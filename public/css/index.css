@@ -1,0 +1,502 @@
+﻿/* index */
+
+.index {
+	background-image: url(../images/fushan.jpg);
+	height: 100%;
+	background-size: cover;
+/*	padding-top: 150px;*/
+	background-position: center;
+	display: flex;
+	align-items: center;
+}
+
+.indexbox {
+	width: 100%;
+	background-color: #dbe279c2;
+	text-align: center;	
+}
+
+.indexbox p{
+	font-size: 2em;
+	padding: 20px;
+	font-weight: bold;
+}
+
+
+.user {
+	  padding-right:20px;
+    text-align: right;
+
+}
+
+.back {
+	cursor: pointer;
+/*	padding-right: 20px;
+	margin: 0px 20px;*/
+	color: white;
+}
+
+/* header */
+
+#header {
+/*	width: 1000px;*/
+/*background-image: url(../images/fushan.jpg);*/
+}
+
+#header_text{
+	background-color: #3D4E17;
+	font-size: 1.5em;
+	padding: 10px 30px;
+	font-family: 'cwTeXFangSong', serif;
+}
+
+.header_bottom {
+	background-color: #5A8100;
+	padding-top:5px;
+}
+
+/*#header_fig{
+	padding:5px 20px;
+	text-align:right;
+  overflow: hidden;
+  margin-top: -100px;
+}
+*/
+
+.icon {
+  position: fixed;
+  top: 200px; /* 調整圖案距離頂部的距離 */
+  right: 20px; /* 調整圖案距離右側的距離 */
+  z-index: 1;
+}
+
+.icon img {
+  width: 200px; /* 調整圖案的寬度 */
+  height: 200px; /* 調整圖案的高度 */
+  opacity: 0.5;
+
+}
+
+/*content*/
+.content {
+/*	padding: 10px;*/
+	line-height:1.5em;
+/*	height: 100%;*/
+	flex:1;
+	z-index: 2;
+}
+
+
+.footer {
+  position: absolute;
+  bottom: 0;
+/*  width: 100%;*/
+
+}
+
+/* choice */
+
+.triangle {
+	width:0px;
+	height:0px;
+	border-top: 100px solid #90a955;
+	border-right: 0px solid #90a955;
+	border-left: 100px solid #4f772d;
+	border-bottom: 100px solid #90a955;
+}
+
+.box1 {
+	display: flex;
+	flex-direction: column;
+	padding:20px;
+	background-color: white;
+	width: fit-content;
+	margin: 30px 10px 10px 0;
+	border-radius: 5px;
+	border: 1px solid #eee;
+}
+
+.img {
+	display: block;
+}
+
+.boxtext {
+	padding: 5px;
+	color: black;
+	font-weight: 600;
+	height: 150px;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+}
+
+.choice {
+	cursor: pointer;
+}
+
+
+/*分欄*/
+
+.left{
+	background-color: #e9edc9;
+/*	height: 100%;*/
+/*	padding: 20px;*/
+  width: 200px;
+}
+
+.right{
+/*	background-color: #fefae0;*/
+/*	height: 100%;*/
+/*	width: 100%;*/
+	padding: 20px;
+	margin: 0 50px;
+}
+
+.list, .innerlist {
+	padding: 10px 20px 0px;
+	display:block;
+/*	background-color:#E9F1AB;*/
+	cursor: pointer;
+	border-radius: 5px 5px 0px 0px;
+}
+
+
+.list:hover, .listhover {
+	text-decoration: none;
+	background-color:#91A21C;
+	color:#FFFFFF;
+}
+
+
+
+.list:hover hr, .listhover hr{
+	color:transparent;
+}
+
+.innerlist:hover{
+	background-color: #a4c639;
+
+}
+
+.now {
+	background-color:#fafafa;
+	color: #333;
+}
+
+
+.now hr{
+	border-width: 2px;
+	color: #91A21C;
+}
+
+.list hr, .innerlist hr{
+	color: transparent;
+	border-style: solid;
+	margin: 7px 0 0px;
+}
+
+
+.rightbox {
+	display: none;
+}
+
+.rightboxnow {
+	display: block;
+}
+
+
+
+.listinner {	
+	list-style: none;
+	padding: 0px 0px 0px 10px;
+	display: inline-flex;	
+	background-color: #91A21C;
+	color: white;
+	width: 100%;
+	justify-content:center;
+}
+
+.list4inner, .list6inner {
+	display: none;
+}
+
+
+
+
+.deletealternotebutton{
+	display: none;
+}
+
+.alternotetalbeouter {
+	padding: 20px;
+	border-radius: 10px;
+	display: none;
+	position: absolute;
+	background-color: floralwhite;
+	width: 420px;
+	top:100;
+	right: 100;
+
+}
+
+.alternotetalbeouter .close{
+	position: absolute;
+	top:10px;
+	right:10px;
+
+}
+
+
+
+
+.text_box {
+/*	min-width: 300px;*/
+	width: fit-content;
+/*	height: fit-content;*/
+	padding:20px;
+	margin: 10px;
+	border: 1px solid #eee;
+	background-color: #fff;
+	border-radius: 5px;
+}
+
+.text_box hr{
+	color: #eee;
+
+}
+
+.text_box ol{
+	padding-inline-start: 20px;
+}
+
+.text_outbox {
+
+}
+
+.text_box_enter{
+	display: inline-flex; 
+	text-align: right;
+	justify-content: flex-end;
+  width: 100%;
+}
+
+
+.text_box_note {
+	min-width: 450px;
+}
+
+.text_box_note_out {
+	display:inline-flex;
+}
+
+/*尚未使用*/
+
+
+
+
+
+
+
+#boxheader{
+
+}
+
+#inner {   /**for login, login_choicework**/
+	line-height: 2em;
+	text-align: center;
+	padding: 20px 20px;
+	color:#000000;
+	font-size: 1.2em;
+
+}
+
+#inner input {
+		font-size: 1em;
+}
+
+/* Page */
+#page4 {  
+
+margin: -40px 20px 30px 20px ;
+}
+
+
+#page {
+ padding: 5px;
+
+}
+
+#page2,#page3 {	    /*文字用*/
+	padding: 0 20px 20px 20px;
+}
+
+#page p, #page3 p{
+	padding: 10px 0;
+
+}
+
+#page2 p {
+	text-indent : 2em;
+	padding:5px;
+}
+
+
+
+/* Footer */
+
+#footer {
+	background-color: #DBE279;
+	font-size:0.9em;
+	height: 100px;
+	clear:both;
+}
+
+#footer p {
+	padding: 10px 20px;
+	font-weight:blod;
+	text-align: left;
+
+}
+
+#footer a {
+	color: #3A2905;
+	text-decoration: none;
+}
+
+/*Index*/
+
+#news ,#link{
+padding: 20px 10px;
+
+}
+
+#news ul, #link ul{
+	margin: 20px;
+	line-height:2em;
+}
+
+
+
+
+
+.clearfix:after {
+content: '.';
+display: block;
+height: 0 ;
+clear:both;
+visibility: hidden;
+
+}
+
+.clearfix {display:inline-table;}
+* html .clearfix {height: 1%;}
+.clearfix {display:block;}
+
+
+/* 選擇工作選單 */
+#list *, #list2 *{
+	margin: 0px;
+	padding:0px;
+	}
+	
+#list, #list2{
+
+	
+	padding: 0 0 0 0px ; 
+	width:100%;
+	}
+	
+#list ul, #list2 ul{
+	float:left;
+	}
+
+#list li, #list2 li{
+	/*list-style-image: url(../images/arrow.gif);*/
+	float:left;
+	list-style-type: none;
+	position:relative;
+
+	
+}
+
+#list li ul, #list2 li ul {
+	position:absolute;
+	width:7em;
+	display:none;
+}
+
+#list li:hover ul, #list2 li:hover ul {
+	display:block;
+}
+
+#list li ul li, #list2 li ul li{
+
+	width:100%;
+}
+
+#list a {
+	padding: 10px;
+	display:block;
+	background-color:#E9F1AB;
+	text-decoration: none;
+}
+
+#list a:hover {
+	text-decoration: none;
+	background-color:#91A21C;
+	color:#FFFFFF;
+}
+
+#list2 a {
+	padding: 10px;
+	display:block;
+	background-color:#c8de59;
+	text-decoration: none;
+}
+
+#list2 a:hover {
+	text-decoration: none;
+	background-color:#91A21C;
+	color:#FFFFFF;
+}
+
+
+/* css hack--clearfix  */   /*讓此區塊不會因float=left而失去高度*/
+#list:after, #list2:after{
+	content:"";
+	display:block;
+	height:0px;
+	clear:both;
+	visbility:hidden;
+}
+
+#list, #list2{
+	display:inline-block;
+}
+/* css hack--clearfix  */
+
+
+
+/****/
+
+/**注意事項**/
+
+
+
+/**資料輸入**/
+
+#simplenote{
+
+	border: 1px dotted #F7C600;
+	background-color: #FFFFB9;
+	line-height: 1.5em;
+}
+
+#newrecruit {
+	display:none;
+
+}
+
+
+
+

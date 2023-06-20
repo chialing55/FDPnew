@@ -1,0 +1,193 @@
+h6 {
+	margin-bottom: 10px;
+}
+
+.flex2 {
+	display: flex;
+	min-height: 100%;
+}
+
+.tablenote{
+	display: inline-block;
+	margin-left: 20px;
+}
+
+
+
+.text_note {
+	display: none;
+}
+
+.note {
+	padding: 0 10px 10px 0px;
+	line-height: 1.5em;
+}
+
+
+.text_note_li {
+	cursor: pointer;
+}
+
+
+.sl_download {
+	border:0;
+	background-color:#003C9D;
+	color:#fff;
+	border-radius:10px;
+	cursor:pointer;
+	padding: 5px;
+	width: fit-content;
+}
+
+.sl_download:hover{
+	color:#003C9D;
+	background-color:#fff;
+	border:2px #003C9D solid;
+}
+
+/*輸入表*/
+.simplenote{
+	border: 1px dotted #F7C600;
+	background-color: #FFFFB9;
+	line-height: 1.5em;
+}
+
+
+
+.species_choice2 {
+border: 1px solid  #A568FF;
+	font-size: 100%;
+	font-family: Arial, Helvetica, sans-serif;
+ background-color: #E1CEFF;
+}
+
+.entrytablediv {
+	margin-top: 10px;
+}
+
+
+
+/* 表頭顏色 */
+.style1 {
+	background-color: #D6DE22;
+	color:black;
+	font-size:85%;
+	font-style:bold;
+}
+
+.style2 {
+	background-color: #FFFF7D;
+}
+
+
+
+#boxtitle2, .boxtitle, .boxtitle2 { 
+	font-weight: bold;
+	background-color:#446919;
+	color:#FFFFFF;
+	padding:5px 10px;
+	text-align: center;
+}
+
+#prev {
+	float: left;
+	width: 50px;
+}
+#name {
+	float: left;
+	margin: 0 250px;
+}
+
+#boxtitle2 a:link {  /**右側**/
+	text-decoration: none;
+	color: #FFFFFF;
+}
+#boxtitle2 a:visited {
+	text-decoration: none;
+	color: #FFFFFF;
+}
+#boxtitle2 a:hover {
+	text-decoration: underline;
+	color: #FFFFFF;
+}
+#boxtitle2 a:active {
+	text-decoration: none;
+	color: #FFFFFF;
+}
+
+
+.recruittableout, .slrolltableout {
+	display: none;
+}
+
+.savenote {
+	font-weight:500; 
+	margin-left: 30px; 
+	font-size:90%; 
+	color:red;
+}
+
+.prev, .next {
+	margin-left: 20px;
+	cursor: pointer;
+	text-decoration: underline;
+}
+
+
+.pages{
+	display: none;
+	margin-bottom: 10px;
+}
+
+
+.plottable {
+	line-height: 2; 
+	width: 35px; 
+	vertical-align: middle; 
+	height: 35px; 
+	float: left; 
+	border: 1px solid #555; 
+	padding: 3px; 
+	margin: 1px 3px; 
+	text-align: center; 
+	cursor: pointer; 
+	background-color: #ffffb985; 
+	color: black; 
+	font-weight: normal;
+}
+
+.finishtable td{
+	vertical-align: middle; 
+	text-align: center; 
+}
+
+#fstreeprogresstable{
+	height: 300px;
+	overflow: auto; /* 啟用滾動條 */
+	margin: 20px 0px;
+}
+
+
+.cannotselect {
+	background-color: #ccc;
+	cursor: inherit;
+
+}
+
+.plotselect {
+	background-color: #dbe279;
+}
+
+.plotunselect {
+	background-color: #ffffb985;
+}
+
+.allfinish {
+	background-color: darkcyan;
+}
+
+.somefinish {
+	background-color: lightblue;
+}
+
+
