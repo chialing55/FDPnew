@@ -19,3 +19,5 @@ yarn-error.log
 /.vscode
 /FDPdata
 /public/recordpdf
+composer.json
+composer.lock
