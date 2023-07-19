@@ -16,8 +16,17 @@ use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
     
-    return view('login');
+    return view('login1');
 });
+
+Route::get('/login1', function () {
+    
+    return view('login1');
+});
+
+// Route::get("/login2", function(){
+//     return ('hello');
+// })
 
 Route::post("/login2", [App\Http\Controllers\loginController::class, 'login'])->name('login');
 
@@ -63,7 +72,7 @@ Route::get('/fushan/{project}/{type}', function($project, $type){
   $site='fushan';
         if ($project=='seedling'){
 
-            if ($type=='text'){
+            if ($type=='doc'){
                 return App::call('App\Http\Controllers\fsSeedlingController@seedling',['site' => $site] );
             } else if ($type=='note'){
                 return App::call('App\Http\Controllers\fsSeedlingController@note',['site' => $site] );
@@ -80,7 +89,7 @@ Route::get('/fushan/{project}/{type}', function($project, $type){
         }
 
         else if ($project=='tree'){
-            if ($type=='text'){
+            if ($type=='doc'){
                 return App::call('App\Http\Controllers\fsTreeController@tree',['site' => $site] );
             } else if ($type=='note'){
                 return App::call('App\Http\Controllers\fsTreeController@note',['site' => $site] );
@@ -90,6 +99,8 @@ Route::get('/fushan/{project}/{type}', function($project, $type){
                 return App::call('App\Http\Controllers\fsTreeController@entry',['site' => $site, 'entry' => '2'] );
             } else if ($type=='progress'){
                 return App::call('App\Http\Controllers\fsTreeController@progress',['site' => $site] );
+            } else if ($type=='dataviewer'){
+                return App::call('App\Http\Controllers\fsTreeController@dataviewer',['site' => $site] );
             }
             
         }

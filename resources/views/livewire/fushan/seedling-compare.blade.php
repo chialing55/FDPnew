@@ -1,7 +1,18 @@
 <div>
          <h2>資料比對</h2>
-        <p style="margin: 10px 0">*** 請確認已確實完成兩次資料輸入</p>
-        <input type='button' value='開始比對'/ wire:click="compare">
+        <p style="margin: 10px 0">{{$compare}}</p>
+    
+        <button wire:click="compare">開始比對</button>
+
+        @php
+        if($cov1!=[]) {
+            print_r($cov1[1][0]);
+            // {echo $cov1[1][0];}
+            foreach ($cov1[1][0] as $key => $value){
+                echo $key;
+            }
+            }
+        @endphp
 
         @if (isset($comnote))
 

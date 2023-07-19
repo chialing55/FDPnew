@@ -1,3 +1,8 @@
+@php
+$personlist=['','陳小跳', '賴德瑜', '黃彥慈', '廖珮如', '鄧永淥', '劉筱薇', '王怡雯','董力銓'];
+
+@endphp
+
 
 <div class='flex text_outbox' style='flex-direction: column; '>
      {{-- <h1>2023 年 每木調查 進度表</h1> --}}
@@ -9,20 +14,34 @@
         <form wire:submit.prevent="submitForm" method="POST">       
         <div class="iflex">
         <div>    
-            <p>調查日期： <input name='date' type='date' placeholder="YYYY-MM-DD" style='width:120px; ' class='fs100' wire:model="date"></p>
+            <p>調查日期： <input name='date' id='date' type='date' placeholder="YYYY-MM-DD" style='width:120px; ' class='fs100' wire:model="date"></p>
             <p>調查樣方： 
-                <select class="fs100 entryqx" style='width:45px; ' wire:model='qx' wire:change="qxqychange">
+                <select class="fs100 entryqx" name='qx' id='qx'style=' ' wire:model='qx' wire:change="qxqychange">
                 @for ($i=0; $i<25;$i++)     
                 <option value="{{$i}}">{{$i}}</option>
                 @endfor
-                </select>-<select class="fs100" style='width:45px;' wire:model='qy' wire:change="qxqychange">
+                </select>-<select class="fs100" name='qy' id='qy' style='' wire:model='qy' wire:change="qxqychange">
                 @for ($i=0; $i<25;$i++)
                 <option value="{{$i}}">{{$i}} </option>
                 @endfor
                 </select>
             </p>
             
-            <p>工作人數： <input name='ind' type='text' style='width:45px;' wire:model='ind'></p>
+            <p>每組人數： <input name='ind' type='text' style='width:45px;' wire:model='ind'> (若調查當日人數有變動，如2-3人，則填2.5)</p>
+            <p>調查時數： <input name='period' type='text' style='width:45px;' wire:model='period'> (以小時計，可含小數)</p>
+            <p>調查人員： <select name='person1' id='person1' class="" style='width:85px;' wire:model="person1">
+                @for ($i=0; $i<count($personlist);$i++)     
+                <option value="{{$personlist[$i]}}">{{$personlist[$i]}}</option>
+                @endfor
+                </select>, <select name='person2'  id='person2' class="" style='width:85px;' wire:model="person2">
+                @for ($i=0; $i<count($personlist);$i++)     
+                <option value="{{$personlist[$i]}}">{{$personlist[$i]}}</option>
+                @endfor
+                </select>, <select name='person3' id='person3' class="" style='width:85px;' wire:model="person3">
+                @for ($i=0; $i<count($personlist);$i++)     
+                <option value="{{$personlist[$i]}}">{{$personlist[$i]}}</option>
+                @endfor
+                </select>, <input name='person4' id='person4' type=text style='width:150px' wire:model="person4"/> </p>
             <p>新增枝幹： <input name='new' type=text style='width:45px' wire:model="new"/> 筆 (同一天同一樣方輸入一筆合計資料)</p>
         </div>
         <div style='margin-left: 50px;'>    
@@ -49,7 +68,7 @@
         </div>
         </div>
         <div class='text_box_enter'>
-            <p class='savenote'>{{$note1}}</p>
+            <p class='savenote' style='margin-right: 10px'>{{$note1}}</p>
             <button type='submit'>輸入</button>                
         </div>    
         </form>
@@ -65,25 +84,37 @@
                 <thead>
                     <tr>
                         <th>調查日期</th>
-                        <th style='width:50px'>樣線</th>
-                        <th>調查人數</th>
+                        <th style='width:45px'>樣線</th>
+                        <th>每組人數</th>
+                        <th>調查時數</th>
+                        <th>調查人員</th>
                         <th>完成小區數</th>
                         <th>完成小區</th>
-                        <th>舊枝幹數量</th>
-                        <th>新枝幹數量</th>
+                        <th>枝幹數量</th>
+                        
                     </tr>
                 </thead>
                 @if(!empty($table))
                 <tbody>
+
                     @foreach($table as $pro)
+                @php
+                    $pro['plots'] = str_replace('"', '', $pro['plots']);
+                    $pro['plots'] = str_replace('[[', '[', $pro['plots']);
+                    $pro['plots'] = str_replace(']]', ']', $pro['plots']);
+                    // $result = explode(',', $cleanString);
+                @endphp
+
                     <tr>
                         <td>{{$pro['date']}}</td>
                         <td>{{$pro['qx']}}, {{$pro['qy']}}</td>
                         <td>{{$pro['person']}}</td>
+                        <td>{{$pro['period']}}</td>
+                        <td style='min-width:50px; max-width: 200px'>{{$pro['personslist']}}</td>
                         <td>{{$pro['plot_num']}}</td>
-                        <td  style='min-width:100px'>{!!$pro['plots']!!}</td>
-                        <td>{{$pro['ori_branch']}}</td>
-                        <td>{{$pro['new_branch']}}</td>
+                        <td style='min-width:100px; max-width: 350px'>{{$pro['plots']}}</td>
+                        <td>{{$pro['ori_branch']+$pro['new_branch']}}</td>
+                        {{-- <td>{{$pro['new_branch']}}</td> --}}
                         
                     </tr>
                     @endforeach

@@ -50,6 +50,11 @@
 	font-family: 'cwTeXFangSong', serif;
 }
 
+#header_text a {
+	color: inherit;
+	text-decoration: underline;
+}
+
 .header_bottom {
 	background-color: #5A8100;
 	padding-top:5px;
@@ -156,12 +161,16 @@
 	padding: 10px 20px 0px;
 	display:block;
 /*	background-color:#E9F1AB;*/
-	cursor: pointer;
+/*	cursor: pointer;*/
 	border-radius: 5px 5px 0px 0px;
 }
 
+.listlink{
+	cursor: pointer;
+}
 
-.list:hover, .listhover {
+
+.list:hover, {
 	text-decoration: none;
 	background-color:#91A21C;
 	color:#FFFFFF;
@@ -169,7 +178,7 @@
 
 
 
-.list:hover hr, .listhover hr{
+.list:hover hr, {
 	color:transparent;
 }
 
@@ -208,7 +217,7 @@
 
 .listinner {	
 	list-style: none;
-	padding: 0px 0px 0px 10px;
+/*	padding: 0px 0px 0px 10px;*/
 	display: inline-flex;	
 	background-color: #91A21C;
 	color: white;
@@ -253,7 +262,7 @@
 /*	min-width: 300px;*/
 	width: fit-content;
 /*	height: fit-content;*/
-	padding:20px;
+	padding: 20px;
 	margin: 10px;
 	border: 1px solid #eee;
 	background-color: #fff;
@@ -358,10 +367,7 @@ margin: -40px 20px 30px 20px ;
 
 }
 
-#footer a {
-	color: #3A2905;
-	text-decoration: none;
-}
+
 
 /*Index*/
 
@@ -486,7 +492,7 @@ visibility: hidden;
 /**資料輸入**/
 
 #simplenote{
-
+	padding: 0 10px;
 	border: 1px dotted #F7C600;
 	background-color: #FFFFB9;
 	line-height: 1.5em;

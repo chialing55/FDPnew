@@ -82,16 +82,20 @@ class SeedlingShowentry extends Component
             $slrecord=$tablecov::where('date', 'like', '0000-00-00')->orderBy('trap', 'asc')->first();
             $slrecord2=$table::where('date', 'like', '0000-00-00')->orderBy('trap', 'asc')->first();
 
-
-
-            if ($slrecord['trap']>$slrecord2['trap']){
-                $firsttrap=$slrecord2['trap'];
-            } else {
-                $firsttrap=$slrecord1['trap'];
+            $firsttrap = '';
+            if ($slrecord && $slrecord2) {
+                $firsttrap = min($slrecord['trap'], $slrecord2['trap']);
+            } elseif ($slrecord) {
+                $firsttrap = $slrecord['trap'];
+            } elseif ($slrecord2) {
+                $firsttrap = $slrecord2['trap'];
             }
 
+
+
+
         // print_r($slrecord1);
-        if ($slrecord){
+        if ($firsttrap!=''){
 
             $this->entrynote='請從第 '.$firsttrap.' 個樣站開始輸入';
             // $this->sustrap=$slrecord[0]['trap'];
@@ -100,6 +104,7 @@ class SeedlingShowentry extends Component
         } else {
 
             $this->entrynote='第'.$this->entry.'次輸入已完成。 若以完成第'.$entryother.'次輸入，可進行資料比對。';
+            $this->selectTrap='1';
         }
 
         // dd($this->selectTrap);
@@ -134,10 +139,12 @@ class SeedlingShowentry extends Component
 
 
         if ($slrecord->isEmpty()){
-            $slrecord='無';
+            $slrecord1[0]['trap']=$selectTrap;
+            $slrecord1[0]['tag']='無';
+            // $slrecord='無';
         } else {
             $ob_redata = new fsSeedlingAddButton;
-            $slrecord=$ob_redata->addbutton($slrecord, $this->entry);
+            $slrecord1=$ob_redata->addbutton($slrecord, $this->entry);
         }
  
         $scsplist=$request->session()->get('scsplist', function () {
@@ -172,7 +179,7 @@ class SeedlingShowentry extends Component
 
         // dd($slroll);
 
-        $this->record=$slrecord;
+        $this->record=$slrecord1;
         $this->covs=$slcov;
         $this->roll=$slroll;
         $this->selectTrap=$selectTrap;
@@ -188,7 +195,7 @@ class SeedlingShowentry extends Component
         // $this->recordstart='0';
         // $this->thispage='1';
 
-        $this->dispatchBrowserEvent('data', ['covs' => $slcov, 'record' => $slrecord, 'maxid' => $this->maxid, 'emptytable' => $emptytable, 'csplist' => $scsplist, 'slroll' => $slroll]);
+        $this->dispatchBrowserEvent('data', ['covs' => $slcov, 'record' => $slrecord1, 'maxid' => $this->maxid, 'emptytable' => $emptytable, 'csplist' => $scsplist, 'slroll' => $slroll]);
         // dd(count($slrecord));
     }
 

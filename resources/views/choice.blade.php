@@ -1,6 +1,6 @@
-@extends('layouts/app') 
+@extends('layouts/app2') 
 
-@section('title', '登入-台灣森林動態樣區資料管理系統')
+@section('title', '選擇工作項目-台灣森林動態樣區資料管理系統')
 
 
 @section('header_js')

@@ -117,6 +117,7 @@ class fsTreeSaveController extends Controller
         $user=$data_all['user'];
         $recruitsavenote='';
         $datacheck='';
+        $uplistalter='';
 
         $table = $this->getTableInstance($entry);
 
@@ -180,15 +181,14 @@ class fsTreeSaveController extends Controller
 
                     foreach($data[$i] as $key => $value){
                         $excludedKeysall=['update_id', 'updated_at', 'alternotetable'];
-                        if (!in_array($key, $excludedKeys)){
+                        if (!in_array($key, $excludedKeysall)){
                             if ($odata[0][$key] != $value){
                                 if($value==Null){$value='';}
-                                //如果物種名、位置、POM不同，直接更新至特殊修改
 
-                                $excludedKeys = ['qx', 'qy', 'sqx', 'sqy', 'spcode', 'pom', 'h1'];
+                                $includeKeys = ['qx', 'qy', 'sqx', 'sqy', 'csp', 'pom', 'h1'];
 
-                                if (in_array($key, $excludedKeys)) {
-                                    // $uplistalter[$key] = $value;
+                                if (in_array($key, $includeKeys)) {
+                                    $uplistalter[$key] = $value;
                                     $recruitsavenote = $data[$i]['tag'] . ' 漏資料，但基本資料與原始資料不符。請確認編號，或洽管理員。';
                                     $pass = '0';
                                 } else {
@@ -197,6 +197,8 @@ class fsTreeSaveController extends Controller
                             }
                         }
                     }
+                    // $pass='0';
+                    // $recruitsavenote='測試中';
 
                     if ($pass=='0'){
                         break;
@@ -237,7 +239,7 @@ class fsTreeSaveController extends Controller
         }//最外層
 
 
-        //重新載入資料
+//         //重新載入資料
         $redatas=$table::where('qx', 'like', $data[0]['qx'])->where('qy', 'like', $data[0]['qy'])->where('sqx', 'like', $data[0]['sqx'])->where('sqy', 'like', $data[0]['sqy'])->where('show', 'like', '1')->orderBy('stemid', 'asc')->get();
 
 
@@ -249,9 +251,9 @@ class fsTreeSaveController extends Controller
             'result' => 'ok',
             'data' => $redata,
             'odata' => $data,
-            // 'datacheck' => $datacheck,
+            // 'uplistalter' => $uplistalter,
             // 'pass' => $inlist,
-            // 'codea' => $codea,
+            // 'entry' => $entry,
             // 'test' => $arr3,
             'recruitsavenote' => $recruitsavenote
 
@@ -263,7 +265,7 @@ class fsTreeSaveController extends Controller
     public function deletedata(Request $request, $stemid, $entry, $thispage){
         $test='';
             $user = $request->session()->get('user', function () {
-                return view('login', [
+                return view('login1', [
                 'check' => 'no'
                 ]);
             });
@@ -306,7 +308,7 @@ class fsTreeSaveController extends Controller
     public function savealternote(Request $request){
 
         $user = $request->session()->get('user', function () {
-            return view('login', [
+            return view('login1', [
             'check' => 'no'
             ]);
         });
@@ -364,7 +366,7 @@ class fsTreeSaveController extends Controller
     public function deletealter(Request $request, $stemid, $entry, $thispage){
 
         $user = $request->session()->get('user', function () {
-            return view('login', [
+            return view('login1', [
             'check' => 'no'
             ]);
         });

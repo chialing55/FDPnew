@@ -55,7 +55,7 @@ class fsSeedlingSaveController extends Controller
         $savecov=$data_all['data'];
         $entry=$data_all['entry'];
         $user = $request->session()->get('user', function () {
-            return view('login', [
+            return view('login1', [
             'check' => 'no'
             ]);
         });
@@ -109,7 +109,7 @@ class fsSeedlingSaveController extends Controller
         $data=$data_all['data'];
         $entry=$data_all['entry'];
         $user = $request->session()->get('user', function () {
-            return view('login', [
+            return view('login1', [
             'check' => 'no'
             ]);
         });
@@ -291,7 +291,7 @@ class fsSeedlingSaveController extends Controller
         $recruit=$data['data'];
         $entry=$data['entry'];
         $user = $request->session()->get('user', function () {
-            return view('login', [
+            return view('login1', [
             'check' => 'no'
             ]);
         });
@@ -474,7 +474,7 @@ class fsSeedlingSaveController extends Controller
     public function deletedata(Request $request, $tag, $entry, $thispage){
         $test='';
             $user = $request->session()->get('user', function () {
-                return view('login', [
+                return view('login1', [
                 'check' => 'no'
                 ]);
             });
@@ -516,7 +516,7 @@ class fsSeedlingSaveController extends Controller
     public function saveslroll(Request $request, $entry, $trap){
         // $test='';
             $user = $request->session()->get('user', function () {
-                return view('login', [
+                return view('login1', [
                 'check' => 'no'
                 ]);
             });
@@ -688,7 +688,7 @@ class fsSeedlingSaveController extends Controller
     public function savealternote(Request $request){
 
         $user = $request->session()->get('user', function () {
-            return view('login', [
+            return view('login1', [
             'check' => 'no'
             ]);
         });
@@ -751,7 +751,7 @@ class fsSeedlingSaveController extends Controller
     public function deletealter(Request $request, $tag, $entry, $thispage){
 
         $user = $request->session()->get('user', function () {
-            return view('login', [
+            return view('login1', [
             'check' => 'no'
             ]);
         });

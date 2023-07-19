@@ -1,4 +1,4 @@
-@extends('layouts/app') 
+@extends('layouts/app2') 
 
 @php
   if ($site=='fushan'){
@@ -41,11 +41,11 @@
 
 @section('headerList')
   <div class='headerlist iflex'>
-      <div class='list list1 listlink' type='text'>相關文件<hr></div>
+      <div class='list list1 listlink' type='doc'>相關文件<hr></div>
       <div class='list list3 listlink' type='progress'>調查進度<hr></div>
       <div class='list list4 ' >資料輸入<hr></div>
 
-      <div class='list list5 ' type='check' >資料檢視<hr></div>
+      <div class='list list5 listlink' type='dataviewer' >資料檢視<hr></div>
       @if($user=='chialing')
       <div class='list list6 ' type='modify'>資料修改<hr>
       </div>

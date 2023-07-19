@@ -22,10 +22,15 @@ class TreeShowprogress extends Component
     public $qx=0;
     public $qy=0;
     public $ind=0;
+    public $period=0;
     public $sqx=[];
     public $table=[];
     public $note1;
     public $plots=[];
+    public $person1;
+    public $person2;
+    public $person3;
+    public $person4;
 
 
     public $date2;
@@ -79,7 +84,9 @@ class TreeShowprogress extends Component
     protected $listeners = ['updateValue' => 'updateValue'];
 
     public function updateValue($value){
-        $this->sqx=$value;
+        $uniqueArray = array_unique($value, SORT_REGULAR);  //去除重覆值
+        $filteredArray = array_values(array_filter($uniqueArray));  //去除空索引
+        $this->sqx=$filteredArray;
 
     }
 
@@ -89,7 +96,7 @@ class TreeShowprogress extends Component
             return 'no';
         });
 
-        $inlist=['date'=>$this->date, 'id'=>'0', 'qx' => $this->qx, 'qy'=>$this->qy, 'new_branch'=>$this->new, 'person' => $this->ind, 'plot_num'=>count($this->sqx), 'update_id' => $user, 'updated_at' => date("Y-m-d H:i:s")];
+        $inlist=['date'=>$this->date, 'id'=>'0', 'qx' => $this->qx, 'qy'=>$this->qy, 'new_branch'=>$this->new, 'person' => $this->ind, 'plot_num'=>count($this->sqx), 'period' => $this->period, 'update_id' => $user, 'updated_at' => date("Y-m-d H:i:s")];
         $orib=0;
         $plots='';
         $i=0;
@@ -106,9 +113,17 @@ class TreeShowprogress extends Component
         $qx=$this->qx;
         $qy=$this->qy;
 
-        $plots=json_encode($this->sqx);
+        //調查人員
+        $person='';
+        $persons = [$this->person1, $this->person2, $this->person3, $this->person4];
+        $persons = array_filter($persons); // 移除空值
+        $person = implode(", ", $persons);
+
+        $plots = json_encode($this->sqx);
+
         $inlist['ori_branch']=$orib;
         $inlist['plots']=$plots;
+        $inlist['personslist']=$person;
 
         
         FsTreeProgress::insert($inlist);
@@ -140,7 +155,7 @@ class TreeShowprogress extends Component
     }
 
 
-
+//換右邊選小區的表格
     public function qxqychange(){
         $array=[];
         $tables = FsTreeProgress::where('qx', 'like', $this->qx)->where('qy', 'like', $this->qy)->get()->toArray();

@@ -59,6 +59,9 @@ class fsTreeController extends Controller
             //status=0, status=-3&branch=0
             FsTreeRecord1::where('branch','!=', '0')->where('status', 'like', '-3')->update(['show'=>'0']);
             FsTreeRecord1::where('status', 'like', '0')->update(['show'=>'0']);
+            //把census4已沒有資料的(date='0000-00-00')的show=0
+            FsTreeRecord1::where('date', 'like', '0000-00-00')->update(['show'=>'0']);
+            //把census4已沒有資料的(date='0000-00
 
             //選擇輸入樣區時再把census3=-1的show改為0
 
@@ -78,7 +81,7 @@ class fsTreeController extends Controller
 
 
         if ($user=='no'){
-            return view('login', [
+            return view('login1', [
                 'check' => 'no'
             ]);
         } else {
@@ -86,7 +89,7 @@ class fsTreeController extends Controller
             //最近一次調
 
             // print_r($user);
-            return view('pages/fushan/tree_text', [
+            return view('pages/fushan/tree_doc', [
                 'site' => $site,
                 'project' => '每木',
                 'user' => $user,
@@ -105,7 +108,7 @@ class fsTreeController extends Controller
         });
 
         if ($user=='no'){
-            return view('login', [
+            return view('login1', [
                 'check' => 'no'
             ]);
         } else {
@@ -130,7 +133,7 @@ class fsTreeController extends Controller
         });
 
         if ($user=='no'){
-            return view('login', [
+            return view('login1', [
                 'check' => 'no'
             ]);
         } else {
@@ -154,7 +157,7 @@ class fsTreeController extends Controller
         });
 
         if ($user=='no'){
-            return view('login', [
+            return view('login1', [
                 'check' => 'no'
             ]);
         } else {
@@ -170,5 +173,26 @@ class fsTreeController extends Controller
         }
     }
 
+    public function dataviewer(Request $request, $site){
 
+        $user = $request->session()->get('user', function () {
+            return 'no';
+        });
+
+        if ($user=='no'){
+            return view('login1', [
+                'check' => 'no'
+            ]);
+        } else {
+            // echo "1";
+            //最近一次調
+
+            // print_r($user);
+            return view('pages/fushan/tree_dataviewer', [
+                'site' => $site,
+                'project' => '每木',
+                'user' => $user,
+            ]);
+        }
+    }
 }

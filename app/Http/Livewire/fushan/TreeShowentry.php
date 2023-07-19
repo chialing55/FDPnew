@@ -100,6 +100,18 @@ class TreeShowentry extends Component
         for($k=0;$k<20;$k++){
             $emptytable[$k]['qx']=$qx;
             $emptytable[$k]['qy']=$qy;
+            $emptytable[$k]['branch']='0';
+            $emptytable[$k]['pom']='1.3';
+            $emptytable[$k]['date']='';
+            $emptytable[$k]['code']='';
+            $emptytable[$k]['sqx']='';
+            $emptytable[$k]['sqy']='';
+            $emptytable[$k]['tag']='';
+            $emptytable[$k]['csp']='';
+            $emptytable[$k]['dbh']='';
+            $emptytable[$k]['note']='';
+            $emptytable[$k]['tofix']='';
+
          
         }
 

@@ -53,7 +53,7 @@
 <h6>樣站環境資料</h6>
 <hr>
 
-    <div class='simplenote text_box'>
+    <div id='simplenote' class='text_box'>
         <ul>
         <li>樣區上方光度 - <b>U</b>: 多層樹冠 (預設)，<b>I</b>: 一層樹冠，<b>G</b>: 沒有樹冠。</li>
         </ul>
@@ -74,16 +74,16 @@
 <h6>小苗調查資料</h6>
 <hr>
 
-<div class='simplenote text_box'>
+<div id='simplenote' class='text_box'>
     <ul>
 
     <li>長度及葉片數 - <b>-1</b>: 沒有測量，<b>-2</b>: DBH >= 1，<b>-4</b>: 見環不見苗或死亡，<b>-6</b>: 消失，<b>-7</b>: 主幹或分枝死亡但個體存活。<span class='line'>長度不可為 0</span>。</li>
     <li>狀態 - <b>A</b>: 存活，<b>G</b>: 見環不見苗，<b>D</b>: 死亡，<b>N</b>: 消失，<b>L</b>: 離開。</li>
-    <li>特殊修改 - 需要更正 Trap, Plot, Tag, 種類, 原長度和原葉片數，請點選<i class='fa-regular fa-note-sticky'></i>填寫。</li>
+    <li>特殊修改 - 如需要更正 Trap, Plot, Tag, 種類, 原長度和原葉片數，請點選特殊修改 <i class='fa-regular fa-note-sticky'></i> 填寫。</li>
     </ul>
 </div>
-        @if($record=='無')
-           <div style='margin-top:20px'><p> 沒有舊資料</p></div>
+        @if($record[0]['tag']=='無')
+           <div style='margin:20px 0'><p> 沒有舊資料</p></div>
         
         @else
     <div class='entrytablediv'>
@@ -127,7 +127,7 @@
 <div class='recruittableout text_box' style='margin-top: 20px;'>
    <h6>新增苗</h6>
    <hr>
-   <div class='simplenote text_box'>
+   <div id='simplenote' class='text_box'>
     <ul>
 
         <li>長度及葉片數 - <b>-1</b>: 沒有測量，<b>-2</b>: DBH >= 1。<span class='line'>長度不可為 0</span>。</li>

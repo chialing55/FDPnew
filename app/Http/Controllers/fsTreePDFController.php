@@ -52,7 +52,7 @@ class fsTreePDFController extends Controller
             $maxG='';
         }
 //排除status=0
-        $treedatas=FsTreeCensus4::whereIn('tag', $taglist)->where('status','not like', '0')->orderBy('tag', 'asc')->orderBy('branch', 'asc')->get()->toArray();
+        $treedatas=FsTreeCensus4::whereIn('tag', $taglist)->where('status','not like', '0')->where('date', 'not like', '0000-00-00')->orderBy('tag', 'asc')->orderBy('branch', 'asc')->get()->toArray();
         $totalnum=0;
         for($i=0;$i<count($treedatas);$i++){
             //排除分支為-3
@@ -70,7 +70,16 @@ class fsTreePDFController extends Controller
             }
             $treedatas[$i]['spcode']=$taglistqx[$treedatas[$i]['tag']]['spcode'];
             $treedatas[$i]['csp']=$splist[$treedatas[$i]['spcode']];
-            ;
+            
+            //code=c, 移除code資料
+            if ($treedatas[$i]['code']=='C'){
+                $treedatas[$i]['code']='';
+            }
+
+            if ($treedatas[$i]['pom']!='1.3'){
+                $treedatas[$i]['note']='[POM = '.$treedatas[$i]['pom']."] ".$treedatas[$i]['note'];
+            }
+
             $sqx=$taglistqx[$treedatas[$i]['tag']]['sqx'];
             $sqy=$taglistqx[$treedatas[$i]['tag']]['sqy'];
 
@@ -120,7 +129,7 @@ class fsTreePDFController extends Controller
 
             $pdf = PDF::loadView('pages.fushan.tree_record', $data)->setPaper('A4');
             // $pdf ->set_option( 'isFontSubsettingEnabled' , true );
-            if ($type==1){
+            if ($type==1){  //有qx及qy
         // return $dompdf->output();
             return $pdf->stream($data['filename'].".pdf");   //在網頁顯示
             // return $pdf->download($data['title'].".pdf");//直接下載     
@@ -130,7 +139,7 @@ class fsTreePDFController extends Controller
            
 
             } else {
-
+                //全線下載
             
             $directory = public_path('recordpdf/'.$data['qx']);
             $filename = $data['filename'] . '.pdf';

@@ -29,7 +29,7 @@ class choiceController extends Controller
                   'user' => $value
                 ]);               
             } else {
-                return view('login', [
+                return view('login1', [
                 'check' => 'no'
                 ]);
             }

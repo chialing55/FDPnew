@@ -7,12 +7,12 @@
 <div style='font-weight: 800; margin-bottom: 20px; display: inline-flex;' >
     <span style='margin-right: 20px;'>選擇要輸入的樣方</span>
     <form wire:submit.prevent='submitForm'>
-        <select name="qx" class="fs100 entryqx" wire:model.defer='qx' style='width:45px; height:25px;'>
+        <select name="qx" class="fs100 entryqx" wire:model.defer='qx' style='height:25px;'>
         @for ($i=0; $i<25;$i++)
         <option value="{{$i}}">{{$i}} 
         </option>
          @endfor
-        </select>-<select name="qy" class="fs100" wire:model.defer='qy' style='width:45px; height:25px;'>
+        </select>-<select name="qy" class="fs100" wire:model.defer='qy' style='height:25px;'>
         @for ($i=0; $i<25;$i++)
         <option value="{{$i}}">{{$i}} 
         </option>
@@ -36,17 +36,25 @@
 <div>
 <div id='simplenote' class='text_box'>
 <ul>
-<li><b>輸入資料後需按「儲存」鈕才能確實將資料儲存。</b></li>
-<li>日期格式 - YYYY-MM-DD。每筆資料皆需輸入日期，<b>日期為0000-00-00者視同未輸入</b>。</li>
-<li>status 為 0,-1,-2,-3，則 dbh 需為0，且 code 不得有值。tatus 為空值，則dbh不得為0</li>
+<li><b>輸入資料後需按 <button>儲存</button> ，才能確實將資料儲存。</b></li>
+<li>日期格式： YYYY-MM-DD。每筆資料皆需輸入日期，<b>日期為 0000-00-00 者視同未輸入</b>。</li>
+<li>status 為 0,-1,-2,-3，則 dbh 需為0，且 code 不得有值。tatus 為空值，則 dbh 不得為 0。</li>
 <li>dbh/h高 必須<b>大於或等於</b>上次調查，或勾選縮水。</li>
-<li>若code包含C，則POM不得同於前次pom。code R只能出現在分支。<span class='line'>code 代碼間可共存</span>，多碼時照字母排列，<span class='line'>中間不留空格</span>。</li>
-<li>pom 更新，code欄需有 C 。若是原始資料錯誤，請在「<i class='fa-regular fa-note-sticky'></i>」更新。</li>
-<li>note - TAB=#。統一使用<b>「中文」標點符號</b>。<b>「半形」英文符號</b>。<b>「半形」阿拉伯數字</b>，數字後留一格空白。先輸入原始note，加句號，再輸入手寫note。</li>
-<li>20x，20y，5x，5y，tag，b，csp，POM 等欄位需要修改時，請至「<i class='fa-regular fa-note-sticky'></i>」填寫。</li>
-<li>新樹會有格子可以再做修改並可刪除。</li></ul>
+<li>若 code 包含 C，則 POM 不得同於前次 POM。code R 只能出現在分支。<span class='line'>code 代碼間可共存</span>，多碼時照字母排列，<span class='line'>中間不留空格</span>。</li>
+<li>POM 更新，code 欄需有 C 。若是原始資料錯誤，請在「特殊修改<i class='fa-regular fa-note-sticky'></i>」更新。</li>
+<li>note： TAB=#。統一使用<b>「中文」標點符號</b>。<b>「半形」英文符號</b>。<b>「半形」阿拉伯數字</b>，數字後留一格空白。先確認原始 note，加句號，再輸入本次note。</li>
+<li>20x，20y，5x，5y，tag，b，csp，POM 等欄位需要修改時，請至「特殊修改<i class='fa-regular fa-note-sticky'></i>」填寫。</li>
+<li>新樹資料可以修改或刪除。</li></ul>
 </div>
-<div class='text_box'>電子檔   舊樹  新樹</div>
+@php
+
+$fileqx=str_pad($qx, 2, '0', STR_PAD_LEFT);
+$fileqy=str_pad($qy, 2, '0', STR_PAD_LEFT);
+$filesqx=$fileqx.$fileqy;
+
+@endphp
+
+<div class='text_box'>第四次調查電子檔：<a href='{{asset('/fs_census4_scanfile/'.$fileqx.'/old/'.$filesqx.'_old.pdf')}}' target="_blank">舊樹</a>  <a href='{{asset('/fs_census4_scanfile/'.$fileqx.'/new/'.$filesqx.'_new.pdf')}}' target="_blank">新樹</a></div>
 @php
 // print_r($record[1][1]);
 $plot2list=array("11","12","22","21","13","14","24","23","33","34","44","43","31","32","42","41");

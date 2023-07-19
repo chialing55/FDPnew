@@ -20,21 +20,21 @@ $('.listlink').on('click', function(){
 
 $('.list4, .list4inner').on('mouseenter', function() {
   $('.list4inner').css('display', 'inline-flex');
-  $('.list4').addClass('listhover'); 
+  $('.list4').css({'color': '#fff','background-color': '#91A21C'}); 
   $('.now hr').css('color', 'transparent');
 }).on('mouseleave', function() {
   $('.list4inner').hide();
-  $('.list4').removeClass('listhover');
+  $('.list4').css({'color': '','background-color': ''}); 
   $('.now hr').css('color', '#91A21C');
 });
 
 $('.list6, .list6inner').on('mouseenter', function() {
   $('.list6inner').css('display', 'inline-flex');
-  $('.list6').addClass('listhover');
+  $('.list6').css({'color': '#fff','background-color': '#91A21C'}); 
   $('.now hr').css('color', 'transparent');
 }).on('mouseleave', function() {
   $('.list6inner').hide();
-  $('.list6').removeClass('listhover');
+  $('.list6').css({'color': '','background-color': ''}); 
   $('.now hr').css('color', '#91A21C');
 });
 
@@ -254,10 +254,10 @@ function alternotetable(alterdata, stemid, entry, thispage){
     colHeaders: true,
     removeRowPlugin: true,
     // minSpareRows: 1,
-    colWidths: [25,25,25,25,80, 40, 120,50],
+    colWidths: [25,25,25,25,80, 40, 120,70],
     licenseKey: 'non-commercial-and-evaluation',
  
-    colHeaders: ["20x","20y","5x","5y", "tag", "b", "csp","POM", "stemid"],
+    colHeaders: ["20x","20y","5x","5y", "tag", "b", "csp","原始POM", "stemid"],
     columns: [
       {data: "qx", type: 'numeric'},
       {data: "qy", type: 'numeric'},
@@ -670,10 +670,10 @@ $(`button[name=recruitsave${site}]`).off();
     contextMenu: ['row_above', 'row_below', 'remove_row'],
     // minSpareRows: 1,
     rowHeights: 35,
-    colWidths: [120, 25,25,25,25,80, 40, 120,50,60,60,160,50],
+    colWidths: [120, 25,25,25,25,80, 40, 120,50,60,70,160,50],
     licenseKey: 'non-commercial-and-evaluation',
  
-    colHeaders: ["Date","20x","20y","5x","5y", "tag", "b", "csp", "code","dbh/h高","pom/h低","note","漏資料"],
+    colHeaders: ["Date","20x","20y","5x","5y", "tag", "b", "csp", "code","dbh/h高","POM/h低","note","漏資料"],
     columns: [
       {data: "date", dateFormat: 'YYYY-MM-DD', type: 'date', allowInvalid: false},
       {data: "qx", type: 'numeric', readOnly: true},

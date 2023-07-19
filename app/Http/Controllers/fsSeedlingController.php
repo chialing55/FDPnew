@@ -31,7 +31,7 @@ class fsSeedlingController extends Controller
         });
 
         if ($user=='no'){
-            return view('login', [
+            return view('login1', [
                 'check' => 'no'
             ]);
         } else {
@@ -139,7 +139,7 @@ class fsSeedlingController extends Controller
 
 
             
-            return view('pages/fushan/seedling_text', [
+            return view('pages/fushan/seedling_doc', [
                 'site' => $site,
                 'project' => '小苗',
                 'user' => $user,
@@ -166,7 +166,7 @@ class fsSeedlingController extends Controller
         });
 
         if ($user=='no'){
-            return view('login', [
+            return view('login1', [
                 'check' => 'no'
             ]);
         } else {
@@ -192,7 +192,7 @@ class fsSeedlingController extends Controller
         });
 
         if ($user=='no'){
-            return view('login', [
+            return view('login1', [
                 'check' => 'no'
             ]);
         } else {
@@ -217,7 +217,7 @@ class fsSeedlingController extends Controller
         });
 
         if ($user=='no'){
-            return view('login', [
+            return view('login1', [
                 'check' => 'no'
             ]);
         } else {
@@ -243,7 +243,7 @@ class fsSeedlingController extends Controller
         });
 
         if ($user=='no'){
-            return view('login', [
+            return view('login1', [
                 'check' => 'no'
             ]);
         } else {

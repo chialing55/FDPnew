@@ -4,7 +4,7 @@ namespace App\Http\Controllers;
 
 use Illuminate\Support\Facades\File;
 
-class UpdateController extends Controller
+class updateController extends Controller
 {
     public function latestUpdates()
     {

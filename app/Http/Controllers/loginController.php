@@ -8,7 +8,7 @@ use Illuminate\Support\Facades\App;
 // use Illuminate\Support\Facades\Input;
 
 use App\Models\FsBaseLogin;
-use App\Http\Controllers\UpdateController;
+use App\Http\Controllers\updateController;
 
 class loginController extends Controller
 {
@@ -18,7 +18,7 @@ class loginController extends Controller
         // Session::start();
         // $input = Request::all();
         $lasterUpdate='';
-        $ob_update = new UpdateController;
+        $ob_update = new updateController;
         $lasterUpdate=$ob_update->latestUpdates();
       
         $request->session()->put('latest_update', $lasterUpdate);
@@ -56,7 +56,7 @@ class loginController extends Controller
         } else {
             // echo 'no';
 
-            return view('login', [
+            return view('/login1', [
                 'check' => 'no'
             ]);
         }

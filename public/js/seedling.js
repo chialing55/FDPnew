@@ -60,7 +60,9 @@ window.addEventListener('data', event => {
 
     fscovtable(covs);
     //一開始,thispage=1
-    fsseedlingtable(data, maxid, 1);
+
+    if (data[0].tag!='無'){
+    fsseedlingtable(data, maxid, 1);}
     recruittable(data, emptytable);
     fsslrolltable(slroll, covs);
 
