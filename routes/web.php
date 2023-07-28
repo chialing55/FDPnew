@@ -101,6 +101,8 @@ Route::get('/fushan/{project}/{type}', function($project, $type){
                 return App::call('App\Http\Controllers\fsTreeController@progress',['site' => $site] );
             } else if ($type=='dataviewer'){
                 return App::call('App\Http\Controllers\fsTreeController@dataviewer',['site' => $site] );
+            } else if ($type=='entryprogress'){
+                return App::call('App\Http\Controllers\fsTreeController@entryprogress',['site' => $site] );
             }
             
         }
@@ -116,7 +118,7 @@ Route::post('/fstreesaverecruit', [App\Http\Controllers\fsTreeSaveController::cl
 Route::get('/fstreeaddalternote/{stemid}/{entry}/{thispage}', [App\Http\Controllers\fsTreeAlternote::class, 'alternote']);
 Route::post('/fstreesavealternote', [App\Http\Controllers\fsTreeSaveController::class, 'savealternote']);
 Route::get('/fstreedeletealter/{stemid}/{entry}/{thispage}', [App\Http\Controllers\fsTreeSaveController::class, 'deletealter']);
-
+Route::get('/fstreefinish/{qx}/{qy}/{entry}', [App\Http\Controllers\fsTreeSaveController::class, 'finishnote']);
 
 //fsseedling entry
 Route::post('/fsseedlingsavecov', [App\Http\Controllers\fsSeedlingSaveController::class, 'savecov'])->name('savecov');

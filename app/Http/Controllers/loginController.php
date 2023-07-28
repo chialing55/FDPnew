@@ -42,7 +42,7 @@ class loginController extends Controller
         // print_r($input);
         // echo "</br>";
 
-        $ident_id=FsBaseLogin::where('id', 'like', $input['id'])->where('pass', 'like', $input['pass'])->get();
+        $ident_id=FsBaseLogin::where('id2', 'like', $input['id'])->where('pass', 'like', $input['pass'])->get();
         // echo "3";
         // print_r($ident_id);
         // echo "</br>";        

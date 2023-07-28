@@ -127,7 +127,7 @@ border: 1px solid  #A568FF;
 	color:red;
 }
 
-.prev, .next {
+.prev, .next, .showall {
 	margin-left: 20px;
 	cursor: pointer;
 	text-decoration: underline;
@@ -190,4 +190,39 @@ border: 1px solid  #A568FF;
 	background-color: lightblue;
 }
 
+
+.entry1fin {
+	background-color: gold;
+}
+
+.entry2fin {
+	background-color: cornflowerblue;
+}
+
+.entryallfin {
+	background-color: olivedrab;
+
+}
+
+.entryfinshow {
+	width: 25px;
+	height: 25px;
+	margin: 0 10px 0 10px;
+}
+
+.alternotehover {
+    position: relative;
+}
+
+.alternotehover:hover::before {
+	position: absolute;
+	top: 0px;
+	left: 35px;
+	font-size: 0.8em;
+	content: '請先儲存輸入資料';
+	background-color: lightyellow;
+	border-radius: 5px;
+	padding: 5px;
+	z-index: 100;
+}
 

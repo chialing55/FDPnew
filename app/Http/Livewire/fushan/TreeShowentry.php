@@ -60,36 +60,67 @@ class TreeShowentry extends Component
             $request->session()->put('csplist', $csplist);
         }
 
-            $records=$table::where('qx', 'like', $qx)->where('qy', 'like', $qy)->where('sqx', 'like', $sqx)->where('sqy', 'like', $sqy)->where('show', 'like', '1')->orderBy('stemid', 'asc')->get()->toArray();
+            $records=$table::where('qx', 'like', $qx)->where('qy', 'like', $qy)->where('sqx', 'like', $sqx)->where('sqy', 'like', $sqy)->orderBy('stemid', 'asc')->get()->toArray();
 
 
 
         if (!empty($records)){
             // dd($record);
             if ($records[0]['csp']==''){
+                // 第一次選到這個樣區時，把csp填入
 
                 for($i=0;$i<count($records);$i++){
                     $record=$records[$i];
                     $update=[];
-                    $records[$i]['csp']=$splist[$record['spcode']];
+                    // $records[$i]['csp']=$splist[$record['spcode']];
                     $update['csp']=$splist[$record['spcode']];
                     if ($record['status']=='-1'){
+                        // 把census3=-1的show改為0
                         $census3=FsTreeCensus3::where('stemid', 'like', $record['stemid'])->get();
                         if ($census3[0]['status']=='-1'){
                             $update['show']='0';
-                            $records[$i]['show']='0';
+                            // $records[$i]['show']='0';
                         }
+
+                        
                     }
+
+
+
+
+                    //把依據census4把code填入
+                    $census4=FsTreeCensus4::where('stemid', 'like', $record['stemid'])->get();
+                        if ($census4[0]['code']!=''){
+                            $update['code']=$census4[0]['code'];
+                            // $records[$i]['code']=$census4[0]['code'];
+                        }                    
+
 
                     $table::where('stemid', 'like', $record['stemid'])->update($update);
                 }
             }
 
+            //重新載入records
+
+            $records1=$table::where('qx', 'like', $qx)->where('qy', 'like', $qy)->where('sqx', 'like', $sqx)->where('sqy', 'like', $sqy)->where('show', 'like', '1')->orderBy('tag', 'asc')->orderBy('branch', 'asc')->get()->toArray();
+
+
+            // for($i=0;$i<count($records);$i++){
+            //     if ($records[$i]['alternote']!=''){
+            //         $alterdata=['qx'=>'', 'qy' => '', 'sqx'=>'', 'sqy' => '', 'tag'=>'', 'b'=>'', 'csp'=>'', 'pom'=>''];
+            //         $alterdata1 = json_decode($records[$i]['alternote'], true);
+            //         $mergedArray = array_merge($alterdata, $alterdata1);
+            //         $records[$i]['alterdata']=$mergedArray;
+            //     }
+            // }
+            // $result=$records;
+
             //新增樹為刪除按鍵，其他加入特殊修改按鍵
 
             $ob_redata = new fsTreeAddButton;
-            $result=$ob_redata->addbutton($records, $this->entry);
+            $result=$ob_redata->addbutton($records1, $this->entry);
 
+            //拆解alternote
 
 
         } else {
@@ -97,7 +128,7 @@ class TreeShowentry extends Component
         }
 
         //recruittable
-        for($k=0;$k<20;$k++){
+        for($k=0;$k<30;$k++){
             $emptytable[$k]['qx']=$qx;
             $emptytable[$k]['qy']=$qy;
             $emptytable[$k]['branch']='0';
@@ -155,6 +186,11 @@ class TreeShowentry extends Component
         $this->searchsite($request, $this->qx, $this->qy, 1, 1);
     }
 
+
+    public function submitsqxForm(Request $request){
+
+        $this->searchsite($request, $this->qx, $this->qy, $this->sqx, $this->sqy);
+    }
 
     public function render()
     {

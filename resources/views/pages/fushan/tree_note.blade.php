@@ -41,19 +41,19 @@ $(function() {
         <li><b>Date</b> - 每一筆皆需填入調查日期。<b>未輸入日期(0000-00-00)則視同未輸入，不予儲存。</b></li>
         <li><b>Status</b> - 枝幹存在狀態代碼。<span class='line'>代碼間不可共存</span>。
             <ul>
-                <li><b>0</b>: <span class='line'>全株</span>死亡。<span class='line'>同編號之所有枝幹</span>均為 0，code 欄留白，dbh 欄均為 0。</li>
-                <li><b>-1</b>: <span class='line'>全株</span>失蹤。<span class='line'>同編號之所有枝幹</span>均為 -1，code 欄留白，dbh 欄均為 0。</li>
-                <li><b>-2</b>: <span class='line'>全株</span>枝幹 dbh < 1 cm，但植株仍存活。代表整個植株脫離了樣區研究的取樣範圍。<span class='line'>同編號之所有枝幹</span>均為 -2，code 欄留白，dbh 欄均為 0。</li>
-                <li><b>-3</b>: 僅<span class='line'>該枝幹</span> dbh < 1 cm，但植株仍存活。<span class='line'>該枝幹</span> 記錄 -3，code 欄留白，dbh 欄為 0。</li>
-                <li><b>留白</b>: 正常情形，枝幹存活，也可以找到 POM 測量 dbh。該枝幹的 dbh 一定 ≥ 1 cm。</li>
+                <li><b>0</b>：<span class='line'>全株</span>死亡。<span class='line'>同編號之所有枝幹</span>均為 0，code 欄留白，dbh 欄均為 0。</li>
+                <li><b>-1</b>：<span class='line'>全株</span>失蹤。<span class='line'>同編號之所有枝幹</span>均為 -1，code 欄留白，dbh 欄均為 0。</li>
+                <li><b>-2</b>：<span class='line'>全株</span>枝幹 dbh < 1 cm，但植株仍存活。代表整個植株脫離了樣區研究的取樣範圍。<span class='line'>同編號之所有枝幹</span>均為 -2，code 欄留白，dbh 欄均為 0。</li>
+                <li><b>-3</b>：僅<span class='line'>該枝幹</span> dbh < 1 cm，但植株仍存活。<span class='line'>該枝幹</span> 記錄 -3，code 欄留白，dbh 欄為 0。</li>
+                <li><b>留白</b>：正常情形，枝幹存活，也可以找到 POM 測量 dbh。該枝幹的 dbh 一定 ≥ 1 cm。</li>
             </ul>
         </li>
         <li><b>code</b> - 特殊狀態代碼。<span class='line'>代碼間可共存</span>，多碼時<span class='line'>照字母排列</span>，<span class='line'>中間不留空格</span>。
             <ul>
-                <li><b>C</b>(Change): 更改 POM 。要在 note 欄說明更換 POM的原因，並記錄新 POM 的長度。</li>
-                <li><b>I</b>(Irregular): 不正常 POM 。</li>
-                <li><b>P</b>(Prostrate): 枝幹倒伏 。</li>
-                <li><b>R</b>(Ramet): 無性拓殖分株。已與主幹分離，獨立存活的分枝。<span class='line'>只能記錄在分枝</span>。若無性拓殖分株上有多個分枝時，R 只記錄在「著地」的那一個主要分枝，並要在 note 欄記錄「包含分枝#」。</li>
+                <li><b>C</b>(Change)：更改 POM 。要在 note 欄說明更換 POM的原因，並記錄新 POM 的長度。</li>
+                <li><b>I</b>(Irregular)：不正常 POM 。</li>
+                <li><b>P</b>(Prostrate)：枝幹倒伏 。</li>
+                <li><b>R</b>(Ramet)：無性拓殖分株。已與主幹分離，獨立存活的分枝。<span class='line'>只能記錄在分枝</span>。若無性拓殖分株上有多個分枝時，R 只記錄在「著地」的那一個主要分枝，並要在 note 欄記錄「包含分枝#」。</li>
             </ul>
         </li>
         <li><b>dbh/h高</b> - 填入測量值至<span class='line'>小數點後一位</span>。
@@ -74,15 +74,17 @@ $(function() {
                 <li>若有縮水則勾選「縮水」，若需查舊資料則勾選「查舊」，此兩項不需在 note 欄輸入。</li>
                 <li>pom 若有更新，則在 pom 欄位輸入，不需在 note 欄輸入。若原始 note 欄位中有 pom 備註，請將其刪除。</li>
                 <li>「主幹牌移至分支#」統一寫為「TAB=#」。</li>
-                <li>統一使用<b>「中文」標點符號</b>。<b>「半形」英文符號</b>。<b>「半形」阿拉伯數字</b>，並於數字後留一格空白。</li>
                 <li>請檢視原始 note 是否仍需完全保留。再輸入此次新增之 note (列於原始 note 之後)。</li>
+                <li>統一使用<b>「中文」標點符號</b>。<b>「半形」英文符號</b>。<b>「半形」阿拉伯數字</b>。</li>
+                <li>新舊 note 以句號「。」相隔。多個分支以「、」相隔，如：1、2、3...。不同類型的 note 之間以「。」相隔。數字與單位間包含一個空格，如：1 cm。數字和<、=、>之間不需空格。</li>
+                <li>特例：座標寫法為「(1, 1)」。括號用半形「()」。</li>
             </ul>
         </li>
         <li><b>縮水</b> - 本次調查所得之 dbh 若小於上次調查之 dbh，則勾選「縮水」。</li>
         <li><b>查舊</b> - 本次調查之狀態與前次調查不符，需調閱資料確定者，請勾選「查舊」。</li>
 
         </li>
-        <li><b>特殊修改<i class='fa-regular fa-note-sticky'></i></b> - 需更新原始資料的修改。包含: <span class='line'>樣區，號碼，種類，原始 pom。</span>。
+        <li><b>特殊修改<i class='fa-regular fa-note-sticky'></i></b> - 需更新原始資料的修改。包含：<span class='line'>樣區，號碼，種類，原始 pom。</span>。
             <ul>
             <li>將欲修改的欄位，分別填入格子內。</li>
             <li>若調查發現現場調查之 pom 與原 pom 不同者(並非於這次修改 pom)，<span class='line'>請將數值填入「特殊修改<i class='fa-regular fa-note-sticky'></i>」中的 原始 POM 欄位中</span>，而不在 POM 欄位做修改。</li>
@@ -111,9 +113,9 @@ $(function() {
         </li>
         <li><b>code</b> - 特殊狀態代碼。<span class='line'>代碼間可共存</span>，多碼時照字母排列，<span class='line'>中間不留空格</span>。
             <ul>
-                <li><b>I</b>(Irregular): 不正常 POM 。</li>
-                <li><b>P</b>(Prostrate): 枝幹倒伏 。</li>
-                <li><b>R</b>(Ramet): 無性拓殖分株。已與主幹分離，獨立存活的分枝。只能記錄在分枝。若無性拓殖分株上有多個分枝時，R 只記錄在「著地」的那一個主要分枝，並要在 note 欄記錄「包含分枝#」。</li>
+                <li><b>I</b>(Irregular)：不正常 POM 。</li>
+                <li><b>P</b>(Prostrate)：枝幹倒伏 。</li>
+                <li><b>R</b>(Ramet)：無性拓殖分株。已與主幹分離，獨立存活的分枝。只能記錄在分枝。若無性拓殖分株上有多個分枝時，R 只記錄在「著地」的那一個主要分枝，並要在 note 欄記錄「包含分枝#」。</li>
                 <li>不得有C。</li>
             </ul>
         </li>
@@ -131,7 +133,9 @@ $(function() {
         <li><b>note</b> - 註記。
             <ul>
                 <li>若為漏資料則勾選「漏資料」，不需在note欄輸入。</li>
-                <li>統一使用<b>「中文」標點符號</b>。<b>「半形」英文符號</b>。<b>「半形」阿拉伯數字</b>，並於數字後留一格空白。</li>
+                <li>統一使用<b>「中文」標點符號</b>。<b>「半形」英文符號</b>。<b>「半形」阿拉伯數字</b>。</li>
+                <li>新舊 note 以句號「。」相隔。多個分支以「、」相隔，如：1、2、3...。不同類型的 note 之間以「。」相隔。數字與單位間包含一個空格，如：1 cm。</li>
+                <li>特例：座標寫法為「(1, 1)」。括號用半形「()」。</li>
             </ul>
         </li>
         <li>未通過檢查以致無法儲存的資料將保留在輸入表單中，而點選 <button>輸入完成</button> 鈕後即會刪除。</li>
@@ -166,10 +170,13 @@ $(function() {
             <ul>
                 <li>請先依照規則新增這筆資料進去，dbh先填1，勾選漏資料，儲存，然後系統會把資料叫出來，再將資料修改成status=-2，dbh=0。</li>
             </ul>
+        </li>
+        <li>
+            若調查後的 dbh < 1 cm，請在表格內填寫 1，再至「特殊修改<i class='fa-regular fa-note-sticky'></i>」的 dbh(<1)欄位填寫正確之調查資料。
         </li>   
         <li>遇到舊樣木復活，但無法確認樹種。
             <ul>
-                <li>請查閱舊資料電子檔，或是資料管理者進後端確認樹種。</li>
+                <li>請查閱舊資料電子檔，或是請資料管理者進後端確認樹種。</li>
             </ul>
         </li>
         </ol>

@@ -67,7 +67,7 @@
           <li class='innerlist list42 listlink' type='entry1' >第一次輸入<hr></li>
           <li class='innerlist list43 listlink' type='entry2' >第二次輸入<hr></li>
           <li class='innerlist list44' type=''>資料比對<hr></li>
-          <li class='innerlist list45' type=''>資料輸入進度<hr></li>
+          <li class='innerlist list45 listlink' type='entryprogress'>資料輸入進度<hr></li>
       </div>
       <div class='listinner list6inner'>
           <li class='innerlist list61' type=''>每木調查資料修改流程<hr></li>

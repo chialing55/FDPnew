@@ -163,6 +163,8 @@ select {
 	font-weight: 500;
 }
 
+
+
 /* colors */
 .bg-g1{
   background-color: #31572c;
@@ -306,18 +308,50 @@ button:focus {
   outline: 1px transparent;
 }
 
-button:before {
+/*button:before {
   display: none;
-}
+}*/
 
 button:-webkit-details-marker {
   display: none;
 }
 
 
+.datasavebutton {
+  width: 800px;
+  background-color: beige;
+}
 
+.datasavebutton:hover {
+  background-color: #d8d89d;
+  text-decoration: none;
+  transition-duration: 0.1s;
+}
 
+.recruitbutton{
+  background-color: darkgoldenrod;
+  color: white;
+  letter-spacing: 1px;
+}
 
+.recruitbutton:hover {
+  background-color: #8f690c;
+  text-decoration: none;
+  transition-duration: 0.1s;
+}
+
+.finishbutton{
+  background-color: lightcoral;
+/*  color: white;*/
+  font-weight: 800;
+  letter-spacing: 1px;
+}
+
+.finishbutton:hover {
+  background-color: #f1bfbf;
+  text-decoration: none;
+  transition-duration: 0.1s;
+}
 
 .tablesorter {
   width: 100%;

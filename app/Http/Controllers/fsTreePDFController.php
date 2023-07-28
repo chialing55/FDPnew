@@ -55,8 +55,10 @@ class fsTreePDFController extends Controller
         $treedatas=FsTreeCensus4::whereIn('tag', $taglist)->where('status','not like', '0')->where('date', 'not like', '0000-00-00')->orderBy('tag', 'asc')->orderBy('branch', 'asc')->get()->toArray();
         $totalnum=0;
         for($i=0;$i<count($treedatas);$i++){
-            //排除分支為-3
+            //排除分支為-3, -2, -1
             if($treedatas[$i]['branch']!='0' && $treedatas[$i]['status']=='-3')continue;
+            if($treedatas[$i]['branch']!='0' && $treedatas[$i]['status']=='-2')continue;
+            if($treedatas[$i]['branch']!='0' && $treedatas[$i]['status']=='-1')continue;
             if ($treedatas[$i]['status']=='-9'){
                 $treedatas[$i]['status']='';
             }

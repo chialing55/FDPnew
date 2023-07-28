@@ -25,13 +25,28 @@
                 <select class="fs100" name='oldnew' id='oldnew' style='' wire:model='oldnew' wire:change="change">
                 <option value="old">舊樹 </option>
                 <option value="new">新樹 </option>
-                </select>
+                <option value="map">地圖 </option>
+                </select> 
+                @if($oldnew=='map')
+                    第
+                    <select class="fs100" name='map' id='map' style='' wire:model='map' wire:change="change">
+                        @for ($i=1; $i<5;$i++)
+                            <option value="{{$i}}">{{$i}}</option>
+                        @endfor
+                    </select> 
+                    區
+                @endif  
+                資料
 
-                 @if($path!='')
-                <a href='{{asset($path)}}' target="_blank"><button>送出</button></a>
-                @else
-                <button>送出</button>
-                @endif
+
+               {{-- path: {{$path}} --}}
+                <span style='margin-left:20px'>
+                    @if($path!='')
+                    <a href='{{asset($path)}}' target="_blank"><button>送出</button></a>
+                    @else
+                    <button>送出</button>
+                    @endif
+                </span>
           
             @if($error!='')
                 <p class='savenote'>{{$error}}</p>

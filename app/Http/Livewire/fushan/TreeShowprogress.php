@@ -31,6 +31,7 @@ class TreeShowprogress extends Component
     public $person2;
     public $person3;
     public $person4;
+    
 
 
     public $date2;
@@ -68,7 +69,7 @@ class TreeShowprogress extends Component
             $finishSite2 = [];
 
             foreach ($table2s as $table2) {
-                $finishSite2["'".$table2['qx'].$table2['qy']."'"] = $table2['plots'];
+                $finishSite2["'".$table2['qx']."-".$table2['qy']."'"] = $table2['plots'];
                 
                     $countFinishSite=$countFinishSite+$table2['plots'];
 

@@ -36,15 +36,18 @@
 <div>
 <div id='simplenote' class='text_box'>
 <ul>
-<li><b>輸入資料後需按 <button>儲存</button> ，才能確實將資料儲存。</b></li>
+<li><b>輸入資料後需按 <button class='datasavebutton' style='width: auto;'>儲存</button> ，才能確實將資料儲存。</b></li>
 <li>日期格式： YYYY-MM-DD。每筆資料皆需輸入日期，<b>日期為 0000-00-00 者視同未輸入</b>。</li>
-<li>status 為 0,-1,-2,-3，則 dbh 需為0，且 code 不得有值。tatus 為空值，則 dbh 不得為 0。</li>
+<li>status 為 0(全株死亡),-1(全株失蹤),-2(全株 dbh < 1 cm),-3(枝幹死亡)，則 dbh 需為0，且 code 不得有值。tatus 為空值，則 dbh 不得為 0。</li>
 <li>dbh/h高 必須<b>大於或等於</b>上次調查，或勾選縮水。</li>
-<li>若 code 包含 C，則 POM 不得同於前次 POM。code R 只能出現在分支。<span class='line'>code 代碼間可共存</span>，多碼時照字母排列，<span class='line'>中間不留空格</span>。</li>
+<li>code：CIPR。若 code 包含 C，則 POM 不得同於前次 POM。code R 只能出現在分支。<b>code 代碼間可共存</b>，多碼時照字母排列，<b>中間不留空格</b>。</li>
 <li>POM 更新，code 欄需有 C 。若是原始資料錯誤，請在「特殊修改<i class='fa-regular fa-note-sticky'></i>」更新。</li>
-<li>note： TAB=#。統一使用<b>「中文」標點符號</b>。<b>「半形」英文符號</b>。<b>「半形」阿拉伯數字</b>，數字後留一格空白。先確認原始 note，加句號，再輸入本次note。</li>
-<li>20x，20y，5x，5y，tag，b，csp，POM 等欄位需要修改時，請至「特殊修改<i class='fa-regular fa-note-sticky'></i>」填寫。</li>
-<li>新樹資料可以修改或刪除。</li></ul>
+<li>note： TAB=#。統一使用<b>「中文」標點符號</b>。<b>「半形」英文符號</b>。<b>「半形」阿拉伯數字</b>，數字後留一格空白。先確認原始 note，加「。」，再輸入本次note。不同類型 note 間用「。」分隔。</li>
+<li>20x，20y，5x，5y，tag，b，csp，POM 等欄位需要修改時，請至「特殊修改<i class='fa-regular fa-note-sticky'></i>」填寫。<b>只需填寫需修改的部分。</b></li>
+<li>若調查後的 dbh < 1 cm，請在表格內填寫 1，再至「特殊修改<i class='fa-regular fa-note-sticky'></i>」的 dbh(<1) 欄位填寫正確之調查資料。</li>
+<li>新樹資料可以修改或刪除。</li>
+<li><a href='https://bit.ly/3YcMFY4' target="_blank">每木調查除錯進度統整表</a></li>
+</ul>
 </div>
 @php
 
@@ -62,6 +65,26 @@ $nowplotkey=array_keys($plot2list, $sqx.$sqy);
 $nowplot=$plot2list[$nowplotkey[0]];
 
 @endphp
+
+<div class='text_box' style='font-weight: 800; margin-bottom: 20px; display: inline-flex;'>
+    <span style='margin-right: 20px;'>選擇小樣區</span>     
+    <form wire:submit.prevent='submitsqxForm'>
+        <select name="sqx" class="fs100 entrysqx" wire:model.defer='sqx' style='height:25px;'>
+        @for ($i=1; $i<5;$i++)
+        <option value="{{$i}}">{{$i}} 
+        </option>
+         @endfor
+        </select>-<select name="sqy" class="fs100" wire:model.defer='sqy' style='height:25px;'>
+        @for ($i=1; $i<5;$i++)
+        <option value="{{$i}}">{{$i}} 
+        </option>
+         @endfor
+        </select>
+        <button type="submit" style='margin-left: 20px;'>送出</button>
+    </form>
+
+</div>
+
 
 <div class='text_box'>
     <div class='entrytablediv'>
@@ -90,27 +113,27 @@ $nowplot=$plot2list[$nowplotkey[0]];
         @if($record!='無')
 
         
-        <span class='datasavenote savenote'>
-
-        </span>
+        <span class='datasavenote savenote'></span>
         <div class='pages' style='margin-top: 5px;'>
            <div class='pagenote'></div>
            <div class='prev'>上一頁</div>
            <div class='next'>下一頁</div>
+           <div class='showall'><button>顯示全部資料</button></div>
        </div>
         <div id='datatable{{$qx}}{{$qy}}{{$sqx}}{{$sqy}}' style='margin-top: 20px;' class='fs100' ></div>
 
 
-        <p style='margin-top:5px;'><button name='datasave{{$qx}}{{$qy}}{{$sqx}}{{$sqy}}' >儲存</button></p>
-    
+        <p style='margin-top:5px; text-align: center;'><span class='datasavenote savenote' style='margin: 0 30px 0 0'></span><button name='datasave{{$qx}}{{$qy}}{{$sqx}}{{$sqy}}' class='datasavebutton'>儲存</button></p>
+        
         <div class='alternotetalbeouter'>
-            <h6 class='alterh6'>特殊修改</h6>
+            <h6 class='alterh6'>特殊修改<span style='margin-left: 20px; font-size: 80%; font-weight: 500;'>*只需填寫需修改的資料</span></h6>
+
             <p ><span class='alterstemid'></span>
             <span class='altersavenote savenote'></span></p>
             <div id='alternotetable' style='margin-top: 5px;' class='fs100' ></div>
 
 
-            <p style='margin-top:10px; text-align: right;'><button name='alternotesave' >儲存</button>
+            <p style='margin-top:10px; text-align: right;'><button name='alternotesave' class='datasavebutton' style='width: auto;' >儲存</button>
 
             <button name='deletealternote' class='deletealternotebutton' onclick="deletealternoteButtonClick(this)">刪除此資料</button>
             <button class='close' onclick="$('.alternotetalbeouter').hide(); $('.alternotetable').html();" >X</button>
@@ -125,9 +148,9 @@ $nowplot=$plot2list[$nowplotkey[0]];
 </div>    
 
 <div style='margin-left: 30px;'>
-<button class='recruit' onclick="$('.recruittableout').toggle();"> 新增樹與漏資料樹</button>
+<button class='recruit recruitbutton' onclick="$('.recruittableout').toggle();">新增樹與漏資料樹</button>
 </div>
- 
+
 
 <div class=' text_box recruittableout' style='margin-top: 20px;'>
 
@@ -135,22 +158,28 @@ $nowplot=$plot2list[$nowplotkey[0]];
    <hr>
    <div id='simplenote' class='text_box'>
         <ul>
-            <li>dbh - 新增樹的dbh<b>必須 ≥ 1</b>。</li>
+            <li>dbh - 新增樹的 dbh <b>必須 ≥ 1</b>。</li>
             <li>新增狀態 - 預設為新增。若為漏資料的樹，請記得點選。</li>
-            <li>樹蕨的<b>h低</b>請填入<b>pom</b>欄位。</li>
-            <li>未通過檢查以致無法儲存的資料將保留在輸入表單中。</li>
-            <li>表單中間有空行並不影響儲存。</li>
+            <li>樹蕨的<b> h低 </b>請填入<b> pom </b>欄位。</li>
+            <li>未通過檢查以致無法儲存的資料將保留在輸入表單中。已儲存的資料可按右鍵以刪除。</li>
+            <li>若需新增植物種類，請洽資料管理員。</li>
+            
         </ul>
     </div>
     <div class='entrytablediv'>
         <p class='recruitsavenote savenote'></p>
         
-        <p style='text-align: right;'><button name='recruitsave{{$qx}}{{$qy}}{{$sqx}}{{$sqy}}' class="save2">儲存</button></p>
+        
         <div id='recruittable{{$qx}}{{$qy}}{{$sqx}}{{$sqy}}' style='margin-top: 10px;'></div>
+        <p style='text-align: center;'><span class='recruitsavenote savenote' style='margin: 0 30px 0 0'></span><button name='recruitsave{{$qx}}{{$qy}}{{$sqx}}{{$sqy}}' class="save2 datasavebutton">儲存</button></p>
+        <span class='datasavenote savenote'></span>
         <p style='margin-top:5px;'><button name='clearrecruittable' class="save2">清空新增表單</button></p>
     </div>
 </div>
-
+<div style='margin: 30px 0 0 30px ;'>
+<button class='finish finishbutton' onclick="finish({{$qx}}, {{$qy}}, {{$entry}})">輸入完成</button>
+<span class='finishnote savenote'></span>
+</div> 
 
 @endif
 

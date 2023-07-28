@@ -34,17 +34,18 @@ class fsTreeRecruitCheck
 			$checkstemid=$table::where('stemid', 'like', $data[$i]['stemid'])->get();
 
 			if (!$checkstemid->isEmpty()){  //重號
+				$double="重號樹在 (".$checkstemid[0]['qx']." ,".$checkstemid[0]['qy'].")(".$checkstemid[0]['sqx']." ,".$checkstemid[0]['sqy'].")";
 				if ($checkstemid[0]['status']=='-9'){
-					$datasavenote=$data[$i]['stemid'].' 已新增(重號)。';
+					$datasavenote=$data[$i]['stemid'].' 已新增(重號)。['.$double."]";
 					$pass="0";
 					break;
 				}
 				if ($checkstemid[0]['show']=='1'){
-						$datasavenote=$data[$i]['stemid'].' 重號，且為此次要調查的樹。 請確認號碼是否輸入錯誤。';
+						$datasavenote=$data[$i]['stemid'].' 重號，且為此次要調查的樹。 請確認號碼是否輸入錯誤。['.$double."]";
 						$pass="0";break;
 				} else {
 					if ($data[$i]['tofix']!='1'){
-						$datasavenote=$data[$i]['stemid'].' 重號，請確認是否漏資料。';
+						$datasavenote=$data[$i]['stemid'].' 重號，請確認是否漏資料。['.$double."]";
 						$pass="0";break;
 					}
 				}
@@ -81,6 +82,13 @@ class fsTreeRecruitCheck
 					$pass="0";break;
 				}
 			}
+
+//dbh欄位不得為0
+			if ($data[$i]['dbh']=='0'){
+				$datasavenote=$data[$i]['stemid'].' dbh/h高 需大於或等於 1。';
+				$pass="0";break;
+			}
+
 	// 8. 如果只有分支沒有主幹，不予新增
 			if ($data[$i]['branch']!='0'){
 				
@@ -93,7 +101,15 @@ class fsTreeRecruitCheck
 					$site1=$stemid3[0]['qx'].$stemid3[0]['qy'].$stemid3[0]['sqx'].$stemid3[0]['sqy'];
 					$site2=$data[$i]['qx'].$data[$i]['qy'].$data[$i]['sqx'].$data[$i]['sqy'];
 					if ($site1 != $site2){
-						$datasavenote=$data[$i]['stemid'].' 此分支與主幹不在同一小區。';
+						if ($data[$i]['code']!=''){
+							$codea=str_split($data[$i]['code']);
+							if (!in_array("R",$codea)){
+								$datasavenote=$data[$i]['stemid'].' 此分支與主幹不在同一小區，code 需有 R。';
+							}
+						} else {
+							$datasavenote=$data[$i]['stemid'].' 此分支與主幹不在同一小區，code 需有 R。';
+						}
+						
 					$pass="0";break;
 					}
 				}
@@ -103,14 +119,14 @@ class fsTreeRecruitCheck
         //4. code CIPR
             //自動轉為大寫
             
-            // 4.1  若code包含C，則POM不得同於前次pom
+            // 4.1  
             if ($data[$i]['code']!=''){
             	$codea=str_split($data[$i]['code']);
-                if (in_array("C",$codea)){
-                    $datasavenote=$data[$i]['stemid']." 新增樹不得有 C。";
-                    $pass='0';
-                    break;
-                }
+                // if (in_array("C",$codea)){
+                //     $datasavenote=$data[$i]['stemid']." 新增樹不得有 C。";
+                //     $pass='0';
+                //     break;
+                // }
             //4.2 code只能是CIPR
                 $codaarray=array("I","P","R");
 

@@ -117,7 +117,7 @@ for (let i = 0; i < totalRequests; i++) {
 //         $('.footer').css('position', 'relative').css('bottom', 0);
 //     }
 // }
-
+var ppsall;
 window.addEventListener('data', event => {
 
 	data=event.detail.record;
@@ -131,11 +131,11 @@ window.addEventListener('data', event => {
     // $('#slrolltable').html('');
     $(".save2").off();
 
-
+	$('.finishnote').html();
     // fscovtable(covs);
     // //一開始,thispage=1
 
-    fstreetable(data, 1);
+    fstreetable(data, 1, 20);
 
     recruittable(data, emptytable, csplist);
     // fsslrolltable(slroll, covs);
@@ -153,12 +153,13 @@ function alternote(stemid, entry, thispage) {
 	// console.log(stemid);
 	$('.altersavenote').html('');
 
+
 	var posX = $("button[name='alternoteshow"+stemid+"']").offset().left;
     var posY = $("button[name='alternoteshow"+stemid+"']").offset().top;
     console.log(posX+", "+posY);
 
     $('.alternotetalbeouter').css('top', posY);
-    $('.alternotetalbeouter').css('left', posX-500);
+    $('.alternotetalbeouter').css('left', posX-550);
 	
 // $(".deletealternotebutton").removeAttr("stemid thispage");
 
@@ -170,8 +171,8 @@ function alternote(stemid, entry, thispage) {
 		    type: 'get',
 		    success: function (res) {
 		      if (res.result === 'ok') {
-		        console.log('Data saved');
-				alternotetable(res.alterdata,stemid, entry, res.thispage);
+		        console.log('Data show');
+				    alternotetable(res.alterdata,stemid, entry, res.thispage);
 
 				if (res.havedata=='yes'){
 					$('.deletealternotebutton').show();
@@ -216,7 +217,7 @@ function deletealternote(stemid, thispage){
             if (res.datasavenote !=''){
               $('.altersavenote').html(res.datasavenote);
             }
-            fstreetableupdate(res.data, res.thispage);
+            fstreetableupdate(res.data, res.thispage, ppsall);
 
 			var container = $("#alternotetable");
 			var handsontable = container.data('handsontable');
@@ -254,10 +255,10 @@ function alternotetable(alterdata, stemid, entry, thispage){
     colHeaders: true,
     removeRowPlugin: true,
     // minSpareRows: 1,
-    colWidths: [25,25,25,25,80, 40, 120,70],
+    colWidths: [25,25,25,25,80, 40, 120,70,70],
     licenseKey: 'non-commercial-and-evaluation',
  
-    colHeaders: ["20x","20y","5x","5y", "tag", "b", "csp","原始POM", "stemid"],
+    colHeaders: ["20x","20y","5x","5y", "tag", "b", "csp", "dbh(<1)" ,"原始POM", "stemid"],
     columns: [
       {data: "qx", type: 'numeric'},
       {data: "qy", type: 'numeric'},
@@ -266,6 +267,7 @@ function alternotetable(alterdata, stemid, entry, thispage){
       {data: "tag"},
       {data: "b", type: 'numeric'},
       {data: "csp", type: 'autocomplete', source: csplist, strict: false, visibleRows: 10, allowInvalid: false,},
+      {data: "dbh", type: 'numeric'},
       {data: "pom"},
       {data: "stemid"}
     ],
@@ -274,7 +276,7 @@ function alternotetable(alterdata, stemid, entry, thispage){
   	manualColumnResize: true,
   	hiddenColumns: {
     // specify columns hidden by default
-   		columns: [8],
+   		columns: [9],
   	},
   });
 
@@ -305,7 +307,7 @@ function alternotetable(alterdata, stemid, entry, thispage){
 		        	$('.altersavenote').html(res.datasavenote);
 		        } 
 		        console.log(res);
-		        fstreetableupdate(res.data, res.thispage);
+		        fstreetableupdate(res.data, res.thispage, ppsall);
 		        $('.deletealternotebutton').show();
 		      }
 		      else {
@@ -337,7 +339,7 @@ function alternotetable(alterdata, stemid, entry, thispage){
             if (res.datasavenote !=''){
               $('.datasavenote').html(res.datasavenote);
             }
-            fstreetableupdate(res.recruit, res.thispage);
+            fstreetableupdate(res.recruit, res.thispage, ppsall);
           }
           else {
             console.log('Save error');
@@ -351,17 +353,18 @@ function alternotetable(alterdata, stemid, entry, thispage){
   }
 
 
-function fstreetable(data, thispage){
-
+function fstreetable(data, thispage, pps){
+$('.finishnote').html();
 	// datapage=pages(data, thispage);
 	// console.log(datapage);
 	// console.log(entry, user);
-
+	ppsall=pps;
+	// console.log(pps);
 	var site=data[0].qx+data[0].qy+data[0].sqx+data[0].sqy;
 	$('.totalnum').html(`共有 ${data.length} 筆資料`);
 
 // 分頁
-	var totalpage=Math.ceil(data.length/20);
+	var totalpage=Math.ceil(data.length/pps);
 	// console.log(data);
 		$('.prev').addClass('prev'+site);
 		$('.next').addClass('next'+site);
@@ -388,10 +391,10 @@ function fstreetable(data, thispage){
     rowHeights: 38,
     removeRowPlugin: true,
     // minSpareRows: 1,
-    colWidths: [120, 25,25,25,25,80, 40, 120,50,50,60,50,160,50,50, 160],
+    colWidths: [120, 25,25,25,25,80, 40, 120,50,50,60,50,160,50, 160],
     licenseKey: 'non-commercial-and-evaluation',
  
-    colHeaders: ["Date","20x","20y","5x","5y", "tag", "b", "csp",'status', "code","dbh/h高","POM","note","縮水","查舊",""],
+    colHeaders: ["Date","20x","20y","5x","5y", "tag", "b", "csp",'status', "code","dbh/h高","POM","note","縮水",""],
     columns: [
       {data: "date", dateFormat: 'YYYY-MM-DD', type: 'date', allowInvalid: false},
       {data: "qx", readOnly: true},
@@ -400,17 +403,50 @@ function fstreetable(data, thispage){
       {data: "sqy", readOnly: true},
       {data: "tag", readOnly: true},
       {data: "branch", readOnly: true},
-      {data: "csp", readOnly: true, type: 'autocomplete', source: csplist, strict: false, visibleRows: 10, allowInvalid: false,},
+      {data: "csp", readOnly: true, type: 'autocomplete', source: csplist, strict: true, visibleRows: 10, allowInvalid: false,},
       {data: "status", type: 'dropdown', source: ['', '0', '-1', '-2', '-3'], allowInvalid: false},
       {data: "code"},
-      {data: "dbh", type: 'numeric', allowInvalid: false},
+      {data: "dbh", type: 'numeric'},
 
       {data: "pom"},
       {data: "note"},
       {data: "confirm", type: 'checkbox', checkedTemplate: '1', uncheckedTemplate: ''},
-      {data: "tocheck", type: 'checkbox', checkedTemplate: '1', uncheckedTemplate: ''},
       {data: "alternotetable", renderer: "html"},
+      {data: "update_id"}
+      // {data: "alterdata", type:'handsontable', 
+      // 	handsontable:{
+			//   	// data: data2.alterdata,
+			//     // height: 320,
+			//     startRows: 1,
+			//     colHeaders: true,
+			//     // removeRowPlugin: true,
+			//     // minSpareRows: 1,
+			//     // colWidths: [25,25,25,25,80, 40, 120,70],
+			//     licenseKey: 'non-commercial-and-evaluation',
+			 
+			//     colHeaders: ["20x","20y","5x","5y", "tag", "b", "csp","原始POM"],
+			//     // colHeaders:['欄位名稱'],
+			//     columns: [
+			//       {data: "qx", type: 'numeric'},
+			//       {data: "qy", type: 'numeric'},
+			//       {data: "sqx", type: 'numeric'},
+			//       {data: "sqy", type: 'numeric'},
+			//       {data: "tag"},
+			//       {data: "b", type: 'numeric'},
+			//       {data: "csp", type: 'autocomplete', source: csplist, strict: false, visibleRows: 10, allowInvalid: false,},
+			//       {data: "pom"}
+			//     ],
+			//     currentRowClassName: 'currentRow',
+			//     // autoWrapRow: true,   //自動換行
+			//   	// manualColumnResize: true,
+
+     	// 	}
+     	// }
     ],
+    hiddenColumns: {
+    // specify columns hidden by default
+   		columns: [15],
+  	},
     currentRowClassName: 'currentRow',
     autoWrapRow: true,   //自動換行
   	manualColumnResize: true,
@@ -421,9 +457,10 @@ function fstreetable(data, thispage){
           // var curData = container.handsontable('getData')[row][10]; //column 10 is the field "sprout"
           if (container.handsontable('getData')[row][8]=='-9'){
           	cellProperties.readOnly = false; 
-          	if (col==1 || col ==2){
+          	if (col==1 || col ==2 || col == 8){
           		cellProperties.readOnly = true; 
           	}
+
           }
 
           // if (col == 11 || col==12) {            //column needs to be read only               
@@ -433,9 +470,13 @@ function fstreetable(data, thispage){
           //   }
           // }
 //note字變小
-          if (col == 12 || col==15){
+          if (col == 12 || col==14){
           	cellProperties.className = 'fs08'; 
           }
+          // if (container.handsontable('getData')[row][16]!=''){
+          // 	// let cell = $(container.getCell(row, col));
+          // 	cellProperties.className = 'text-red-500';
+          // }
 
          return cellProperties;
 
@@ -514,10 +555,13 @@ function fstreetable(data, thispage){
 		     
 		        if (res.datasavenote !=''){
 		        	$('.datasavenote').html(res.datasavenote);
+		        	// fstreetableupdate(res.data, thispage);
+		        	// console.log(thispage);
+		        	// handsontable.updateData(res.data, thispage);
 		        	// console.log(res.datasavenote);
 		        	// container.render();
 		        } 
-		        // console.log(res);
+		        console.log(res);
 		        // console.log(res.list);
 
 		      }
@@ -568,14 +612,23 @@ function pages(data, thispage, totalpage){
 			thispage=$(this).attr('thispage');
 			gopage=parseInt(thispage)-1;
 
-			fstreetableupdate(data, gopage);
+			fstreetableupdate(data, gopage, 20);
 		})
 
 		$('.next'+site).off('click').on('click', function() {
 			thispage=$(this).attr('thispage');
 			gopage=parseInt(thispage)+1;
 								// console.log(data);
-			fstreetableupdate(data, gopage);
+			fstreetableupdate(data, gopage, 20);
+
+		})
+
+		$('.showall').off('click').on('click', function() {
+								// console.log(data);
+			$('.pages').hide();
+			ppsall=data.length;
+			fstreetableupdate(data, 1, data.length);
+			// recruittable(data, emptytable, csplist);
 		})
 
 			datapage=[data, data2, thispage];
@@ -588,13 +641,15 @@ function pages(data, thispage, totalpage){
 
 
 
-function fstreetableupdate(data, thispage){
+
+function fstreetableupdate(data, thispage, pps){
+	$('.finishnote').html('');
     var site=data[0].qx+data[0].qy+data[0].sqx+data[0].sqy;
 	$('.datasavenote').html('');
 	var container = $("#datatable"+site);
 	var handsontable = container.data('handsontable');
 	// console.log(data);
-	var totalpage=Math.ceil(data.length/20);
+	var totalpage=Math.ceil(data.length/pps);
 	$('.totalnum').html(`共有 ${data.length} 筆資料`);
 
 	var data3 = (totalpage > 1) ? pages(data, thispage, totalpage)[1] : data;
@@ -609,12 +664,12 @@ function fstreetableupdate(data, thispage){
           // var curData = container.handsontable('getData')[row][10]; //column 10 is the 
           if (container.handsontable('getData')[row][8]=='-9'){
           	cellProperties.readOnly = false; 
-          	if (col==1 || col ==2){
+          	if (col==1 || col ==2 || col == 8){
           		cellProperties.readOnly = true; 
           	}
           }
 
-          if (col == 12 || col == 15){
+          if (col == 12 || col == 14){
           	cellProperties.className = 'fs08'; 
           }
          return cellProperties;
@@ -663,7 +718,7 @@ $(`button[name=recruitsave${site}]`).off();
       note: '',
       tofix: ''
     },
-    startRows: 20,
+    startRows: 30,
     colHeaders: true,
     rowHeaders: true,
     rowHeaderWidth: 25,
@@ -682,7 +737,7 @@ $(`button[name=recruitsave${site}]`).off();
       {data: "sqy", type: 'numeric', allowInvalid: false, validator: qqValidator},
       {data: "tag"},
       {data: "branch", type: 'numeric'},
-      {data: "csp", type: 'autocomplete', source: csplist, strict: false, visibleRows: 10, allowInvalid: false,},
+      {data: "csp", type: 'autocomplete', source: csplist, strict: true, visibleRows: 10, allowInvalid: false,},
       {data: "code"},
       {data: "dbh", type: 'numeric', allowInvalid: false},
       {data: "pom", type: 'numeric', allowInvalid: false},
@@ -734,7 +789,10 @@ $(`button[name=recruitsave${site}]`).off();
 		        // $('#recruittable'+res.recruit[0].trap).html('');
 				// console.log(res.recruit.data[0].trap);
 				//新增完，thispage=1
-				fstreetableupdate(res.data, 1);
+		        handsontable.updateData(res.nonsavelist);
+		        if (res.data.length !== 0){
+							fstreetableupdate(res.data, 1, ppsall);
+						}
 				// handsontable.clear();
 				// handsontable.loadData(res.temp);
 
@@ -760,6 +818,36 @@ $(`button[name=recruitsave${site}]`).off();
 	});
 
 }
+
+
+  function finish(qx, qy, entry){
+
+  	console.log(qx, qy, entry);
+        $.ajax({
+        url: `/fstreefinish/${qx}/${qy}/${entry}`,
+        type: 'get',
+        success: function (res) {
+        	// console.log(res);
+          if (res.result === 'ok') {
+            console.log('Data saved');
+            console.log(res);
+            if (res.finishnote !=''){
+              $('.finishnote').html(res.finishnote);
+            }
+          }
+          else {
+            console.log('Save error');
+          }
+        },
+        error: function () {
+          console.log('Save error2.');
+        }
+      });
+    
+  }
+
+
+///調查進度
 
 var value=[];
 
@@ -857,3 +945,6 @@ $('.canselect').click(function(){
 	// console.log(plots);
 
 }
+
+
+

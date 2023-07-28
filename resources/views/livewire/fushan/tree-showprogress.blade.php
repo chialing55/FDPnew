@@ -1,5 +1,6 @@
 @php
-$personlist=['','陳小跳', '賴德瑜', '黃彥慈', '廖珮如', '鄧永淥', '劉筱薇', '王怡雯','董力銓'];
+$personlist=['','王怡雯','黃彥慈','劉筱薇','鄧永淥', '楊知璇','陳小跳','廖珮如','董力銓','賴德瑜'];
+
 
 @endphp
 
@@ -41,7 +42,9 @@ $personlist=['','陳小跳', '賴德瑜', '黃彥慈', '廖珮如', '鄧永淥',
                 @for ($i=0; $i<count($personlist);$i++)     
                 <option value="{{$personlist[$i]}}">{{$personlist[$i]}}</option>
                 @endfor
-                </select>, <input name='person4' id='person4' type=text style='width:150px' wire:model="person4"/> </p>
+                </select>, <input name='person4' id='person4' type=text style='width:150px' wire:model="person4"/> <br>
+                (請以半形「,」分隔，並留一空格)
+            </p>
             <p>新增枝幹： <input name='new' type=text style='width:45px' wire:model="new"/> 筆 (同一天同一樣方輸入一筆合計資料)</p>
         </div>
         <div style='margin-left: 50px;'>    
@@ -113,7 +116,7 @@ $personlist=['','陳小跳', '賴德瑜', '黃彥慈', '廖珮如', '鄧永淥',
                         <td style='min-width:50px; max-width: 200px'>{{$pro['personslist']}}</td>
                         <td>{{$pro['plot_num']}}</td>
                         <td style='min-width:100px; max-width: 350px'>{{$pro['plots']}}</td>
-                        <td>{{$pro['ori_branch']+$pro['new_branch']}}</td>
+                        <td>{{$pro['ori_branch']+$pro['new_branch']}} ({{$pro['ori_branch']}}+{{$pro['new_branch']}})</td>
                         {{-- <td>{{$pro['new_branch']}}</td> --}}
                         
                     </tr>
@@ -147,34 +150,35 @@ $personlist=['','陳小跳', '賴德瑜', '黃彥慈', '廖珮如', '鄧永淥',
         <hr>
         <div style='margin:10px 0 0 0px'>
             <p style='margin:0 0 20px 0'>
-                共完成 {{$countFinishSite}} 個樣區，累計 {{($countFinishSite/625)*25}} 公頃，達 {{($countFinishSite/625)*100}} %。
+                共完成 {{number_format($countFinishSite, 2)}} 個樣區，累計 {{($countFinishSite/625)*25}} 公頃，達 {{($countFinishSite/625)*100}} %。
             </p>
             <table class='finishtable'border="1" cellpadding="1" cellspacing="0" style=''>
-                <tr>
-                    <td></td>
-                    @for($i=0;$i<25;$i++)
-                    <td style='width:25px'>{{$i}}</td>
-                    @endfor
-                </tr>
+
                 @for ($i=24;$i>-1;$i--)
                 <tr>
                     <td style='width:25px'>{{$i}}</td>
                     @for($j=0;$j<25;$j++)
                     @php 
-                    if(isset($finishSite["'".$j.$i."'"]) && $finishSite["'".$j.$i."'"]=='16'){
+                    if(isset($finishSite["'".$j."-".$i."'"]) && $finishSite["'".$j."-".$i."'"]=='16'){
                     $finishSiteClass='allfinish';
-                    } else if (isset($finishSite["'".$j.$i."'"]) && $finishSite["'".$j.$i."'"]!='16'){
+                    } else if (isset($finishSite["'".$j."-".$i."'"]) && $finishSite["'".$j."-".$i."'"]!='16'){
                     $finishSiteClass='somefinish';
                     } else {
                     $finishSiteClass='';
                     }
                     @endphp
 
-                    <td class='{{$j}}{{$i}}  {{$finishSiteClass}}'></td>
+                    <td class='{{$j}}-{{$i}}  {{$finishSiteClass}}'></td>
 
                     @endfor
                 </tr>
                 @endfor
+                                <tr>
+                    <td></td>
+                    @for($i=0;$i<25;$i++)
+                    <td style='width:25px'>{{$i}}</td>
+                    @endfor
+                </tr>
             </table>
         </div>
     </div>

@@ -30,7 +30,7 @@ class fsTreeAddButton
 
             // 生成 HTML 按鈕元素
             $button1 = "<button name='deletedata' deleteid='$escapedStemid' onclick='deleteid(\"$escapedStemid\", \"$escapedEntry\", \"$escapedThispage\")'><i class='fa-solid fa-xmark'></i></button>";
-            $button2 = "<button name='alternoteshow{$escapedStemid}'  onclick='alternote(\"$escapedStemid\", \"$escapedEntry\", \"$escapedThispage\")'><i class='fa-regular fa-note-sticky'></i></button> ";
+            $button2 = "<button name='alternoteshow{$escapedStemid}'  onclick='alternote(\"$escapedStemid\", \"$escapedEntry\", \"$escapedThispage\")' class='alternotehover'><i class='fa-regular fa-note-sticky'></i></button> ";
             $records[$q]['alternotetable']=$records[$q]['alternote'];
 
 

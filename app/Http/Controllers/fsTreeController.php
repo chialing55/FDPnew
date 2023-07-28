@@ -59,9 +59,13 @@ class fsTreeController extends Controller
             //status=0, status=-3&branch=0
             FsTreeRecord1::where('branch','!=', '0')->where('status', 'like', '-3')->update(['show'=>'0']);
             FsTreeRecord1::where('status', 'like', '0')->update(['show'=>'0']);
+
+            //分支status=-1, -2 show=0
+            FsTreeRecord1::where('status', 'like', '-1')->where('branch', '!=', '0')->update(['show'=>'0']);
+            FsTreeRecord1::where('status', 'like', '-2')->where('branch', '!=', '0')->update(['show'=>'0']);
+
             //把census4已沒有資料的(date='0000-00-00')的show=0
             FsTreeRecord1::where('date', 'like', '0000-00-00')->update(['show'=>'0']);
-            //把census4已沒有資料的(date='0000-00
 
             //選擇輸入樣區時再把census3=-1的show改為0
 
@@ -75,9 +79,6 @@ class fsTreeController extends Controller
             DB::connection('mysql')->select("INSERT INTO record2 SELECT * FROM record1");
 
          }
-
-
-
 
 
         if ($user=='no'){
@@ -195,4 +196,31 @@ class fsTreeController extends Controller
             ]);
         }
     }
+
+    public function entryprogress(Request $request, $site){
+
+        $user = $request->session()->get('user', function () {
+            return 'no';
+        });
+
+        if ($user=='no'){
+            return view('login1', [
+                'check' => 'no'
+            ]);
+        } else {
+            // echo "1";
+            //最近一次調
+
+            // print_r($user);
+            return view('pages/fushan/tree_entryprogress', [
+                'site' => $site,
+                'project' => '每木',
+                'user' => $user,
+            ]);
+        }
+    }
+
+
+
+
 }
