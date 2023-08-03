@@ -200,7 +200,7 @@ $list=0;
       @endif
     </td>{{--(最大分支數) --}}
     @if($data['tag'][0]=='G')
-    <td class="td2" style='font-size:11px'>{{$data['h1']}}+{{$data['h2']}}</td>
+    <td class="td2" style='font-size:11px'>{{$data['pom']}}+{{$data['h2']}}</td>
     @else
    <td class="td2">{{$data['dbh']}}</td>{{--如果列h1+h2，class=td4 --}}
    @endif

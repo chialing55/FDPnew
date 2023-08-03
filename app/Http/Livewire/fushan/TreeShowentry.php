@@ -61,41 +61,40 @@ class TreeShowentry extends Component
         }
 
             $records=$table::where('qx', 'like', $qx)->where('qy', 'like', $qy)->where('sqx', 'like', $sqx)->where('sqy', 'like', $sqy)->orderBy('stemid', 'asc')->get()->toArray();
+            $records_1=$table::where('qx', 'like', $qx)->where('qy', 'like', $qy)->where('sqx', 'like', $sqx)->where('sqy', 'like', $sqy)->where('date','like', '0000-00-00')->where('show', 'like', '1')->get()->toArray();
+            // dd($records);
 
-
-
-        if (!empty($records)){
-            // dd($record);
-            if ($records[0]['csp']==''){
-                // 第一次選到這個樣區時，把csp填入
+        if (count($records)>0){
+            // dd($records);
+            if (count($records_1)>0){
+                // 這個樣區有尚未輸入完成的資料
 
                 for($i=0;$i<count($records);$i++){
                     $record=$records[$i];
                     $update=[];
                     // $records[$i]['csp']=$splist[$record['spcode']];
                     $update['csp']=$splist[$record['spcode']];
-                    if ($record['status']=='-1'){
-                        // 把census3=-1的show改為0
-                        $census3=FsTreeCensus3::where('stemid', 'like', $record['stemid'])->get();
-                        if ($census3[0]['status']=='-1'){
-                            $update['show']='0';
-                            // $records[$i]['show']='0';
+                    if ($record['date']=='0000-00-00'){ //還未輸入
+                        if ($record['status']=='-1'){
+                        
+                        // 把census3=-1的show改為0 
+                            $census3=FsTreeCensus3::where('stemid', 'like', $record['stemid'])->get();
+                            if ($census3[0]['status']=='-1'){
+                                $update['show']='0';
+                                // $records[$i]['show']='0';
+                            }
                         }
 
-                        
+                        //把依據census4把code填入
+                        $census4=FsTreeCensus4::where('stemid', 'like', $record['stemid'])->get();
+                        if (count($census4)>0){
+                            if ($census4[0]['code']!=''){
+                                $update['code']=$census4[0]['code'];
+                                // $records[$i]['code']=$census4[0]['code'];
+                            }                    
+
+                        }
                     }
-
-
-
-
-                    //把依據census4把code填入
-                    $census4=FsTreeCensus4::where('stemid', 'like', $record['stemid'])->get();
-                        if ($census4[0]['code']!=''){
-                            $update['code']=$census4[0]['code'];
-                            // $records[$i]['code']=$census4[0]['code'];
-                        }                    
-
-
                     $table::where('stemid', 'like', $record['stemid'])->update($update);
                 }
             }
@@ -104,7 +103,7 @@ class TreeShowentry extends Component
 
             $records1=$table::where('qx', 'like', $qx)->where('qy', 'like', $qy)->where('sqx', 'like', $sqx)->where('sqy', 'like', $sqy)->where('show', 'like', '1')->orderBy('tag', 'asc')->orderBy('branch', 'asc')->get()->toArray();
 
-
+            // dd($records1);
             // for($i=0;$i<count($records);$i++){
             //     if ($records[$i]['alternote']!=''){
             //         $alterdata=['qx'=>'', 'qy' => '', 'sqx'=>'', 'sqy' => '', 'tag'=>'', 'b'=>'', 'csp'=>'', 'pom'=>''];
@@ -116,10 +115,13 @@ class TreeShowentry extends Component
             // $result=$records;
 
             //新增樹為刪除按鍵，其他加入特殊修改按鍵
+            if (count($records1)>0){
 
-            $ob_redata = new fsTreeAddButton;
-            $result=$ob_redata->addbutton($records1, $this->entry);
-
+                $ob_redata = new fsTreeAddButton;
+                $result=$ob_redata->addbutton($records1, $this->entry);
+            } else {
+                $result='無';
+            }
             //拆解alternote
 
 

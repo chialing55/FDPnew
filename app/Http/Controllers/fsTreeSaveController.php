@@ -271,7 +271,7 @@ class fsTreeSaveController extends Controller
                 }
                 $recruitsavenote=$recruitsavenote."<br>第".($i+1).'筆資料已儲存';
                     $nonsavelist[$i]['qx']=$data[$i]['qx'];
-                    $nonsavelist[$i]['qy']=$data[$i]['qx'];
+                    $nonsavelist[$i]['qy']=$data[$i]['qy'];
                     $nonsavelist[$i]['branch']='0';
                     $nonsavelist[$i]['pom']='1.3';
                     $nonsavelist[$i]['date']='';

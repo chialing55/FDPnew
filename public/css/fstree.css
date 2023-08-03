@@ -167,6 +167,17 @@ border: 1px solid  #A568FF;
 	margin: 20px 0px;
 }
 
+.fstreeStemidtable{
+	margin: 20px 20px;
+}
+
+.fstreeStemidtable table th{
+	text-align: center;
+}
+
+.fstreeStemidtable table tbody th{
+	font-weight: 500;
+}
 
 .cannotselect {
 	background-color: #ccc;
@@ -226,3 +237,6 @@ border: 1px solid  #A568FF;
 	z-index: 100;
 }
 
+.dataviewerdownload span{
+	margin-left: 10px;
+}
