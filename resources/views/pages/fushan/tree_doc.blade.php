@@ -58,7 +58,9 @@ $(function() {
             <ol>
               <li class='text_note_li ' ><a href='https://bit.ly/3psIquc' target="_blank">每木調查工作日誌</a></li>
               <li lass='text_note_li '><a href='https://bit.ly/3YcMFY4' target="_blank">每木調查除錯進度統整表</a></li>
+              <li lass='text_note_li '><a href='https://bit.ly/3QnjkYM' target="_blank">標本鑑定清單</a></li>
               <li lass='text_note_li '><a href='https://forms.gle/FKDWx2rmLRyE8ED1A' target="_blank">輸入系統錯誤表單</a></li>
+
               {{-- 連結google表單 --}}
             </ol>
     </div>

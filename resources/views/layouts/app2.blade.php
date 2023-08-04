@@ -1,3 +1,6 @@
+@php
+date_default_timezone_set("Asia/Taipei");
+@endphp
 <!DOCTYPE html>
 <html lang="tw">
 <head>

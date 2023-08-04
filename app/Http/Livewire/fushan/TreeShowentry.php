@@ -103,6 +103,8 @@ class TreeShowentry extends Component
 
             $records1=$table::where('qx', 'like', $qx)->where('qy', 'like', $qy)->where('sqx', 'like', $sqx)->where('sqy', 'like', $sqy)->where('show', 'like', '1')->orderBy('tag', 'asc')->orderBy('branch', 'asc')->get()->toArray();
 
+
+
             // dd($records1);
             // for($i=0;$i<count($records);$i++){
             //     if ($records[$i]['alternote']!=''){
@@ -116,6 +118,12 @@ class TreeShowentry extends Component
 
             //新增樹為刪除按鍵，其他加入特殊修改按鍵
             if (count($records1)>0){
+
+                for($i=0;$i<count($records1);$i++){
+                    if ($records1[$i]['tag'][0]=='G'){
+                        $records1[$i]['dbh']=$records1[$i]['h2'];
+                    }
+                }
 
                 $ob_redata = new fsTreeAddButton;
                 $result=$ob_redata->addbutton($records1, $this->entry);

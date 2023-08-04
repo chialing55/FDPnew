@@ -81,6 +81,7 @@ class fsTreeSaveController extends Controller
                 if ($data[$i]['stemid'][0]=='G'){
                     $data[$i]['h2']=$data[$i]['dbh'];
                     $data[$i]['dbh']='0';
+                    // $data[$i]['h1']=$data[$i]['pom'];
                 }
             // 8.1 新增樹種更改中文名時，需要spcode
                 if ($data[$i]['status']=='-9'){

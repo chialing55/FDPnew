@@ -463,6 +463,7 @@ $('.finishnote').html();
 
           }
 
+
           // if (col == 11 || col==12) {            //column needs to be read only               
           //  //if status is Active
 		// 	if (curData=== 'TRUE') { 

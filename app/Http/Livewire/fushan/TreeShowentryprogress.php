@@ -25,6 +25,7 @@ class TreeShowentryprogress extends Component
 
     public function mount(){
 
+//輸入完成表
         $tables=FsTreeEntrycom::get()->toArray();
         $countFinishSite1=0;
         $countFinishSite2=0;
@@ -51,7 +52,7 @@ class TreeShowentryprogress extends Component
             $userid[$names[$i]['id2']]=$names[$i]['name'];
         }
 
-        
+//助理進度表
 
 
         $table1s=FsTreeRecord1::select('update_id', DB::raw('LEFT(updated_at, 10) AS date1'), DB::raw('count(stemid) as pps'))->where('date', 'not like', '0000-00-00')->groupBy('update_id', 'date1')->orderByDesc('date1')->get()->toArray();
@@ -64,6 +65,8 @@ class TreeShowentryprogress extends Component
             }
             $tableall[$table1s[$i]['date1']][$table1s[$i]['update_id']]=$table1s[$i];
         }
+
+        // dd($tableall);
         $table2s=FsTreeRecord2::select('update_id', DB::raw('LEFT(updated_at, 10) AS date1'), DB::raw('count(stemid) as pps'))->where('date', 'not like', '0000-00-00')->groupBy('update_id', 'date1')->get()->toArray();
 
         if (count($table2s)>0){
