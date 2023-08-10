@@ -113,7 +113,8 @@ class fsTreePDFController extends Controller
         // echo count($treedatas)."<br>";
         // echo $totalnum."<br>";
 
-        $totalpage=ceil(($totalnum+16)/39);
+        //每行約0.6cm，(1,1)那一行約0.9cm，0.9*16(個樣區行)/0.6=24
+        $totalpage=ceil(($totalnum+24)/39);
         // print_r($splist);
         // echo $totalpage;
             
@@ -170,6 +171,8 @@ class fsTreePDFController extends Controller
             }
 
     }
+
+
 
 
 }

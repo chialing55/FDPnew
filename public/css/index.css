@@ -255,6 +255,24 @@
 }
 
 
+.alternotehover {
+    position: relative;
+}
+
+.alternotehover:hover::before {
+	position: absolute;
+	top: 0px;
+	left: 35px;
+	font-size: 0.8em;
+	content: '請先儲存輸入資料';
+	background-color: lightyellow;
+	border-radius: 5px;
+	padding: 5px;
+	z-index: 100;
+}
+
+
+
 
 
 .text_box {

@@ -59,6 +59,7 @@ Route::get('/{site}/{project}', function($site, $project){
 //seedling download record pdf
 //
 Route::get('/fsseedling-record-pdf/{start}/{end}', [App\Http\Controllers\fsSeedlingPDFController::class, 'record']);
+Route::get('/fsseedling-compare-pdf', [App\Http\Controllers\fsSeedlingPDFController::class, 'compare']);
 
 Auth::routes();
 
@@ -128,10 +129,9 @@ Route::post('/fsseedlingsaveslroll/{entry}/{trap}', [App\Http\Controllers\fsSeed
 Route::get('/fsseedlingdeletedata/{tag}/{entry}/{thispage}', [App\Http\Controllers\fsSeedlingSaveController::class, 'deletedata'])->name('deletedata');
 Route::get('/fsseedlingdeleteslroll/{tag}/{id}/{entry}/{trap}', [App\Http\Controllers\fsSeedlingSaveController::class, 'deleteslroll'])->name('deleteslroll');
 Route::get('/fsseedlingaddalternote/{tag}/{entry}/{thispage}', [App\Http\Controllers\fsSeedlingAlternote::class, 'alternote']);
-
 Route::post('/fsseedlingsavealternote', [App\Http\Controllers\fsSeedlingSaveController::class, 'savealternote']);
 Route::get('/fsseedlingdeletealter/{stemid}/{entry}/{thispage}', [App\Http\Controllers\fsSeedlingSaveController::class, 'deletealter']);
-
+Route::get('/fsseedlingfinish/{entry}/{test}', [App\Http\Controllers\fsSeedlingSaveController::class, 'finishnote']);
 
 
 //檔案最新更新日期

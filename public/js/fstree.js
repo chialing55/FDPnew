@@ -411,7 +411,7 @@ $('.finishnote').html();
       {data: "pom"},
       {data: "note"},
       {data: "confirm", type: 'checkbox', checkedTemplate: '1', uncheckedTemplate: ''},
-      {data: "alternotetable", renderer: "html"},
+      {data: "alternotetable", renderer: "html", readOnly: true},
       {data: "update_id"}
       // {data: "alterdata", type:'handsontable', 
       // 	handsontable:{

@@ -42,15 +42,18 @@ class SeedlingImport extends Component
         // dd($seedlingkey);
 
         $s_slrecord=FsSeedlingSlrecord1::all()->toArray();
+        $censusY=$s_slrecord[0]['year'];
+        $censusM=str_pad($s_slrecord[0]['month'], 2, '0', STR_PAD_LEFT);
 
         foreach($s_slrecord as $slrecord){
             $add=[];
+            $slrecord['id']='0';
 
             for($i=0;$i<count($seedlingkey);$i++){
-                $add[$seedlingkey[$k]]=$slrecord[$seedlingkey[$k]];
+                $add[$seedlingkey[$i]]=$slrecord[$seedlingkey[$i]];
             }
 
-           // $insert=FsSeedlingData::insert($add);
+           $insert=FsSeedlingData::insert($add);
         }
 
 //cov
@@ -60,26 +63,31 @@ class SeedlingImport extends Component
 
         foreach($s_slcov as $slcov){
             $add=[];
+            $slcov['id']='0';
 
             for($i=0;$i<count($covkey);$i++){
-                $add[$covkey[$k]]=$slcov[$covkey[$k]];
+                $add[$covkey[$i]]=$slcov[$covkey[$i]];
             }
 
-           // $insert=FsSeedlingCov::insert($add);
+           $insert=FsSeedlingCov::insert($add);
         }        
+
 
 //update_base
 
-        $s_slbase=DB::connection('mysql3')->select('distinct mtag, trap, plot, x, y from slrecord1');
+        $s_slbase=DB::connection('mysql3')->select('select distinct mtag, trap, plot, x, y from slrecord1');
         $s_slbase=array_map(function ($value) { return (array)$value; }, $s_slbase);
 
         foreach($s_slbase as $slbase){
             $updatelist=[];
             $s_base=FsSeedlingBase::where('mtag', 'like', $slbase['mtag'])->get()->toArray();
-            if (!empty($s_base)){  //有舊資料
+            if (count($s_base)>0){  //有舊資料
+                // dd($s_base[0]);
                 foreach ($s_base[0] as $key => $value){
+                    // dd($key, $value);
                     if ($key !='id' && $key !='updated_at' && $key !='update_id'){
-                        if ($s_base[0][$key]!=$slbase[$key]){
+                        // dd($key, $value);
+                        if ($value!=$slbase[$key]){
                             $updatelist[$key]=$value;
                         }
                     }
@@ -92,18 +100,12 @@ class SeedlingImport extends Component
                 foreach($slbase as $key => $value){
                     $insertlist[$key]=$value;
                 }
-                $insertlist['id']='';
+                $insertlist['id']='0';
                 $insertlist['update_id']=$this->user;
                 $insertlist['updated_at']=date("Y-m-d H:i:s");
-
                 $insert=FsSeedlingBase::insert($insertlist);
-
-
             }
         }
-
-
-//將cov1, slrecord1, slroll1改名
 
 
         $this->importnote="資料已匯入完成";

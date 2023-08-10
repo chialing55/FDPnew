@@ -490,7 +490,7 @@ class fsTreeSaveController extends Controller
         $table = $this->getTableInstance($entry);
         $pass='1';
         $finishnote='';
-        $data = $table::where('qx', 'like', $qx)->where('qy', 'like', $qy)->get();
+        $data = $table::where('qx', 'like', $qx)->where('qy', 'like', $qy)->get()->toArray();
 
         //如果沒有csp，先補上
         for($i=0;$i<count($data);$i++){

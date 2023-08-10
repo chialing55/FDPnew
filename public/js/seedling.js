@@ -269,7 +269,7 @@ function fsseedlingtable(data, maxid, thispage){
     // minSpareRows: 1,
     colWidths: [120, 40, 40, 70, 120,50,50,50,40,40,60,35,35, 160,160],
     licenseKey: 'non-commercial-and-evaluation',
-    colHeaders: ["Date", "Trap", "Plot", "Tag", "種類", "長度","子葉","真葉","狀態","新舊","萌糵","X","Y", "Note","特殊修改"],
+    colHeaders: ["Date", "Trap", "Plot", "Tag", "種類", "長度","子葉","真葉","狀態","新舊","萌櫱","X","Y", "Note","特殊修改"],
     columns: [
       {data: "date", dateFormat: 'YYYY-MM-DD', type: 'date', allowInvalid: false},
       {data: "trap", readOnly: true},
@@ -529,7 +529,8 @@ function fsseedlingtableupdate(data, maxid, thispage){
 function recruittable(data, emptytable){
 
 // console.log(entry);
-
+  var trap=data[0].trap;
+  $(`button[name=recruitsave${trap}]`).off();
   var container = $("#recruittable"+data[0].trap);
   var parent = container.parent();
   // var emptytable=emptytable;
@@ -550,7 +551,17 @@ function recruittable(data, emptytable){
     dataSchema: {
       trap: data[0].trap,
       recruit: 'R',
-      sprout: 'FALSE'
+      sprout: 'FALSE',
+      date: '',
+      plot:'',
+      tag:'',
+      csp:'',
+      ht:'',
+      cotno:'',
+      leafno:'',
+      x:'',
+      y:'',
+      note:''
     },
     startRows: 20,
     colHeaders: true,
@@ -561,7 +572,7 @@ function recruittable(data, emptytable){
     colWidths: [120, 40, 40, 70, 120,50,50,50,40,90,35,35, 160],
     rowHeights: 35,
     licenseKey: 'non-commercial-and-evaluation',
-    colHeaders: ["Date", "Trap", "Plot", "Tag", "種類", "長度","子葉","真葉","新舊","萌糵","X","Y", "Note"],
+    colHeaders: ["Date", "Trap", "Plot", "Tag", "種類", "長度","子葉","真葉","新舊","萌櫱","X","Y", "Note"],
     columns: [
       {data: "date", dateFormat: 'YYYY-MM-DD', type: 'date', allowInvalid: false},
       {data: "trap", type: 'numeric', allowInvalid: false},
@@ -623,7 +634,10 @@ function recruittable(data, emptytable){
 		        // $('#recruittable'+res.recruit[0].trap).html('');
 				// console.log(res.recruit.data[0].trap);
 				//新增完，thispage=1
-				fsseedlingtableupdate(res.recruit, res.maxid, 1);
+        handsontable.updateData(res.nonsavelist);
+        if (res.recruit.length != 0){
+				  fsseedlingtableupdate(res.recruit, res.maxid, 1);
+        }
 				// handsontable.clear();
 				// handsontable.loadData(res.temp);
 
@@ -648,7 +662,7 @@ function recruittable(data, emptytable){
 		handsontable.updateData(emptytable);
 	});
 
-}
+} 
 
   function deleteroll(tag, id, entry, trap){
     
@@ -797,7 +811,7 @@ function alternote(tag, entry, thispage) {
 	// console.log(tag);
 	$('.altersavenote').html('');
 
-	var posX = $("button[name='alternoteshow"+tag+"']").offset().left;
+	  var posX = $("button[name='alternoteshow"+tag+"']").offset().left;
     var posY = $("button[name='alternoteshow"+tag+"']").offset().top;
     console.log(posX+", "+posY);
 
@@ -960,4 +974,30 @@ function alternotetable(alterdata, tag, entry, thispage){
 		    }
 		  });
 	});
+}
+
+
+function finish(entry){
+    console.log(entry);
+        $.ajax({
+        url: `/fsseedlingfinish/${entry}/text`,
+        type: 'get',
+        success: function (res) {
+          // console.log(res);
+          if (res.result === 'ok') {
+            console.log('Data saved');
+            console.log(res);
+            if (res.finishnote !=''){
+              $('.finishnote').html(res.finishnote);
+            }
+          }
+          else {
+            console.log('Save error');
+            // console.log(res);
+          }
+        },
+        error: function () {
+          console.log('Save error2.');
+        }
+      });
 }

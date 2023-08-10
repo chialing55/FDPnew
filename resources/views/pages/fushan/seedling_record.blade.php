@@ -123,9 +123,9 @@ $list=0;
     <thead class='table-header'>
      
       <td class="table-left table-header" style='width:30px'>Date</td>
-        <td class="table-header" style='width:30px'>T-P</td>
+        <td class="table-header" style='width:35px'>T-P</td>
         <td class="table-header" style='width:50px'>Tag</td>
-        <td class="table-header" style='width:80px'>種類</td>
+        <td class="table-header" style='width:75px'>種類</td>
         <td class="table-header" style='width:35px'>長度</td>
         <td class="table-header" style='width:35px'>葉片數</td>
         <td class="table-header table-left " style='width:35px'>長度</td>
@@ -157,11 +157,9 @@ $list=0;
     <td class="table-yellow talble-left"></td>
       <td class="table-yellow">{{$plot[$k]}}</td>
       <td class="table-yellow" colspan="3">覆蓋度</td>
-      <td class="table-yellow" colspan="2">樣區上方光度</td>
-      <td class="table-yellow" colspan="2">U&nbsp;&nbsp;&nbsp;&nbsp;I&nbsp;&nbsp;&nbsp;&nbsp;G   </td>
-      <td class="table-yellow" ></td>
-    <td class="table-yellow" ></td>
-    <td class="table-yellow talble-right" ></td>
+      <td class="table-yellow talble-right" colspan="7">樣區上方光度
+      &nbsp;&nbsp;&nbsp;&nbsp;U&nbsp;&nbsp;&nbsp;&nbsp;I&nbsp;&nbsp;&nbsp;&nbsp;G   </td>
+
       <td class=""></td>
       <td class=""></td>
       <td class=""></td>

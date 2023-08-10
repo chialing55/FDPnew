@@ -8,6 +8,6 @@ use Illuminate\Database\Eloquent\Model;
 class FsSeedlingBase extends Model
 {
     use HasFactory;
-    protected $table = "seedling";
+    protected $table = "base";
     protected $connection = 'mysql3';
 }

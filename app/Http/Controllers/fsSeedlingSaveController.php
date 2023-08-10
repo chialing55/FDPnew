@@ -48,6 +48,56 @@ class fsSeedlingSaveController extends Controller
         }
     }
 
+    public function finishnote(Request $request, $entry, $text){
+        $user = $request->session()->get('user', function () {
+            return view('login1', [
+            'check' => 'no'
+            ]);
+        });
+
+
+        $tablecov = $this->getTableInstanceCov($entry);
+        $table = $this->getTableInstance($entry);
+        $pass='1';
+        $finishnote='';
+        $cov = $tablecov::query()->where('date', 'like', '0000-00-00')->get();
+        if (count($cov)!='0'){
+            foreach($cov as $temp){
+                $traplist[]=$temp['trap'];
+            }
+            $traplist=array_unique($traplist);
+            sort($traplist);
+            $string = implode(", ", $traplist);
+            $finishnote='有資料未輸入完成 ['.$string.']';
+        } else {
+
+
+            $data = $table::query()->where('date', 'like', '0000-00-00')->get();
+            if (count($data)!='0'){
+                foreach($data as $temp){
+                    $traplist[]=$temp['trap'];
+                }
+                $traplist=array_unique($traplist);
+                sort($traplist);
+                $string = implode(", ", $traplist);
+                $finishnote='有資料未輸入完成 ['.$string.']';
+            }
+
+        }
+
+        if ($finishnote==''){$finishnote='輸入完成';}
+
+        // echo $user;
+        return [
+            'result' => 'ok',
+            'pass' => $pass,
+            // 'test'=> $splist,
+
+            'finishnote' => $finishnote
+        ];
+
+    }
+
     public function savecov(Request $request){
 
         $data_all = request()->all();
@@ -67,7 +117,7 @@ class fsSeedlingSaveController extends Controller
         for($i=0; $i<count($savecov);$i++){
 
             if ($savecov[$i]['date']=='0000-00-00'){
-                $covsavenote='調查日期有誤';
+                $covsavenote='需有日期資料';
                 break;
             }
 
@@ -137,19 +187,31 @@ class fsSeedlingSaveController extends Controller
                 if (!$slrecord->isEmpty()){
 
                     if ($data[$i]['ht']=='-4' && $slrecord[0]['ht']!='-4'){
-                        $datasavenote=$data[$i]['tag']." 植株存活但萌櫱苗死亡，萌糵苗記為 -7, status 為 A";
+                        $datasavenote=$data[$i]['tag']." 植株存活但萌櫱苗死亡，萌櫱苗記為 -7, status 為 A";
                     break;
                     }
 
                     if ($data[$i]['ht']=='-6' && $slrecord[0]['ht']!='-6'){
-                        $datasavenote=$data[$i]['tag']." 植株存活但萌櫱苗消失，萌糵苗記為 -7, status 為 A";
+                        $datasavenote=$data[$i]['tag']." 植株存活但萌櫱苗消失，萌櫱苗記為 -7, status 為 A";
                     break;
                     }
 
                     if ($data[$i]['status']!=$slrecord[0]['status']){
-                        $datasavenote=$data[$i]['tag']." 萌糵苗的status需與主幹相同 (若該植株尚有分支存活，status 皆為 A)";
+                        $datasavenote=$data[$i]['tag']." 萌櫱苗的 status 需與主幹相同 (若該植株尚有分支存活，status 皆為 A)";
                     break;
                     }
+
+                    if ($data[$i]['csp']!=$slrecord[0]['csp']){
+                        $datasavenote=$data[$i]['tag']." 萌櫱苗的 csp 需與主幹相同 ";
+                    break;
+                    }
+
+                    if ($data[$i]['trap']!=$slrecord[0]['trap'] || $data[$i]['plot']!=$slrecord[0]['plot']){
+                        $datasavenote=$data[$i]['tag']." 萌櫱苗的樣區位置需與主幹相同 ";
+                    break;
+                    }
+
+
                 }
             }
 
@@ -212,7 +274,13 @@ class fsSeedlingSaveController extends Controller
                 $data[$i]['cotno']='0';
             }
 
-
+//位置資料   
+            if (isset($data[$i]['x'])){
+                if ($data[$i]['x'] >100 || $data[$i]['y'] >100){
+                    $datasavenote=$data[$i]['tag']." 座標不得大於100";
+                    break;
+                }
+            }
 
 //修改tag  //如果是修改新增小苗的號碼，則mtag也要一起修改
             
@@ -223,27 +291,21 @@ class fsSeedlingSaveController extends Controller
                 $mtag=explode('.',trim($data[$i]['tag']));
                 $data[$i]['mtag'] = $mtag[0];
             }
-//如果原本的status是N，後來不是N，更新alternote
+//如果原本的status是N，後來不是N (A, G, D)，更新alternote
         //echo 'recruit: '.$data[$i]['recruit'];
             if ($slrecord[0]['status'] == 'N' && $data[$i]['status'] !='N'){
 
                 if ($data[$i]['alternote']!=''){
                     $alterdata = json_decode($result[0]['alternote'], true);  //把json轉array
                 }
-                $alterdata['新舊']="A";
+                $alterdata['狀態']=$data[$i]['status'];
 
                 $data[$i]['alternote'] = json_encode($alterdata, JSON_UNESCAPED_UNICODE);  //把array轉json
 
 
             }
 
-//位置資料   
-            if (isset($data[$i]['x'])){
-                if ($data[$i]['x'] >100 || $data[$i]['y'] >100){
-                    $datasavenote=$data[$i]['tag']." 座標不得大於100";
-                    break;
-                }
-            }
+
 
 
 
@@ -296,6 +358,7 @@ class fsSeedlingSaveController extends Controller
             ]);
         });
         $recruitsavenote='';
+        $nonsavelist=[];
 
         $table = $this->getTableInstance($entry);
 
@@ -306,69 +369,80 @@ class fsSeedlingSaveController extends Controller
         $insertkey='';
         $insertvalue='';
         $insert1='';
+        
 
-            if (!isset($recruit[$i]['date']) ) {
+            if ($recruit[$i]['date']=='' ) {
                 // $recruitsavenote = '資料不完整';
-                break;
+                $nonsavelist[$i]=$recruit[$i]; 
+                continue;
             }
 
-            if (!isset($recruit[$i]['tag'])){
-                break;
+            if ($recruit[$i]['tag']==''){
+                $nonsavelist[$i]=$recruit[$i]; 
+                continue;
             } else {
                 $recruit[$i]['tag']=strtoupper($recruit[$i]['tag']); //轉為大寫
 
-                if (!isset($recruit[$i]['plot']) || !isset($recruit[$i]['csp']) || !isset($recruit[$i]['ht']) || !isset($recruit[$i]['leafno'])){
-                    $recruitsavenote = $recruit[$i]['tag'].' 資料不完整';
-                    break;
+                if ($recruit[$i]['plot']=='' || $recruit[$i]['csp']=='' || $recruit[$i]['ht']=='' || $recruit[$i]['leafno']==''){
+                    $recruitsavenote = $recruitsavenote."<br>第".($i+1).'筆資料 資料不完整';
+                    $nonsavelist[$i]=$recruit[$i]; 
+                    continue;
                 }
-                if (!isset($recruit[$i]['cotno'])){
+                if ($recruit[$i]['cotno']==''){
                     $recruit[$i]['cotno']=0;
                 }
 
 //重號檢查
                 $seedling=FsSeedlingdata::where('tag', 'like', $recruit[$i]['tag'])->get();
                 if (!$seedling->isEmpty()){
-                    $recruitsavenote = $recruit[$i]['tag']. '重號';
-                    break;
+                    $recruitsavenote = $recruitsavenote."<br>第".($i+1).'筆資料 重號';
+                    $nonsavelist[$i]=$recruit[$i]; 
+                    continue;
                 } else {
                     
                     $seedling2=$table::where('tag', 'like', $recruit[$i]['tag'])->get();
 
                     if (!$seedling2->isEmpty()){
-                        $recruitsavenote = $recruit[$i]['tag']. '重號或已輸入';
-                        break;
+                        $recruitsavenote = $recruitsavenote."<br>第".($i+1).'筆資料 重號或已輸入';
+                        $nonsavelist[$i]=$recruit[$i]; 
+                        continue;
                     }                    
                 }
                 $mtag=explode('.', $recruit[$i]['tag']);
                 $recruit[$i]['mtag']=$mtag[0];
 
-                if (isset($mtag[1])){  //萌糵
+                if (isset($mtag[1])){  //萌櫱
                     if ($recruit[$i]['sprout']=='FALSE'){
-                        $recruitsavenote = $recruit[$i]['tag']. '萌糵狀態錯誤，請確認';
-                        break;
+                        $recruitsavenote = $recruitsavenote."<br>第".($i+1).'筆資料 萌櫱狀態錯誤，請確認';
+                        $nonsavelist[$i]=$recruit[$i]; 
+                        continue;
                     }
 
                     if ($recruit[$i]['cotno']>0){
-                        $recruitsavenote = $recruit[$i]['tag']. '萌糵苗不會有子葉，請確認';
-                        break;
+                        $recruitsavenote = $recruitsavenote."<br>第".($i+1).'筆資料 萌櫱苗不會有子葉，請確認';
+                        $nonsavelist[$i]=$recruit[$i]; 
+                        continue;
                     }
                 }
 
 
                 if ($recruit[$i]['ht']==0 ){
-                    $recruitsavenote= $recruit[$i]['tag'].' 長度不得為 0';
-                    break;
+                    $recruitsavenote= $recruitsavenote."<br>第".($i+1).'筆資料 長度不得為 0';
+                    $nonsavelist[$i]=$recruit[$i]; 
+                    continue;
                 } else if ($recruit[$i]['ht']<0){
-                    if ($recruit[$i]['cotno']!=$recruit[$i]['ht'] && $recruit[$i]['leafno'] !=$recruit[$i]['ht']){
-                        $recruitsavenote= $recruit[$i]['tag'].' 長度 < 0，子葉數與葉片數需與長度相同';
-                        break;
+                    if ($recruit[$i]['cotno']!=$recruit[$i]['ht'] || $recruit[$i]['leafno'] !=$recruit[$i]['ht']){
+                        $recruitsavenote= $recruitsavenote."<br>第".($i+1).'筆資料 長度 < 0，子葉數與葉片數需與長度相同';
+                        $nonsavelist[$i]=$recruit[$i]; 
+                        continue;
                     }
                 }
 
                  
                 if ($recruit[$i]['cotno']>2){
-                    $recruitsavenote= $recruit[$i]['tag'].' 子葉數不得 > 2';
-                    break;
+                    $recruitsavenote= $recruitsavenote."<br>第".($i+1).'筆資料 子葉數不得 > 2';
+                    $nonsavelist[$i]=$recruit[$i]; 
+                    continue;
                 }
 
                 if ($recruit[$i]['sprout']=='TRUE'){
@@ -381,27 +455,60 @@ class fsSeedlingSaveController extends Controller
 
                     if (!$sprout->isEmpty()){
                         if ($sprout[0]['status']!='A'){
-                            $recruit[$i]['alternote']='主幹狀態不為A，請確認。';
-                            $recruitsavenote=$recruitsavenote.$recruit[$i]['tag']."主幹狀態不為A，請確認。"."<br>";
+                            // $recruit[$i]['alternote']='主幹狀態不為A，請確認。';
+                            $recruitsavenote=$recruitsavenote."<br>第".($i+1)."筆資料 主幹狀態不為 A，請確認。<br>";
+                            $nonsavelist[$i]=$recruit[$i]; 
+                            continue;
+
                         }
+
+                        if ($recruit[$i]['csp']!=$sprout[0]['csp']){
+                            $recruitsavenote=$recruitsavenote."<br>第".($i+1)."筆資料 萌櫱苗與主幹種類不同，請確認。<br>";
+                            $nonsavelist[$i]=$recruit[$i]; 
+                            continue; 
+                        }
+
+                        if ($recruit[$i]['trap']!=$sprout[0]['trap'] || $recruit[$i]['plot']!=$sprout[0]['plot']){
+                            $recruitsavenote=$recruitsavenote."<br>第".($i+1)."筆資料 萌櫱苗與主幹的樣區位置不同，請確認。<br>";
+                            $nonsavelist[$i]=$recruit[$i]; 
+                            continue; 
+                        }
+
                     } else {
-                        $recruit[$i]['alternote']='未有主幹資料，請確認。';
-                        $recruitsavenote=$recruitsavenote.$recruit[$i]['tag']."未有主幹資料，請確認。<br>";
+                        // $recruit[$i]['alternote']='未有主幹資料，請確認。';
+                        $recruitsavenote=$recruitsavenote."<br>第".($i+1)."筆資料 未有主幹資料，請確認。或請管理員加入資料。<br>";
+                        $nonsavelist[$i]=$recruit[$i]; 
+                        continue;
                     }
 
                 }
 
-                if (!isset( $recruit[$i]['x'])){
-                    $recruit[$i]['x']='0';
+                if ($recruit[$i]['x']==''){
+                    if ($recruit[$i]['sprout']!='TRUE'){
+                        $recruitsavenote= $recruitsavenote."<br>第".($i+1).'筆資料 需有座標';
+                        $nonsavelist[$i]=$recruit[$i]; 
+                        continue;
+                    } else {
+                        $recruit[$i]['x']='0';
+                    }
+                    
                 } else if  ($recruit[$i]['x']>100 || $recruit[$i]['x']<0) {
-                    $recruitsavenote= $recruit[$i]['tag'].' 座標不得大於100';
-                    break;
+                    $recruitsavenote= $recruitsavenote."<br>第".($i+1).'筆資料 座標不得 > 100 或 < 0';
+                    $nonsavelist[$i]=$recruit[$i]; 
+                    continue;
                 }
-                if (!isset( $recruit[$i]['y'])){
-                    $recruit[$i]['y']='0';
+                if ($recruit[$i]['y']==''){
+                    if ($recruit[$i]['sprout']!='TRUE'){
+                        $recruitsavenote= $recruitsavenote."<br>第".($i+1).'筆資料 需有座標';
+                        $nonsavelist[$i]=$recruit[$i]; 
+                        continue;
+                    } else {
+                        $recruit[$i]['y']='0';
+                    }
                 } else if  ($recruit[$i]['y']>100 || $recruit[$i]['y']<0) {
-                    $recruitsavenote= $recruit[$i]['tag'].' 座標不得大於100';
-                    break;
+                    $recruitsavenote= $recruitsavenote."<br>第".($i+1).'筆資料 座標不得 > 100 或 < 0';
+                    $nonsavelist[$i]=$recruit[$i]; 
+                    continue;
                 }
 
 //補資料
@@ -433,11 +540,24 @@ class fsSeedlingSaveController extends Controller
                         // $insertvalue=$insertvalue."'".trim($value)."',";
 
                 }
+                $nonsavelist[$i]['date']='';
+                $nonsavelist[$i]['trap']=$recruit[$i]['trap'];
+                $nonsavelist[$i]['recruit']='R';
+                $nonsavelist[$i]['sprout']='FALSE';
+                $nonsavelist[$i]['tag']='';
+                $nonsavelist[$i]['csp']='';
+                $nonsavelist[$i]['ht']='';
+                $nonsavelist[$i]['cotno']='';
+                $nonsavelist[$i]['leafno']='';
+                $nonsavelist[$i]['x']='';
+                $nonsavelist[$i]['y']='';
+                $nonsavelist[$i]['note']='';
+
 
 
                 $table::insert($insert2);
 
-                $recruitsavenote=$recruitsavenote.$recruit[$i]['tag']." 資料已儲存<br>";
+                $recruitsavenote=$recruitsavenote."<br>第".($i+1).'筆資料已儲存';
 
             }  //來自 tag
         }
@@ -460,6 +580,7 @@ class fsSeedlingSaveController extends Controller
             // 'data' => $data,
             'recruit' => $redata,
             'maxid' => $maxid,
+            'nonsavelist' => $nonsavelist,
             // 'temp' => $temp,
             'recruitsavenote' => $recruitsavenote
             // 'insert' => $insert1
@@ -793,5 +914,8 @@ class fsSeedlingSaveController extends Controller
 
 
     }
+
+
+
 
 }

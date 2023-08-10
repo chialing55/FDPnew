@@ -340,6 +340,18 @@ button:-webkit-details-marker {
   transition-duration: 0.1s;
 }
 
+.rollbutton{
+  background-color: lightsteelblue;
+/*  color: white;*/
+  letter-spacing: 1px;
+}
+
+.rollbutton:hover {
+  background-color: #dadcdf;
+  text-decoration: none;
+  transition-duration: 0.1s;
+}
+
 .finishbutton{
   background-color: lightcoral;
 /*  color: white;*/

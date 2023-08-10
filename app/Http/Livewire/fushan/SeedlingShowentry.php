@@ -99,12 +99,12 @@ class SeedlingShowentry extends Component
 
             $this->entrynote='請從第 '.$firsttrap.' 個樣站開始輸入';
             // $this->sustrap=$slrecord[0]['trap'];
-            $this->selectTrap=$firsttrap;
+            // $this->selectTrap=$firsttrap;
 
         } else {
 
             $this->entrynote='第'.$this->entry.'次輸入已完成。 若以完成第'.$entryother.'次輸入，可進行資料比對。';
-            $this->selectTrap='1';
+            // $this->selectTrap='1';
         }
 
         // dd($this->selectTrap);
@@ -187,9 +187,18 @@ class SeedlingShowentry extends Component
         $this->seedlingsavenote='';
 //recruittable
         for($k=0;$k<20;$k++){
+            $emptytable[$k]['date']='';
             $emptytable[$k]['trap']=$selectTrap;
             $emptytable[$k]['recruit']='R';
             $emptytable[$k]['sprout']='FALSE';
+            $emptytable[$k]['tag']='';
+            $emptytable[$k]['csp']='';
+            $emptytable[$k]['ht']='';
+            $emptytable[$k]['cotno']='';
+            $emptytable[$k]['leafno']='';
+            $emptytable[$k]['x']='';
+            $emptytable[$k]['y']='';
+            $emptytable[$k]['note']='';
         }
 
         // $this->recordstart='0';
@@ -199,7 +208,7 @@ class SeedlingShowentry extends Component
         // dd(count($slrecord));
     }
 
-
+    public $finishnote='';
 
 
 

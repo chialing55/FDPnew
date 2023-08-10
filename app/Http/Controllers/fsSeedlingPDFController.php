@@ -34,14 +34,14 @@ class fsSeedlingPDFController extends Controller
             
         }
         $length=count($slrecord)+count($slplot1);
-        $totalpage=ceil($length/37);
+        $totalpage=ceil($length/31);
         // print_r($slrecord2);
         if ($length>750){
             return redirect()->back() ->with('alert', '資料過多，請重新選擇範圍');
 
         } else {
 
-            if ($slrecord[0]['census']%2==0){
+            if ($slrecord[0]['census']%2==1){
                 $month='八';
             } else { $month = '二';}
             
@@ -70,5 +70,19 @@ class fsSeedlingPDFController extends Controller
 
     }
 
+
+    public function compare(Request $request){
+        $comnote = $request->session()->get('comnote');
+        $html="<p style='font-family: msjh'>".$comnote."</p>";
+
+
+        
+        // print_r($comnote);
+        $pdf= PDF::loadHtml($html)->setPaper('A4');
+        // $pdf ->set_option( 'isFontSubsettingEnabled' , true );
+        return $pdf->stream("seedling_compare.pdf");
+
+
+    }
 
 }

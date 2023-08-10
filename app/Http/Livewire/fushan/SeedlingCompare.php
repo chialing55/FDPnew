@@ -2,6 +2,7 @@
 
 namespace App\Http\Livewire\Fushan;
 
+use Illuminate\Http\Request;
 use Livewire\Component;
 use Livewire\WithPagination;
 use Illuminate\Support\Facades\DB;
@@ -59,169 +60,189 @@ class SeedlingCompare extends Component
 
     }
 
-    public function compare(){
+    public function compare(Request $request){
         $comnote='';
+
 
         //比對環境資料
             $cov1=FsSeedlingSlcov1::orderBy('trap', 'asc')->orderBy('plot', 'asc')->get()->toArray();
-            foreach($cov1 as $cov){
-                $cov['update_id']=='';
-                $cov['updated_at']=='';
-                $cov11[$cov['trap']][]=$cov;
+            for($i=0;$i<count($cov1);$i++){
+                $cov11[$cov1[$i]['trap']][$cov1[$i]['plot']]=$cov1[$i];
             }
 
             $cov2=FsSeedlingSlcov2::orderBy('trap', 'asc')->orderBy('plot', 'asc')->get()->toArray();
-            foreach($cov2 as $cov){
-                $cov['update_id']=='';
-                $cov['updated_at']=='';
-                $cov21[$cov['trap']][]=$cov;
+            for($i=0;$i<count($cov2);$i++){
+                $cov21[$cov2[$i]['trap']][$cov2[$i]['plot']]=$cov2[$i];
             }
             $comnote='';
-
+// dd($cov11[106]);
             // $this->cov1=$cov11;
             // $this->cov2=$cov2;
-            $path='Y';
+            $pass1='1';
+            $array=['year', 'month', 'date', 'cov', 'ht', 'canopy', 'note'];
             for ($j = 1; $j < 108; $j++) {
-                for ($i = 0; $i < count($cov1[$j]); $i++) {
-                    if ($i==42) break;
-                    foreach ($cov1[$j][$i] as $key => $value) {
-                        if ($cov2[$j][$i][$key] != $value) {
-                            $comnote .= '環境資料比對: 樣站 ' . $j . ' 有資料不合。<br>';
-                            $path = 'N';
-                            break 2; // 跳出兩層迴圈
+                if ($j==42) continue;
+                for ($i = 1; $i < (count($cov11[$j])+1); $i++) {
+                    
+                    foreach ($cov11[$j][$i] as $key => $value) {
+                        if (in_array($key, $array)){
+                            if ($cov21[$j][$i][$key] != $value) {
+                                $comnote.= '環境資料比對: 樣站 ' . $j . ' 有資料不合。<br>';
+                                $pass1 = '0';
+                                break 2; // 跳出兩層迴圈
+                            }
                         }
                     }
                 }
             }
 
-            $comnote=$comnote."<br>";
+            if ($pass1 == '0'){
+                $comnote=$comnote."<br>";
+            }
 
             // 比對小苗資料
-
-            for ($j=1;$j<108;$j++){
-                if ($j==42) break;
-
-                $tag1=array();
-                $tag2=array();
-                $record1=array();
-                $record2=array();
+            $pass2='1';
+            $tag1=array();
+            $tag2=array();
+            $record1=array();
+            $record2=array();
 
                 
-                $s_record1=FsSeedlingSlrecord1::where('trap', 'like', $j)->get();
-                if (!$s_record1->isEmpty()){
-                    $s_record1=$s_record1->toArray();
-                    foreach ($s_record1 as $record){
-                        $record['update_id']='';
-                        $record['updated_at']='';
-                        $record['id']='';
-                        $tag1[]=$record['tag'];
-                        $record1[$record['tag']]=$record;
-                    }
+            $s_record1=FsSeedlingSlrecord1::get()->toArray();
+            if (count($s_record1)>0){
+                
+                foreach ($s_record1 as $record){
+                    $record['id']='';
+                    $record['updated_at']='';
+                    $record['update_id']='';
+                    $tag1[]=$record['tag'];
+                    $record1[$record['tag']]=$record;
                 }
+            }
 
-                $s_record2=FsSeedlingSlrecord2::where('trap', 'like', $j)->get();
-                if (!$s_record2->isEmpty()){
-                    $s_record2=$s_record2->toArray();
-                    foreach ($s_record2 as $record){
-                        $record['update_id']='';
-                        $record['updated_at']='';
-                        $record['id']='';
-                        $tag1[]=$record['tag'];
-                        $record2[$record['tag']]=$record;
-                    }
+            $s_record2=FsSeedlingSlrecord2::get()->toArray();
+            if (count($s_record2)>0){
+                   
+                foreach ($s_record2 as $record){
+                    $record['id']='';
+                    $record['updated_at']='';
+                    $record['update_id']='';
+                    $tag1[]=$record['tag'];
+                    $record2[$record['tag']]=$record;
                 }
+            }
+// dd($record1);
 
-
-                if (count($tag1)>0){
+           
                 //列出所有的tag
-                $tag2 = array_unique($tag1);
-                $tag2 = array_diff($tag2, array(""));
+            $tag2 = array_unique($tag1);
+            $tag2 = array_diff($tag2, array(""));
 
-                sort($tag2);    
-                    
+            sort($tag2);    
+ // dd($tag2);
 
                     //依tag比對
 
                     //$comnote=$comnote.$j.'step3<br>';
-                    for ($i=0; $i<count($tag2);$i++){
-                    if (isset($record1[$tag2[$i]])){
+            for ($i=0; $i<count($tag2);$i++){
+                if (isset($record1[$tag2[$i]])){
                     //$comnote=$comnote.'step4<br>';
-                        if (isset($record2[$tag2[$i]])){
+                    if (isset($record2[$tag2[$i]])){  //12皆有
                         //$comnote=$comnote.'step5<br>';
+                        $add2='';
                         foreach ($record1[$tag2[$i]] as $key => $value){
+                        
                             if ($record2[$tag2[$i]][$key]!=$value){
-                                
-                               
-                                // $add2=" [".$key.", (".$value."), (".$record2[$tag2[$i]][$key].")]";  
-                                $add2='['.$key.']';
-                                
-                                $comnote=$comnote.'小苗資料比對: 樣站 '.$j.' No. '.$tag2[$i].$add2.' 的資料不合。<br>';             
-                                
+                                    // $add2=" [".$key.", (".$value."), (".$record2[$tag2[$i]][$key].")]";  
+                                    $add2.='['.$key.']';             
                             }
-                            
+                        }
+                        if ($add2!=''){
+                            $comnote=$comnote.'小苗資料比對: 樣站 '.$j.' No. '.$tag2[$i].$add2.' 的資料不合。<br>';
+                            $pass2='0';
                         }
                     } else {  //1有2沒有
-                        
-                            $comnote=$comnote.'小苗資料比對: 樣站 '.$j.' No. '.$tag2[$i].' 第二次輸入缺資料。<br>';    
+                        $comnote=$comnote.'小苗資料比對: 樣站 '.$j.' No. '.$tag2[$i].' 第二次輸入缺資料。<br>';
+                        $pass2='0';    
                     }
-                    
-                    
-                    
-                    } else {  //1沒有2有
-                            $comnote=$comnote.'小苗資料比對: 樣站 '.$j.' No. '.$tag2[$i].' 第一次輸入缺資料。<br>';    
-                    }
+
+                } else {  //1沒有2有
+                        $comnote=$comnote.'小苗資料比對: 樣站 '.$j.' No. '.$tag2[$i].' 第一次輸入缺資料。<br>';
+                        $pass2='0';    
                 }
-                }}
+            }
+
+            if ($pass2=='0'){
                 $comnote=$comnote."<br>";
+            }
 
-// // 比對撿到環資料
-//                 $s_roll1=FsSeedlingSlroll1::orderBy('trap', 'asc')->orderBy('plot', 'asc')->orderBy('tag', 'asc')->get();
+// 比對撿到環資料
+            $s_roll1=FsSeedlingSlroll1::orderBy('trap', 'asc')->orderBy('plot', 'asc')->orderBy('tag', 'asc')->get();
 
-//                 if (!$s_roll1->isEmpty()){
-//                     $s_roll1=$s_roll1->toArray();
-//                     foreach($s_roll1 as $roll){
-//                         $roll['id']='';
-//                         $roll['update_id']='';
-//                         $roll['updated_at']='';
-//                         $roll1[]=$roll;
-//                     }
+            if (!$s_roll1->isEmpty()){
+                $s_roll1=$s_roll1->toArray();
+                foreach($s_roll1 as $roll){
+                    $roll['id']='';
+                    $roll['update_id']='';
+                    $roll['updated_at']='';
+                    $roll1[$roll['tag']]=$roll;
+                    $tagroll1[]=$roll['tag'];
+                }
 
-//                 }
-//                 $s_roll2=FsSeedlingSlroll2::orderBy('trap', 'asc')->orderBy('plot', 'asc')->orderBy('tag', 'asc')->get();
+            }
+            $s_roll2=FsSeedlingSlroll2::orderBy('trap', 'asc')->orderBy('plot', 'asc')->orderBy('tag', 'asc')->get();
 
-//                 if (!$s_roll2->isEmpty()){
-//                     $s_roll2=$s_roll2->toArray();
-//                     foreach($s_roll2 as $roll){
-//                         $roll['id']='';
-//                         $roll['update_id']='';
-//                         $roll['updated_at']='';
-//                         $roll2[]=$roll;
-//                     }
+            if (!$s_roll2->isEmpty()){
+                $s_roll2=$s_roll2->toArray();
+                foreach($s_roll2 as $roll){
+                    $roll['id']='';
+                    $roll['update_id']='';
+                    $roll['updated_at']='';
+                    $roll2[$roll['tag']]=$roll;
+                    $tagroll1[]=$roll['tag'];
+                }
 
-//                 }
+            }
+// dd($roll1);
+            $tagroll2 = array_unique($tagroll1);
+            $tagroll2 = array_diff($tagroll2, array(""));
 
+            sort($tagroll2);
 //                     //比對
+            $pass3='1';
 
-                    
-                    // for ($i=0; $i<count($roll1);$i++){
-                    //     foreach ($roll1[$i] as $key => $value){
-                    //         if ($roll2[$i][$key]!=$value){
-                                
-                                
-                    //             $add3=" [".$key.", (".$value."), (".$roll2[$i][$key].")]";  
-                    //             // $add3='['.$key.']';
-                    //             $comnote=$comnote.'撿到環資料比對: 樣站 '.$roll1[$i]['trap'].' No. '.$roll1[$i]['tag'].' 的 '.$add3.' 資料不合。<br>';
-                    //             break;
-                    //         }
-                            
-                    //     }
-                    // }                
+            for ($i=0; $i<count($tagroll2);$i++){
+                if (isset($roll1[$tagroll2[$i]])){
+                    if (isset($roll2[$tagroll2[$i]])){  //12都有
+                        foreach ($roll1[$tagroll2[$i]] as $key => $value){
+                            if ($roll2[$tagroll2[$i]][$key]!=$value){
+
+                                $add3=" [".$key.", (".$value."), (".$roll2[$tagroll2[$i]][$key].")]";  
+                                // $add3='['.$key.']';
+                                $comnote=$comnote.'撿到環資料比對: 樣站 '.$roll1[$tagroll2[$i]]['trap'].' tag '.$roll1[$tagroll2[$i]]['tag'].' 的 '.$add3.' 資料不合。<br>';
+                                $pass3='0';
+                                break 2;
+
+                            }
+                        }
+
+                    } else { //1有2沒有
+                        $comnote.='撿到環資料比對: 第二次輸入缺少 tag :'.$roll1[$tagroll2[$i]]['tag']." 資料。<br>";
+                        $pass3='0';
+                    }
+                } else { //1沒有2有
+                    $comnote.='撿到環資料比對: 第一次輸入缺少 tag :'.$roll2[$tagroll2[$i]]['tag']." 資料。<br>";
+                    $pass3='0';
+                }
+            }
+
 
 
         if ($comnote==''){$comnote='資料皆相符，請聯絡資料管理員。';}
       
 
         $this->comnote=$comnote;
+        $request->session()->put('comnote', $comnote);
         // dd('q');
     }
 

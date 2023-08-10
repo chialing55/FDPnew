@@ -51,6 +51,10 @@ $(function() {
             <div id="downloadMessage2" style="display: none;">載入中...</div>
         </div>
         @endif
+        <hr>
+        <ol>
+            <li><a href='{{asset('/fs_tree_file/05_第五次調查_新增植株表.pdf')}}' target="_blank">第五次調查新增植株表</a></li>
+        </ol>
     </div> 
     <div class='text_box'>
         <h2>每木調查相關表單</h2>
@@ -73,7 +77,7 @@ $(function() {
                 <li><a href='{{asset('/fs_tree_file/02_福山樣區複查code與status.pdf')}}' target="_blank">福山樣區複查code與status</a></li>
                 <li><a href='{{asset('/fs_tree_file/03_Code%20R的規則%20ver.4.pdf')}}' target="_blank">Code R的規則</a></li>
                 <li><a href='{{asset('/fs_tree_file/04_每日檢查確認表.pdf')}}' target="_blank">每日檢查確認表</a></li>
-                <li><a href='{{asset('/fs_tree_file/05_第五次調查_新增植株表.pdf')}}' target="_blank">第五次調查新增植株表</a></li>
+                
                 <li><a href='{{asset('/fs_tree_file/06_問題表格.pdf')}}' target="_blank">問題表格</a></li>
                 <li><a href='{{asset('/fs_tree_file/09_福山種子網分布圖.pdf')}}' target="_blank">福山種子網分布圖</a></li>
                 <li>每木調查資料整理SOP

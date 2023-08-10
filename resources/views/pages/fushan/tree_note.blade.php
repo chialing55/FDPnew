@@ -28,8 +28,9 @@ $(function() {
 <div class='note'>
 
     <ul>
-        <li><b>輸入資料後需按 <button>儲存</button> 鈕才能確實將資料儲存。</b></li>
+        <li><b>輸入資料後需按 <button class='datasavebutton' style='width:auto'>儲存</button> 鈕才能確實將資料儲存。</b></li>
         <li><b>可利用「Tab」鍵和「上下左右」鍵在各輸入欄位間移動。</b></li>
+        <li><b>每一 20×20 樣方輸入完成後，請按 <button class='finishbutton'>輸入完成</button> 來檢查資料是否輸入正確及完整。</b>若有錯誤，請一一更正。</li>
     </ul>
 <div class='flex text_outbox' style="flex-direction: column;">
     <div class='text_box_note_out'>
@@ -183,7 +184,7 @@ $(function() {
     </div>
     <div class='text_box text_box_note' >
         <ul>
-        <li><b>每一 20×20 樣方輸入完成後，請按 <button>輸入完成</button> 來檢查資料是否輸入正確及完整。</b>若有錯誤，請一一更正。
+        <li><b>每一 20×20 樣方輸入完成後，請按 <button class='finishbutton'>輸入完成</button> 來檢查資料是否輸入正確及完整。</b>若有錯誤，請一一更正。
             <ol>
             <li>輸入完成後將檢查 - 
                 <ol>
