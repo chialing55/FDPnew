@@ -208,7 +208,7 @@ class SeedlingShowentry extends Component
         // dd(count($slrecord));
     }
 
-    public $finishnote='';
+
 
 
 

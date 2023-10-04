@@ -1,20 +1,25 @@
-
-
-.flex2 {
-	display: flex;
-	min-height: 100%;
-}
-
-.tablenote{
-	display: inline-block;
-	margin-left: 20px;
-}
-
-
-
-.text_note {
+.seedstable, .entrytableout {
 	display: none;
+	
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 .note {
 	padding: 0 10px 10px 0px;
@@ -125,102 +130,16 @@ border: 1px solid  #A568FF;
 	color:red;
 }
 
-.prev, .next, .showall {
+.prev, .next {
 	margin-left: 20px;
 	cursor: pointer;
 	text-decoration: underline;
+	display: none;
 }
+
 
 
 .pages{
-	display: none;
+	display: flex;
 	margin-bottom: 10px;
-}
-
-
-.plottable {
-	line-height: 2; 
-	width: 35px; 
-	vertical-align: middle; 
-	height: 35px; 
-	float: left; 
-	border: 1px solid #555; 
-	padding: 3px; 
-	margin: 1px 3px; 
-	text-align: center; 
-	cursor: pointer; 
-	background-color: #ffffb985; 
-	color: black; 
-	font-weight: normal;
-}
-
-.finishtable td{
-	vertical-align: middle; 
-	text-align: center; 
-}
-
-#fstreeprogresstable{
-	height: 300px;
-	overflow: auto; /* 啟用滾動條 */
-	margin: 20px 0px;
-}
-
-.fstreeStemidtable{
-	margin: 20px 20px;
-}
-
-.fstreeStemidtable table th{
-	text-align: center;
-}
-
-.fstreeStemidtable table tbody th{
-	font-weight: 500;
-}
-
-.cannotselect {
-	background-color: #ccc;
-	cursor: inherit;
-
-}
-
-.plotselect {
-	background-color: #dbe279;
-}
-
-.plotunselect {
-	background-color: #ffffb985;
-}
-
-.allfinish {
-	background-color: darkcyan;
-}
-
-.somefinish {
-	background-color: lightblue;
-}
-
-
-.entry1fin {
-	background-color: gold;
-}
-
-.entry2fin {
-	background-color: cornflowerblue;
-}
-
-.entryallfin {
-	background-color: olivedrab;
-
-}
-
-.entryfinshow {
-	width: 25px;
-	height: 25px;
-	margin: 0 10px 0 10px;
-}
-
-
-
-.dataviewerdownload span{
-	margin-left: 10px;
 }

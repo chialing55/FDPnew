@@ -43,17 +43,21 @@ Route::get('/choice', [App\Http\Controllers\choiceController::class, 'check'])->
 //     return redirect(route('genus', ['family' => $family, 'genusnow' => $genus]));
 // });
 
-Route::get('/{site}/{project}', function($site, $project){
+Route::get('fushan/{project}', function($project){
 // echo '1'.$project;
-    if ($site=='fushan'){
+
         if ($project=='seedling'){
-            return App::call('App\Http\Controllers\fsSeedlingController@seedling',['site' => $site] );
+            return App::call('App\Http\Controllers\fsSeedlingController@seedling',['site' => 'fushan'] );
         }
 
         if ($project=='tree'){
-            return App::call('App\Http\Controllers\fsTreeController@tree',['site' => $site] );
+            return App::call('App\Http\Controllers\fsTreeController@tree',['site' => 'fushan'] );
         }
-    }
+
+        if ($project=='seeds'){
+            return App::call('App\Http\Controllers\fsSeedsController@seeds',['site' => 'fushan'] );
+        }
+    
 });
 
 //seedling download record pdf
@@ -107,6 +111,20 @@ Route::get('/fushan/{project}/{type}', function($project, $type){
             }
             
         }
+
+        else if ($project=='seeds'){
+            if ($type=='doc'){
+                return App::call('App\Http\Controllers\fsSeedsController@seeds',['site' => $site] );
+            } else if ($type=='note'){
+                return App::call('App\Http\Controllers\fsSeedsController@note',['site' => $site] );
+
+            } else if ($type=='entry'){
+                return App::call('App\Http\Controllers\fsSeedsController@entry',['site' => $site] );
+            } else if ($type=='import'){
+                return App::call('App\Http\Controllers\fsSeedsController@import',['site' => $site] );
+            }
+            
+        }
     
 });
 
@@ -131,8 +149,13 @@ Route::get('/fsseedlingdeleteslroll/{tag}/{id}/{entry}/{trap}', [App\Http\Contro
 Route::get('/fsseedlingaddalternote/{tag}/{entry}/{thispage}', [App\Http\Controllers\fsSeedlingAlternote::class, 'alternote']);
 Route::post('/fsseedlingsavealternote', [App\Http\Controllers\fsSeedlingSaveController::class, 'savealternote']);
 Route::get('/fsseedlingdeletealter/{stemid}/{entry}/{thispage}', [App\Http\Controllers\fsSeedlingSaveController::class, 'deletealter']);
-Route::get('/fsseedlingfinish/{entry}/{test}', [App\Http\Controllers\fsSeedlingSaveController::class, 'finishnote']);
+Route::get('/fsseedlingfinish/{entry}', [App\Http\Controllers\fsSeedlingSaveController::class, 'finishnote']);
 
+
+Route::post('/fsseedssavedata', [App\Http\Controllers\fsSeedsSaveController::class, 'savedata'])->name('savedata');
+Route::post('/fsseedssavedata1', [App\Http\Controllers\fsSeedsSaveController::class, 'savedata1'])->name('savedata1');
+Route::get('/fsseedsdeletedata/{id}/{info}/{thispage}', [App\Http\Controllers\fsSeedsSaveController::class, 'deletedata'])->name('deletedata');
+Route::get('/fsseedsfinish', [App\Http\Controllers\fsSeedsSaveController::class, 'finishnote'])->name('finishnote');
 
 //檔案最新更新日期
 Route::get('/latest-updates', 'App\Http\Controllers\UpdateController@latestUpdates');

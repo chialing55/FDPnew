@@ -12,7 +12,7 @@ $(document).ready(function() {
 	$('.choice').on('click', function(){
 		thissite=$(this).attr('site');
 		thisproject=$(this).attr('project');
-		location.href=`/${thissite}/${thisproject}`;
+		location.href=`${thissite}/${thisproject}`;
 
 	})
 

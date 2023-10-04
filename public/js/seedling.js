@@ -267,7 +267,7 @@ function fsseedlingtable(data, maxid, thispage){
     rowHeights: 38,
     removeRowPlugin: true,
     // minSpareRows: 1,
-    colWidths: [120, 40, 40, 70, 120,50,50,50,40,40,60,35,35, 160,160],
+    colWidths: [120, 40, 40, 80, 120,50,50,50,40,40,60,35,35, 160,160],
     licenseKey: 'non-commercial-and-evaluation',
     colHeaders: ["Date", "Trap", "Plot", "Tag", "種類", "長度","子葉","真葉","狀態","新舊","萌櫱","X","Y", "Note","特殊修改"],
     columns: [
@@ -279,7 +279,7 @@ function fsseedlingtable(data, maxid, thispage){
       {data: "ht", type: 'numeric', allowInvalid: false},
       {data: "cotno", type: 'numeric', allowInvalid: false},
       {data: "leafno", type: 'numeric', allowInvalid: false},
-      {data: "status", type: 'dropdown', source: ['A', 'G', 'D', 'N', 'L'], allowInvalid: false},
+      {data: "status", type: 'dropdown', source: ['A', 'G', 'D', 'N'], allowInvalid: false},
       {data: "recruit", readOnly: true},
       {data: "sprout", readOnly: true},
       {data: "x", type: 'numeric', allowInvalid: false},
@@ -483,12 +483,14 @@ function fsseedlingtableupdate(data, maxid, thispage){
 	var container = $("#seedlingtable"+data[0].trap);
 	var handsontable = container.data('handsontable');
 	// console.log(data);
-	totalpage=Math.ceil(data.length/20);
+	totalpage=Math.ceil(data.length/20); 
+  $('.pagenote').html(`共 ${data.length} 筆資料。`);
 	if (totalpage>1){
 		datapages=pages(data, thispage, totalpage);
+    $('.pagenote').append('第 '+thispage+' ／ '+totalpage+' 頁');
 		data3=datapages[1];
 	} else {data3=data;}
-	$('.pagenote').html(`共 ${data.length} 筆資料。`);
+
 	
 // console.log(data3);
 	handsontable.updateData(data3, maxid, thispage);
@@ -569,7 +571,7 @@ function recruittable(data, emptytable){
     rowHeaderWidth: 25,
     contextMenu: ['row_above', 'row_below', 'remove_row'],
     // minSpareRows: 1,
-    colWidths: [120, 40, 40, 70, 120,50,50,50,40,90,35,35, 160],
+    colWidths: [120, 40, 40, 80, 120,50,50,50,40,90,35,35, 160],
     rowHeights: 35,
     licenseKey: 'non-commercial-and-evaluation',
     colHeaders: ["Date", "Trap", "Plot", "Tag", "種類", "長度","子葉","真葉","新舊","萌櫱","X","Y", "Note"],
@@ -703,9 +705,9 @@ function fsfsrolltableupdate(data, trap){
 	$('.deleteroll').on('click', function(){
 		id=$(this).attr('deleteid');
 		tag=$(this).attr('tag');
-		entry=$(this).attr('entry');
+		entry1=$(this).attr('entry');
 		trap=$(this).attr('trap');
-		deleteroll(tag, id, entry, trap);
+		deleteroll(tag, id, entry1, trap);
 	})
 }
 
@@ -763,7 +765,7 @@ function fsslrolltable(slroll, covs){
 			});
 
 		  $.ajax({
-		    url: "/fsseedlingsaveslroll/"+covs[0]['entry']+"/"+covs[0]['trap'],
+		    url: "/fsseedlingsaveslroll/"+entry+"/"+covs[0]['trap'],
 		    data: {
 		    	data: handsontable.getSourceData()
 		    	// _token : '{{csrf-token()}}'
@@ -980,7 +982,7 @@ function alternotetable(alterdata, tag, entry, thispage){
 function finish(entry){
     console.log(entry);
         $.ajax({
-        url: `/fsseedlingfinish/${entry}/text`,
+        url: `/fsseedlingfinish/${entry}`,
         type: 'get',
         success: function (res) {
           // console.log(res);

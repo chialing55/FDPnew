@@ -64,16 +64,16 @@
 @section('headerListinner')
       <div class='listinner list4inner'>
           <li class='innerlist list41 listlink' type='note'>資料輸入注意事項<hr></li>
-          <li class='innerlist list42 listlink' type='entry1' >第一次輸入</li>
-          <li class='innerlist list43 listlink' type='entry2' >第二次輸入</li>
-          <li class='innerlist list44' type=''>資料比對</li>
-          <li class='innerlist list45 listlink' type='entryprogress'>資料輸入進度</li>
+          <li class='innerlist list42 listlink' type='entry1' >第一次輸入<hr></li>
+          <li class='innerlist list43 listlink' type='entry2' >第二次輸入<hr></li>
+          <li class='innerlist list44' type=''>資料比對<hr></li>
+          <li class='innerlist list45 listlink' type='entryprogress'>資料輸入進度<hr></li>
       </div>
       <div class='listinner list6inner'>
-          <li class='innerlist list61' type=''>每木調查資料修改流程</li>
-          <li class='innerlist list62' type='' >更新census5資料表</li>
-          <li class='innerlist list63' type='' >後端資料更正</li>
-          <li class='innerlist list64' type=''>新增資料</li>
+          <li class='innerlist list61' type=''>每木調查資料修改流程<hr></li>
+          <li class='innerlist list62' type='' >更新census5資料表<hr></li>
+          <li class='innerlist list63' type='' >後端資料更正<hr></li>
+          <li class='innerlist list64' type=''>新增資料<hr></li>
 
       </div>
 @endsection

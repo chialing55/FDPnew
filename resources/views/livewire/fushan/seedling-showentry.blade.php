@@ -33,10 +33,19 @@
         <span style='padding-left:20px'>*{{$entrynote}}</span>
         @else
             @if($selectTrap>1)
-            <span style='padding-left:20px'><a class='a_' wire:click="searchtrap({{($selectTrap-1)}})">上一個</a></span>
+                @if($selectTrap==43)
+                <span style='padding-left:20px'><a class='a_' wire:click="searchtrap({{($selectTrap-2)}})">上一個</a></span>
+                @else
+                <span style='padding-left:20px'><a class='a_' wire:click="searchtrap({{($selectTrap-1)}})">上一個</a></span>
+                @endif
             @endif
             @if($selectTrap<107)
-              <span style='padding-left:20px'><a class='a_' wire:click="searchtrap({{($selectTrap+1)}})">下一個</a></span>
+                @if($selectTrap==41)
+                <span style='padding-left:20px'><a class='a_' wire:click="searchtrap({{($selectTrap+2)}})">下一個</a></span>
+                @else
+                <span style='padding-left:20px'><a class='a_' wire:click="searchtrap({{($selectTrap+1)}})">下一個</a></span>
+                @endif
+              
             @endif  
         @endif
 
@@ -56,6 +65,7 @@
 
     <div id='simplenote' class='text_box'>
         <ul>
+        <li><b>輸入資料後需按 <button class='datasavebutton' style='width: auto;'>儲存</button> ，才能確實將資料儲存。</b></li>
         <li>樣區上方光度 - <b>U</b>: 多層樹冠 (預設)，<b>I</b>: 一層樹冠，<b>G</b>: 沒有樹冠。</li>
         </ul>
     </div>
@@ -77,11 +87,12 @@
 
 <div id='simplenote' class='text_box'>
     <ul>
-
-    <li>長度及葉片數：<b>-1</b>: 沒有測量，<b>-2</b>: DBH >= 1，<b>-4</b>: 見環不見苗或死亡，<b>-6</b>: 消失，<b>-7</b>: 主幹或分枝死亡但個體存活。<span class='line'>長度不可為 0</span>。</li>
-    <li>狀態：<b>A</b>: 存活，<b>G</b>: 見環不見苗，<b>D</b>: 死亡，<b>N</b>: 消失，<b>L</b>: 離開。</li>
-    <li>note：統一使用「中文」標點符號。「半形」英文符號。「半形」阿拉伯數字，數字後留一格空白。先確認原始 note，加「。」，再輸入本次note。不同類型 note 間用「。」分隔。暫時註記的內容(需特殊修改或撿到環等)，不需填入。</li>
-    <li>特殊修改：如需要更正 Trap, Plot, Tag, 種類, 原長度和原葉片數，請點選「特殊修改 <i class='fa-regular fa-note-sticky'></i>」 填寫。</li>
+        <li><b>輸入資料後需按 <button class='datasavebutton' style='width: auto;'>儲存</button> ，才能確實將資料儲存。</b></li>
+        <li>長度及葉片數：<b>-1</b>: 沒有測量，<b>-2</b>: DBH >= 1，<b>-4</b>: 見環不見苗或死亡，<b>-6</b>: 消失，<b>-7</b>: 主幹或分枝死亡但個體存活。<span class='line'>長度不可為 0</span>。</li>
+        <li>狀態：<b>A</b>: 存活，<b>G</b>: 見環不見苗，<b>D</b>: 死亡，<b>N</b>: 消失。</li>
+        <li>note：統一使用「中文」標點符號。「半形」英文符號。「半形」阿拉伯數字，數字後留一格空白。先確認原始 note，加「。」，再輸入本次note。不同類型 note 間用「。」分隔。暫時註記的內容(需特殊修改或撿到環等)，不需填入。</li>
+        <li>特殊修改：如需要更正 Trap, Plot, Tag, 種類, 原長度和原葉片數，請點選「特殊修改 <i class='fa-regular fa-note-sticky'></i>」 填寫。</li>
+        <li>資料輸入完成至Trap=107時，請按<button class='datasavebutton' style='width: auto;'>輸入完成</button>，以做最後檢查。</li>
     </ul>
 </div>
         @if($record[0]['tag']=='無')
@@ -128,10 +139,11 @@
 
 <div style='margin-top: 20px;'>
 <button class='finish finishbutton' onclick="finish({{$entry}})">輸入完成</button>
-<span class='finishnote savenote'>{{$finishnote}}</span>
+<span class='finishnote savenote'></span>
 
-@endif
+
 </div>
+@endif
 </div>    
 
 
@@ -141,12 +153,13 @@
    <hr>
    <div id='simplenote' class='text_box'>
     <ul>
-
+        <li><b>輸入資料後需按 <button class='datasavebutton' style='width: auto;'>儲存</button> ，才能確實將資料儲存。</b></li>
         <li>長度及葉片數：<b>-1</b>: 沒有測量，<b>-2</b>: DBH >= 1。<span class='line'>長度不可為 0</span>。</li>
         <li>新增狀態：<b>R</b>: 新增 (預設)，<b>O</b>: 舊苗，<b>T</b>: DBH > = 1 ，因有萌櫱而被記錄的樹。</li>
         <li>萌櫱狀態：<b>TRUE</b>: 萌櫱苗，<b>FALSE</b>: 種子苗 (預設)。</li>
         <li>萌櫱苗不需有位置資料。</li>
         <li>如果為已死小苗的新增萌櫱(資料中無主幹資料)，請通知資料管理員。</li>
+        <li><b>若小苗更改植物種類，但有新增萌糵苗，造成種類名稱不同</b>：新增萌糵苗的種類先輸入原有種類，並在主幹的note欄位備注「有新增萌糵苗需改種類名稱」</li>
         <li>資料不完整即不予處理。</li>
     </ul>
     </div>

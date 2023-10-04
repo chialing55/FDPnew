@@ -28,7 +28,7 @@ $personlist=['','王怡雯','黃彥慈','劉筱薇','鄧永淥', '楊知璇','�
                 </select>
             </p>
             
-            <p>每組人數： <input name='ind' type='text' style='width:45px;' wire:model='ind'> (若調查當日人數有變動，如2-3人，則填2.5)</p>
+            {{-- <p>每組人數： <input name='ind' type='text' style='width:45px;' wire:model='ind'> (若調查當日人數有變動，如2-3人，則填2.5)</p> --}}
             <p>調查時數： <input name='period' type='text' style='width:45px;' wire:model='period'> (以小時計，可含小數)</p>
             <p>調查人員： <select name='person1' id='person1' class="" style='width:85px;' wire:model="person1">
                 @for ($i=0; $i<count($personlist);$i++)     
@@ -124,7 +124,12 @@ $personlist=['','王怡雯','黃彥慈','劉筱薇','鄧永淥', '楊知璇','�
                 </tbody>
                 @endif
             </table>
+
         </div>
+            <p>
+                <button wire:click="downloadTxtFile">下載調查進度表(csv[;分隔])</button>
+            </p>
+
     </div>
 
     <div class='text_box' style='background-color:#ececc4'>

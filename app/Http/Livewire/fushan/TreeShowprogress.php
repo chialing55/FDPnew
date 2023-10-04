@@ -7,6 +7,7 @@ use Livewire\Component;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\App;
+use Illuminate\Http\Response;
 use Livewire\WithPagination;
 
 use App\Models\FsTreeProgress;
@@ -97,7 +98,7 @@ class TreeShowprogress extends Component
             return 'no';
         });
 
-        $inlist=['date'=>$this->date, 'id'=>'0', 'qx' => $this->qx, 'qy'=>$this->qy, 'new_branch'=>$this->new, 'person' => $this->ind, 'plot_num'=>count($this->sqx), 'period' => $this->period, 'update_id' => $user, 'updated_at' => date("Y-m-d H:i:s")];
+        $inlist=['date'=>$this->date, 'id'=>'0', 'qx' => $this->qx, 'qy'=>$this->qy, 'new_branch'=>$this->new, 'plot_num'=>count($this->sqx), 'period' => $this->period, 'update_id' => $user, 'updated_at' => date("Y-m-d H:i:s")];
         $orib=0;
         $plots='';
         $i=0;
@@ -116,12 +117,21 @@ class TreeShowprogress extends Component
 
         //調查人員
         $person='';
-        $persons = [$this->person1, $this->person2, $this->person3, $this->person4];
+        $person4=$this->person4;
+        $person4_1=explode(',', $person4);
+
+        $persons = [$this->person1, $this->person2, $this->person3];
+
+        for($i=0;$i<count($person4_1);$i++){
+            $persons[]=trim($person4_1[$i]);
+        }
+
         $persons = array_filter($persons); // 移除空值
-        $person = implode(", ", $persons);
+        $person = implode(", ", $persons);  //合併為string
 
         $plots = json_encode($this->sqx);
 
+        $inlist['person']=count($persons);
         $inlist['ori_branch']=$orib;
         $inlist['plots']=$plots;
         $inlist['personslist']=$person;
@@ -171,6 +181,41 @@ class TreeShowprogress extends Component
         $this->plots=$array;
         $this->dispatchBrowserEvent('rePlots', ['plots'=>$array]);
 // dd($array);
+    }
+
+    public function downloadTxtFile() {
+
+        $table1 = FsTreeProgress::orderByDesc('date')->get()->toArray();
+
+        $content = "'date';'qx';'qy'; 'people';'hours';'crews';'nquad';'quad.done';'nstems';'nrecruits';'total.stems'\n";
+        
+        $filename = 'fs_census5_progress.csv';
+
+        foreach ($table1 as $pro){
+            $pro['plots'] = str_replace('"', '', $pro['plots']);
+            $pro['plots'] = str_replace('[[', '[', $pro['plots']);
+            $pro['plots'] = str_replace(']]', ']', $pro['plots']);
+            
+            $text="'".$pro['date']."';'".$pro['qx']."';'".$pro['qy']."';'".$pro['person']."';'".$pro['period']."';'".$pro['personslist']."';'".$pro['plot_num']."';'".$pro['plots']."';'".$pro['ori_branch']."';'".$pro['new_branch']."';'".$pro['ori_branch']+$pro['new_branch']."'\n";
+            $content.=$text;
+        }
+
+        // 設定檔案下載標頭
+        $headers = [
+            'Content-Type' => 'text/plain',
+            'Content-Disposition' => "attachment; filename={$filename}",
+        ];
+
+        return response()->stream(
+            function () use ($content) {
+                echo $content;
+            },
+            200,
+            [
+                'Content-Type' => 'text/plain',
+                'Content-Disposition' => 'attachment; filename="' . $filename . '"',
+            ]
+        );        
     }
 
     public function render()

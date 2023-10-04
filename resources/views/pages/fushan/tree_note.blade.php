@@ -180,6 +180,8 @@ $(function() {
                 <li>請查閱舊資料電子檔，或是請資料管理者進後端確認樹種。</li>
             </ul>
         </li>
+        <li>如遇到被認為死亡的樹有新增枝幹，請新增主幹並勾選漏資料，主幹若死亡，status = -3。</li>
+
         </ol>
     </div>
     <div class='text_box text_box_note' >

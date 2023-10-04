@@ -59,7 +59,7 @@ const user='".$user."';
           <img src="{{asset('/images/research/tree.png')}}"/>
           <div class='boxtext'>福山 每木</div>
         </div>
-        <div class='box1'>
+        <div class='box1 choice' site='fushan' project='seeds'>
           <div class='boxtext'>福山 種子雨</div>
           <img src="{{asset('/images/research/seed.png')}}"/>
           

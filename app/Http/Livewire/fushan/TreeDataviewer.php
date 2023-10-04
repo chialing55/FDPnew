@@ -138,6 +138,7 @@ class TreeDataviewer extends Component
 
             for($j=0;$j<count($temp);$j++){
                 $filePath=$filecensus."/".$fileqx.'/'.$temp[$j].'/'.$filesqx.'_'.$temp[$j].'';
+                $filemap='';
                 if ($i==1 && $temp[$j]=='new') {
                     $downloadtable[$i][$j]="";
                     continue;
@@ -145,7 +146,11 @@ class TreeDataviewer extends Component
 
                 if ($temp[$j]=='map'){
                     $filemap=$j-1;
-                    $filemap=str_pad($this->map, 2, '0', STR_PAD_LEFT);
+                    if ($i==1 || $i==2){
+                        if ($filemap==3){$filemap=4;}
+                        else if ($filemap==4){$filemap=3;}
+                    }
+                    $filemap=str_pad($filemap, 2, '0', STR_PAD_LEFT);
                     $filePath=$filecensus."/".$fileqx.'/'.$temp[$j].'/'.$filesqx.$filemap.'';
                 }
 
@@ -184,7 +189,7 @@ class TreeDataviewer extends Component
                 }
                 $temp2=['舊樹','新樹','地圖1','地圖2','地圖3','地圖4'];
                 if ($path!=''){
-                    $downloadtable[$i][$j]="<a href='/".$path."' target=_blank>".$temp2[$j]."</a>";
+                    $downloadtable[$i][$j]="<a href='/".$path."' target=_blank j=".$j.">".$temp2[$j]."</a>";
                 } else { $downloadtable[$i][$j]=$temp2[$j]."";}
 
             }

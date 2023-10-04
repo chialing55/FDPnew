@@ -169,7 +169,7 @@ class fsTreeSaveController extends Controller
             }
 
             foreach ($data[$i] as $key => $value){
-                $excludedKeys = ['code', 'tofix', 'note'];
+                $excludedKeys = ['code', 'tofix', 'note', 'confirm', 'alternote', 'status'];
                 if (!in_array($key, $excludedKeys) && is_null($value)) {
                     $pass = '0';
                     $recruitsavenote = $recruitsavenote."<br> 第".($i+1)."筆 ".$data[$i]['tag'] ." ". $key.'資料不全，不予處理。';
@@ -221,6 +221,7 @@ class fsTreeSaveController extends Controller
                     $temp=array_keys($splist, $data[$i]['csp']);
                     $data[$i]['spcode']=$temp[0];
 
+
                     foreach($data[$i] as $key => $value){
                         $excludedKeysall=['update_id', 'updated_at', 'alternotetable'];
                         if (!in_array($key, $excludedKeysall)){
@@ -228,11 +229,11 @@ class fsTreeSaveController extends Controller
                                 if($value==Null){$value='';}
                                 
 
-                                $includeKeys = ['qx', 'qy', 'sqx', 'sqy', 'spcode', 'pom', 'h1'];
+                                $includeKeys = ['qx', 'qy', 'sqx', 'sqy', 'spcode', 'pom'];
 
                                 if (in_array($key, $includeKeys)) {
                                     $uplistalter[$key] = $value;
-                                    $recruitsavenote = $recruitsavenote."<br>".$data[$i]['tag'] . ' 漏資料，但基本資料與原始資料不符。請確認編號、檢查舊資料，或洽管理員。';
+                                    $recruitsavenote = $recruitsavenote."<br>".$data[$i]['tag'] .' 漏資料，但基本資料 '.$key.' 與原始資料不符。請確認編號、檢查舊資料，或洽管理員。';
                                     $pass = '0';
                                 } else {
                                     $uplist[$key] = $value;
@@ -245,7 +246,7 @@ class fsTreeSaveController extends Controller
                     // $recruitsavenote='測試中';
 
                     if ($pass=='0'){
-                        $nonsavelist[$i]=$data[$i]; break;
+                        $nonsavelist[$i]=$data[$i]; continue;
                     }
 
                     if ($uplist!=[]){
@@ -287,11 +288,10 @@ class fsTreeSaveController extends Controller
 
 
 
-            } else {  //if ($datacheck['pass']==1)
+            } else {  // $datacheck['pass']!=1
                 $recruitsavenote=$recruitsavenote."<br>".$datacheck['datasavenote'];
-                $nonsavelist[$i]=$data[$i]; continue;
+                $nonsavelist[$i]=$data[$i];
                 // break;
-                
 
             }
         }//最外層
@@ -520,8 +520,8 @@ class fsTreeSaveController extends Controller
                 $com2s=[];
                 $com1s2=[];
                 $com3s=[];
-                $data1=$table::where('tag', 'like', $data[$i]['tag'])->where('show', 'like', '1')->get()->toArray();
-                if (count($data1)>1){
+                $data1=$table::where('tag', 'like', $data[$i]['tag'])->where('show', 'like', '1')->orderBy('branch', 'asc')->get()->toArray();
+                if (count($data1)>1){   //有分支
                     foreach($data1 as $data0){
                         $com1=$data0['qx'].$data0['qy'].$data0['sqx'].$data0['sqy'];
                         $codes[]=$data0['code'];
@@ -534,6 +534,13 @@ class fsTreeSaveController extends Controller
                     $com1s=array_unique($com1s);
                     $com2s=array_unique($com2s);
                     $com3s=array_unique($com3s);
+                    if ($data1[0]['branch']!='0'){
+                        $pass='0';
+                        $finishnote=$data1[0]['tag'].' 缺少主幹資料，請新增主幹並勾選漏資料，主幹若死亡，status = -3。';
+                        break;
+                    }
+
+
                     if (count($com1s)>1){
                         if (!in_array("R", $codes)){
                             $pass='0';

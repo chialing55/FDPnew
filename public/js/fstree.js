@@ -533,7 +533,7 @@ $('.finishnote').html();
 
 	parent.find('button[name=datasave'+site+']').click(function () {
 		$('.datasavenote').html('');
-
+console.log(handsontable.getSourceData());
 		$.ajaxSetup({
 			  headers: {
 			    'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
@@ -677,7 +677,7 @@ function fstreetableupdate(data, thispage, pps){
 		}
     });
 
-    Livewire.emit('updateAmount', data.length);
+    // Livewire.emit('updateAmount', data.length);
 
 }
 

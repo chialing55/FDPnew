@@ -46,6 +46,7 @@
 <li>20x，20y，5x，5y，tag，b，csp，POM 等欄位需要修改時，請至「特殊修改<i class='fa-regular fa-note-sticky'></i>」填寫。<b>只需填寫需修改的部分。</b></li>
 <li>若調查後的 dbh < 1 cm，請在表格內填寫 1，再至「特殊修改<i class='fa-regular fa-note-sticky'></i>」的 dbh(<1) 欄位填寫正確之調查資料。</li>
 <li>新樹資料可以修改或刪除。</li>
+<li><b>每一20×20樣方輸入完成後，請按下<button class='datasavebutton' style='width: auto;'>輸入完成</button>。</b>檢查通過後，即會在資料輸入進度表中留下紀錄。若有更新資料，則需重新按<button class='datasavebutton' style='width: auto;'>輸入完成</button>，以再次檢查並更新完成紀錄。</li>
 <li><a href='https://bit.ly/3YcMFY4' target="_blank">每木調查除錯進度統整表</a></li>
 </ul>
 </div>
@@ -158,6 +159,7 @@ $nowplot=$plot2list[$nowplotkey[0]];
    <hr>
    <div id='simplenote' class='text_box'>
         <ul>
+            <li><b>輸入資料後需按 <button class='datasavebutton' style='width: auto;'>儲存</button> ，才能確實將資料儲存。</b></li>
             <li>dbh - 新增樹的 dbh <b>必須 ≥ 1</b>。</li>
             <li>新增狀態 - 預設為新增。若為漏資料的樹，請記得點選。</li>
             <li>樹蕨的<b> h低 </b>請填入<b> pom </b>欄位。</li>

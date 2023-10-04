@@ -113,7 +113,6 @@ $list=0;
     @endif</span></div>
 </header>
 
-
 <footer>
   <p>[樣區上方光度] U：多層樹冠；I：一層樹冠；G：孔隙    <span style='padding-left: 30px;'>[長度/葉片數] -1：因故沒有測量；-2：DBH>=1；-4：死亡；-6：消失；-7：枝幹死亡但個體存活</span><span style='padding-left: 30px;'>[狀態] G：見環不見苗；D：死亡；N：消失；L：離開</span></p>
 </footer>
@@ -178,7 +177,14 @@ $list=0;
       <td class="talble-left"></td>
         <td class="">{{$record[$plot[$k]][$i]['TP']}}</td>
         <td align="center" class="">{{$record[$plot[$k]][$i]['tag']}}</td>
-        <td class="">{{$record[$plot[$k]][$i]['csp']}}</td>
+        <td class="">
+          <div>
+            <span>{{$record[$plot[$k]][$i]['csp']}}</span>
+            @if(isset($maxb[$record[$plot[$k]][$i]['mtag']]) && $record[$plot[$k]][$i]['sprout'] == 'FALSE')
+            <span style='font-size: 70%; color: #333333;'>  ({{$maxb[$record[$plot[$k]][$i]['tag']]}})</span>
+            @endif
+          </div>
+        </td>
         <td class="table-align-right">{{$record[$plot[$k]][$i]['ht']}}</td>
         <td class="talble-right table-align-right">
           @if($record[$plot[$k]][$i]['cotno']>0)

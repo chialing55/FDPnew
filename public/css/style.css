@@ -104,6 +104,11 @@ h5{
   margin: 10px 0px;
 }
 
+h6 {
+  margin-bottom: 10px;
+}
+
+
 input, select {
   height: 20px;
   font-size: 100%;
@@ -412,4 +417,12 @@ button:-webkit-details-marker {
   float: right;
   margin-left: 5px;
   margin-top:-25px;
+}
+
+
+
+/*結構*/
+.pages{
+  display: flex;
+  margin-bottom: 10px;
 }

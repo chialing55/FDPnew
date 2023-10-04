@@ -28,7 +28,7 @@ class fsSeedlingSaveController extends Controller
         if ($entry == '1') {
             return new FsSeedlingSlrecord1;
         } else {
-            return new FsSeedlingSlrecord1;
+            return new FsSeedlingSlrecord2;
         }
     }
 
@@ -36,7 +36,7 @@ class fsSeedlingSaveController extends Controller
         if ($entry == '1') {
             return new FsSeedlingSlcov1;
         } else {
-            return new FsSeedlingSlcov1;
+            return new FsSeedlingSlcov2;
         }
     }
 
@@ -44,11 +44,11 @@ class fsSeedlingSaveController extends Controller
         if ($entry == '1') {
             return new FsSeedlingSlroll1;
         } else {
-            return new FsSeedlingSlroll1;
+            return new FsSeedlingSlroll2;
         }
     }
 
-    public function finishnote(Request $request, $entry, $text){
+    public function finishnote(Request $request, $entry){
         $user = $request->session()->get('user', function () {
             return view('login1', [
             'check' => 'no'
@@ -231,10 +231,10 @@ class fsSeedlingSaveController extends Controller
                 } else if ($data[$i]['ht']=='-1' && $data[$i]['status']!='A'){
                 $datasavenote=$data[$i]['tag']." 長度 = -1，狀態欄需為 A";
                 break;
-                } else if ($data[$i]['ht']=='-2' && $data[$i]['status']!='L'){
-                    $datasavenote=$data[$i]['tag']." 長度 = -2，狀態欄需為 L";
-                     ;
-                    break;
+                // } else if ($data[$i]['ht']=='-2' && $data[$i]['status']!='L'){
+                //     $datasavenote=$data[$i]['tag']." 長度 = -2，狀態欄需為 L";
+                //      ;
+                //     break;
                 } else if ($data[$i]['ht']=='-4'){
                     if ($data[$i]['status']!='G' && $data[$i]['status']!='D'){
                     $datasavenote=$data[$i]['tag']." 長度 = -4，狀態欄需為 G or D";
@@ -645,10 +645,12 @@ class fsSeedlingSaveController extends Controller
         $slrollsavenote='';
         $slrolldata = request()->all();
         $slrollnew=$slrolldata['data'];
+
         $insert1='';
         for($i=0;$i<count($slrollnew);$i++){
             $uplist=[];
             if (empty($slrollnew[$i])) break;
+
 
             if ($slrollnew[$i]['date']==''){
                 break;
@@ -658,7 +660,7 @@ class fsSeedlingSaveController extends Controller
                 break;
             }
 
-            if ($slrollnew[$i]['id']!='' && $slrollnew[$i]['id']!='0'){
+            if (isset($slrollnew[$i]['id'])){
                 // 比對舊資料
 
                     $olddata=$tableroll::where('id', 'like', $slrollnew[$i]['id'])->get();
@@ -691,7 +693,7 @@ class fsSeedlingSaveController extends Controller
                 $slrollnew[$i]['month']=$cov['month'];
                 $slrollnew[$i]['year']=$cov['year'];
                 $slrollnew[$i]['id']='0';
-                // if()
+               
                 foreach ($slrollnew[$i] as $key => $value){
                     if ($key != 'delete' && $key !='update_id'){
                         $insertkey=$insertkey.$key.",";
@@ -715,7 +717,7 @@ class fsSeedlingSaveController extends Controller
  
         }
 
-        //重新載入資料
+        // //重新載入資料
 
             $slroll=$tableroll::orderBy('trap', 'asc')->orderBy('plot', 'asc')->orderBy('tag', 'asc')->get();
 
@@ -748,6 +750,7 @@ class fsSeedlingSaveController extends Controller
             'result' => 'ok',
             'entry' => $entry,
             'data' => $slroll,
+            'text' => $slrollnew,
             'trap' => $trap,
             'slrollsavenote' => $slrollsavenote
 
