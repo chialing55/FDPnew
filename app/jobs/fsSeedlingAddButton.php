@@ -43,7 +43,7 @@ class fsSeedlingAddButton
 
             // 生成 HTML 按鈕元素
             $button1 = "<button name='deletedata' onclick='deleteid(\"$escapedTag\", \"$escapedEntry\", \"$escapedThispage\")')><i class='fa-solid fa-xmark'></button>";
-            $button2 = "<button name='alternoteshow{$escapedTag} '  onclick='alternote(\"$escapedTag\", \"$escapedEntry\", \"$escapedThispage\")' class='alternotehover'><i class='fa-regular fa-note-sticky'></i></button> ";
+            $button2 = "<button name='alternoteshow{$escapedTag} '  onclick='alternote(\"$escapedTag\", \"$escapedEntry\", \"$escapedThispage\", event)' class='alternotehover'><i class='fa-regular fa-note-sticky'></i></button> ";
 
 
            

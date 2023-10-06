@@ -86,13 +86,13 @@ function emptyseedstable(table){
       {data: "census"},
       {data: "trap", allowInvalid: false},
       {data: "csp", type: 'autocomplete', source: csplist, strict: false, visibleRows: 10},
-      {data: "code", type: 'dropdown', source: [' ', '1', '2', '3', '4', '5', '6'], allowInvalid: false, visibleRows: 10},
+      {data: "code", type: 'dropdown', source: ['', '1', '2', '3', '4', '5', '6'], allowInvalid: false, visibleRows: 10},
       {data: "count", type: 'numeric', allowInvalid: false},
       {data: "seeds"},
       {data: "viability"},
       {data: "fragments", type: 'numeric', allowInvalid: false},
       
-      {data: "sex", type: 'dropdown', source: [' ', 'F', 'M'], allowInvalid: false, visibleRows: 10},
+      {data: "sex", type: 'dropdown', source: ['', 'F', 'M'], allowInvalid: false, visibleRows: 10},
       {data: "identifier", type: 'dropdown', source: ['蔡佳秀', '張楊家豪'], allowInvalid: true, visibleRows: 40},
       {data: "note"},
 

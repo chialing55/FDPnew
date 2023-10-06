@@ -60,7 +60,7 @@ $('.list1 hr').css('color', '#91A21C');
         </ol>
     </div>
     <div class='text_box'>
-        <h2>輸入資料檢查流程圖</h2>
+        <h2>輸入資料檢查流程</h2>
         <hr>
         <ol>
             <li><a href='https://hospitable-nickel-b27.notion.site/6e0835f6dd3f43f080ad0fdebbdb7670?pvs=4' target="_blank">小苗輸入檢查流程</a></li>

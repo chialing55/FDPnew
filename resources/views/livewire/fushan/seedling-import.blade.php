@@ -1,5 +1,5 @@
 <div>
-    <h2>資料匯入</h2>
+    <h2>資料匯入 (only for chialing)</h2>
     @if($slmaxcensus!= $nowcensus)
     <p style='margin: 10px 0; font-weight: 800'>seedling 資料表中的最新資料為 第 {{$slmaxcensus}} 次調查資料。<br>接下來要匯入 第 {{$nowcensus}} 次調查資料。</p>
     @else

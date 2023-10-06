@@ -39,16 +39,14 @@ $('.list1 hr').css('color', '#91A21C');
             <li><a href='{{asset('/fs_seeds_file/trapmaps_HOBO架設位置.pdf')}}' target="_blank">HOBO架設位置</a></li>
         </ol>
     </div>
-{{--     <div class='text_box'>
-        <h2>輸入資料檢查流程圖</h2>
+    <div class='text_box'>
+        <h2>輸入資料檢查流程</h2>
         <hr>
         <ol>
-            <li><a href='https://hospitable-nickel-b27.notion.site/6e0835f6dd3f43f080ad0fdebbdb7670?pvs=4' target="_blank">小苗輸入檢查流程</a></li>
-            <li><a href='https://hospitable-nickel-b27.notion.site/2dd68747525f4ae2a638245e05856cdb?pvs=4' target="_blank">新苗輸入檢查流程</a></li>
-            <li><a href='https://hospitable-nickel-b27.notion.site/7d9691e6d60a495dbcc52416833c44f2?pvs=4' target="_blank">輸入完成檢查流程</a></li>
+            <li><a href='https://hospitable-nickel-b27.notion.site/e59db3a8e3364bf4817b70853af036a0?pvs=4' target="_blank">種子雨輸入檢查流程</a></li>
         </ol>
         
-    </div> --}}
+    </div>
 </div>
 
 @endsection

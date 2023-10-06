@@ -127,6 +127,9 @@ class fsSeedsSaveController extends Controller
                 if ($data[$i]['code']==''){
                     $data[$i]['code']='0';
                 }
+                // if ($record['seeds']==''){
+                //     $record['seeds']='0';
+                // }
                 $data[$i]['trap'] = str_pad($data[$i]['trap'], 3, '0', STR_PAD_LEFT);
                 $check = new fsSeedsCheck;
                 $checknote=$check->check($data[$i], $spinfo, 'n');

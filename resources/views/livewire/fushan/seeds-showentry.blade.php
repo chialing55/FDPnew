@@ -7,7 +7,7 @@ $personlist=['','蔡佳秀'];
 <div>
 <h2>種子雨資料輸入</h2>
     <div style='margin-top:10px'>
-        <p>請先詳閱<a href="{{asset('/fushan/seedls/note')}}">種子輸入注意事項</a></p> 
+        <p>請先詳閱<a href="{{asset('/fushan/seeds/note')}}">種子輸入注意事項</a></p> 
         <p> 輸入者 {{$user}}，輸入日期 {{date("Y-m-d")}}</p>
     </div>
 @if($entry=='')

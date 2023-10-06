@@ -92,7 +92,7 @@ $(function() {
             </ol>
     </div>
     <div class='text_box'>
-        <h2>輸入資料檢查流程圖</h2>
+        <h2>輸入資料檢查流程</h2>
         <hr>
             <ol>
                 <li><a href='https://hospitable-nickel-b27.notion.site/bf51d6d898b1447084281d6ab59eac65?pvs=4' target="_blank">舊樹輸入檢查流程</a></li>

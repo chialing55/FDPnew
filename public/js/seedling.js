@@ -267,7 +267,7 @@ function fsseedlingtable(data, maxid, thispage){
     rowHeights: 38,
     removeRowPlugin: true,
     // minSpareRows: 1,
-    colWidths: [120, 40, 40, 80, 120,50,50,50,40,40,60,35,35, 160,160],
+    colWidths: [120, 40, 40, 100, 120,50,50,50,40,40,60,35,35, 160,160],
     licenseKey: 'non-commercial-and-evaluation',
     colHeaders: ["Date", "Trap", "Plot", "Tag", "種類", "長度","子葉","真葉","狀態","新舊","萌櫱","X","Y", "Note","特殊修改"],
     columns: [
@@ -809,13 +809,15 @@ function fsslrolltable(slroll, covs){
 
 
 
-function alternote(tag, entry, thispage) {
+function alternote(tag, entry, thispage, envet) {
 	// console.log(tag);
 	$('.altersavenote').html('');
 
-	  var posX = $("button[name='alternoteshow"+tag+"']").offset().left;
-    var posY = $("button[name='alternoteshow"+tag+"']").offset().top;
-    console.log(posX+", "+posY);
+    var posX = event.pageX;
+    var posY = event.pageY;
+	  // var posX = $("button[name='alternoteshow"+tag+"']").offset();
+    // var posY = $("button[name='alternoteshow"+tag+"']").offset().top;
+    console.log(posX);
 
     $('.alternotetalbeouter').css('top', posY);
     $('.alternotetalbeouter').css('left', posX-500);

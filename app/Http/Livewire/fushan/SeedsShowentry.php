@@ -73,7 +73,13 @@ class SeedsShowentry extends Component
             $month=$date1[1];
             $day=$date1[2];
 
-
+//種子雨收集日期間隔(date1)判斷
+//如果這次的收集月份與上次不同，取得上次日期資料，與這次的日期資料相減，獲得$interval
+//如果本次日期($day)<$interval/2，則將本次資料歸為前一個月
+//若($day)=$interval/2，則需判斷前次月份和前前次月份是否皆已達五次(最多為五次)，若否，則歸入前月，若是，則維持為本月
+//若($day)>$interval/2，則屬於本月
+//
+//
             $inlist['year']=$year;
 
             $census=$this->census;
@@ -98,7 +104,9 @@ class SeedsShowentry extends Component
                     }
                 }
             }
-
+//period判斷
+//以九月為切分，過九月後，即為新的一個period
+//
             $month=str_pad($month, 2, '0', STR_PAD_LEFT);
             $inlist['month']=$month;
             $inlist['date1']=$year."-".$month."-01";

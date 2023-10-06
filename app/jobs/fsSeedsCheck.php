@@ -38,7 +38,7 @@ class fsSeedsCheck
 			} else {
 			//3 code = 0
 				if ($record['code']=='0'){
-					$checknote='code 不得為 0。';	
+					$checknote='類別 不得為 0。';	 
 				} else if ($record['code']=='1') {
 				// 3 code = 1
 				// a seeds = 0		
@@ -57,12 +57,12 @@ class fsSeedsCheck
 								if ($spinfo[$record['csp']]['size']=='B'){
 									
 									if ($record['csp'] == '九芎' or $record['csp'] == '凹葉越橘' or $record['csp'] == '五節芒' or $record['csp'] == 'UNKCOM1' or $record['csp'] == 'UNKCOM2' or $record['csp'] == 'UNKCOM3'){
-									if ($record['viability'] != 'NA' ){
-									$checknote='活性應為 NA。';		
-									}	
-									if ($record['seeds'] == 'NA' ){
-									$checknote='種子數不應為 NA。';		
-									}
+										if ($record['viability'] != 'NA' ){
+										$checknote='活性應為 NA。';		
+										}	
+										if ($record['seeds'] == 'NA' ){
+										$checknote='種子數不應為 NA。';		
+										}
 									
 									} else {
 									
@@ -158,11 +158,11 @@ class fsSeedsCheck
 				} else if ($record['code']=='3') {
 				// 3 code = 3
 				// a seeds != 0	
-					if ($record['seeds']==''){
-						$record['seeds']='0';
-					}
-					if ($record['seeds']!='0'){
-						$checknote='種子數應為 0。';						
+					// if ($record['seeds']==''){
+					// 	$record['seeds']='0';
+					// }
+					if ($record['seeds']!=''){
+						$checknote='種子數應為 空白。';						
 					} 
 				// b viability != ''		
 					if ($record['viability']!=''){
@@ -182,11 +182,11 @@ class fsSeedsCheck
 				} else if ($record['code']=='4') {
 				// 3 code = 4
 				// a seeds != 0	
-					if ($record['seeds']==''){
-						$record['seeds']='0';
-					}
-					if ($record['seeds']!='0'){
-						$checknote='種子數應為 0。';						
+					// if ($record['seeds']==''){
+					// 	$record['seeds']='0';
+					// }
+					if ($record['seeds']!=''){
+						$checknote='種子數應為 空白。';						
 					} 
 				// b viability != ''		
 					if ($record['viability']!=''){
@@ -207,11 +207,11 @@ class fsSeedsCheck
 				} else if ($record['code']=='5') {
 				// 3 code = 5
 				// a seeds != 0		
-					if ($record['seeds']==''){
-						$record['seeds']='0';
-					}
-					if ($record['seeds']!='0'){
-						$checknote='種子數應為 0。';						
+					// if ($record['seeds']==''){
+					// 	$record['seeds']='0';
+					// }
+					if ($record['seeds']!=''){
+						$checknote='種子數應為 空白。';						
 					} 
 				// b viability != ''		
 					if ($record['viability']!=''){
@@ -228,11 +228,11 @@ class fsSeedsCheck
 				} else if ($record['code']=='6') {
 				// 3 code = 6
 				// a seeds != 0	
-					if ($record['seeds']==''){
-						$record['seeds']='0';
-					}
-					if ($record['seeds']!='0'){
-						$checknote='種子數應為 0。';						
+					// if ($record['seeds']==''){
+					// 	$record['seeds']='0';
+					// }
+					if ($record['seeds']!=''){
+						$checknote='種子數應為 空白。';						
 					} 
 				// b viability != ''		
 					if ($record['viability']!=''){
@@ -256,10 +256,7 @@ class fsSeedsCheck
 						$checknote='性別欄位應為 空白。';
 						}
 					}
-				} else {
-				// 3 code != 1-6	
-					$checknote='類別欄位應為 1 - 6 。';
-				}
+				} 
 			}
 		}
 
