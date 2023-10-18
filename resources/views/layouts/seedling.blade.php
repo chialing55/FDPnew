@@ -60,6 +60,11 @@
 
 @section('content') 
 
+  <div class="icon icon2">
+
+    <img src="{{asset('/images/黃杞_苗_72_250.png')}}" alt="圖案">
+  </div>
+
 @include('includes.header2')
  
 <div class='content'>

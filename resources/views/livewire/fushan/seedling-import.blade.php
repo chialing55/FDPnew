@@ -12,11 +12,13 @@
             <ol>
                 <li>完成<a href='{{asset('/fushan/seedling/compare')}}'>資料比對</a></li>
                 <li>(後端) 進行特殊修改：修改 slrecord1，並刪除 slrecord1 的 alternote 欄位資料，以示以完成特殊修改。</li>
+                <li>(後端) 將資料為 -2 的種類，新增欄位改為 T。</li>
                 <li>將小苗資料匯入大表 seedling，將覆蓋度資料匯入 seedling_cov，將小苗位置資料匯入/更新至 base (slroll 沒有大表) 。</li>
             </ol>
             <p style='margin: 10px 0 30px 0'><button class='recruitbutton' wire:click="import">匯入大表</button></p>
         </p>
         <p>
+
         <h6>後續資料表整理 (手動)</h6>
             <ol>
                 <li>修改 slrecord2(才有特殊修改資訊)、slcov1、slroll1 資料表名稱為 slrecord_yyyymm(當次調查年月)，以此類推。

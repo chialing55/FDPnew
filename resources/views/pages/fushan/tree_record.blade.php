@@ -202,7 +202,7 @@ $list=0;
     @if($data['tag'][0]=='G')
     <td class="td2" style='font-size:11px'>{{$data['pom']}}+{{$data['h2']}}</td>
     @else
-   <td class="td2">{{$data['dbh']}}</td>{{--如果列h1+h2，class=td4 --}}
+   <td @if($data['status']=='-1') class="td3" @else class='td2' @endif>{{$data['dbh']}}</td>{{--如果列h1+h2，class=td4 --}}
    @endif
    <td width="6%" class='td5' style='font-size:10px'>{{$data['status']}}</td>
    <td width="7%" class='td5' style='font-size:10px'>{{$data['code']}}</td>

@@ -60,6 +60,14 @@ Route::get('fushan/{project}', function($project){
     
 });
 
+Route::get('shoushan/{project}', function($project){
+// echo '1'.$project;
+        if ($project=='plot'){
+            return App::call('App\Http\Controllers\ssPlotController@plot',['site' => 'shoushan'] );
+        }
+    
+});
+
 //seedling download record pdf
 //
 Route::get('/fsseedling-record-pdf/{start}/{end}', [App\Http\Controllers\fsSeedlingPDFController::class, 'record']);
@@ -70,6 +78,10 @@ Auth::routes();
 //tree download record pdf
 
 Route::get('/fstree-record-pdf/{qx}/{qy}/{type}', [App\Http\Controllers\fsTreePDFController::class, 'record']);
+
+//ssplot download record pdf
+
+Route::get('/ssplot-10m-record-pdf/{plot}', [App\Http\Controllers\ss10mTreePDFController::class, 'record']);
 
 // pages
 Route::get('/fushan/{project}/{type}', function($project, $type){
@@ -108,6 +120,8 @@ Route::get('/fushan/{project}/{type}', function($project, $type){
                 return App::call('App\Http\Controllers\fsTreeController@dataviewer',['site' => $site] );
             } else if ($type=='entryprogress'){
                 return App::call('App\Http\Controllers\fsTreeController@entryprogress',['site' => $site] );
+            } else if ($type=='compare'){
+                return App::call('App\Http\Controllers\fsTreeController@compare',['site' => $site] );
             }
             
         }

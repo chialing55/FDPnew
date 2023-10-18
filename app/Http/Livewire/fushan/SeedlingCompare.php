@@ -140,40 +140,67 @@ class SeedlingCompare extends Component
 
             sort($tag2);    
  // dd($tag2);
-
+            $comnote1=[];
                     //依tag比對
 
                     //$comnote=$comnote.$j.'step3<br>';
             for ($i=0; $i<count($tag2);$i++){
+                $comnote2=[];
                 if (isset($record1[$tag2[$i]])){
                     //$comnote=$comnote.'step4<br>';
                     if (isset($record2[$tag2[$i]])){  //12皆有
                         //$comnote=$comnote.'step5<br>';
-                        $add2='';
+                        $add2=[];
                         foreach ($record1[$tag2[$i]] as $key => $value){
                         
                             if ($record2[$tag2[$i]][$key]!=$value){
                                     // $add2=" [".$key.", (".$value."), (".$record2[$tag2[$i]][$key].")]";  
-                                    $add2.='['.$key.']';             
+                                    $add2[]=$key;             
                             }
                         }
-                        if ($add2!=''){
-                            $comnote=$comnote.'小苗資料比對: 樣站 '.$j.' No. '.$tag2[$i].$add2.' 的資料不合。<br>';
+                        if (count($add2)>0){
+                            foreach ($add2 as $add21){
+                                $comnote2['trap']=intval($record1[$tag2[$i]]['trap']);
+                                $comnote2['tag']=$tag2[$i];
+                                $comnote2['note']=$add21.' 資料不合';
+                                $comnote1[]=$comnote2;
+                                // $comnote=$comnote.'小苗資料比對: 樣站 '.$record1[$tag2[$i]]['trap'].' No. '.$tag2[$i]. $add21.' 的資料不合。<br>';
+                            }
+                            
                             $pass2='0';
                         }
                     } else {  //1有2沒有
-                        $comnote=$comnote.'小苗資料比對: 樣站 '.$j.' No. '.$tag2[$i].' 第二次輸入缺資料。<br>';
+                                $comnote2['trap']=intval($record1[$tag2[$i]]['trap']);
+                                $comnote2['tag']=$tag2[$i];
+                                $comnote2['note']=' 第二次輸入缺資料';
+                                $comnote1[]=$comnote2;
+                        // $comnote=$comnote.'小苗資料比對: 樣站 '.$record1[$tag2[$i]]['trap'].' No. '.$tag2[$i].' 第二次輸入缺資料。<br>';
                         $pass2='0';    
                     }
 
                 } else {  //1沒有2有
-                        $comnote=$comnote.'小苗資料比對: 樣站 '.$j.' No. '.$tag2[$i].' 第一次輸入缺資料。<br>';
+                                $comnote2['trap']=intval($record2[$tag2[$i]]['trap']);
+                                $comnote2['tag']=$tag2[$i];
+                                $comnote2['note']=' 第二次輸入缺資料';
+                                $comnote1[]=$comnote2;
+                        // $comnote=$comnote.'小苗資料比對: 樣站 '.$record2[$tag2[$i]]['trap'].' No. '.$tag2[$i].' 第一次輸入缺資料。<br>';
                         $pass2='0';    
                 }
             }
+            // dd($comnote1);
 
             if ($pass2=='0'){
-                $comnote=$comnote."<br>";
+
+                usort($comnote1, function ($a, $b) {
+                    return $a['trap'] - $b['trap'];
+                });
+
+                foreach ($comnote1 as $note){
+                    $comnote=$comnote.'小苗資料比對: 樣站 '.$note['trap']. ' tag '.$note['tag']." ".$note['note']."<br>";
+                }
+
+
+                
             }
 
 // 比對撿到環資料

@@ -71,13 +71,20 @@
 .icon {
   position: fixed;
   top: 200px; /* 調整圖案距離頂部的距離 */
-  right: 20px; /* 調整圖案距離右側的距離 */
+  right: 30px; /* 調整圖案距離右側的距離 */
   z-index: 1;
 }
 
 .icon img {
   width: 200px; /* 調整圖案的寬度 */
-  height: 200px; /* 調整圖案的高度 */
+/*  height: 200px; /* 調整圖案的高度 */
+  opacity: 0.5;
+
+}
+
+.icon2 img {
+  width: 130px; /* 調整圖案的寬度 */
+/*  height: 200px; /* 調整圖案的高度 */
   opacity: 0.5;
 
 }
@@ -110,7 +117,7 @@
 	border-bottom: 100px solid #90a955;
 }
 
-.box1 {
+.box1, .box2 {
 	display: flex;
 	flex-direction: column;
 	padding:20px;
@@ -119,6 +126,10 @@
 	margin: 30px 10px 10px 0;
 	border-radius: 5px;
 	border: 1px solid #eee;
+}
+
+.box2 {
+	background-color: #e6e6e6;
 }
 
 .img {

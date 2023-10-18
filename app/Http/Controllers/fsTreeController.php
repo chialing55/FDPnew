@@ -220,7 +220,28 @@ class fsTreeController extends Controller
         }
     }
 
+    public function compare(Request $request, $site){
 
+        $user = $request->session()->get('user', function () {
+            return 'no';
+        });
+
+        if ($user=='no'){
+            return view('login1', [
+                'check' => 'no'
+            ]);
+        } else {
+            // echo "1";
+            //最近一次調
+
+            // print_r($user);
+            return view('pages/fushan/tree_compare', [
+                'site' => $site,
+                'project' => '每木',
+                'user' => $user,
+            ]);
+        }
+    }
 
 
 }

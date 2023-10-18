@@ -57,6 +57,11 @@
 
 @section('content') 
 
+  <div class="icon">
+
+    <img src="{{asset('/images/山龍眼_花果_72_300.png')}}" alt="圖案">
+  </div>
+
 @include('includes.header2')
  
 <div class='content'>

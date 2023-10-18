@@ -92,6 +92,7 @@
         <li>狀態：<b>A</b>: 存活，<b>G</b>: 見環不見苗，<b>D</b>: 死亡，<b>N</b>: 消失。</li>
         <li>note：統一使用「中文」標點符號。「半形」英文符號。「半形」阿拉伯數字，數字後留一格空白。先確認原始 note，加「。」，再輸入本次note。不同類型 note 間用「。」分隔。暫時註記的內容(需特殊修改或撿到環等)，不需填入。</li>
         <li>特殊修改：如需要更正 Trap, Plot, Tag, 種類, 原長度和原葉片數，請點選「特殊修改 <i class='fa-regular fa-note-sticky'></i>」 填寫。</li>
+        <li>請參考輸入說明之特殊情況處理。</li>
         <li>資料輸入完成至Trap=107時，請按<button class='datasavebutton' style='width: auto;'>輸入完成</button>，以做最後檢查。</li>
     </ul>
 </div>

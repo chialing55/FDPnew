@@ -67,9 +67,20 @@ class fsTreePDFController extends Controller
                 $missdata=FsTreeCensus3::where('tag', 'like', $treedatas[$i]['tag'])->where('status', 'like', '-1')->get();
                 if (!$missdata->isEmpty()){
                     continue;
+                } else {
+                    $missdata1=FsTreeCensus3::where('tag', 'like', $treedatas[$i]['tag'])->get();
+                    if ($treedatas[$i]['tag'][0]!='G'){
+                        $treedatas[$i]['dbh']='('.$missdata1[0]['dbh'].")";
+                    } else {
+                        $treedatas[$i]['h2']='('.$missdata1[0]['h2'].")";
+                    }
+                    
                 }
 
             }
+
+
+
             $treedatas[$i]['spcode']=$taglistqx[$treedatas[$i]['tag']]['spcode'];
             $treedatas[$i]['csp']=$splist[$treedatas[$i]['spcode']];
             
@@ -112,9 +123,9 @@ class fsTreePDFController extends Controller
         // echo "(2,2) 共".count($datasqx[2][2])."筆/".count($datatagsqx[2][2])."棵樹";
         // echo count($treedatas)."<br>";
         // echo $totalnum."<br>";
-
+// (18,14)-> 335/10  (16,4)->255/7
         //每行約0.6cm，(1,1)那一行約0.9cm，0.9*16(16個樣區行)/0.6=24
-        $totalpage=ceil(($totalnum+20)/39);
+        $totalpage = round(($totalnum+24) / 39) ;
         // print_r($splist);
         // echo $totalpage;
             

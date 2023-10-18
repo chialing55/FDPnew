@@ -24,6 +24,11 @@ const user='".$user."';
 
 @section('content') 
 
+  <div class="icon">
+
+    <img src="{{asset('/images/紅楠_葉_72_300.png')}}" alt="圖案">
+  </div>
+
   @include('includes.header')
 
 <div class='content'>
@@ -62,13 +67,15 @@ const user='".$user."';
         <div class='box1 choice' site='fushan' project='seeds'>
           <div class='boxtext'>福山 種子雨</div>
           <img src="{{asset('/images/research/seed.png')}}"/>
-          
         </div>
         <div class='box1 choice' site='fushan' project='seedling'>
           <img src="{{asset('/images/research/seedling.png')}}"/>
           <div class='boxtext'>福山 小苗</div>
         </div>
-
+        <div class='box2 choice' site='shoushan' project='plot'>
+          <div class='boxtext'>壽山 植物監測</div>
+          <img src="{{asset('/images/research/monkey.png')}}"/>
+        </div>
 
   </div>
 

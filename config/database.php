@@ -120,6 +120,25 @@ return [
             ]) : [],
         ],
 
+        'mysql5' => [
+            'driver' => env('DB_CONNECTION_FIFTH'),
+            'host' => env('DB_HOST_FIFTH'),
+            'port' => env('DB_PORT_FIFTH'),
+            'database' => env('DB_DATABASE_FIFTH'),
+            'username' => env('DB_USERNAME_FIFTH'),
+            'password' => env('DB_PASSWORD_FIFTH'),
+            'unix_socket' => env('DB_SOCKET', ''),
+            'charset' => 'utf8mb4',
+            'collation' => 'utf8mb4_unicode_ci',
+            'prefix' => '',
+            'prefix_indexes' => true,
+            'strict' => true,
+            'engine' => null,
+            'options' => extension_loaded('pdo_mysql') ? array_filter([
+                PDO::MYSQL_ATTR_SSL_CA => env('MYSQL_ATTR_SSL_CA'),
+            ]) : [],
+        ],
+
         'pgsql' => [
             'driver' => 'pgsql',
             'url' => env('DATABASE_URL'),
