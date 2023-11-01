@@ -119,6 +119,7 @@ border-bottom:1px solid #dedede;
   display: inline-block;
   padding-left:10px;
   margin-left:5px;
+  color:#b3b3b3;
 }
 
 .td8 {
@@ -152,7 +153,7 @@ $list=0;
 {{-- <?php echo count($record);?> --}}
 <table width="100%"  border='0' cellpadding="4" cellspacing="0" class='chinese' valign='top'>
   <tr>
-    <td style='vertical-align:text-top'><div style="font-size: 2em; margin: -10px 0 10px 0">({{$plot}})</div><div style="font-size: 1.2em"><div class='td8' >GPS</div><div class='td7' style='width:130px'>{{$plotinfo['gps_x']}}, {{$plotinfo['gps_y']}}</div></div><div><div class='td8'>海拔</div> <div class="td7">{{$plotinfo['altitude']}} m</div></div></td>
+    <td style='vertical-align:text-top'><div style="font-size: 2em; margin: -10px 0 10px 0">({{$plot}})</div><div style="font-size: 1.2em"><div class='td8' >GPS</div><div class='td7' style='width:130px; color:black;'>{{$plotinfo['gps_x']}}, {{$plotinfo['gps_y']}}</div></div><div><div class='td8'>海拔</div> <div class="td7" style='color:black;'>{{$plotinfo['altitude']}} m</div></div></td>
     <td style='vertical-align:text-top'>
       
       <div><div class='td8'>坡向</div> <div class="td7">{{$plotinfo['aspect']}}</div></div>
@@ -236,9 +237,9 @@ $list=0;
   @for($q=0;$q<count($datasqx[$x][$y]);$q++)
   @php $data=$datasqx[$x][$y][$q]@endphp
 <tr class='tr'>
-  <td width="10%" @if($data['b']=='0') class="td2" @else class='td3' @endif>{{$data['tag']}}</td>{{--如果status!=''，class=td3 --}}
-   <td width="4%" class="td2">{{$data['b']}}</td>
-   <td width="15%" @if($data['b']=='0') class="td2" @else class='td3' @endif>{{$data['csp']}}</td>
+  <td width="10%" @if($data['branch']=='0') class="td2" @else class='td3' @endif>{{$data['tag']}}</td>{{--如果status!=''，class=td3 --}}
+   <td width="4%" class="td2">{{$data['branch']}}</td>
+   <td width="15%" @if($data['branch']=='0') class="td2" @else class='td3' @endif>{{$data['csp']}}</td>
     <td width="4%" class="td4" style='font-size:10px'>
       @if(isset($data['maxb']))
       ({{$data['maxb']}})

@@ -54,8 +54,17 @@ class TreeShowentryprogress extends Component
 
 //助理進度表
 
-//因為搞不定主機的紀錄時間，所以更改顯示時間，需加8小時
-        $table1s=FsTreeRecord1::select('update_id', DB::raw('LEFT(DATE_ADD(updated_at, INTERVAL 8 HOUR), 10) AS date1'), DB::raw('count(stemid) as pps'))->where('date', 'not like', '0000-00-00')->groupBy('update_id', 'date1')->orderByDesc('date1')->get()->toArray();
+//一開始因為搞不定主機的紀錄時間，所以更改顯示時間，需加8小時
+//但10-21後日期變成正確的，所以直接把之前的時間更新
+
+// UPDATE `record1`
+// SET `updated_at` = DATE_FORMAT(DATE_ADD(`updated_at`, INTERVAL 8 HOUR), '%Y-%m-%d %H:%i:%s')
+// WHERE `updated_at` < '2023-10-20';
+
+
+//$table1s=FsTreeRecord1::select('update_id', DB::raw('LEFT(DATE_ADD(updated_at, INTERVAL 8 HOUR), 10) AS date1'), DB::raw('count(stemid) as pps'))->where('date', 'not like', '0000-00-00')->groupBy('update_id', 'date1')->orderByDesc('date1')->get()->toArray();
+
+        $table1s=FsTreeRecord1::select('update_id', DB::raw('LEFT(updated_at, 10) AS date1'), DB::raw('count(stemid) as pps'))->where('date', 'not like', '0000-00-00')->groupBy('update_id', 'date1')->orderByDesc('date1')->get()->toArray();
         for($i=0;$i<count($table1s); $i++){
             
             if (isset($userid[$table1s[$i]['update_id']])){
@@ -67,7 +76,7 @@ class TreeShowentryprogress extends Component
         }
 
         // dd($tableall);
-        $table2s=FsTreeRecord2::select('update_id', DB::raw('LEFT(DATE_ADD(updated_at, INTERVAL 8 HOUR), 10) AS date1'), DB::raw('count(stemid) as pps'))->where('date', 'not like', '0000-00-00')->groupBy('update_id', 'date1')->get()->toArray();
+        $table2s=FsTreeRecord2::select('update_id', DB::raw('LEFT(updated_at, 10) AS date1'), DB::raw('count(stemid) as pps'))->where('date', 'not like', '0000-00-00')->groupBy('update_id', 'date1')->get()->toArray();
 
         if (count($table2s)>0){
             for($i=0;$i<count($table2s); $i++){

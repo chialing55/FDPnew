@@ -46,6 +46,10 @@ class fsTreeSaveController extends Controller
         $uplist['update_id'.$entry]=$user;
         $uplist['update_date'.$entry]=date("Y-m-d H:i:s");
         FsTreeEntrycom::where('qx', 'like', $qx)->where('qy', 'like', $qy)->update($uplist);
+        $uplist2['compareOK']='0';
+        $uplist2['compareOKdate']='';
+
+        FsTreeEntrycom::where('qx', 'like', $qx)->update($uplist2);
 
         return $redata;
 

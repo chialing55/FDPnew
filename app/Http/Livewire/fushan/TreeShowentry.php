@@ -174,22 +174,6 @@ class TreeShowentry extends Component
     }
     public $entrynote='';
 
-//速度太慢，幫助不大，要從以輸入完成的資料表中取資料比較快
-    public function qxchange($qx){
-        // $this->record='';
-        // if ($this->entry=='1'){
-        //     $from=FsTreeRecord1::where('qx', 'like', $qx)->where('show', 'like', '1')->where('date', 'like', '0000-00-00')->orderBy('qy', 'asc')->get();
-        // } else {
-
-        // }
-        
-        // if (!$from->isEmpty()){
-        //     $from1=$from[0]['qy'];
-        //     $this->entrynote='* 可從 qy='.$from1."開始";
-        // } else {
-        //     $this->entrynote='* 樣線 '.$qx." 以輸入完成";
-        // }
-    }
 
     public function submitForm(Request $request){
 

@@ -17,6 +17,7 @@ yarn-error.log
 /.idea
 /.vscode
 /FDPdata
+/fushanseed
 /public/recordpdf
 composer.json
 composer.lock

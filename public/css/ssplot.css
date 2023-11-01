@@ -1,0 +1,8 @@
+.tablenote{
+	display: inline-block;
+	margin-left: 20px;
+}
+
+.addcovtableout {
+	display: none;
+}

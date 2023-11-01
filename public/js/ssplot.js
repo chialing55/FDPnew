@@ -50,3 +50,4 @@ $('.list6, .list6inner').on('mouseenter', function() {
       window.open(url);
     }
   });
+

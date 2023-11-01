@@ -114,16 +114,9 @@ border: 1px solid  #A568FF;
 }
 
 
-.recruittableout, .slrolltableout {
-	display: none;
-}
 
-.savenote {
-	font-weight:500; 
-	margin-left: 30px; 
-	font-size:90%; 
-	color:red;
-}
+
+
 
 .prev, .next, .showall {
 	margin-left: 20px;

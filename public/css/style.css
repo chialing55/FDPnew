@@ -263,6 +263,8 @@ select {
 }
 
 
+
+
 /* CSS */
 button {
   appearance: none;
@@ -427,3 +429,13 @@ button:-webkit-details-marker {
   margin-bottom: 10px;
 }
 
+.recruittableout, .slrolltableout {
+  display: none;
+}
+
+.savenote {
+  font-weight:500; 
+  margin-left: 30px; 
+  font-size:90%; 
+  color:red;
+}

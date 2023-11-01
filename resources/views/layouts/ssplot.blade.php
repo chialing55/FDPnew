@@ -39,26 +39,27 @@
 @section('headerList')
   <div class='headerlist iflex'>
       <div class='list list1 listlink' type='doc'>相關文件<hr></div>
-      <div class='list list4 ' >1.05樣區資料輸入<hr></div>
       <div class='list list6 ' >森林觀測樣區資料輸入<hr></div>
+      <div class='list list4 ' >1.05樣區資料輸入<hr></div>
+      
   </div>
 
 @endsection
 
 @section('headerListinner')
       <div class='listinner list4inner'>
-          <li class='innerlist list41 listlink' type='note'>資料輸入注意事項<hr></li>
-          <li class='innerlist list42 listlink' type='1.05_entry1' >第一次輸入<hr></li>
-          <li class='innerlist list43 listlink' type='1.05_entry2' >第二次輸入<hr></li>
-          <li class='innerlist list44 listlink' type='1.05_compare'>資料比對<hr></li>
+          <li class='innerlist list41' type='1ha_note'>資料輸入注意事項<hr></li>
+          <li class='innerlist list42' type='1ha_entry1' >第一次輸入<hr></li>
+          <li class='innerlist list43' type='1ha_entry2' >第二次輸入<hr></li>
+          <li class='innerlist list44' type='1.05_compare'>資料比對<hr></li>
 
       </div>
 
       <div class='listinner list6inner'>
-          <li class='innerlist list61 listlink' type='note'>資料輸入注意事項<hr></li>
-          <li class='innerlist list62 listlink' type='fp_entry1' >第一次輸入<hr></li>
-          <li class='innerlist list63 listlink' type='fp_entry2' >第二次輸入<hr></li>
-          <li class='innerlist list64 listlink' type='fp_compare'>資料比對<hr></li>
+          <li class='innerlist list61 ' type='10m_note'>資料輸入注意事項<hr></li>
+          <li class='innerlist list62 listlink' type='10m_entry1' >第一次輸入<hr></li>
+          <li class='innerlist list63 listlink' type='10m_entry2' >第二次輸入<hr></li>
+          <li class='innerlist list64' type='10m_compare'>資料比對<hr></li>
 
       </div>
 
@@ -66,9 +67,9 @@
 
 @section('content') 
 
-  <div class="icon icon2">
+  <div class="icon">
 
-    <img src="{{asset('/images/小刺山柑_葉_72_300.png')}}" alt="圖案">
+    <img src="{{asset('/images/小刺山柑_葉_72_300.png')}}" alt="圖案" >
   </div>
 
 @include('includes.header2')

@@ -523,6 +523,7 @@ function fsseedlingtableupdate(data, maxid, thispage){
          return cellProperties;
 
     },
+    
     });
 
 }

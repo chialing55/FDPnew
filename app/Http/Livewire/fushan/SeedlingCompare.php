@@ -181,7 +181,7 @@ class SeedlingCompare extends Component
                 } else {  //1沒有2有
                                 $comnote2['trap']=intval($record2[$tag2[$i]]['trap']);
                                 $comnote2['tag']=$tag2[$i];
-                                $comnote2['note']=' 第二次輸入缺資料';
+                                $comnote2['note']=' 第一次輸入缺資料';
                                 $comnote1[]=$comnote2;
                         // $comnote=$comnote.'小苗資料比對: 樣站 '.$record2[$tag2[$i]]['trap'].' No. '.$tag2[$i].' 第一次輸入缺資料。<br>';
                         $pass2='0';    

@@ -43,7 +43,7 @@ Route::get('/choice', [App\Http\Controllers\choiceController::class, 'check'])->
 //     return redirect(route('genus', ['family' => $family, 'genusnow' => $genus]));
 // });
 
-Route::get('fushan/{project}', function($project){
+Route::get('/fushan/{project}', function($project){
 // echo '1'.$project;
 
         if ($project=='seedling'){
@@ -60,7 +60,7 @@ Route::get('fushan/{project}', function($project){
     
 });
 
-Route::get('shoushan/{project}', function($project){
+Route::get('/shoushan/{project}', function($project){
 // echo '1'.$project;
         if ($project=='plot'){
             return App::call('App\Http\Controllers\ssPlotController@plot',['site' => 'shoushan'] );
@@ -142,6 +142,37 @@ Route::get('/fushan/{project}/{type}', function($project, $type){
     
 });
 
+// pages
+Route::get('/shoushan/{project}/{type}', function($project, $type){
+// echo '1'.$project;
+  $site='shoushan';
+        if ($project=='plot'){
+
+            if ($type=='doc'){
+                return App::call('App\Http\Controllers\ssPlotController@plot',['site' => $site] );
+            } else if ($type=='1ha_note'){
+                return App::call('App\Http\Controllers\ssPlotController@note1ha',['site' => $site] );
+            } else if ($type=='1ha_entry1'){
+                return App::call('App\Http\Controllers\ssPlotController@entry1ha',['site' => $site, 'entry'=> '1'] );
+            } else if ($type=='1ha_entry2'){
+                return App::call('App\Http\Controllers\ssPlotController@entry1ha',['site' => $site, 'entry'=> '2'] );
+            } else if ($type=='1ha_compare'){
+                return App::call('App\Http\Controllers\ssPlotController@compare1ha',['site' => $site] );
+            } else if ($type=='10m_note'){
+                return App::call('App\Http\Controllers\ssPlotController@note10m',['site' => $site] );
+            } else if ($type=='10m_entry1'){
+                return App::call('App\Http\Controllers\ssPlotController@entry10m',['site' => $site, 'entry'=> '1'] );
+            } else if ($type=='10m_entry2'){
+                return App::call('App\Http\Controllers\ssPlotController@entry10m',['site' => $site, 'entry'=> '2'] );
+            } else if ($type=='10m_compare'){
+                return App::call('App\Http\Controllers\ssPlotController@compare10m',['site' => $site] );
+            }
+        }
+
+});
+
+
+
 // Route::get('/fushan/seedling/text', [App\Http\Controllers\fsSeedlingController::class, 'seedling',['site' => 'fushan']]);
 
 //fstree entry
@@ -170,6 +201,19 @@ Route::post('/fsseedssavedata', [App\Http\Controllers\fsSeedsSaveController::cla
 Route::post('/fsseedssavedata1', [App\Http\Controllers\fsSeedsSaveController::class, 'savedata1'])->name('savedata1');
 Route::get('/fsseedsdeletedata/{id}/{info}/{thispage}', [App\Http\Controllers\fsSeedsSaveController::class, 'deletedata'])->name('deletedata');
 Route::get('/fsseedsfinish', [App\Http\Controllers\fsSeedsSaveController::class, 'finishnote'])->name('finishnote');
+
+
+//ssplot entry
+Route::post('/ss10msaveenvi', [App\Http\Controllers\ss10mSaveController::class, 'saveenvi']);
+Route::post('/ss10msavedata', [App\Http\Controllers\ss10mSaveController::class, 'savedata']);
+Route::post('/ss10msaverecruit', [App\Http\Controllers\ss10mSaveController::class, 'saverecruit']);
+Route::get('/ss10mdeletedata/{stemid}/{entry}', [App\Http\Controllers\ss10mSaveController::class, 'deletedata']);
+Route::get('/ss10maddalternote/{stemid}/{entry}', [App\Http\Controllers\ss10mAlternote::class, 'alternote']);
+Route::post('/ss10msavealternote', [App\Http\Controllers\ss10mSaveController::class, 'savealternote']);
+Route::get('/ss10mdeletealter/{stemid}/{entry}', [App\Http\Controllers\ss10mSaveController::class, 'deletealter']);
+Route::post('/ss10msaveaddcov', [App\Http\Controllers\ss10mSaveController::class, 'saveaddcov']);
+Route::get('/ss10mdeletecov/{id}/{entry}', [App\Http\Controllers\ss10mSaveController::class, 'deletecov']);
+Route::post('/ss10msavecov', [App\Http\Controllers\ss10mSaveController::class, 'savecov']);
 
 //檔案最新更新日期
 Route::get('/latest-updates', 'App\Http\Controllers\UpdateController@latestUpdates');

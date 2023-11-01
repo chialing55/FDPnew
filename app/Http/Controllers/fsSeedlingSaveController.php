@@ -178,6 +178,9 @@ class fsSeedlingSaveController extends Controller
                 $datasavenote=$data[$i]['tag'].' 需有日期/長度/葉片數 資料';
                 break;
             }
+
+//             // if (!isset($data[$i]['note'])){$data[$i]['note']='';}
+
             if ($data[$i]['sprout']=='TRUE'){///sprout
 
                 $sprout_tag=explode('.',trim($data[$i]['tag']));
@@ -256,7 +259,7 @@ class fsSeedlingSaveController extends Controller
                 break;
             }
 
-//子葉數
+// //子葉數
             if ($data[$i]['cotno']>2){
                 $datasavenote=$data[$i]['tag']." 子葉數不得 > 2";
                 break;
@@ -283,7 +286,7 @@ class fsSeedlingSaveController extends Controller
             }
 
 //修改tag  //如果是修改新增小苗的號碼，則mtag也要一起修改
-            
+            $alterdata=[];
             $slrecord=$table::where('id', 'like', $data[$i]['id'])->get();
 
             if ($data[$i]['tag'] != $slrecord[0]['tag']){
@@ -293,23 +296,15 @@ class fsSeedlingSaveController extends Controller
             }
 //如果原本的status是N，後來不是N (A, G, D)，更新alternote
         //echo 'recruit: '.$data[$i]['recruit'];
-            if ($slrecord[0]['status'] == 'N' && $data[$i]['status'] !='N'){
+            if ($slrecord[0]['recruit'] == 'N' && $data[$i]['status'] !='N'){
 
                 if ($data[$i]['alternote']!=''){
-                    $alterdata = json_decode($result[0]['alternote'], true);  //把json轉array
+                    $alterdata = json_decode($data[0]['alternote'], true);  //把json轉array
                 }
                 $alterdata['狀態']=$data[$i]['status'];
 
                 $data[$i]['alternote'] = json_encode($alterdata, JSON_UNESCAPED_UNICODE);  //把array轉json
-
-
             }
-
-
-
-
-
-            
 // ['year' => date('Y'), 'month' => $month, 'date' => '0000-00-00']
             foreach($data[$i] as $key => $value){
                 // dd($key);

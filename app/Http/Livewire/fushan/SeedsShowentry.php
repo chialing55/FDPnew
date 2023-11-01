@@ -156,11 +156,11 @@ class SeedsShowentry extends Component
 
 
 
-        $csplist1 = FsSeedsFulldata::select('csp', DB::raw('count(trap) as count2'))->where('csp', 'not like', 'nothing')->groupBy('csp')->orderByDesc('count2')->get()->toArray();
+        $fsscsplist1 = FsSeedsFulldata::select('csp', DB::raw('count(trap) as count2'))->where('csp', 'not like', 'nothing')->groupBy('csp')->orderByDesc('count2')->get()->toArray();
 
-        for($i=0;$i<count($csplist1);$i++){
+        for($i=0;$i<count($fsscsplist1);$i++){
 
-            $csplist[]=$csplist1[$i]['csp'];
+            $fsscsplist[]=$fsscsplist1[$i]['csp'];
         }
 
         for($k=0;$k<29;$k++){
@@ -182,7 +182,7 @@ class SeedsShowentry extends Component
         $this->entry='y';
         $this->thiscensus=$census;
 
-        $this->dispatchBrowserEvent('data', [ 'census' => $census, 'record' => $entrytable, 'emptytable' => $emptytable, 'csplist' => $csplist]);
+        $this->dispatchBrowserEvent('data', [ 'census' => $census, 'record' => $entrytable, 'emptytable' => $emptytable, 'csplist' => $fsscsplist]);
 
     }
 
