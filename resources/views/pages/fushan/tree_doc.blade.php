@@ -15,7 +15,7 @@ $(function() {
 @section('rightbox')
 <div class='flex text_outbox'>
     <div class='text_box'>
-        <h2>下載第五次調查記錄紙</h2>
+        <h2>下載第五次調查紀錄紙</h2>
         <hr>
         <div  style='flex-direction: column;' >
             <div style='margin: 20px 0px;'>

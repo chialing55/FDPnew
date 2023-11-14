@@ -70,7 +70,7 @@ class ss10mSaveController extends Controller
         $table = $this->getCovTableInstance($entry);
         $redata=[];
 
-        $redata=$table::where('plot', 'like', $plot)->where('sqx', 'like', $sqx)->where('sqy', 'like', $sqy)->orderBy('layer', 'desc')->orderBy('id', 'asc')->get();
+        $redata=$table::where('plot', 'like', $plot)->orderBy('sqx', 'asc')->orderBy('sqy', 'asc')->orderBy('layer', 'desc')->orderBy('id', 'asc')->get();
 
 
             if (!$redata->isEmpty()){
@@ -111,7 +111,7 @@ class ss10mSaveController extends Controller
             $uplist[$key]=$value;
         }
         $uplist['update_id']=$user;
-        $table::where('plot_2023', $envi['plot_2023'])->update($uplist);
+        $table::where('plot', $envi['plot'])->update($uplist);
             //重新下載資料
 
 
@@ -533,9 +533,10 @@ class ss10mSaveController extends Controller
         $nonsavelist=[];
         $addcovsavenote='';
 
-        // $test='';
-        // $sqx='1';
-        // $sqy='1';
+        // // $test='';
+
+        $sqx='0';
+        $sqy='0';
 
 
         $table = $this->getCovTableInstance($entry);
@@ -555,30 +556,30 @@ class ss10mSaveController extends Controller
             }
 
             foreach ($data[$i] as $key => $value){
-                $excludedKeys = ['note'];
+                $excludedKeys = ['note', 'height'];
                 if (!in_array($key, $excludedKeys) && is_null($value)) {
                     $pass = '0';
                     $addcovsavenote = $addcovsavenote."<br> 第".($i+1)."筆 "." ". $key.'資料不全，不予處理。';
-                    $nonsavelist[$i]=$data[$i]; continue;
+                    $nonsavelist[$i]=$data[$i]; break;
                 } 
             }
-            
- 
 
+            if ($pass == '0'){continue;}
             
-            
-            $datasavenote='';
 
                if($data[$i]['layer']=='u'){
-                    if ($data[$i]['height']=='0'){
+                    if ($data[$i]['height']=='0' || is_null($data[$i]['height'])){
                         $pass='0';
-                        $datasavenote = "第".($i+1)."筆 資料 缺少高度值";
+                        $addcovsavenote .= "<br>第".($i+1)."筆 資料 缺少高度值";
                     }
                } else if($data[$i]['layer']=='o'){
-                    if ($data[$i]['height']!='0'){
-                        $pass='0';
-                        $datasavenote = "第".($i+1)."筆 資料 高度應為 0";
+                    if (is_null($data[$i]['height'])){
+                        $data[$i]['height']='0';
                     }
+                    else if ($data[$i]['height']!='0'){
+                        $pass='0';
+                        $addcovsavenote.= "<br>第".($i+1)."筆 資料 高度應為 0";
+                    } 
                 }
 
 
@@ -588,15 +589,15 @@ class ss10mSaveController extends Controller
                     ['sqx', 'like', $data[$i]['sqx']],
                     ['sqy', 'like', $data[$i]['sqy']],
                     ['layer', 'like', $data[$i]['layer']],
-                    ['csp', 'like', $data[$i]['csp']],
-                    ['cover', 'like', $data[$i]['cover']]
+                    ['csp', 'like', $data[$i]['csp']]
                 ])->get();
 
                 if(count($covtables)>0){
                         $pass='0';
-                        $datasavenote = "第".($i+1)."筆 資料 重複輸入";
-                   
+                        $addcovsavenote.= "<br>第".($i+1)."筆 資料 重複輸入";
                 }
+
+
 
             if ($pass=='1'){
 
@@ -629,10 +630,10 @@ class ss10mSaveController extends Controller
                     $nonsavelist[$i]['height']='';
                     $nonsavelist[$i]['note']='';
 
-
+                if($sqx=='0'){$sqx=$data[$i]['sqx']; $sqy=$data[$i]['sqy'];}
 
             } else {  // $datacheck['pass']!=1
-                $addcovsavenote=$addcovsavenote."<br>".$datasavenote;
+                
                 $nonsavelist[$i]=$data[$i];
                 // break;
 
@@ -640,8 +641,9 @@ class ss10mSaveController extends Controller
         }//最外層
 
 //         //重新載入資料
+        if($sqx=='0'){$sqx='1'; $sqy='1';}
 
-            $redata=$this->getRecovdata($entry, $data[0]['plot'], $data[0]['sqx'], $data[0]['sqy'], $user);
+            $redata=$this->getRecovdata($entry, $data[0]['plot'], $sqx, $sqy, $user);
 
         return [
             'result' => 'ok',
@@ -730,6 +732,7 @@ class ss10mSaveController extends Controller
                     }
                }
 
+            // 看是否有重複資料
 
 
             //找舊資料
@@ -738,17 +741,36 @@ class ss10mSaveController extends Controller
                 $excludedKeys=['update_id', 'updated_at','delete'];
                 if (!in_array($key, $excludedKeys)){
                     if ($ocov[0][$key] != $value){
+                        
                         if($value==Null){$value='';}
                         $uplist[$key]=$value;
                     }
 
                 }
             }
-
+            $covtables=[];
             if ($uplist!=[]){
-                $uplist['update_id']=$user;
-                $table::where('id', 'like', $data[$i]['id'])->update($uplist);
-                $covsavenote='資料已儲存';
+
+                $covtables = $table::where([
+                    ['plot', 'like', $data[$i]['plot']],
+                    ['sqx', 'like', $data[$i]['sqx']],
+                    ['sqy', 'like', $data[$i]['sqy']],
+                    ['layer', 'like', $data[$i]['layer']],
+                    ['csp', 'like', $data[$i]['csp']],
+                    ['id', '!=', $data[$i]['id']]
+                ])->get();
+
+                if(count($covtables)>0){
+                        $pass='0';
+                        $covsavenote = "第".($i+1)."筆 資料 重複種類";
+                } else {
+
+                    $uplist['update_id']=$user;
+                    $table::where('id', 'like', $data[$i]['id'])->update($uplist);
+                    $covsavenote='資料已儲存';
+
+                }
+
             }
         
         }//最外層

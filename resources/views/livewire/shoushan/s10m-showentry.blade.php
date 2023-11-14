@@ -78,7 +78,7 @@ $nowplot=$plot2list[$nowplotkey[0]];
                 <ul>
                     <li><b>輸入資料後需按 <button class='datasavebutton' style='width: auto;'>儲存</button> ，才能確實將資料儲存。</b>請確實依照紙本資料輸入，以減少兩次輸入的不一致。</li>
                     <li>日期格式： YYYY-MM-DD。每筆資料皆需輸入日期，<b>日期為 0000-00-00 者視同未輸入</b>。</li>
-                    <li>status 為 0(全株死亡),-1(全株失蹤),-2(全株 dbh < 1 cm),-3(枝幹死亡)，則 dbh 需為0，且 code 不得有值。tatus 為空值，則 dbh 不得為 0。</li>
+                    <li>status 為 0(全株死亡),-1(全株失蹤),-2(全株 dbh < 1 cm),-3(枝幹死亡)，則 dbh 需為0，且 code 不得有值。status 為空值，則 dbh 不得為 0。</li>
                     <li>dbh 必須<b>大於或等於</b>上次調查，或勾選縮水。</li>
                     <li>code：C(更改pom)，I(量測點表面不平)，P(枝幹倒伏)，R(無行拓殖分株)。code R 只能出現在分支。<b>code 代碼間可共存</b>，多碼時照字母排列，<b>中間不留空格</b>。</li>
                     <li>note： TAB=#。統一使用<b>「中文」標點符號</b>。<b>「半形」英文符號</b>。<b>「半形」阿拉伯數字</b>，數字後留一格空白。先確認原始 note，加「。」，再輸入本次note。不同類型 note 間用「。」分隔。</li>
@@ -146,6 +146,7 @@ $nowplot=$plot2list[$nowplotkey[0]];
         <ul>
             <li><b>輸入資料後需按 <button class='datasavebutton' style='width: auto;'>儲存</button> ，才能確實將資料儲存。</b></li>
             <li>需有日期資料才會進入輸入檢查。資料不完整不予儲存。</li>
+            <li>新增種類需為名錄內植物。如有需新增名錄，請洽管理員。</li>
             <li>dbh - 新增樹的 dbh <b>必須 ≥ 1</b>。</li>
             <li>新增狀態 - 預設為新增。若為漏資料的樹，請記得點選。</li>
             <li>正榕與雀榕: 若分支不在同一小區，需在code記R。其餘物種，分支皆需與主幹在同一小區。</li>
@@ -178,9 +179,6 @@ $nowplot=$plot2list[$nowplotkey[0]];
                 </ul>
             </div>
 
-            <h2 style='display: inline-block;'>({{$sqx}}, {{$sqy}}) </h2>
-
-           
             <div class='entrytablediv covtable'>
 
                 <p class='covsavenote savenote'></p>
@@ -206,6 +204,7 @@ $nowplot=$plot2list[$nowplotkey[0]];
                     <ul>
                         <li><b>輸入資料後需按 <button class='datasavebutton' style='width: auto;'>儲存</button> ，才能確實將資料儲存。</b></li>
                         <li>需有日期資料才會進入輸入檢查。資料不完整不予儲存。</li>
+                        <li>新增種類需為名錄內植物。如有需新增名錄，請洽管理員。</li>
                         <li>layer: u (地被層，understory)，o (上木層，overstory)。</li>
                         <li>上木層地被沒有量測高度資料，紀錄為0。</li>
                         <li>未通過檢查以致無法儲存的資料將保留在輸入表單中。已儲存的資料可按右鍵以刪除。</li>

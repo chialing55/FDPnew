@@ -23,7 +23,7 @@ $('.list1 hr').css('color', '#91A21C');
         <hr>
         <ol>
             
-            <li><a href='{{asset('/fs_seeds_file/種子分類記錄紙.pdf')}}' target="_blank">種子分類記錄紙</a></li>
+            <li><a href='{{asset('/fs_seeds_file/種子分類記錄紙.pdf')}}' target="_blank">種子分類紀錄紙</a></li>
             <li><a href='{{asset('/fs_seeds_file/種子樣本標籤紙_v2.pdf')}}' target="_blank">種子樣本標籤紙</a></li>
             <li><a href='{{asset('/fs_seeds_file/拍照用比例尺.pdf')}}' target="_blank">拍照用比例尺</a></li>
         </ol>

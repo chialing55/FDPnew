@@ -83,8 +83,11 @@ $personlist=['','蔡佳秀'];
         <div id='simplenote' class='text_box'>
             <ul>
             <li><b>輸入資料後需按 <button class='datasavebutton' style='width: auto;'>儲存</button> ，才能確實將資料儲存。</b></li>
-            <li>Trap欄位會自動補0。</li>
-            <li>若為小種子、無法計算種子數量，種子數及活性欄位皆填NA。</li>
+            <li>Trap欄位會自動在左側補0。</li>
+            <li>若出現新增種類，請洽管理員更新物種名單。</li>
+            <li>不確定種類，一律輸入「<b>UNKUNK</b>」，並將疑似種類名稱寫在 note。</li>
+            <li>若為小種子植物的果實或種子，無法計算種子數量，種子數及活性欄位皆填NA。</li>
+            <li>不需記錄種子數、活性、碎片3數量時，可填入 0 或保留空白(系統會自動補 0)。</li>
             <li>若不符合規則，會在檢查欄位顯示錯誤之處，若未更改，將無法完成輸入。</li>
             <li><b>輸入完成後請按下<button class='datasavebutton' style='width: auto;'>輸入完成</button></b>，檢查通過後，即會將資料匯入大表。</li>
             </ul>

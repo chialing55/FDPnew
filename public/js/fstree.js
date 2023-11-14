@@ -370,7 +370,7 @@ $('.finishnote').html();
 		$('.next').addClass('next'+site);
 
 	if (totalpage>1){
-		datapage=pages(data, thispage, totalpage);
+		datapage=pages(data, thispage, totalpage, 20);
 		var data2=datapage[1];
 	} else {
 		var data2=data;
@@ -533,13 +533,13 @@ $('.finishnote').html();
 
 	parent.find('button[name=datasave'+site+']').click(function () {
 		$('.datasavenote').html('');
-console.log(handsontable.getSourceData());
+
 		$.ajaxSetup({
 			  headers: {
 			    'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
 			  }
 			});
-
+console.log(handsontable.getSourceData());
 		  $.ajax({
 		    url: "/fstreesavedata",
 		    data: {
@@ -580,14 +580,14 @@ console.log(handsontable.getSourceData());
 }
 
 
-function pages(data, thispage, totalpage){
+function pages(data, thispage, totalpage, pps){
 
 	// $(".prev").unbind();
 	// $(".next").unbind();
 		site=data[0].qx+data[0].qy+data[0].sqx+data[0].sqy;
 
-		start=20*(thispage-1);
-		end=start+20;
+		start=pps*(thispage-1);
+		end=start+pps;
 		// console.log(thispage);
 		data2=data.slice(start, end);
 		$('.pages').css('display', 'flex');
@@ -597,38 +597,49 @@ function pages(data, thispage, totalpage){
 
 
 		// console.log('1');
-
-		if (thispage==1){
-			$('.prev').hide();
-			$('.next').show();
-		} else if (thispage==totalpage){
-			$('.prev').show();
-			$('.next').hide();			
+		if (totalpage>1){
+			if (thispage==1){
+				$('.prev').hide();
+				$('.next').show();
+			} else if (thispage==totalpage){
+				$('.prev').show();
+				$('.next').hide();			
+			} else {
+				$('.prev').show();
+				$('.next').show();
+			}
 		} else {
-			$('.prev').show();
-			$('.next').show();
+			$('.pages').hide();
+
 		}
 
 		$('.prev'+site).off('click').on('click', function() {
 			thispage=$(this).attr('thispage');
 			gopage=parseInt(thispage)-1;
 
-			fstreetableupdate(data, gopage, 20);
+			fstreetableupdate(data, gopage, pps);
 		})
 
 		$('.next'+site).off('click').on('click', function() {
 			thispage=$(this).attr('thispage');
 			gopage=parseInt(thispage)+1;
 								// console.log(data);
-			fstreetableupdate(data, gopage, 20);
+			fstreetableupdate(data, gopage, pps);
 
 		})
 
 		$('.showall').off('click').on('click', function() {
 								// console.log(data);
-			$('.pages').hide();
-			ppsall=data.length;
-			fstreetableupdate(data, 1, data.length);
+			
+			if (data.length>40){
+				ppsall=40;
+
+			} else {
+				ppsall=data.length;
+				$('.pages').hide();
+			}
+		
+			fstreetableupdate(data, 1, ppsall);
 			// recruittable(data, emptytable, csplist);
 		})
 
@@ -653,9 +664,9 @@ function fstreetableupdate(data, thispage, pps){
 	var totalpage=Math.ceil(data.length/pps);
 	$('.totalnum').html(`共有 ${data.length} 筆資料`);
 
-	var data3 = (totalpage > 1) ? pages(data, thispage, totalpage)[1] : data;
+	var data3 = (totalpage > 1) ? pages(data, thispage, totalpage, pps)[1] : data;
+	// pages(data, thispage, totalpage, pps)
 
-	
 // console.log(data3);
 	handsontable.updateData(data3, thispage);
 	handsontable.updateSettings({

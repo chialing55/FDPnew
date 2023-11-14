@@ -153,13 +153,24 @@ $list=0;
 {{-- <?php echo count($record);?> --}}
 <table width="100%"  border='0' cellpadding="4" cellspacing="0" class='chinese' valign='top'>
   <tr>
-    <td style='vertical-align:text-top'><div style="font-size: 2em; margin: -10px 0 10px 0">({{$plot}})</div><div style="font-size: 1.2em"><div class='td8' >GPS</div><div class='td7' style='width:130px; color:black;'>{{$plotinfo['gps_x']}}, {{$plotinfo['gps_y']}}</div></div><div><div class='td8'>海拔</div> <div class="td7" style='color:black;'>{{$plotinfo['altitude']}} m</div></div></td>
     <td style='vertical-align:text-top'>
-      
-      <div><div class='td8'>坡向</div> <div class="td7">{{$plotinfo['aspect']}}</div></div>
-      <div><div class='td8'>坡度</div> <div class="td7">{{$plotinfo['slope']}}</div></div>
-      <div><div class='td8'>地形</div> <div class="td7">{{$plotinfo['terrain']}}</div></div>
+      <div style="font-size: 3em; margin: -10px 0 10px 0">({{$plot}})</div>
     </td>
+    <td style='vertical-align:text-top'>  
+      <div style="font-size: 1.2em">
+        <div class='td8' >GPS</div>
+        <div class='td7' style='width:130px; color:black;'>{{$plotinfo['gps_x']}}, {{$plotinfo['gps_y']}}</div>
+      </div>
+      <div>
+        <div class='td8'>海拔</div>
+        <div class="td7" style='color:black;'>{{$plotinfo['altitude']}} m</div>
+      </div>
+      <div>
+        <div class='td8'>地形</div>
+        <div class="td7">{{$plotinfo['terrain']}}</div>
+      </div>
+    </td>
+
     <td style='vertical-align:text-top'>
       <div><div class='td8'>岩石地比例  </div> <div class="td7">{{$plotinfo['rocky']}}</div></div>
       <div><div class='td8'>地表裸露度  </div> <div class="td7">{{$plotinfo['surface']}}</div></div>
@@ -188,13 +199,13 @@ $list=0;
    <td width="4%"></td>
    <td width="9%">dbh15</td>
 
-   <td width="7%">status</td>
-   <td width="6%">code</td>
-   <td width="7%">dbh</td>
-   <td width="7%">ill</td>
-   <td width="7%">leave</td>
+   <td width="40px">status</td>
+   <td width="40px">code</td>
+   <td width="40px">dbh</td>
+   <td width="40px">ill</td>
+   <td width="40px">leave</td>
    
-   <td>note</td>
+   <td colspan="3" >note</td>
    <td width="5%">狀況</td>
    
    
@@ -217,11 +228,13 @@ $list=0;
    <td  width="6%" >月</td>
    <td width="7%" class="td6"></td>
    <td > 日</td>
-   <td></td>
-   <td></td>
+   <td width="7%" style='font-size:12px'>坡度</td>
+   <td width="7%" class="td6"></td>
+   <td width="5%" style='font-size:12px'>坡向</td>
+   <td width="5%" class="td6"></td>
    
    
-   <td align="right" style="font-size:12px; text-align: right;" width="30%">
+   <td align="right" style="font-size:12px; text-align: right;" >
     @if(isset($datasqx[$x][$y]))
       共 {{count($datasqx[$x][$y])}} 筆 / {{count($datatagsqx[$x][$y])}} 棵樹
     @else
@@ -254,7 +267,7 @@ $list=0;
    <td class='td5'></td>
    <td class='td5'></td>
    
-   <td width="30%" class="td1" style='font-size:10px; text-align: right;'>{{$data['note']}}</td>
+   <td colspan="3" width="30%" class="td1" style='font-size:10px; text-align: right;'>{{$data['note']}}</td>
    <td width="5%" class="td1"></td>
    
    

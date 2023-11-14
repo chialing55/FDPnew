@@ -69,6 +69,22 @@ function emptyseedstable(table){
   var parent = container.parent();
   // var emptytable=emptytable;
 
+  const codeValidator = (value, callback) => {
+    if ([1, 2, 3, 4, 5, 6,  ''].includes(value)) {   //允許1234和空格
+      callback(true);
+    } else {
+      callback(false);
+    }
+  };
+
+  const sexValidator = (value, callback) => {
+    if (['F', 'M',  ''].includes(value)) {   //允許1234和空格
+      callback(true);
+    } else {
+      callback(false);
+    }
+  };
+
   container.handsontable({
     data: table,
     startRows: 29,
@@ -85,15 +101,15 @@ function emptyseedstable(table){
     	{data: "id"},
       {data: "census"},
       {data: "trap", allowInvalid: false},
-      {data: "csp", type: 'autocomplete', source: csplist, strict: false, visibleRows: 10},
-      {data: "code", type: 'dropdown', source: ['', '1', '2', '3', '4', '5', '6'], allowInvalid: false, visibleRows: 10},
+      {data: "csp", type: 'autocomplete', source: csplist, strict: true, visibleRows: 10, allowInvalid: false},
+      {data: "code", type: 'numeric', allowInvalid: false, validator: codeValidator},
       {data: "count", type: 'numeric', allowInvalid: false},
       {data: "seeds"},
       {data: "viability"},
       {data: "fragments", type: 'numeric', allowInvalid: false},
       
-      {data: "sex", type: 'dropdown', source: ['', 'F', 'M'], allowInvalid: false, visibleRows: 10},
-      {data: "identifier", type: 'dropdown', source: ['蔡佳秀', '張楊家豪'], allowInvalid: true, visibleRows: 40},
+      {data: "sex", allowInvalid: false, validator: sexValidator},
+      {data: "identifier", type: 'autocomplete', source: ['蔡佳秀', '張楊家豪'], allowInvalid: true, visibleRows: 40},
       {data: "note"},
 
     ],
@@ -198,6 +214,22 @@ function seedstable(data, table, thispage){
   var parent = container.parent();
   // var emptytable=emptytable;
 
+  const codeValidator = (value, callback) => {
+    if ([1, 2, 3, 4, 5, 6,  ''].includes(value)) {   //允許1234和空格
+      callback(true);
+    } else {
+      callback(false);
+    }
+  };
+
+  const sexValidator = (value, callback) => {
+    if (['F', 'M',  ''].includes(value)) {   //允許1234和空格
+      callback(true);
+    } else {
+      callback(false);
+    }
+  };
+
   container.handsontable({
     data: data,
     startRows: 29,
@@ -214,15 +246,15 @@ function seedstable(data, table, thispage){
     	{data: "id"},
       {data: "census"},
       {data: "trap",  allowInvalid: false},
-      {data: "csp", type: 'autocomplete', source: csplist, strict: false, visibleRows: 10},
-      {data: "code", type: 'dropdown', source: [' ', '1', '2', '3', '4', '5', '6'], allowInvalid: false, visibleRows: 10},
+      {data: "csp", type: 'autocomplete', source: csplist, strict: true, visibleRows: 10, allowInvalid: false},
+      {data: "code", type: 'numeric', allowInvalid: false, validator: codeValidator},
       {data: "count", type: 'numeric', allowInvalid: false},
       {data: "seeds"},
       {data: "viability"},
       {data: "fragments", type: 'numeric', allowInvalid: false},
       
-      {data: "sex", type: 'dropdown', source: [' ', 'F', 'M'], allowInvalid: false, visibleRows: 10},
-      {data: "identifier", type: 'dropdown', source: ['蔡佳秀', '張楊家豪'], allowInvalid: true, visibleRows: 40},
+      {data: "sex", allowInvalid: false, validator: sexValidator},
+      {data: "identifier", type: 'autocomplete', source: ['蔡佳秀', '張楊家豪'], allowInvalid: true, visibleRows: 40},
       {data: "note"},
       {data: "checknote", readOnly: true},
       {data: "d", readOnly: true, renderer: "html"}
@@ -398,17 +430,23 @@ function seedstableupdate(data, thispage){
 
 
 		// console.log('1');
-
-		if (thispage==1){
-			$('.prev').hide();
-			$('.next').show();
-		} else if (thispage==totalpage){
-			$('.prev').show();
-			$('.next').hide();			
+		if (totalpage>1){
+			if (thispage==1){
+				$('.prev').hide();
+				$('.next').show();
+			} else if (thispage==totalpage){
+				$('.prev').show();
+				$('.next').hide();			
+			} else {
+				$('.prev').show();
+				$('.next').show();
+			}
 		} else {
-			$('.prev').show();
-			$('.next').show();
+				$('.prev').hide();
+				$('.next').hide();			
 		}
+
+
 
 			$('.prev').on('click', function() {
 				thispage=$(this).attr('thispage');

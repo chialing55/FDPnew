@@ -25,7 +25,7 @@ $('.list1 hr').css('color', '#91A21C');
 <div class='flex text_outbox'>
     <div class='slrecord text_box' >
 
-        <h2>下載第{{$census}}次調查的記錄紙</h2>
+        <h2>下載第{{$census}}次調查的紀錄紙</h2>
         <hr>
 
         <div class='' style='margin-bottom: 20px;' >

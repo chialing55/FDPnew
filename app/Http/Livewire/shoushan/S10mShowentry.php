@@ -18,6 +18,7 @@ use App\Models\Ss10mTreeCovR1;
 use App\Models\Ss10mTreeCovR2;
 use App\Models\Ss10mTreeRecord1;
 use App\Models\Ss10mTreeRecord2;
+use App\Models\SsSplist;
 
 use App\Jobs\fsTreeAddButton;
 
@@ -75,48 +76,53 @@ class S10mShowentry extends Component
             $entryother='1';
         }
 
+        // dd($qx, $qy);
+        // 新增資料輸入種類用
+
         $ss10mcsplist=$request->session()->get('ss10mcsplist', function () {
             return 'no';
         });
-        // dd($qx, $qy);
-        // 新增資料輸入種類用
+        $ss10mcovcsplist=$request->session()->get('ss10mcsplist', function () {
+            return 'no';
+        });
+
         if ($ss10mcsplist=='no'){
             $ss10mcsplist=[];
+            $ss10mcovcsplist=[];
 
             $csplist1 = $table::select('csp', DB::raw('count(stemid) as count2'))->groupBy('csp')->orderByDesc('count2')->get()->toArray();
+
+            $splist=SsSplist::select('index')->orderBy('index', 'asc')->get()->toArray();
 
             foreach ($csplist1 as $list) {
                 $csplist2[]=$list['csp'];
             }
-        
-            $ss10mcsplist=$csplist2;
-            $request->session()->put('ss10mcsplist', $ss10mcsplist);
-        }
 
-        // 覆蓋度輸入種類用
-   
-            $ss10mcovcsplist=[];
-
-            $covcsplist1 = $tablecov::select('csp', DB::raw('count(csp) as count2'))->groupBy('csp')->orderByDesc('count2')->get()->toArray();
-            if (count( $covcsplist1)>0){
-
-                foreach ($covcsplist1 as $list) {
-                    $covcsplist2[]=$list['csp'];
+            foreach ($splist as $list){
+                if (!in_array($list['index'], $csplist2)){
+                    $csplist2[]=$list['index'];
                 }
-            } else {
-                $covcsplist2=[];
+
+                $covcsplist2[]=$list['index'];
             }
         
+            $ss10mcsplist=$csplist2;
             $ss10mcovcsplist=$covcsplist2;
+            $request->session()->put('ss10mcsplist', $ss10mcsplist);
+            $request->session()->put('ss10mcovcsplist', $ss10mcovcsplist);
+
+        } 
+        
+
           
         
 
 // dd($ss10mcsplist);
 
 
-        $envi=$tableenvi::query()->where('plot_2023', 'like', $plot)->get()->toArray();
-        $records=$table::query()->where('plot', 'like', $plot)->where('sqx', 'like', $sqx)->where('sqy', 'like', $sqy)->orderBy('tag', 'asc')->orderBy('branch', 'asc')->get()->toArray();
-        $cov=$tablecov::query()->where('plot', 'like', $plot)->where('sqx', 'like', $sqx)->where('sqy', 'like', $sqy)->get()->toArray();
+        $envi=$tableenvi::query()->where('plot', 'like', $plot)->get()->toArray();
+        $records=$table::query()->where('plot', 'like', $plot)->where('sqx', 'like', $sqx)->where('sqy', 'like', $sqy)->where('show', 'like', '1')->orderBy('tag', 'asc')->orderBy('branch', 'asc')->get()->toArray();
+        $cov=$tablecov::query()->where('plot', 'like', $plot)->orderBy('sqx', 'asc')->orderBy('sqy', 'asc')->orderBy('layer', 'desc')->orderBy('id', 'asc')->get()->toArray();
 
         //新增樹為刪除按鍵，其他加入特殊修改按鍵
         if (count($records)>0){
@@ -175,7 +181,7 @@ class S10mShowentry extends Component
             $emptytable[$k]['tofix']='';
         }
 
-        $this->dispatchBrowserEvent('data', ['covs' => $cov, 'record' => $result, 'emptytable' => $emptytable,'emptytable2' => $emptytable2, 'csplist' => $ss10mcsplist,'covcsplist' => $ss10mcovcsplist, 'envi' => $envi]);
+        $this->dispatchBrowserEvent('data', ['covs' => $cov, 'record' => $result, 'emptytable' => $emptytable,'emptytable2' => $emptytable2, 'csplist' => $ss10mcsplist, 'covcsplist' => $ss10mcovcsplist, 'envi' => $envi]);
 
 
     }

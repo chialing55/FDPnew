@@ -157,10 +157,20 @@ class SeedsShowentry extends Component
 
 
         $fsscsplist1 = FsSeedsFulldata::select('csp', DB::raw('count(trap) as count2'))->where('csp', 'not like', 'nothing')->groupBy('csp')->orderByDesc('count2')->get()->toArray();
+        $fsscsplist2 = FsSeedsSplist::select('csp')->get()->toArray();
 
         for($i=0;$i<count($fsscsplist1);$i++){
 
             $fsscsplist[]=$fsscsplist1[$i]['csp'];
+        }
+
+        for($i=0;$i<count($fsscsplist2);$i++){
+
+            if (!in_array($fsscsplist2[$i]['csp'], $fsscsplist)){
+                $fsscsplist[]=$fsscsplist2[$i]['csp'];
+            }
+
+            
         }
 
         for($k=0;$k<29;$k++){
@@ -198,7 +208,7 @@ class SeedsShowentry extends Component
         $this->chcensus='';
 
         // $this->reset();
-        // $this->mount();
+        $this->mount();
     }
 
     public $finishnote;

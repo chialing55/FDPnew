@@ -38,7 +38,7 @@
 <ul>
 <li><b>輸入資料後需按 <button class='datasavebutton' style='width: auto;'>儲存</button> ，才能確實將資料儲存。</b>請確實依照紙本資料輸入，以減少兩次輸入的不一致。</li>
 <li>日期格式： YYYY-MM-DD。每筆資料皆需輸入日期，<b>日期為 0000-00-00 者視同未輸入</b>。</li>
-<li>status 為 0(全株死亡),-1(全株失蹤),-2(全株 dbh < 1 cm),-3(枝幹死亡)，則 dbh 需為0，且 code 不得有值。tatus 為空值，則 dbh 不得為 0。</li>
+<li>status 為 0(全株死亡),-1(全株失蹤),-2(全株 dbh < 1 cm),-3(枝幹死亡)，則 dbh 需為0，且 code 不得有值。status 為空值，則 dbh 不得為 0。</li>
 <li>dbh/h高 必須<b>大於或等於</b>上次調查，或勾選縮水。</li>
 <li>code：CIPR。若 code 包含 C，則 POM 不得同於前次 POM。code R 只能出現在分支。<b>code 代碼間可共存</b>，多碼時照字母排列，<b>中間不留空格</b>。</li>
 <li>POM 更新，code 欄需有 C 。若是原始資料錯誤，請在「特殊修改<i class='fa-regular fa-note-sticky'></i>」更新。</li>
@@ -119,7 +119,7 @@ $nowplot=$plot2list[$nowplotkey[0]];
            <div class='pagenote'></div>
            <div class='prev'>上一頁</div>
            <div class='next'>下一頁</div>
-           <div class='showall'><button>顯示全部資料</button></div>
+           <div class='showall'><button>顯示較多資料</button></div>
        </div>
         <div id='datatable{{$qx}}{{$qy}}{{$sqx}}{{$sqy}}' style='margin-top: 20px;' class='fs100' ></div>
 

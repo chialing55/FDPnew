@@ -61,6 +61,9 @@ class fsSeedsSaveController extends Controller
                 $data[$i]['trap'] = str_pad($data[$i]['trap'], 3, '0', STR_PAD_LEFT);
                 $check = new fsSeedsCheck;
                 $checknote=$check->check($data[$i], $spinfo, 'o');
+                $result=$check->check($data[$i], $spinfo, 'o');
+                $checknote=$result['checknote'];
+                $data[$i]=$result['result'];
                 // // $checknote1.=$checknote;
                 $uplist=[];
 
@@ -132,8 +135,10 @@ class fsSeedsSaveController extends Controller
                 // }
                 $data[$i]['trap'] = str_pad($data[$i]['trap'], 3, '0', STR_PAD_LEFT);
                 $check = new fsSeedsCheck;
-                $checknote=$check->check($data[$i], $spinfo, 'n');
-                // $checknote1.=$checknote;
+                // $checknote=$check->check($data[$i], $spinfo, 'n');
+                $result=$check->check($data[$i], $spinfo, 'n');
+                $checknote=$result['checknote'];
+                $data[$i]=$result['result'];                // $checknote1.=$checknote;
 
                 $inlist=[];
                 foreach ($data[$i] as $key => $value){
@@ -292,6 +297,7 @@ class fsSeedsSaveController extends Controller
 
             }
 
+            //刪除資料表內的資料
             FsSeedsRecord1::truncate();
             
             // return redirect('/fushan/seeds/entry');

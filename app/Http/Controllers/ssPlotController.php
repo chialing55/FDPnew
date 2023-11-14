@@ -13,6 +13,8 @@ use App\Models\Ss10mTree2014;
 use App\Models\Ss10mTree2015;
 use App\Models\Ss10mTreeRecord1;
 use App\Models\Ss10mTreeRecord2;
+use App\Models\Ss10mTreeEnviR1;
+use App\Models\Ss10mTreeEnviR2;
 
 class ssPlotController extends Controller
 {
@@ -173,6 +175,21 @@ class ssPlotController extends Controller
                 DB::connection('mysql5')->select("INSERT INTO 10m_tree_record2 SELECT * FROM 10m_tree_record1");
 
             }
+
+            // if (Schema::connection('mysql5')->hasTable('10m_tree_envi_r1'))
+            // {
+            //       //有輸入表單
+            // } else {
+            //     DB::connection('mysql5')->select('CREATE TABLE 10m_tree_envi_r1 LIKE 10m_quad_2014');
+            //     DB::connection('mysql5')->statement("INSERT IGNORE INTO 10m_tree_envi_r1 SELECT * FROM 10m_quad_2014 where type like '森林'");
+
+            //     DB::connection('mysql5')->statement("ALTER TABLE  `10m_tree_envi_ri` ADD  (`sqx` int(2) not null,`sqy` int(2) not null, `note` varchar(255) not Null,  `date` CHAR(10) NOT NULL default '0000-00-00'), `update_id` CHAR(20) NOT NULL,`updated_at` varchar(255) CHARACTER SET utf8 COLLATE utf8_general_ci NOT NULL");
+            //     DB::connection('mysql5')->statement("ALTER TABLE `10m_tree_envi_ri` DROP COLUMN `plot_2015`, `plot_2012`, `type`, `gps_x`, `gps_y`, `altitude`, `cluster`");
+            //     DB::connection('mysql5')->statement("ALTER TABLE `10m_tree_envi_ri` CHANGE COLUMN `plot_2023` `plot`");
+
+            //     //篩選森林資料
+            //     $plotlist=Ss10mTreeEnviR1::query()->get()->toArray();
+            // }
 
             // print_r($user);
             return view('pages/shoushan/10m_entry', [

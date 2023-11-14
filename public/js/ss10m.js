@@ -42,7 +42,7 @@ window.addEventListener('data', event => {
 
 function ssenvitable(envi, sqx, sqy){
 
-  var container = $("#envitable"+envi[0].plot_2023+sqx+sqy);
+  var container = $("#envitable"+envi[0].plot+sqx+sqy);
   var parent = container.parent();
   var cellChanges = [];
 
@@ -89,13 +89,19 @@ function ssenvitable(envi, sqx, sqy){
     // rowHeaders: true,
     // minSpareRows: 1,
     currentRowClassName: 'currentRow',
-    colWidths: [80, 50, 50, 80, 80, 80, 90, 80, 50, 50, 50, 50],
+    colWidths: [80, 50, 50,50, 50,50, 50,50, 50, 80, 50, 50, 50, 50, 50, 50, 50, 50],
     licenseKey: 'non-commercial-and-evaluation',
-    colHeaders: ["Plot", "坡度", "坡向", "地形", "岩石地比例", "地表裸露度", "凋落物覆蓋度", "倒木覆蓋度", 'T1', 'T2', 'S', 'H'],
+    colHeaders: ["Plot", "坡度1","坡度2","坡度3","坡度4", "坡向1","坡向2","坡向3","坡向4", "地形", "岩石地<br>比例", "地表<br>裸露度", "凋落物<br>覆蓋度", "倒木<br>覆蓋度", 'T1', 'T2', 'S', 'H'],
     columns: [
-      {data: "plot_2023", readOnly:true},
-      {data: "aspect", type: 'numeric', validator: aspectValidator},
-      {data: "slope", type: 'numeric', validator: slopeValidator},
+      {data: "plot", readOnly:true},
+      {data: "aspect1", type: 'numeric', validator: aspectValidator, placeholder: "(1,1)"},
+      {data: "aspect2", type: 'numeric', validator: aspectValidator, placeholder: "(1,2)"},
+      {data: "aspect3", type: 'numeric', validator: aspectValidator, placeholder: "(2,2)"},
+      {data: "aspect4", type: 'numeric', validator: aspectValidator, placeholder: "(2,1)"},
+      {data: "slope1", type: 'numeric', validator: slopeValidator, placeholder: "(1,1)"},
+      {data: "slope2", type: 'numeric', validator: slopeValidator, placeholder: "(1,2)"},
+      {data: "slope3", type: 'numeric', validator: slopeValidator, placeholder: "(2,2)"},
+      {data: "slope4", type: 'numeric', validator: slopeValidator, placeholder: "(2,1)"},
       {data: "terrain", type: 'dropdown', source: ['上坡', '中坡', '下坡', '稜線'], allowInvalid: false},
       {data: "rocky", type: 'numeric', validator: numericValidator},
       {data: "exposed_surface", type: 'numeric', validator: numericValidator},
@@ -159,7 +165,7 @@ function ssenvitable(envi, sqx, sqy){
     });
   var handsontable = container.data('handsontable');
 
-  parent.find('button[name=envisave'+envi[0].plot_2023+sqx+sqy+']').click(function () {
+  parent.find('button[name=envisave'+envi[0].plot+sqx+sqy+']').click(function () {
     $('.envisavenote').html('');
 
     $.ajaxSetup({
@@ -438,7 +444,7 @@ $(`button[name=recruitsave${site}]`).off();
       {data: "sqy", type: 'numeric', allowInvalid: false, validator: qqValidator},
       {data: "tag"},
       {data: "branch", type: 'numeric'},
-      {data: "csp", type: 'autocomplete', source: csplist, strict: false, visibleRows: 10, allowInvalid: false,},
+      {data: "csp", type: 'autocomplete', source: csplist, strict: true, visibleRows: 10, allowInvalid: false},
       {data: "code"},
       {data: "dbh", type: 'numeric' },
       {data: "ill", type: 'numeric', validator: numericValidator},
@@ -665,7 +671,7 @@ function alternotetable(alterdata, stemid, entry){
       {data: "sqy", type: 'numeric'},
       {data: "tag"},
       {data: "b", type: 'numeric'},
-      {data: "csp", type: 'autocomplete', source: csplist, strict: false, visibleRows: 10, allowInvalid: false,},
+      {data: "csp", type: 'autocomplete', source: csplist, strict: true, visibleRows: 10, allowInvalid: false,},
       {data: "dbh", type: 'numeric'},
       
       {data: "stemid"}
@@ -781,6 +787,14 @@ function ssaddcovtable(covs, data, emptytable2, covcsplist){
     }
   };
 
+  const layerValidator = (value, callback) => {
+    if (['u', 'o', ''].includes(value)) {   //允許1234和空格
+      callback(true);
+    } else {
+      callback(false);
+    }
+  };
+
   container.handsontable({
     data:emptytable2,
     // startRows: 3,
@@ -799,11 +813,11 @@ function ssaddcovtable(covs, data, emptytable2, covcsplist){
     columns: [
       {data: "date", dateFormat: 'YYYY-MM-DD', type: 'date'},
       {data: "plot", readOnly: true},
-      {data: "sqx", type: 'numeric', validator: qqValidator},
-      {data: "sqy", type: 'numeric', validator: qqValidator},
-      {data: "layer", type: 'autocomplete', source: ['u', 'o'],strict: false, allowInvalid: false},
-      {data: "csp", type: 'autocomplete', source: covcsplist, strict: false, visibleRows: 10, allowInvalid: false,},
-      {data: "cover", type: 'numeric', validator: numericValidator},
+      {data: "sqx", type: 'numeric', allowInvalid: false, validator: qqValidator},
+      {data: "sqy", type: 'numeric', allowInvalid: false, validator: qqValidator},
+      {data: "layer", allowInvalid: false, validator: layerValidator},
+      {data: "csp", type: 'autocomplete', source: covcsplist, strict: true, visibleRows: 10, allowInvalid: false,},
+      {data: "cover", type: 'numeric', allowInvalid: false, validator: numericValidator},
       {data: "height", type: 'numeric'},
       {data: "note"},
       {data: "id"},
@@ -832,7 +846,7 @@ function ssaddcovtable(covs, data, emptytable2, covcsplist){
       });
 
       $.ajax({
-        url: "/ss10msaveaddcov/",
+        url: "/ss10msaveaddcov",
         data: {
           data: handsontable.getSourceData(),
           entry: entry,
@@ -895,7 +909,15 @@ function sscovtable(covs, data, covcsplist){
 
   var container = $("#covtable"+site);
   var parent = container.parent();
-  // var cellChanges = [];
+  var cellChanges = [];
+
+  const qqValidator = (value, callback) => {
+    if ([1, 2, ''].includes(value)) {   //允許1234和空格
+      callback(true);
+    } else {
+      callback(false);
+    }
+  };
 
   const numericValidator = (value, callback) => {
     if (value === '0') {
@@ -906,6 +928,13 @@ function sscovtable(covs, data, covcsplist){
     }
   };
 
+  const layerValidator = (value, callback) => {
+    if (['u', 'o', ''].includes(value)) {   //允許1234和空格
+      callback(true);
+    } else {
+      callback(false);
+    }
+  };
 
   container.handsontable({
     data: covs,
@@ -925,12 +954,12 @@ function sscovtable(covs, data, covcsplist){
     columns: [
       {data: "date", dateFormat: 'YYYY-MM-DD', type: 'date'},
       {data: "plot", readOnly: true},
-      {data: "sqx", readOnly: true},
-      {data: "sqy", readOnly: true},
-      {data: "layer", type: 'autocomplete', source: ['u', 'o'],strict: false, allowInvalid: false},
-      {data: "csp", type: 'autocomplete', source: covcsplist, strict: false, visibleRows: 10, allowInvalid: false,},
-      {data: "cover", validator: numericValidator},
-      {data: "height", validator: numericValidator},
+      {data: "sqx", type: 'numeric', allowInvalid: false, validator: qqValidator},
+      {data: "sqy", type: 'numeric', allowInvalid: false, validator: qqValidator},
+      {data: "layer", allowInvalid: false, validator: layerValidator},
+      {data: "csp", type: 'autocomplete', source: covcsplist, strict: true, visibleRows: 10, allowInvalid: false,},
+      {data: "cover", type: 'numeric', allowInvalid: false, validator: numericValidator},
+      {data: "height", type: 'numeric'},
       {data: "note"},
       {data: "delete", renderer: "html"},
       {data: "id"},
@@ -943,7 +972,48 @@ function sscovtable(covs, data, covcsplist){
     // dropdownMenu: true,
     cells: function (row, col, prop) {
      },
-    
+    afterChange: function (changes, source) {
+      if (!changes) {
+          return;
+      }
+            $.each(changes, function (index, element) {
+                var change = element;
+                var rowIndex = change[0];
+                var columnIndex = change[1];
+                
+                var oldValue = change[2];
+                var newValue = change[3];
+                col=container.handsontable('propToCol', columnIndex);
+                // console.log(col);
+                var td = container.handsontable('getCell', rowIndex, col);
+                var cellChange = {
+                    'rowIndex': rowIndex,
+                    'columnIndex': col, 
+                    'td': td
+                };
+                
+                 
+                // console.log(td);
+                if(oldValue != newValue){
+                    cellChanges.push(cellChange);
+                    td.style.color = 'forestgreen';
+                }
+            });
+    },
+        afterRender: function () {
+            // var instance = container.handsontable('getInstance');
+            $.each(cellChanges, function (index, element) {
+                var cellChange = element;
+                var rowIndex = cellChange['rowIndex'];
+                var columnIndex = cellChange['columnIndex'];
+                // var grilla = $('#grilla');
+                var td=cellChange['td'];
+                // var td = container.handsontable('getCell', rowIndex, columnIndex);
+                td.style.color = 'forestgreen'; 
+                // cell.style.background = backgroundColor;
+                // console.log(td);
+            });
+        },    
 
     });
 
