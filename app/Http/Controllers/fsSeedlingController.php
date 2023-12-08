@@ -94,7 +94,7 @@ class fsSeedlingController extends Controller
                 $i_table1=DB::connection('mysql3')->select("INSERT INTO fs_seedling.slrecord2 SELECT * FROM fs_seedling.slrecord1");
 
                 //cov
-                $c_cov1=DB::connection('mysql3')->select("create table `fs_seedling`.`slcov1` ( `id` int (11) NOT  NULL AUTO_INCREMENT, `year` int( 4  ) ,  `month` int( 2  ) ,  `date` char( 10  ) ,  `trap` int( 3  ),  `plot` int( 1  ) , `cov` float,`ht` float, `canopy` char (2) ,  `note` varchar( 255  ), `updated_at` varchar(255), `update_id` char(20), PRIMARY KEY (  `id` ) , index(  trap  ) )ENGINE  =  MyISAM  DEFAULT CHARSET  = utf8");
+                $c_cov1=DB::connection('mysql3')->select("create table `fs_seedling`.`slcov1` ( `id` int (11) NOT  NULL AUTO_INCREMENT, `year` int( 4  ) ,  `month` int( 2  ) ,  `date` char( 10  ) ,  `trap` int( 3  ),  `plot` int( 1  ) , `cov` float,`canopy` char (2) ,  `note` varchar( 255  ), `updated_at` varchar(255), `update_id` char(20), PRIMARY KEY (  `id` ) , index(  trap  ) )ENGINE  =  MyISAM  DEFAULT CHARSET  = utf8");
 
                 for ($x=1;$x<108;$x++){ 
                     if ($x!=42){    

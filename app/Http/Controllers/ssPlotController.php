@@ -63,7 +63,7 @@ class ssPlotController extends Controller
             // print_r($user);
             return view('pages/shoushan/1ha_note', [
                 'site' => $site,
-                'project' => '樣區監測_1.05樣區',
+                'project' => '樣區監測',
                 'user' => $user
 
             ]);
@@ -87,7 +87,7 @@ class ssPlotController extends Controller
             // print_r($user);
             return view('pages/shoushan/10m_note', [
                 'site' => $site,
-                'project' => '樣區監測_森林觀測樣區',
+                'project' => '樣區監測',
                 'user' => $user
 
             ]);
@@ -117,7 +117,7 @@ class ssPlotController extends Controller
             // print_r($user);
             return view('pages/shoushan/1ha_entry', [
                 'site' => $site,
-                'project' => '樣區監測_1.05樣區',
+                'project' => '樣區監測',
                 'entry' => $entry,
                 'user' => $user
 
@@ -157,7 +157,7 @@ class ssPlotController extends Controller
                 DB::connection('mysql5')->statement("INSERT IGNORE INTO 10m_tree_record1 SELECT * FROM 10m_tree_2014 WHERE stemid NOT IN (SELECT stemid FROM 10m_tree_2015)");
 
 
-                DB::connection('mysql5')->statement("ALTER TABLE  `10m_tree_record1` ADD  (`code` char(10) not null,`ill` int(1) default '0',`leave` float default '0',`show` int(1) not null default '1', `date` CHAR(10) NOT NULL default '0000-00-00',`confirm` char(2) not null, `tofix` char(2) not null, `alternote` varchar(255) not null, `update_id` CHAR(20) NOT NULL,`updated_at` varchar(255) CHARACTER SET utf8 COLLATE utf8_general_ci NOT NULL)");
+                DB::connection('mysql5')->statement("ALTER TABLE  `10m_tree_record1` ADD  (`code` char(10) not null,`ill` int(1) default '0',`leave` float default '0',`show` int(1) not null default '1',`confirm` char(2) not null, `tofix` char(2) not null, `alternote` varchar(255) not null, `update_id` CHAR(20) NOT NULL,`updated_at` varchar(255) CHARACTER SET utf8 COLLATE utf8_general_ci NOT NULL)");
                 //status=0, status=-3&branch=0
 
                 Ss10mTreeRecord1::where('branch','!=', '0')->where('status', 'like', '-3')->update(['show'=>'0']);
@@ -166,8 +166,11 @@ class ssPlotController extends Controller
                 Ss10mTreeRecord1::where('status', 'like', '-1')->where('branch', '!=', '0')->update(['show'=>'0']);
                 Ss10mTreeRecord1::where('status', 'like', '-2')->where('branch', '!=', '0')->update(['show'=>'0']);
 
-                Ss10mTreeRecord1::query()->update(['dbh'=>'0', 'height'=>'0']);
+                Ss10mTreeRecord1::query()->update(['dbh'=>'0', 'height'=>'0', 'date'=>'0000-00-00']);
                 Ss10mTreeRecord1::where('status', 'like', '-9')->update(['status'=>'']);
+
+                //刪除欄位
+                DB::connection('mysql5')->statement("ALTER TABLE `10m_tree_record1` DROP COLUMN `height`");
 
                 //產生record2
                 DB::connection('mysql5')->select('CREATE TABLE 10m_tree_record2 LIKE 10m_tree_record1');
@@ -183,9 +186,11 @@ class ssPlotController extends Controller
             //     DB::connection('mysql5')->select('CREATE TABLE 10m_tree_envi_r1 LIKE 10m_quad_2014');
             //     DB::connection('mysql5')->statement("INSERT IGNORE INTO 10m_tree_envi_r1 SELECT * FROM 10m_quad_2014 where type like '森林'");
 
-            //     DB::connection('mysql5')->statement("ALTER TABLE  `10m_tree_envi_ri` ADD  (`sqx` int(2) not null,`sqy` int(2) not null, `note` varchar(255) not Null,  `date` CHAR(10) NOT NULL default '0000-00-00'), `update_id` CHAR(20) NOT NULL,`updated_at` varchar(255) CHARACTER SET utf8 COLLATE utf8_general_ci NOT NULL");
-            //     DB::connection('mysql5')->statement("ALTER TABLE `10m_tree_envi_ri` DROP COLUMN `plot_2015`, `plot_2012`, `type`, `gps_x`, `gps_y`, `altitude`, `cluster`");
-            //     DB::connection('mysql5')->statement("ALTER TABLE `10m_tree_envi_ri` CHANGE COLUMN `plot_2023` `plot`");
+            //     DB::connection('mysql5')->statement("ALTER TABLE  `10m_tree_envi_r1` ADD  (`sqx` int(2) not null,`sqy` int(2) not null, `note` varchar(255) not Null,  `date` CHAR(10) NOT NULL default '0000-00-00'), `update_id` CHAR(20) NOT NULL,`updated_at` varchar(255) CHARACTER SET utf8 COLLATE utf8_general_ci NOT NULL");
+            //     //刪除欄位
+            //     DB::connection('mysql5')->statement("ALTER TABLE `10m_tree_envi_r1` DROP COLUMN `plot_2015`, `plot_2012`, `type`, `gps_x`, `gps_y`, `altitude`, `cluster`");
+            //     //改欄位名稱
+            //     DB::connection('mysql5')->statement("ALTER TABLE `10m_tree_envi_r1` CHANGE COLUMN `plot_2023` `plot`");
 
             //     //篩選森林資料
             //     $plotlist=Ss10mTreeEnviR1::query()->get()->toArray();
@@ -194,7 +199,7 @@ class ssPlotController extends Controller
             // print_r($user);
             return view('pages/shoushan/10m_entry', [
                 'site' => $site,
-                'project' => '樣區監測_森林觀測樣區',
+                'project' => '樣區監測',
                 'entry' => $entry,
                 'user' => $user
 
@@ -219,7 +224,7 @@ class ssPlotController extends Controller
             // print_r($user);
             return view('pages/shoushan/1ha_compare', [
                 'site' => $site,
-                'project' => '樣區監測_1.05樣區',
+                'project' => '樣區監測',
                 'entry' => $entry,
                 'user' => $user
 
@@ -245,7 +250,7 @@ class ssPlotController extends Controller
             // print_r($user);
             return view('pages/shoushan/10m_compare', [
                 'site' => $site,
-                'project' => '樣區監測_森林觀測樣區',
+                'project' => '樣區監測',
                 'entry' => $entry,
                 'user' => $user
 
@@ -253,4 +258,54 @@ class ssPlotController extends Controller
         }
     }
 
+
+    public function dataviewer10m(Request $request, $site){
+
+        $user = $request->session()->get('user', function () {
+            return 'no';
+        });
+
+        if ($user=='no'){
+            return view('login1', [
+                'check' => 'no'
+            ]);
+        } else {
+            // echo "1";
+            //最近一次調
+
+            // print_r($user);
+            return view('pages/shoushan/10m_dataviewer', [
+                'site' => $site,
+                'project' => '樣區監測',
+                'user' => $user
+
+            ]);
+        }
+    }    
+
+    public function dataviewer1ha(Request $request, $site){
+
+        $user = $request->session()->get('user', function () {
+            return 'no';
+        });
+
+        if ($user=='no'){
+            return view('login1', [
+                'check' => 'no'
+            ]);
+        } else {
+            // echo "1";
+            //最近一次調
+
+            // print_r($user);
+            return view('pages/shoushan/1ha_dataviewer', [
+                'site' => $site,
+                'project' => '樣區監測',
+                'user' => $user
+
+            ]);
+        }
+    }
+
 }
+

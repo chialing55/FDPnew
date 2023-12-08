@@ -74,11 +74,11 @@ class ss10mRecruitCheck
             	$codea=str_split($data[$i]['code']);
 
             //4.2 code只能是CIPR
-                $codaarray=array("I","P","R");
+                $codaarray=array("I","P","R", "F");
 
                 $arr3 = array_diff($codea, $codaarray);
                 if (count($arr3) != 0) {
-                    $datasavenote=$data[$i]['stemid']." code 只能是 I P R。";
+                    $datasavenote=$data[$i]['stemid']." code 只能是 I P R F。";
                     $pass='0';
                     break;
                 }
@@ -88,6 +88,14 @@ class ss10mRecruitCheck
                 if (in_array("R",$codea)){  
                     if ($data[$i]['branch']=='0'){
                         $datasavenote=$data[$i]['stemid']." code R 只能記錄在分支。";
+                        $pass='0';
+                        break;
+                    }
+                }
+
+                if (in_array("F",$codea)){  
+                    if ($data[$i]['branch']=='0'){
+                        $datasavenote=$data[$i]['stemid']." code F 只能記錄在分支。";
                         $pass='0';
                         break;
                     }
@@ -111,8 +119,8 @@ class ss10mRecruitCheck
 					if ($site1 != $site2){
 						if (in_array($data[$i]['csp'], $ficus)){
 							
-							if (!in_array('R', $codea)){
-								$datasavenote=$data[$i]['stemid'].' 分支與主幹不在同一小區，請在code註記R。';
+							if (!in_array('F', $codea)){
+								$datasavenote=$data[$i]['stemid'].' 分支與主幹不在同一小區，請在code註記F。';
 								$pass="0";break;
 							}
 						} else {

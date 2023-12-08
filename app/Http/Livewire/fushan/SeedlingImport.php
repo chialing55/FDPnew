@@ -64,8 +64,10 @@ class SeedlingImport extends Component
         foreach($s_slcov as $slcov){
             $add=[];
             $slcov['id']='0';
+            $slcov['ht']='0';
 
             for($i=0;$i<count($covkey);$i++){
+                if (is_null($slcov[$covkey[$i]])){$slcov[$covkey[$i]]='';}
                 $add[$covkey[$i]]=$slcov[$covkey[$i]];
             }
 

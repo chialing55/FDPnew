@@ -439,3 +439,11 @@ button:-webkit-details-marker {
   font-size:90%; 
   color:red;
 }
+
+.photocombo{
+  margin: 20px 10px;
+}
+
+.photo {
+  margin-bottom: 10px;
+}

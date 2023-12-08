@@ -13,7 +13,7 @@ use App\Models\FsSeedsFulldata;
 use App\Models\FsSeedsRecord1;
 use App\Models\FsSeedsSplist;
 
-use App\Jobs\FsSeedsCheck;
+use App\Jobs\fsSeedsCheck;
 use App\Jobs\fsSeedsAddButton;
 
 
@@ -59,8 +59,22 @@ class fsSeedsSaveController extends Controller
             // $list[]=$data[$i]['tag'];
                 $data[$i]['checknote']='';
                 $data[$i]['trap'] = str_pad($data[$i]['trap'], 3, '0', STR_PAD_LEFT);
+                $temp=[];
+                $temp=FsSeedsRecord1::where('id','like',$data[$i]['id'])->get()->toArray();
+                $exarray=['checknote', 'updated_at', 'update_id'];
+                $up='no';
+                foreach($temp[0] as $key=>$value){
+                    if(!in_array($key, $exarray)){
+                        if($temp[0][$key]!=$data[$i][$key]){
+                            $up='yes'; break;
+                        }
+                    }
+                }
+
+                if($up=='no') continue;
+
                 $check = new fsSeedsCheck;
-                $checknote=$check->check($data[$i], $spinfo, 'o');
+                // $checknote=$check->check($data[$i], $spinfo, 'o');
                 $result=$check->check($data[$i], $spinfo, 'o');
                 $checknote=$result['checknote'];
                 $data[$i]=$result['result'];
@@ -73,6 +87,7 @@ class fsSeedsSaveController extends Controller
 
                     $uplist[$key] = $value;
                 }
+                $thisid=$data[$i]['id'];
 
                 // if ($checknote==''){$inlist['pass']='y';} else {$inlist['pass']='n';}
                 $uplist['checknote']=$checknote;
@@ -92,11 +107,14 @@ class fsSeedsSaveController extends Controller
         $ob_table = new fsSeedsAddButton;
         $redata=$ob_table->addbutton($data1);
 
+        $thispage=ceil($thisid/20);
+
 
             return [
                 'result' => 'ok',
                 'uplist' => $uplist,
                 'data' => $redata,
+                'thispage' => $thispage,
                 // 'list' => $list,
                 'seedssavenote' => $datasavenote
 
@@ -125,14 +143,14 @@ class fsSeedsSaveController extends Controller
         $inlist=[];
 
         for ($i=0;$i<count($data);$i++){
-            // $list[]=$data[$i]['tag'];
+//             // $list[]=$data[$i]['tag'];
             if ($data[$i]['trap']!=''){
                 if ($data[$i]['code']==''){
                     $data[$i]['code']='0';
                 }
-                // if ($record['seeds']==''){
-                //     $record['seeds']='0';
-                // }
+                if ($data[$i]['count']==''){
+                    $data[$i]['count']='0';
+                }
                 $data[$i]['trap'] = str_pad($data[$i]['trap'], 3, '0', STR_PAD_LEFT);
                 $check = new fsSeedsCheck;
                 // $checknote=$check->check($data[$i], $spinfo, 'n');
@@ -148,6 +166,7 @@ class fsSeedsSaveController extends Controller
                     $inlist[$key] = $value;
                 }
 
+
                 // if ($checknote==''){$inlist['pass']='y';} else {$inlist['pass']='n';}
                 $inlist['checknote']=$checknote;
                 $inlist['update_id']=$user;
@@ -158,7 +177,7 @@ class fsSeedsSaveController extends Controller
 
         } 
 
-//更新data
+// // 更新data
         $data1=FsSeedsRecord1::query()->orderBy('trap', 'asc')->orderBy('csp', 'asc')->orderBy('code', 'asc')->get()->toArray();
         $ob_table = new fsSeedsAddButton;
         $redata=$ob_table->addbutton($data1);
@@ -287,6 +306,12 @@ class fsSeedsSaveController extends Controller
                     $inlist['identified']='Y';
                     $inlist['code']='0';
                     $inlist['count']='0';
+                    $inlist['seeds']='0';
+                    $inlist['viability']='0';
+                    $inlist['fragments']='0';
+                    $inlist['sex']='';
+                    $inlist['identifier']='';
+                    $inlist['note']='';
 
                 }
                     $inlist['update_id']=$user;

@@ -197,7 +197,8 @@ $list=0;
    <td width="4%">b</td>
    <td width="15%">csp</td>
    <td width="4%"></td>
-   <td width="9%">dbh15</td>
+   <td width="7%">dbh14</td>
+   <td width="7%">dbh15</td>
 
    <td width="40px">status</td>
    <td width="40px">code</td>
@@ -232,9 +233,9 @@ $list=0;
    <td width="7%" class="td6"></td>
    <td width="5%" style='font-size:12px'>坡向</td>
    <td width="5%" class="td6"></td>
+  
    
-   
-   <td align="right" style="font-size:12px; text-align: right;" >
+   <td align="right" style="font-size:12px; text-align: right;" colspan="3">
     @if(isset($datasqx[$x][$y]))
       共 {{count($datasqx[$x][$y])}} 筆 / {{count($datatagsqx[$x][$y])}} 棵樹
     @else
@@ -243,7 +244,7 @@ $list=0;
   </td>
 
    
-   <td width="5%"></td>
+   
 
   </tr>
   @if(isset($datasqx[$x][$y]))
@@ -258,7 +259,7 @@ $list=0;
       ({{$data['maxb']}})
       @endif
     </td>{{--(最大分支數) --}}
-
+    <td @if($data['status']=='-1') class="td3" @else class='td2' @endif>{{$data['dbh14']}}</td>
    <td @if($data['status']=='-1') class="td3" @else class='td2' @endif>{{$data['dbh']}}</td>
 
    <td width="6%" class='td5' style='font-size:10px'>{{$data['status']}}</td>

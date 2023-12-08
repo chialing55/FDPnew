@@ -58,6 +58,7 @@ class fsTreeDataCheck
                 //如果不是樹蕨
                 if ($data[$i]['stemid'][0]=='G'){
                     $census4[0]['dbh']=$census4[0]['h2'];
+ 
                 } else {
                     if ($data[$i]['dbh']<1){
                         $datasavenote=$data[$i]['stemid']." dbh 需大於或等於 1。";
@@ -65,6 +66,8 @@ class fsTreeDataCheck
                         break;
                     }
                 }
+
+                
             //比較dbh大小
                 if ($census4!=[]){
                     if ($data[$i]['dbh']<$census4[0]['dbh']){
@@ -134,6 +137,17 @@ class fsTreeDataCheck
                     }
                 }
             }
+
+            //pom不同, 應要有C
+                    if ($data[$i]['status']!='-9'){
+                        if ($data[$i]['pom']!=$census4[0]['pom'] && !in_array("C",$codea)){
+                            $datasavenote=$data[$i]['stemid']." pom 與前次不同，code 應有C，若非此次更改 pom，請至特殊修改。";
+                            $pass='0';
+                            break;
+                        }
+                    }
+
+
         }
 
 

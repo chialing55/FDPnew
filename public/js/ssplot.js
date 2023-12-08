@@ -51,3 +51,13 @@ $('.list6, .list6inner').on('mouseenter', function() {
     }
   });
 
+  $(".button2").click(function(){
+    let qx = $("select[name='qx']").val();
+    let qy = $("select[name='qy']").val();
+// console.log(qx, qy);
+    // var tempwindow1=window.open('_blank');
+    if (qx!='' && qy!=''){
+      let url='/ssplot-1ha-record-pdf/'+qx+'/'+qy;
+      window.open(url);
+    }
+  });

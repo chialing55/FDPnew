@@ -250,7 +250,7 @@ function sstreetable(data){
       {data: "tag", readOnly: true},
       {data: "branch", readOnly: true},
       {data: "csp", readOnly: true, type: 'autocomplete', source: csplist, strict: true, visibleRows: 10, allowInvalid: false,},
-      {data: "status", type: 'dropdown', source: ['', '0', '-1', '-2', '-3'], allowInvalid: false},
+      {data: "status", type: 'dropdown', source: ['', '0', '-1', '-2', '-3', '-4'], allowInvalid: false},
       {data: "code"},
       {data: "dbh", type: 'numeric'},
       {data: "ill", type: 'numeric', validator: numericValidator},
@@ -674,7 +674,8 @@ function alternotetable(alterdata, stemid, entry){
       {data: "csp", type: 'autocomplete', source: csplist, strict: true, visibleRows: 10, allowInvalid: false,},
       {data: "dbh", type: 'numeric'},
       
-      {data: "stemid"}
+      {data: "stemid"},
+
     ],
     currentRowClassName: 'currentRow',
     autoWrapRow: true,   //自動換行

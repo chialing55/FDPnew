@@ -30,15 +30,23 @@ $('.listlink').on('click', function(){
 })
 
 
-$('.list4, .list4inner').on('mouseenter', function() {
-  $('.list4inner').css('display', 'inline-flex');
-  $('.list4').addClass('listhover'); 
-  $('.now hr').css('color', 'transparent');
-}).on('mouseleave', function() {
-  $('.list4inner').hide();
-  $('.list4').removeClass('listhover');
-  $('.now hr').css('color', '#91A21C');
-});
+function handleHoverEvents(selector, innerSelector) {
+  $(selector + ', ' + innerSelector).on('mouseenter', function() {
+    $(innerSelector).css('display', 'inline-flex');
+    $(selector).css({'color': '#fff', 'background-color': '#91A21C'}); 
+    $('.now hr').css('color', 'transparent');
+  }).on('mouseleave', function() {
+    $(innerSelector).hide();
+    $(selector).css({'color': '', 'background-color': ''}); 
+    $('.now hr').css('color', '#91A21C');
+  });
+}
+
+// 使用
+handleHoverEvents('.list4', '.list4inner');
+// handleHoverEvents('.list6', '.list6inner');
+
+
 
 
 

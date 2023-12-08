@@ -217,7 +217,7 @@ class fsTreeSaveController extends Controller
                 $data[$i]['show']='1';
                 if ($data[$i]['tofix']==Null){$data[$i]['tofix']='';}
                 if ($data[$i]['note']==Null){$data[$i]['note']='';}
- //如果是漏資料 
+ //如果是漏資料 //復活
                 if ($data[$i]['tofix']=='1'){
                     $data[$i]['status']='';
                     $odata=$table::where('stemid', 'like', $data[$i]['stemid'])->get();
@@ -231,7 +231,6 @@ class fsTreeSaveController extends Controller
                         if (!in_array($key, $excludedKeysall)){
                             if ($odata[0][$key] != $value){
                                 if($value==Null){$value='';}
-                                
 
                                 $includeKeys = ['qx', 'qy', 'sqx', 'sqy', 'spcode', 'pom'];
 
@@ -512,9 +511,22 @@ class fsTreeSaveController extends Controller
             $finishnote='有資料未輸入完成 [('.$data[0]['sqx'].', '.$data[0]['sqy'].') '.$data[0]['stemid'].']';
             $pass='0';
         }
+        
+        // $data2 = $table::where('qx', 'like', $qx)->where('qy', 'like', $qy)->where('show', 'like', '1')->get();
 
+        // for($i=0;$i<count($data2);$i++){
+        //                 //全部檢查一次
+        //         $check = new fsTreeDataCheck;
+        //         $datacheck=$check->check($data2[$i]);
+
+        //         if ($datacheck['pass']=='0'){
+        //             $finishnote="(".$data2[$i]['sqx'].",".$data2[$i]['sqy'].") ".$datacheck['datasavenote'];
+        //             $pass='0';
+        //             break;
+        //         }
+        // }
         //同tag是否status相同，csp相同，小區相同, show=1
-
+                
         if ($pass=='1'){
             $data = $table::select('tag')->where('qx', 'like', $qx)->where('qy', 'like', $qy)->where('show', 'like', '1')->groupBy('tag')->get()->toArray();
 
@@ -524,6 +536,9 @@ class fsTreeSaveController extends Controller
                 $com2s=[];
                 $com1s2=[];
                 $com3s=[];
+
+
+
                 $data1=$table::where('tag', 'like', $data[$i]['tag'])->where('show', 'like', '1')->orderBy('branch', 'asc')->get()->toArray();
                 if (count($data1)>1){   //有分支
                     foreach($data1 as $data0){
@@ -606,7 +621,7 @@ class fsTreeSaveController extends Controller
         return [
             'result' => 'ok',
             'pass' => $pass,
-            // 'test'=> $splist,
+            // 'data'=> $datacheck,
 
             'finishnote' => $finishnote
         ];

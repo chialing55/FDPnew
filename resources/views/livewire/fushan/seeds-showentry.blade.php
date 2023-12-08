@@ -66,8 +66,8 @@ $personlist=['','蔡佳秀'];
 
     </div>
 
-    <div class='text_box dateinfo' style='background-color:#ececc4'>
-        <h6>修改調查日期</h6>
+{{--     <div class='text_box dateinfo' style='background-color:#ececc4'>
+        <h6>刪除調查日期</h6>
         <hr>
         <form wire:submit.prevent="deleteForm" method='POST' style='margin-top:10px'>
             <span style='margin-right:20px'> 將 census <input name='chcensus' style="width:60px" wire:model='chcensus'/>
@@ -75,6 +75,27 @@ $personlist=['','蔡佳秀'];
             <button type='submit' >刪除</button>
             <span class='savenote'>{{$note2}}</span>
         </form>
+    </div> --}}
+    <div class='text_box dateinfo' >
+        <h6>修改調查日期資料</h6>
+        <hr>        
+            <form wire:submit.prevent="submitForm3" method="POST">
+                <p>census：<input name='census3' id='census3' type='text' style='width:120px; ' class='fs100' wire:model="census3"></p>
+                <p>調查日期：<input name='date3' id='date3' type='date' placeholder="YYYY-MM-DD" style='width:120px; ' class='fs100' wire:model="date3"></p>
+                <p>調查人員：<select name='person31' id='person31' class="" style='width:85px;' wire:model="person31">
+                    @for ($i=0; $i<count($personlist);$i++)     
+                    <option value="{{$personlist[$i]}}">{{$personlist[$i]}}</option>
+                    @endfor
+                    </select>, <select name='person32'  id='person32' class="" style='width:85px;' wire:model="person32">
+                    @for ($i=0; $i<count($personlist);$i++)     
+                    <option value="{{$personlist[$i]}}">{{$personlist[$i]}}</option>
+                    @endfor
+                    </select>,  <input name='person33' id='person33' type=text style='width:150px' wire:model="person33"/> 
+                    (請以半形「,」分隔，並留一空格)
+                </p>
+                <p>note：<input name='note3' id='note3' type='text' style='width:220px; ' class='fs100' wire:model="note3"></p>
+                <button type='submit'>輸入</button>
+            </form>
     </div>
 
     <div class='text_box entrytableout'>
@@ -88,6 +109,7 @@ $personlist=['','蔡佳秀'];
             <li>不確定種類，一律輸入「<b>UNKUNK</b>」，並將疑似種類名稱寫在 note。</li>
             <li>若為小種子植物的果實或種子，無法計算種子數量，種子數及活性欄位皆填NA。</li>
             <li>不需記錄種子數、活性、碎片3數量時，可填入 0 或保留空白(系統會自動補 0)。</li>
+            <li>長葉木薑子的花，需記錄性別 F / M。</li>
             <li>若不符合規則，會在檢查欄位顯示錯誤之處，若未更改，將無法完成輸入。</li>
             <li><b>輸入完成後請按下<button class='datasavebutton' style='width: auto;'>輸入完成</button></b>，檢查通過後，即會將資料匯入大表。</li>
             </ul>
@@ -105,7 +127,7 @@ $personlist=['','蔡佳秀'];
                 </div>
 
                 <div id='seedstable' class='fs100' >
-
+                    <span class='seedssavenote savenote'></span>
                     <p style='margin-top:5px; text-align: center'><button name='datasave' class='datasavebutton' style='width:550px'>儲存</button></p>
 
                 </div>
@@ -115,6 +137,7 @@ $personlist=['','蔡佳秀'];
                     <button name='show_seedstable'>檢視輸入資料</button>
                 </div>
                 <div id='seedstable_empty' class='fs100' >
+                     
                     <p style='margin-top:5px; text-align: center'><button name='newdatasave' class='datasavebutton' style='width:550px'>儲存</button></p>
 
                 </div>

@@ -6,3 +6,15 @@
 .addcovtableout {
 	display: none;
 }
+
+.fstreeStemidtable{
+	margin: 20px 20px;
+}
+
+.fstreeStemidtable table th{
+	text-align: center;
+}
+
+.fstreeStemidtable table tbody th{
+	font-weight: 500;
+}

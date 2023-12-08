@@ -27,15 +27,23 @@ class ss10mTreePDFController extends Controller
         $plotinfo=Ss10mQuad2014::where('plot_2023','like',$plot)->get()->toArray();
 
         $treedatas=Ss10mTree2015::where('plot','like',$plot)->where('status', 'not like','0')->orderBy('tag', 'asc')->orderBy('branch', 'asc')->get()->toArray();
-        if (count($treedatas)==0){
-            $treedatas=Ss10mTree2014::where('plot','like',$plot)->orderBy('tag', 'asc')->orderBy('branch', 'asc')->get()->toArray();
-        }
+
+
+
 
 
 
         
         // print_r($treedata);
         for($i=0;$i<count($treedatas);$i++){
+
+
+            $treedatas2014=Ss10mTree2014::where('stemid','like',$treedatas[$i]['stemid'])->get()->toArray();
+            if (count($treedatas2014)>0){
+                $treedatas[$i]['dbh14']=$treedatas2014[0]['dbh'];
+            } else {
+                $treedatas[$i]['dbh14']='';
+            }
 
             if($treedatas[$i]['branch']!='0' && $treedatas[$i]['status']=='-3')continue;
             if($treedatas[$i]['branch']!='0' && $treedatas[$i]['status']=='-2')continue;
@@ -48,9 +56,9 @@ class ss10mTreePDFController extends Controller
             if ($treedatas[$i]['branch']=='0'){
                 $maxb=Ss10mTree2015::where('tag','like',$treedatas[$i]['tag'])->where('plot','like',$plot)->orderBy('branch','desc')->get()->toArray();
                 // print_r($maxb[0]);
-                if (count($maxb)==0){
-                    $maxb=Ss10mTree2014::where('tag','like',$treedatas[$i]['tag'])->where('plot','like',$plot)->orderBy('branch','desc')->get()->toArray();
-                }
+                // if (count($maxb)==0){
+                //     $maxb=Ss10mTree2014::where('tag','like',$treedatas[$i]['tag'])->where('plot','like',$plot)->orderBy('branch','desc')->get()->toArray();
+                // }
 
                 if ($maxb[0]['branch']!='0'){
                     $treedatas[$i]['maxb']=$maxb[0]['branch'];

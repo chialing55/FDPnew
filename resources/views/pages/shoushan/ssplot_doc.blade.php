@@ -25,8 +25,8 @@ $plot = array('B-F-01', 'B-F-04', 'B-F-06', 'B-F-13', 'B-F-14', 'B-F-19', 'G-F-0
     <div class='text_box'>
         <h2>下載紀錄紙</h2>
         <hr>
-        <h6>零散森林樣區紀錄紙</h6>
-        <div  style='flex-direction: column;' >
+        <h6>森林觀測樣區紀錄紙</h6>
+        <div style='flex-direction: column;' >
             <div style='margin: 20px 0px;'>
                 請選擇輸出樣區：                    
                 <select class="fs100 entryplot" style='width:120px; ' name='plot' >
@@ -40,6 +40,26 @@ $plot = array('B-F-01', 'B-F-04', 'B-F-06', 'B-F-13', 'B-F-14', 'B-F-19', 'G-F-0
                 <p style='margin-top: 10px; text-align: right;'><button class="button1"  >送出</button></p>
             </div>
         </div>
+        <hr>
+        <h6>1.05 ha 樣區紀錄紙</h6>
+        <div style='flex-direction: column;' >
+            <div style='margin: 20px 0px;'>
+                請選擇輸出樣區：                    
+                <select class="fs100 entryqx" name='qx' id='qx'>
+                <option value=''></option>
+                @for ($i=-4; $i<11;$i++)     
+                <option value="{{$i}}">{{$i}}</option>
+                @endfor
+                </select>-<select class="fs100" name='qy' id='qy'>
+                    <option value=''></option>
+                @for ($i=13; $i<20;$i++)
+                <option value="{{$i}}">{{$i}} </option>
+                @endfor
+                </select>
+                <p style='margin-top: 10px; text-align: right;'><button class="button2"  >送出</button></p>
+            </div>
+        </div>
+
     </div>
 
     <div class='text_box'>

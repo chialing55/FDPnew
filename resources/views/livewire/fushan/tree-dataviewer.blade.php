@@ -112,8 +112,8 @@
             <div class='fstreeStemidtable'>
             <table class='tablesorter'>
                 
-                <thead>
-                    <tr>
+                <thead >
+                    <tr style="text-align: center;">
                         <th>20x</th>
                         <th>20y</th>
                         <th>5x</th>
@@ -121,21 +121,21 @@
                         <th>tag</th>
                         <th>b</th>
                         <th>csp</th>
-                        <th>枝幹數</th>
+                        <th>最大分支號</th>
                         
                     </tr>
                 </thead>
                
                 <tbody>
-                    <tr>
-                        <th>{{$basedata['qx']}}</th>
-                        <th>{{$basedata['qy']}}</th>
-                        <th>{{$basedata['sqx']}}</th>
-                        <th>{{$basedata['sqy']}}</th>
-                        <th>{{$basedata['tag']}}</th>
-                        <th>{{$basedata['b']}}</th>
-                        <th>{{$basedata['csp']}}</th>
-                        <th>{{$basedata['bs']}}</th>
+                    <tr style="text-align: center;">
+                        <td>{{$basedata['qx']}}</td>
+                        <td>{{$basedata['qy']}}</td>
+                        <td>{{$basedata['sqx']}}</td>
+                        <td>{{$basedata['sqy']}}</td>
+                        <td>{{$basedata['tag']}}</td>
+                        <td>{{$basedata['b']}}</td>
+                        <td>{{$basedata['csp']}}</td>
+                        <td>{{$basedata['bs']}}</td>
                     </tr>
                 </tbody>
                
@@ -144,7 +144,7 @@
             <div class='fstreeStemidtable'>
                 <table id='StemidTable' class='tablesorter'>
                     <thead>
-                        <tr>
+                        <tr style="text-align: center;">
                             <th>census</th>
                             <th>status</th>
                             <th>code</th>
@@ -158,16 +158,16 @@
                     @if(!empty($result))
                     <tbody>
                     @foreach($result as $pre)
-                        <tr>
-                            <th>{{$pre['census']}}</th>
-                            <th>{{$pre['status']}}</th>
-                            <th>{{$pre['code']}}</th>
-                            <th>{{$pre['dbh']}}</th>
-                            <th>{{$pre['pom']}}</th>
-                            <th>{{$pre['note']}}</th>
-                            <th>@if($pre['confirm']=='1')
+                        <tr style="text-align: center;">
+                            <td>{{$pre['census']}}</td>
+                            <td>{{$pre['status']}}</td>
+                            <td>{{$pre['code']}}</td>
+                            <td>{{$pre['dbh']}}</td>
+                            <td>{{$pre['pom']}}</td>
+                            <td>{{$pre['note']}}</td>
+                            <td>@if($pre['confirm']=='1')
                             <i class="fa-solid fa-check"></i>
-                            @endif</th>
+                            @endif</td>
                         </tr>
                     @endforeach
                     </tbody>

@@ -103,9 +103,8 @@ class fsTreeRecruitCheck
 					if ($site1 != $site2){
 
 							$datasavenote=$data[$i]['stemid'].' 分支與主幹需在同一小區。如為R，請將R分支之位置註記在note。';
-						
-						
-					$pass="0";break;
+
+							$pass="0";break;
 					}
 				}
 			}

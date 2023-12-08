@@ -19,6 +19,7 @@ class TreeCompare extends Component
     public $entrylist=[];
     public $comparelist=[];
     public $qx;
+    public $user;
 
     public function mount(){
 // 確認是否輸入完資料
@@ -27,7 +28,7 @@ class TreeCompare extends Component
         $comparelist=[];
 
         $entrycom=FsTreeEntrycom::select('qx',  DB::raw('SUM(entry1) as sum1'), DB::raw('SUM(entry2) as sum2'))->groupBy('qx')->get()->toArray();
-        $compareok=FsTreeEntrycom::select('qx',  DB::raw('SUM(compareOK) as sum1'))->groupBy('qx')->get()->toArray();
+        $compareok=FsTreeEntrycom::select('qx',  'compareOK')->where('compareOK', '!=', '0')->groupBy('qx', 'compareOK')->get()->toArray();
 
         foreach ($entrycom as $entry){
             if ($entry['sum1']==25 && $entry['sum2']==25){
@@ -37,10 +38,11 @@ class TreeCompare extends Component
 
 
         foreach ($compareok as $entry){
-            if ($entry['sum1']==25){
+
                 $comparelist[]=$entry['qx'];
-            }
+
         }
+        // dd($compareok);
 
         $this->entrylist=$entrylist;
         $this->comparelist=$comparelist;
@@ -89,7 +91,7 @@ class TreeCompare extends Component
             $stemid2 = array_diff($stemid2, array(""));
 
             sort($stemid2);    
- // dd($tag2);
+ // dd($pass);
             $comnote1=[];
                     // 依tag比對
             $mistake=[];
@@ -108,7 +110,9 @@ class TreeCompare extends Component
                                     $add2[]=$key;             
                             }
                         }
-                        if (count($add2)>0){
+                        // dd($add2);
+                        if ($add2!=[]){
+                       // dd($add2);
                             foreach ($add2 as $add21){
                                 $comnote2['qy']=$record2[$stemid2[$i]]['qy'];
                                 $comnote2['sqx']=$record2[$stemid2[$i]]['sqx'];
@@ -116,16 +120,18 @@ class TreeCompare extends Component
                                 $comnote2['xy10']=$record2[$stemid2[$i]]['sqx'].$record2[$stemid2[$i]]['sqy'];
                                 $comnote2['stemid']=$stemid2[$i];
                                 if ($add21=='alternote'){$add21='特殊修改';}
-                                if ($add21=='spcode'){continue;}
+                                if ($add21=='spcode'){$add21='csp';}
                                 $comnote2['note']=$add21.' 資料不合';
                                 $comnote1[]=$comnote2;
                                 $mistake['key'][]=$add21;
                                 $mistake['steimid'][]=$stemid2[$i];
                             }
 
-                            
+                            // dd($mistake['steimid']);
                             $pass='0';
                         }
+
+                         // dd($pass);
                     } else {  //1有2沒有
                                 $comnote2['qy']=$record1[$stemid2[$i]]['qy'];
                                 $comnote2['sqx']=$record1[$stemid2[$i]]['sqx'];
@@ -154,7 +160,8 @@ class TreeCompare extends Component
                 
                 
             }
-            // dd($comnote1);
+
+            // dd($pass);
 
             if ($pass=='0'){
 
@@ -200,6 +207,11 @@ class TreeCompare extends Component
 
 
         if ($comnote==''){
+
+            $user = $request->session()->get('user', function () {
+                return 'no';
+            });
+
             $comnote='資料皆相符。恭喜比對完成。';
             
             $uplist['compareOK']=$user;

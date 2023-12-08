@@ -31,9 +31,9 @@ class SeedsShowentry extends Component
 
     public function mount(){
         $maxcensus=FsSeedsDateinfo::query()->max('census');
-        $this->census=$maxcensus+1;
+        $this->census=$maxcensus+1;   
         $maxcensus2=FsSeedsFulldata::query()->max('census');
-        $this->census2=$maxcensus2+1;
+        $this->census2=$maxcensus2+1;   
 
         $this->dateinfo=FsSeedsDateinfo::query()->orderBy('census', 'desc')->take(5)->get()->toArray();
 
@@ -48,7 +48,9 @@ class SeedsShowentry extends Component
         $entrytable=FsSeedsRecord1::query()->get()->toArray();
         // dd(count($entrytable));
         if (count($entrytable)>0){
-            $this->createTable($entrytable[0]['census']);
+            // $this->createTable($entrytable[0]['census']);
+            $this->entry='y';
+            $this->thiscensus=$entrytable[0]['census'];
         }
 
 
@@ -68,7 +70,29 @@ class SeedsShowentry extends Component
 
 
         if ($this->date!=''){
-            $date1=explode('-', $this->date);
+
+            $datecheck=$this->datecheck($this->census, $this->date, $this->person1, $this->person2, $this->person3);
+
+            $this->census2date['date']=$this->date;
+
+            $inlist['year']=$datecheck['year'];
+            $inlist['month']=$datecheck['month'];
+            $inlist['date1']=$datecheck['date1'];
+            $inlist['period']=$datecheck['period'];
+            $inlist['workers']=$datecheck['workers'];
+
+            $additionalData=['date'=>$this->date, 'census'=>$this->census,  'update_id' => $user,'note'=>$this->note ,'updated_at' => date("Y-m-d H:i:s")];
+            $inlist = array_merge($inlist, $additionalData);
+            FsSeedsDateinfo::insert($inlist);
+
+            $this->createTable($this->census);
+
+        }
+    }
+
+
+    public function datecheck($census, $date, $person1, $person2, $person3){
+            $date1=explode('-', $date);
             $year=$date1[0];
             $month=$date1[1];
             $day=$date1[2];
@@ -80,9 +104,8 @@ class SeedsShowentry extends Component
 //若($day)>$interval/2，則屬於本月
 //
 //
-            $inlist['year']=$year;
 
-            $census=$this->census;
+
             $pcensus=FsSeedsDateinfo::query()->where('census', 'like', $census-1)->get()->toArray();
             if ($pcensus[0]['month']!=$month){
                 $pdate=Carbon::parse($pcensus[0]['date']);
@@ -108,38 +131,41 @@ class SeedsShowentry extends Component
 //以九月為切分，過九月後，即為新的一個period
 //
             $month=str_pad($month, 2, '0', STR_PAD_LEFT);
-            $inlist['month']=$month;
-            $inlist['date1']=$year."-".$month."-01";
+
             if ($month>='09'){
-                $inlist['period']=$year-2001;
+                $period=$year-2001;
             } else {
-                $inlist['period']=$year-2002;
+                $period=$year-2002;
             }
 
             $workers1=[];
-            if ($this->person1!=''){
-                $workers1[]=$this->person1;
+            if ($person1!=''){
+                $workers1[]=$person1;
             }
 
-            if ($this->person2!=''){
-                $workers1[]=$this->person2;
+            if ($person2!=''){
+                $workers1[]=$person2;
             }
 
-            if ($this->person3!=''){
-                $workers1[]=$this->person3;
+            if ($person3!=''){
+                $workers1[]=$person3;
             }
 
             $workers=implode(', ', $workers1);
-            $this->census2date['date']=$this->date;
 
-            $additionalData=['date'=>$this->date, 'census'=>$this->census,  'update_id' => $this->user,'note'=>$this->note ,'workers'=>$workers,'updated_at' => date("Y-m-d H:i:s")];
-            $inlist = array_merge($inlist, $additionalData);
-            FsSeedsDateinfo::insert($inlist);
+            return [
+                'year'=>$year,
+                'month'=>$month,
+                'date1'=>$year."-".$month."-01",
+                'period'=>$period,
+                'workers'=>$workers
 
-           $this->createTable($this->census);
+            ];
 
-        }
+
     }
+
+
 
     public function direntry($census2){
         $this->createTable($census2);
@@ -196,19 +222,59 @@ class SeedsShowentry extends Component
 
     }
 
+    public $census3;
+    public $date3;
+    public $person31;
+    public $person32;
+    public $person33;
+    public $note3='';
     public $note2;
     public $chcensus;
 
     public function deleteForm(Request $request)
     {
+
+        // 更新date資料
         $d_record = FsSeedsDateinfo::where('census', 'like', $this->chcensus)->delete();
         $this->note2='已刪除 census'.$this->chcensus.' 資料';
 
         $this->dateinfo=FsSeedsDateinfo::query()->orderBy('census', 'desc')->take(5)->get()->toArray();
         $this->chcensus='';
 
-        // $this->reset();
+        $this->reset();
         $this->mount();
+    }
+
+    public function submitForm3(Request $request){
+        $user = $request->session()->get('user', function () {
+            return 'no';
+        });
+
+
+        if ($this->date3!=''){
+
+            $datecheck=$this->datecheck($this->census3, $this->date3, $this->person31, $this->person32, $this->person33);
+
+            if (is_null($this->note3)){$this->note3='';}
+
+            // dd($datecheck);
+
+            $inlist['year']=$datecheck['year'];
+            $inlist['month']=$datecheck['month'];
+            $inlist['date1']=$datecheck['date1'];
+            $inlist['period']=$datecheck['period'];
+            $inlist['workers']=$datecheck['workers'];
+
+            $additionalData=['date'=>$this->date3, 'census'=>$this->census3,  'update_id' => $user,'note'=>$this->note3 ,'updated_at' => date("Y-m-d H:i:s")];
+
+            $inlist = array_merge($inlist, $additionalData);
+            // dd($inlist);
+            FsSeedsDateinfo::where('census', 'like', $this->census3)->update($inlist);
+
+            // $this->createTable($this->census);
+            $this->reset();
+            $this->mount();
+        }        
     }
 
     public $finishnote;

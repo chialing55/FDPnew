@@ -33,10 +33,6 @@ class ss10mDataCheck
             //舊資料(census2015)  //確定dbh大小
          
             $census2015=Ss10mTree2015::where('stemid', 'like', $data[$i]['stemid'])->get()->toArray();
-            if (count($census2015)==0){
-                $census2015=Ss10mTree2015::where('stemid', 'like', $data[$i]['stemid'])->get()->toArray();
-            }
-
 
             //將code拆開
             $data[$i]['code']=strtoupper($data[$i]['code']);  //轉為皆大寫
@@ -65,32 +61,34 @@ class ss10mDataCheck
                 }
 
             //比較dbh大小
-                if ($census2015!=[]){
-                    if ($data[$i]['dbh']<$census2015[0]['dbh']){
-                        
-                        if (in_array("C",$codea)){
-                            if ($data[$i]['confirm']=='1'){
-                                $datasavenote=$data[$i]['stemid']." code 包含C，不需勾選縮水。";
-                                $pass='0';
-                                break;
+                if ($census2015!=[] ){
+                    if ($data[$i]['branch']=='0'){
+                        if ($data[$i]['dbh']<$census2015[0]['dbh']){
+                            
+                            if (in_array("C",$codea)){
+                                if ($data[$i]['confirm']=='1'){
+                                    $datasavenote=$data[$i]['stemid']." code 包含C，不需勾選縮水。";
+                                    $pass='0';
+                                    break;
+                                }
+                            } else {
+                                if ($data[$i]['confirm']!='1'){
+                                    $datasavenote=$data[$i]['stemid']." dbh 必須大於或等於上次調查，或勾選縮水，或是code要給C。";
+                                    $pass='0';
+                                    break;
+                                }
                             }
                         } else {
-                            if ($data[$i]['confirm']!='1'){
-                                $datasavenote=$data[$i]['stemid']." dbh 必須大於或等於上次調查，或勾選縮水，或是code要給C。";
+                            if ($data[$i]['confirm']=='1'){
+                                $datasavenote=$data[$i]['stemid']." dbh 大於上次調查，不應勾選縮水。";
                                 $pass='0';
                                 break;
                             }
                         }
-                    } else {
-                        if ($data[$i]['confirm']=='1'){
-                            $datasavenote=$data[$i]['stemid']." dbh 大於上次調查，不應勾選縮水。";
-                            $pass='0';
-                            break;
-                        }
-                    }
-                }            
+                    } 
+                }           
             }
-        //4. code CIPR
+        //4. code CIPRF
             //自動轉為大寫
             
             //4.1  若code包含C，則POM不得同於前次pom
@@ -114,11 +112,11 @@ class ss10mDataCheck
                     }
                 }
             //4.2 code只能是CIPR
-                $codaarray=array("C","I","P","R");
+                $codaarray=array("C","I","P","R","F");
 
                 $arr3 = array_diff($codea, $codaarray);
                 if (count($arr3) != 0) {
-                    $datasavenote=$data[$i]['stemid']." code 只能是 C I P R。";
+                    $datasavenote=$data[$i]['stemid']." code 只能是 C I P R F。";
                     $pass='0';
                     break;
                 }
@@ -132,6 +130,14 @@ class ss10mDataCheck
                         break;
                     }
                 }
+
+                if (in_array("F",$codea)){  
+                    if ($data[$i]['branch']=='0'){
+                        $datasavenote=$data[$i]['stemid']." code F 只能記錄在分支。";
+                        $pass='0';
+                        break;
+                    }
+                }                
             }
         }
 

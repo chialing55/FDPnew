@@ -26,7 +26,7 @@ class fsSeedsCheck
 		if ($trap>107 || $trap<1 || $trap==42){
 			$checknote='Trap 不正確';
 
-		} elseif ($record['count']==0){
+		} else if ($record['count']==0){
 
 		//1. if count = 0
 		
@@ -86,10 +86,11 @@ class fsSeedsCheck
 					}
 
 				// f fragments = ''
+
 					if ($record['fragments'] != '' && $record['fragments'] != '0'){
-						$checknote='碎片3數量應為 空白/0。';
-					} else {
-						$record['fragments']=='0';
+							$checknote='碎片3數量應為 空白/0。';
+						} else {
+							$record['fragments']='0';
 					}
 				//g sex l!= ''	
 					if ($record['sex'] != ''){

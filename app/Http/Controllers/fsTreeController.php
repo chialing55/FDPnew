@@ -9,7 +9,7 @@ use Illuminate\Support\Facades\Schema;
 // use Illuminate\Support\Facades\Input;
 
 
-use App\Models\FsBaseTreeSplist;
+use App\Models\FsBaseSpinfo;
 use App\Models\FsTreeRecord1;
 use App\Models\FsTreeRecord2;
 use App\Models\FsTreeCensus4;
@@ -28,7 +28,7 @@ class fsTreeController extends Controller
 
         $splist=[];
 
-        $splists=FsBaseTreeSplist::select('spcode', 'csp')->get()->toArray();
+        $splists=FsBaseSpinfo::select('spcode', 'csp')->where('tree', 'like', '1')->get()->toArray();
         foreach($splists as $splist1){
             $splist[$splist1['spcode']]=$splist1['csp'];
         }

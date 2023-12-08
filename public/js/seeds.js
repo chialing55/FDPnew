@@ -9,21 +9,44 @@ $('.listlink').on('click', function(){
 	let type=$(this).attr('type');
 	console.log(type);
 	if (typeof type!='undefined'){
-	location.href=(`/fushan/seeds/${type}`);
+		if (type=='websplist'){
+			window.open('/web/splist', '_blank');
+		} else {
+			location.href=(`/fushan/seeds/${type}`);
+		}
+	
 	}
 
 })
 
 
-$('.list4, .list4inner').on('mouseenter', function() {
-  $('.list4inner').css('display', 'inline-flex');
-  $('.list4').addClass('listhover'); 
-  $('.now hr').css('color', 'transparent');
-}).on('mouseleave', function() {
-  $('.list4inner').hide();
-  $('.list4').removeClass('listhover');
-  $('.now hr').css('color', '#91A21C');
-});
+$("#sptable").tablesorter();
+
+
+
+// window.addEventListener('resptable', event => {
+
+//   $("#sptable").trigger("updateAll");
+
+// });
+
+
+
+function handleHoverEvents(selector, innerSelector) {
+  $(selector + ', ' + innerSelector).on('mouseenter', function() {
+    $(innerSelector).css('display', 'inline-flex');
+    $(selector).css({'color': '#fff', 'background-color': '#91A21C'}); 
+    $('.now hr').css('color', 'transparent');
+  }).on('mouseleave', function() {
+    $(innerSelector).hide();
+    $(selector).css({'color': '', 'background-color': ''}); 
+    $('.now hr').css('color', '#91A21C');
+  });
+}
+
+// 使用
+handleHoverEvents('.list4', '.list4inner');
+handleHoverEvents('.list6', '.list6inner');
 
 window.addEventListener('data', event => {
 
@@ -78,7 +101,7 @@ function emptyseedstable(table){
   };
 
   const sexValidator = (value, callback) => {
-    if (['F', 'M',  ''].includes(value)) {   //允許1234和空格
+    if (['F', 'M', 'MF', ''].includes(value)) {   //允許1234和空格
       callback(true);
     } else {
       callback(false);
@@ -193,7 +216,7 @@ function seedstable(data, table, thispage){
 // console.log(entry);
 
 	totalpage=Math.ceil(data.length/20);
-	// console.log(data);
+	console.log(totalpage);
 		// $('.prev').addClass('prev'+data[0]['trap']);
 		// $('.next').addClass('next'+data[0]['trap']);
 		$('.pagenote').html('共 '+data.length+'筆資料。 ');
@@ -204,10 +227,12 @@ function seedstable(data, table, thispage){
 
 		data=datapage[1];
 	} else {
+		$('.prev').hide();
+		$('.next').hide();
 		data=data;
 	}
 
-
+// console.log(thispage);
   
   $(`button[name=datasave]`).off();
   var container = $("#seedstable");
@@ -223,7 +248,7 @@ function seedstable(data, table, thispage){
   };
 
   const sexValidator = (value, callback) => {
-    if (['F', 'M',  ''].includes(value)) {   //允許1234和空格
+    if (['F', 'M', 'MF' ,''].includes(value)) {   //允許1234和空格
       callback(true);
     } else {
       callback(false);
@@ -312,7 +337,8 @@ function seedstable(data, table, thispage){
 		        if (res.seedssavenote !=''){
 		        	$('.seedssavenote').html(res.seedssavenote);
 		        }
-		        seedstableupdate(res.data, thispage);
+		        seedstableupdate(res.data, res.thispage);
+		        // console.log(thispage);
 		        fdata=res.data;
 
 		      }

@@ -59,7 +59,10 @@ const user='".$user."';
           <div class='boxtext'>小苗 Seedling Census</div>
         </div>
       </div> --}}
-
+        <div class='box1 choice' site='fushan' project='splist'>
+          <div class='boxtext'>福山 植物名錄</div>
+          <img src="{{asset('/images/research/splist.png')}}" width=180/>
+        </div>
         <div class='box1 choice' site='fushan' project='tree'>
           <img src="{{asset('/images/research/tree.png')}}"/>
           <div class='boxtext'>福山 每木</div>

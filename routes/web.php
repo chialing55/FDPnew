@@ -82,7 +82,7 @@ Route::get('/fstree-record-pdf/{qx}/{qy}/{type}', [App\Http\Controllers\fsTreePD
 //ssplot download record pdf
 
 Route::get('/ssplot-10m-record-pdf/{plot}', [App\Http\Controllers\ss10mTreePDFController::class, 'record']);
-
+Route::get('/ssplot-1ha-record-pdf/{qx}/{qy}', [App\Http\Controllers\ss1haPDFController::class, 'record']);
 // pages
 Route::get('/fushan/{project}/{type}', function($project, $type){
 // echo '1'.$project;
@@ -134,8 +134,10 @@ Route::get('/fushan/{project}/{type}', function($project, $type){
 
             } else if ($type=='entry'){
                 return App::call('App\Http\Controllers\fsSeedsController@entry',['site' => $site] );
-            } else if ($type=='import'){
-                return App::call('App\Http\Controllers\fsSeedsController@import',['site' => $site] );
+            } else if ($type=='showdata'){
+                return App::call('App\Http\Controllers\fsSeedsController@showdata',['site' => $site] );
+            } else if ($type=='unknown'){
+                return App::call('App\Http\Controllers\fsSeedsController@unknown',['site' => $site] );
             }
             
         }
@@ -166,6 +168,10 @@ Route::get('/shoushan/{project}/{type}', function($project, $type){
                 return App::call('App\Http\Controllers\ssPlotController@entry10m',['site' => $site, 'entry'=> '2'] );
             } else if ($type=='10m_compare'){
                 return App::call('App\Http\Controllers\ssPlotController@compare10m',['site' => $site] );
+            } else if ($type=='10m_dataviewer'){
+                return App::call('App\Http\Controllers\ssPlotController@dataviewer10m',['site' => $site] );
+            } else if ($type=='1ha_dataviewer'){
+                return App::call('App\Http\Controllers\ssPlotController@dataviewer1ha',['site' => $site] );
             }
         }
 
@@ -215,5 +221,27 @@ Route::post('/ss10msaveaddcov', [App\Http\Controllers\ss10mSaveController::class
 Route::get('/ss10mdeletecov/{id}/{entry}', [App\Http\Controllers\ss10mSaveController::class, 'deletecov']);
 Route::post('/ss10msavecov', [App\Http\Controllers\ss10mSaveController::class, 'savecov']);
 
+
+
 //檔案最新更新日期
 Route::get('/latest-updates', 'App\Http\Controllers\UpdateController@latestUpdates');
+
+
+
+
+
+//web
+
+Route::get("web/index", [App\Http\Controllers\webIndexController::class, 'index']);
+
+Route::get('web/splist', function () {
+    
+    return view('pages/web/splist');
+});
+
+Route::get('web/species/{spcode}', function ($spcode) {
+    
+    return view('pages/web/species',['spcode'=>$spcode]);
+});
+
+// Route::get("web/splist", [App\Http\Controllers\webIndexController::class, 'splist']);

@@ -53,9 +53,17 @@ class TreeShowentry extends Component
 
             $csplist1 = $table::select('spcode', DB::raw('count(stemid) as count2'))->groupBy('spcode')->orderByDesc('count2')->get()->toArray();
 
+
             for($i=0;$i<count($csplist1);$i++){
                 $csplist[$i]=$splist[$csplist1[$i]['spcode']];
             }
+
+            foreach ($splist as $key=>$value){
+                if (!in_array($value, $csplist)){
+                    $csplist[]=$value;
+                }
+            }
+
         
             $request->session()->put('csplist', $csplist);
         }

@@ -35,7 +35,7 @@ class TreeDataviewer extends Component
 
     public function mount(Request $request)
     {
-        $this->processFile($request);
+        
 
         for($i=1;$i<5;$i++){
             $downloadtable[$i][0]='舊樹';
@@ -54,67 +54,6 @@ class TreeDataviewer extends Component
 
     }
 
-    public function change(Request $request)
-    {
-        $this->processFile($request);
-    }
-
-    public function processFile(Request $request)
-    {
-
-        $user = $request->session()->get('user', function () {
-            return 'no';
-        });
-
-        $fileqx=str_pad($this->qx, 2, '0', STR_PAD_LEFT);
-        $fileqy=str_pad($this->qy, 2, '0', STR_PAD_LEFT);
-        $filesqx=$fileqx.$fileqy;
-        $filecensus='fs_census'.$this->census."_scanfile";
-
-
-///fs_census4_scanfile/'.$fileqx.'/old/'.$filesqx.'_old.pdf
-        $filePath=$filecensus."/".$fileqx.'/'.$this->oldnew.'/'.$filesqx.'_'.$this->oldnew.'';
-        // $filePath2=public_path($filePath1);
-        if ($this->oldnew=='map'){
-            $filemap=str_pad($this->map, 2, '0', STR_PAD_LEFT);
-            $filePath=$filecensus."/".$fileqx.'/'.$this->oldnew.'/'.$filesqx.$filemap.'';
-        }
-
-        $matchingFiles = glob(public_path($filePath) . '.*', GLOB_BRACE | GLOB_NOCHECK);
-
-        $this->filePath2=$matchingFiles;
-
-
-        if (!empty($matchingFiles)) {
-
-            foreach ($matchingFiles as $matchingFile) {
-                $info = pathinfo($matchingFile);
-                
-                if ($info['extension'] === 'pdf') {
-                    // 這是 PDF 檔案
-                    $this->path = $filePath.".pdf";
-
-                    $this->error = '';
-                    break;
-                } elseif ($info['extension'] === 'PDF'){
-                    $this->path = $filePath.".PDF";
-                    $this->error = '';
-                    break;
-                } elseif ($info['extension'] === 'jpg'){
-                    $this->path = $filePath.".jpg";
-                    $this->error = '';
-                    break;
-                }else {
-                    $this->error = '沒有檔案 ' . $filePath;
-                    $this->path='';
-                }
-            }
-        } else {
-            $this->error = '沒有檔案 ' . $filePath;
-            $this->path='';
-        }
-
-    }
 
 
     public function change2(Request $request)
@@ -230,11 +169,11 @@ class TreeDataviewer extends Component
         $census3=FsTreeCensus3::where('stemid', 'like', $stemid)->get()->toArray();
         $census4=FsTreeCensus4::where('stemid', 'like', $stemid)->get()->toArray();
         $base=FsTreeBase::where('tag', 'like', $tag)->get()->toArray();
-        $census4_2=FsTreeCensus4::where('tag', 'like', $tag)->get()->toArray();
+        $census4_2=FsTreeCensus4::where('tag', 'like', $tag)->max('branch');
 
         // dd($request);
         if (count($base)>0){
-            $this->basedata=['stemid'=> $stemid, 'qx'=>$base[0]['qx'], 'qy'=>$base[0]['qy'], 'sqx'=>$base[0]['sqx'], 'sqy'=>$base[0]['sqy'], 'csp'=>$splist[$base[0]['spcode']], 'tag'=>$tag, 'b' => $branch, 'bs'=>count($census4_2)];
+            $this->basedata=['stemid'=> $stemid, 'qx'=>$base[0]['qx'], 'qy'=>$base[0]['qy'], 'sqx'=>$base[0]['sqx'], 'sqy'=>$base[0]['sqy'], 'csp'=>$splist[$base[0]['spcode']], 'tag'=>$tag, 'b' => $branch, 'bs'=>$census4_2];
 
             if (count($census1)>0){
                 if ($tag[0]=='G'){
@@ -281,6 +220,7 @@ class TreeDataviewer extends Component
 
         } else {
             $this->resultnote='查無此樹';
+            $this->result='';
         }
     }
 
