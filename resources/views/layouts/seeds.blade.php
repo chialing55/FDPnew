@@ -40,7 +40,7 @@
   <div class='headerlist iflex'>
       <div class='list list1 listlink' type='doc'>相關文件<hr></div>
       <div class='list list4 listlink' >資料輸入<hr></div>
-      <div class='list list6 listlink' >資料檢視<hr></div>
+      <div class='list list6 listlink' >資料查詢<hr></div>
   </div>
 
 @endsection
@@ -49,6 +49,7 @@
       <div class='listinner list4inner'>
           <li class='innerlist list41 listlink' type='note'>資料輸入注意事項<hr></li>
           <li class='innerlist list42 listlink' type='entry'>資料輸入<hr></li>
+          <li class='innerlist list43 listlink' type='updateBackData'>檢視/更新資料<hr></li>
           {{-- <li class='innerlist list45 listlink' type='import'>將資料匯入大表<hr></li> --}}
 
 
@@ -56,7 +57,7 @@
 
       <div class='listinner list6inner'>
         <li class='innerlist list62 listlink' type='websplist'>物種名錄<hr></li>
-        <li class='innerlist list61 listlink' type='showdata'>歷年資料檢視<hr></li>
+        <li class='innerlist list61 listlink' type='showdata'>歷年資料查詢<hr></li>
         <li class='innerlist list62 listlink' type='unknown'>UNKNOWN<hr></li>
 
 

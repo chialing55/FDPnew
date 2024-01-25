@@ -519,7 +519,7 @@ visibility: hidden;
 
 /**資料輸入**/
 
-#simplenote{
+#simplenote, .simplenote{
 	padding: 0 10px;
 	border: 1px dotted #F7C600;
 	background-color: #FFFFB9;

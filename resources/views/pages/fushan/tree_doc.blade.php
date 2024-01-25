@@ -76,6 +76,7 @@ $(function() {
                 <li><a href='https://bit.ly/3Dw5zPX' target="_blank">每木調查方法介紹</a></li>
                 <li><a href='{{asset('/fs_tree_file/02_福山樣區複查code與status.pdf')}}' target="_blank">福山樣區複查code與status</a></li>
                 <li><a href='{{asset('/fs_tree_file/03_Code%20R的規則%20ver.4.pdf')}}' target="_blank">Code R的規則</a></li>
+                <li><a href='https://docs.google.com/document/d/1VvgtNYBD-T8KjfrErSrsjqBqktpiCuEbTT9N9r48D2g/edit' target="_blank">2023 每木調查 note 縮寫說明</li>
                 <li><a href='{{asset('/fs_tree_file/04_每日檢查確認表.pdf')}}' target="_blank">每日檢查確認表</a></li>
                 
                 <li><a href='{{asset('/fs_tree_file/06_問題表格.pdf')}}' target="_blank">問題表格</a></li>

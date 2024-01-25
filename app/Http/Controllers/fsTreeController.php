@@ -43,7 +43,7 @@ class fsTreeController extends Controller
         } else {
             DB::connection('mysql')->select('CREATE TABLE record1 LIKE census4');
        
-            DB::connection('mysql')->statement("INSERT IGNORE INTO record1 SELECT * FROM census4");
+            DB::connection('mysql')->statement("INSERT IGNORE INTO record1 SELECT * FROM census4 where census4.deleted_at like ''");
 
             DB::connection('mysql')->statement("ALTER TABLE `record1` CHANGE `date` `date` CHAR(10) NOT NULL");
             DB::connection('mysql')->statement("ALTER TABLE `record1` CHANGE `alternote` `alternote` VARCHAR(255) NOT NULL");
@@ -55,7 +55,8 @@ class fsTreeController extends Controller
             //join base表單，更新樣區及種類
             DB::connection('mysql')->table('record1')->join('base', 'record1.tag', '=', 'base.tag')->update(['record1.qx'=>DB::raw('base.qx'), 'record1.qy'=>DB::raw('base.qy'),'record1.sqx'=>DB::raw('base.sqx'),'record1.sqy'=>DB::raw('base.sqy'),'record1.spcode'=>DB::raw('base.spcode')]);
             //選擇輸入樣區時再把csp填入
-
+        //刪除欄位
+            DB::connection('mysql')->statement("ALTER TABLE `record1` DROP COLUMN `deleted_at`");
             //status=0, status=-3&branch=0
             FsTreeRecord1::where('branch','!=', '0')->where('status', 'like', '-3')->update(['show'=>'0']);
             FsTreeRecord1::where('status', 'like', '0')->update(['show'=>'0']);
@@ -243,5 +244,96 @@ class fsTreeController extends Controller
         }
     }
 
+    public function modifyPathway(Request $request, $site){
+
+        $user = $request->session()->get('user', function () {
+            return 'no';
+        });
+
+        if ($user=='no'){
+            return view('login1', [
+                'check' => 'no'
+            ]);
+        } else {
+            // echo "1";
+            //最近一次調
+
+            // print_r($user);
+            return view('pages/fushan/tree_modifyPathway', [
+                'site' => $site,
+                'project' => '每木',
+                'user' => $user,
+            ]);
+        }
+    }
+
+    public function updateTable(Request $request, $site){
+
+        $user = $request->session()->get('user', function () {
+            return 'no';
+        });
+
+        if ($user=='no'){
+            return view('login1', [
+                'check' => 'no'
+            ]);
+        } else {
+            // echo "1";
+            //最近一次調
+
+            // print_r($user);
+            return view('pages/fushan/tree_updateTable', [
+                'site' => $site,
+                'project' => '每木',
+                'user' => $user,
+            ]);
+        }
+    }
+
+    public function updateBackData(Request $request, $site){
+
+        $user = $request->session()->get('user', function () {
+            return 'no';
+        });
+
+        if ($user=='no'){
+            return view('login1', [
+                'check' => 'no'
+            ]);
+        } else {
+            // echo "1";
+            //最近一次調
+
+            // print_r($user);
+            return view('pages/fushan/tree_updateBackData', [
+                'site' => $site,
+                'project' => '每木',
+                'user' => $user,
+            ]);
+        }
+    }
+
+    public function addData(Request $request, $site){
+
+        $user = $request->session()->get('user', function () {
+            return 'no';
+        });
+
+        if ($user=='no'){
+            return view('login1', [
+                'check' => 'no'
+            ]);
+        } else {
+            // echo "1";
+            //最近一次調
+
+            // print_r($user);
+            return view('pages/fushan/tree_addData', [
+                'site' => $site,
+                'project' => '每木',
+                'user' => $user,
+            ]);
+        }
+    }
 
 }

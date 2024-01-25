@@ -14,7 +14,7 @@ use App\Models\FsSeedsSplist;
  
 class fsSeedsCheck
 {
-	public function check($record, $spinfo, $type){
+	public function check($record, $spinfo, $type, $type2){
 
 
 		$checknote='';
@@ -280,17 +280,25 @@ class fsSeedsCheck
 				}
 			}
 	// trap+種類+類別 不能一樣	
-			$checksign=$record['trap'].$record['csp'].$record['code'];
+			$checksign=$record['census'].$record['trap'].$record['csp'].$record['code'];
 			$checkarray=[];
-			if ($type=='n'){
-				$dataexit=FsSeedsRecord1::query()->get()->toArray();
+			if ($type2=='record'){
+				if ($type=='n'){
+					$dataexit=FsSeedsRecord1::query()->get()->toArray();
+				} else {
+					$dataexit=FsSeedsRecord1::where('id', 'not like', $record['id'])->get()->toArray();
+				}
 			} else {
-				$dataexit=FsSeedsRecord1::where('id', 'not like', $record['id'])->get()->toArray();
+				if ($type=='n'){
+					$dataexit=FsSeedsFulldata::where('census', 'like', $record['census'])->get()->toArray();
+				} else {
+					$dataexit=FsSeedsFulldata::where('census', 'like', $record['census'])->where('id', 'not like', $record['id'])->get()->toArray();
+				}				
 			}
 
 			if (count($dataexit)>0){
 				foreach ($dataexit as $data){
-					$checkarray[]=$data['trap'].$data['csp'].$data['code'];
+					$checkarray[]=$data['census'].$data['trap'].$data['csp'].$data['code'];
 				}
 
 				if (in_array($checksign, $checkarray)){
@@ -305,6 +313,7 @@ class fsSeedsCheck
             return [
                 'result' => $record,
                 'checknote' => $checknote,
+                // 'type2' => $type2
 
             ];
 

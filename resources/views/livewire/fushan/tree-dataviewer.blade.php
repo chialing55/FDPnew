@@ -93,7 +93,7 @@
 
     <div class='text_box'>     
         <h2>查詢個別植株資料</h2>
-        <p style='font-size: 80%;'>*僅能查詢前 4 次調查資料</p>
+        <p style='font-size: 80%;'>* census5 為此次調查，若未輸入資料則保留空白。</p>
         <hr>
         <div style='margin-top: 10px; line-height: 1.8em; display: inline-flex;'>
             <span style='margin-right: 20px;'>枝幹編號：</span>     
@@ -158,7 +158,14 @@
                     @if(!empty($result))
                     <tbody>
                     @foreach($result as $pre)
-                        <tr style="text-align: center;">
+                    @php 
+                    if($pre['census']=='census5' || $pre['census']=='census5 (record)'){
+                        $trstyle="style=text-align:center;background-color:#f9d1d7;";
+                    } else {
+                        $trstyle="style=text-align:center";
+                    }
+                    @endphp
+                        <tr {{$trstyle}}>
                             <td>{{$pre['census']}}</td>
                             <td>{{$pre['status']}}</td>
                             <td>{{$pre['code']}}</td>

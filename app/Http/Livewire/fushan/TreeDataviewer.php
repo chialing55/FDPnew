@@ -11,6 +11,7 @@ use Livewire\WithPagination;
 use App\Models\FsBaseTreeSplist;
 use App\Models\FsTreeRecord1;
 use App\Models\FsTreeRecord2;
+use App\Models\FsTreeCensus5;
 use App\Models\FsTreeCensus4;
 use App\Models\FsTreeCensus3;
 use App\Models\FsTreeCensus2;
@@ -168,59 +169,168 @@ class TreeDataviewer extends Component
         $census2=FsTreeCensus2::where('stemid', 'like', $stemid)->get()->toArray();
         $census3=FsTreeCensus3::where('stemid', 'like', $stemid)->get()->toArray();
         $census4=FsTreeCensus4::where('stemid', 'like', $stemid)->get()->toArray();
+        $census5=FsTreeCensus5::where('stemid', 'like', $stemid)->get()->toArray();
         $base=FsTreeBase::where('tag', 'like', $tag)->get()->toArray();
-        $census4_2=FsTreeCensus4::where('tag', 'like', $tag)->max('branch');
+        $maxb1=FsTreeRecord1::where('tag', 'like', $tag)->max('branch');
+        $maxb2=FsTreeRecord1::where('tag', 'like', $tag)->max('branch');
+
+
+        $census5_1=FsTreeRecord1::where('stemid', 'like', $stemid)->where('date', 'not like', '0000-00-00')->get()->toArray();
+        $census5_2=FsTreeRecord2::where('stemid', 'like', $stemid)->where('date', 'not like', '0000-00-00')->get()->toArray();
+
+        $census5_3=FsTreeRecord1::where('alternote', 'like', '%'.$tag.'%')->orderby('dbh', 'desc')->get()->toArray();
+        $census5_4=FsTreeRecord2::where('alternote', 'like', '%'.$tag.'%')->orderby('dbh', 'desc')->get()->toArray();
 
         // dd($request);
-        if (count($base)>0){
-            $this->basedata=['stemid'=> $stemid, 'qx'=>$base[0]['qx'], 'qy'=>$base[0]['qy'], 'sqx'=>$base[0]['sqx'], 'sqy'=>$base[0]['sqy'], 'csp'=>$splist[$base[0]['spcode']], 'tag'=>$tag, 'b' => $branch, 'bs'=>$census4_2];
+        if (count($census4)>0){
+            //舊樹資料
 
-            if (count($census1)>0){
-                if ($tag[0]=='G'){
-                    $census1[0]['dbh']=$census1[0]['h']-$census1[0]['pom'];
+            $this->basedata=['stemid'=> $stemid, 'qx'=>$base[0]['qx'], 'qy'=>$base[0]['qy'], 'sqx'=>$base[0]['sqx'], 'sqy'=>$base[0]['sqy'], 'csp'=>$splist[$base[0]['spcode']], 'tag'=>$tag, 'b' => $branch, 'bs'=>max($maxb1, $maxb2)];
+
+
+            $censusTables = ['census1', 'census2', 'census3', 'census4', 'census5'];
+
+            foreach ($censusTables as $index => $censusTable) {
+                if (count($$censusTable) > 0) {
+                    if ($tag[0] == 'G') {
+                        $$censusTable[0]['dbh'] = $$censusTable[0]['h2'];
+                    }
+                    if ($censusTable=='census1'){
+                        $$censusTable[0]['status']='';
+                        $$censusTable[0]['code']='';
+                        $$censusTable[0]['confirm']='';
+                    }
+                    if ($censusTable=='census2'){
+                        $$censusTable[0]['confirm']='';
+                    }
+                    $table[$index] = [
+                        'census' => $censusTable,
+                        'status' => $$censusTable[0]['status'],
+                        'code' => $$censusTable[0]['code'],
+                        'dbh' => $$censusTable[0]['dbh'],
+                        'pom' => $$censusTable[0]['pom'],
+                        'note' => $$censusTable[0]['note'],
+                        'confirm' => $$censusTable[0]['confirm'],
+                    ]; 
+
+                    if ($index=='4'){
+                        $table[$index]['note'] .= ' ' . $$censusTable[0]['alternote'];                        
+                    }           
+                } else {
+                    $table[$index] = [
+                        'census' => $censusTable,
+                        'status' => '',
+                        'code' => '',
+                        'dbh' => '',
+                        'pom' => '',
+                        'note' => '',
+                        'confirm' => '',
+                    ];
                 }
-                $table[0]=['census' => 'census1', 'status' => '', 'code'=>'', 'dbh'=>$census1[0]['dbh'], 'pom' => $census1[0]['pom'], 'note' => $census1[0]['note'], 'confirm' =>''];
-            } else {
-                $table[0]=['census' => 'census1', 'status' => '', 'code'=>'', 'dbh'=>'', 'pom' => '', 'note' => '', 'confirm' =>''];
-            }
-            if (count($census2)>0){
-                if ($tag[0]=='G'){
-                    $census2[0]['dbh']=$census2[0]['h2'];
-                    // $census2[0]['pom']=$census2[0]['h1'];
-                }
-                $table[1]=['census' => 'census2', 'status' => $census2[0]['status'], 'code'=>$census2[0]['code'], 'dbh'=>$census2[0]['dbh'], 'pom' => $census2[0]['pom'], 'note' => $census2[0]['note'], 'confirm' =>''];
-            } else {
-                $table[1]=['census' => 'census2', 'status' => '', 'code'=>'', 'dbh'=>'', 'pom' => '', 'note' => '', 'confirm' =>''];
             }
 
-            if (count($census3)>0){
-                if ($tag[0]=='G'){
-                    $census3[0]['dbh']=$census3[0]['h2'];
-                    // $census3[0]['pom']=$census3[0]['h1'];
-                }
-                $table[2]=['census' => 'census3', 'status' => $census3[0]['status'], 'code'=>$census3[0]['code'], 'dbh'=>$census3[0]['dbh'], 'pom' => $census3[0]['pom'], 'note' => $census3[0]['note'], 'confirm' =>$census3[0]['confirm']];
-            } else {
-                $table[2]=['census' => 'census3', 'status' => '', 'code'=>'', 'dbh'=>'', 'pom' => '', 'note' => '', 'confirm' =>''];
-            }
+            if (count($census5)=='0'){
 
-            if (count($census4)>0){
-                if ($tag[0]=='G'){
-                    $census4[0]['dbh']=$census4[0]['h2'];
-                    // $census4[0]['pom']=$census4[0]['h1'];
-                }
-                $table[3]=['census' => 'census4', 'status' => $census4[0]['status'], 'code'=>$census4[0]['code'], 'dbh'=>$census4[0]['dbh'], 'pom' => $census4[0]['pom'], 'note' => $census4[0]['note'], 'confirm' =>$census4[0]['confirm']];
-            } else {
-                $table[3]=['census' => 'census4', 'status' => '', 'code'=>'', 'dbh'=>'', 'pom' => '', 'note' => '', 'confirm' =>''];
-            }
+                $census5Table = count($census5_1) > 0 ? $census5_1 : $census5_2;
 
-            
+                if (count($census5Table)>0){
+                    if ($tag[0]=='G'){
+                        $census5Table[0]['dbh']=$census5Table[0]['h2'];
+                        // $$census5Table[0]['pom']=$$census5Table[0]['h1'];
+                    }
+                    $table[4]=['census' => 'census5 (record)', 'status' => $census5Table[0]['status'], 'code'=>$census5Table[0]['code'], 'dbh'=>$census5Table[0]['dbh'], 'pom' => $census5Table[0]['pom'], 'note' => $census5Table[0]['note'].' '.$census5Table[0]['alternote'], 'confirm' =>$census5Table[0]['confirm']];
+
+                } else {
+
+                    $table[4]=['census' => 'census5', 'status' => '', 'code'=>'', 'dbh'=>'', 'pom' => '', 'note' => '', 'confirm' =>''];
+                }
+            }
 
             $this->result=$table;
             $this->resultnote='';
 
         } else {
-            $this->resultnote='查無此樹';
-            $this->result='';
+
+
+            //這次新增的樹 or 特殊修改換號碼
+
+            //如果已匯入大表
+
+            if (count($census5)>0){
+                $census5Table=$census5;
+            } else {
+                $census5Table = count($census5_1) > 0 ? $census5_1 : $census5_2;
+            }
+
+            if (count($census5Table) > 0) {
+                $table = [];
+
+                for ($i = 1; $i <= 4; $i++) {
+                    $table[$i - 1] = ['census' => 'census'.$i, 'status' => '', 'code' => '', 'dbh' => '', 'pom' => '', 'note' => '',  'confirm' => '',
+                    ];
+                }
+
+            if (count($base)> 0){
+                $this->basedata=['stemid'=> $stemid, 'qx'=>$base[0]['qx'], 'qy'=>$base[0]['qy'], 'sqx'=>$base[0]['sqx'], 'sqy'=>$base[0]['sqy'], 'csp'=>$splist[$base[0]['spcode']], 'tag'=>$tag, 'b' => $branch, 'bs'=>max($maxb1, $maxb2)];
+            } else {
+
+                $this->basedata=['stemid'=> $stemid, 'qx'=>$census5Table[0]['qx'], 'qy'=>$census5Table[0]['qy'], 'sqx'=>$census5Table[0]['sqx'], 'sqy'=>$census5Table[0]['sqy'], 'csp'=>$splist[$census5Table[0]['spcode']], 'tag'=>$tag, 'b' => $branch, 'bs'=>max($maxb1, $maxb2)];
+            }
+
+                if ($tag[0] == 'G') {
+                    $census5Table[0]['dbh'] = $census5Table[0]['h2'];
+                }
+                $table[4] = [
+                    'census' => 'census5 (record)',
+                    'status' => $census5Table[0]['status'],
+                    'code' => $census5Table[0]['code'],
+                    'dbh' => $census5Table[0]['dbh'],
+                    'pom' => $census5Table[0]['pom'],
+                    'note' => $census5Table[0]['note'].' '.$census5Table[0]['alternote'],
+                    'confirm' => $census5Table[0]['confirm'],
+                ];
+                $this->result = $table;
+                $this->resultnote = '';
+            } else {
+
+                //號碼在特殊修改中出現
+
+                $census5alter = count($census5_3) > 0 ? $census5_3 : $census5_4;
+                if (count($census5alter) > 0){
+
+                    for ($i = 1; $i <= 4; $i++) {
+                        $table[$i - 1] = ['census' => 'census'.$i, 'status' => '', 'code' => '', 'dbh' => '', 'pom' => '', 'note' => '',  'confirm' => '',
+                        ];
+                    }
+
+                    $this->basedata=['stemid'=> $stemid, 'qx'=>$census5alter[0]['qx'], 'qy'=>$census5alter[0]['qy'], 'sqx'=>$census5alter[0]['sqx'], 'sqy'=>$census5alter[0]['sqy'], 'csp'=>$splist[$census5alter[0]['spcode']], 'tag'=>$census5alter[0]['tag'], 'b' => $census5alter[0]['branch'], 'bs'=>max($maxb1, $maxb2)];
+
+                    
+                    if ($tag[0] == 'G') {
+                        $census5alter[0]['dbh'] = $census5alter[0]['h2'];
+                    }
+                    $table[4] = [
+                        'census' => 'census5 (record)',
+                        'status' => $census5alter[0]['status'],
+                        'code' => $census5alter[0]['code'],
+                        'dbh' => $census5alter[0]['dbh'],
+                        'pom' => $census5alter[0]['pom'],
+                        'note' => $census5alter[0]['note'].' '.$census5alter[0]['alternote'],
+                        'confirm' => $census5alter[0]['confirm'],
+                    ];
+                    $this->result = $table;
+                    $this->resultnote = ''; 
+                } else {
+                    $this->resultnote = '查無此樹';
+                    $this->result = '';
+                }                          
+
+
+                
+            }
+
+
+
         }
     }
 

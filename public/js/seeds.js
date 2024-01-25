@@ -57,8 +57,8 @@ window.addEventListener('data', event => {
 	emptytable=event.detail.emptytable;
 	census=event.detail.census;
 	csplist=event.detail.csplist;
-	console.log(emptytable);
-	console.log(fdata);
+	// console.log(emptytable);
+	// console.log(fdata);
 	if (fdata.length>0){
 		console.log('1');
 		$('#seedstableout').show();
@@ -72,12 +72,6 @@ window.addEventListener('data', event => {
 		seedstable(emptytable, emptytable, 1);
 		emptyseedstable(emptytable);
 	}
-	
-
-    // $(".save2").unbind();
-
-    //一開始,thispage=1
-
 
 });
 
@@ -86,9 +80,9 @@ function emptyseedstable(table){
 
 // console.log(entry);
 	
-  
-  $(`button[name=newdatasave]`).off();
-  var container = $("#seedstable_empty");
+  const census=table[0]['census'];
+  $('button[name=newdatasave'+census+']').off();
+  var container = $("#seedstable_empty"+census);
   var parent = container.parent();
   // var emptytable=emptytable;
 
@@ -159,7 +153,7 @@ function emptyseedstable(table){
 	});
 
 
-	parent.find('button[name=newdatasave]').click(function () {
+	parent.find('button[name=newdatasave'+census+']').click(function () {
 		$('.seedssavenote').html('');
 
 		$.ajaxSetup({
@@ -169,7 +163,7 @@ function emptyseedstable(table){
 			});
 
 		  $.ajax({
-		    url: "/fsseedssavedata1",
+		    url: "/fsseedssavedata1/record",
 		    data: {
 		    	data: handsontable.getSourceData(),
 		    	// _token : '{{csrf-token()}}'
@@ -186,7 +180,7 @@ function emptyseedstable(table){
 		        }
 		        // console.log(emptytable);
 		        handsontable.updateData(res.emptytable);
-		        totalpage=Math.ceil(res.data.length/20);
+		        totalpage=Math.ceil(res.data.length/29);
 		        seedstableupdate(res.data, totalpage);
 		        fdata=res.data;
 
@@ -204,7 +198,51 @@ function emptyseedstable(table){
 		  // handsontable.updateData(emptytable);
 	});
 
+//更新大表
+	parent.find('button[name=newdatasave2'+census+']').click(function () {
+		$('.seedssavenote').html('');
 
+		$.ajaxSetup({
+			  headers: {
+			    'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+			  }
+			});
+
+		  $.ajax({
+		    url: "/fsseedssavedata1/fulldata",
+		    data: {
+		    	data: handsontable.getSourceData(),
+		    	// _token : '{{csrf-token()}}'
+		    }, //returns all cells' data
+		    // dataType: 'json',
+		    type: 'POST',
+		    success: function (res) {
+		      if (res.result === 'ok') {
+		        console.log('Data saved');
+		        console.log(res);
+
+		        if (res.seedssavenote !=''){
+		        	$('.seedssavenote').html(res.seedssavenote);
+		        }
+		        // console.log(emptytable);
+		        handsontable.updateData(res.emptytable);
+		        totalpage=Math.ceil(res.data.length/29);
+		        seedstableupdate(res.data, totalpage);
+		        fdata=res.data;
+
+
+		      }
+		      else {
+		        console.log('Save error');
+		      }
+		    },
+		    error: function () {
+		      console.log('Save error2.');
+		    }
+		  });
+		  // console.log(handsontable.getData());
+		  // handsontable.updateData(emptytable);
+	});
 	
 
 
@@ -213,9 +251,10 @@ function emptyseedstable(table){
 
 function seedstable(data, table, thispage){
 
-// console.log(entry);
+// console.log(data);
+// const census=data[0]['census'];
 
-	totalpage=Math.ceil(data.length/20);
+	totalpage=Math.ceil(data.length/29);
 	console.log(totalpage);
 		// $('.prev').addClass('prev'+data[0]['trap']);
 		// $('.next').addClass('next'+data[0]['trap']);
@@ -234,8 +273,8 @@ function seedstable(data, table, thispage){
 
 // console.log(thispage);
   
-  $(`button[name=datasave]`).off();
-  var container = $("#seedstable");
+  $('button[name=datasave'+census+']').off();
+  var container = $("#seedstable"+census);
   var parent = container.parent();
   // var emptytable=emptytable;
 
@@ -254,13 +293,13 @@ function seedstable(data, table, thispage){
       callback(false);
     }
   };
-
+var cellChanges = [];
   container.handsontable({
     data: data,
     startRows: 29,
     colHeaders: true,
     rowHeaders: true,
-    rowHeaderWidth: 25,
+    rowHeaderWidth: 26,
     
     // minSpareRows: 1,
     colWidths: [30, 40, 50, 120, 50, 50,60,50,70,40,100, 160, 200,40],
@@ -299,7 +338,50 @@ function seedstable(data, table, thispage){
           	cellProperties.className = 'text-red-500'; 
           }
          return cellProperties;
-   	 }
+   	 },
+   	 
+    afterChange: function (changes, source) {
+	    if (!changes) {
+	        return;
+	    }
+            $.each(changes, function (index, element) {
+                var change = element;
+                var rowIndex = change[0];
+                var columnIndex = change[1];
+                
+                var oldValue = change[2];
+                var newValue = change[3];
+                col=container.handsontable('propToCol', columnIndex);
+                // console.log(col);
+                var td = container.handsontable('getCell', rowIndex, col);
+                var cellChange = {
+                    'rowIndex': rowIndex,
+                    'columnIndex': col, 
+                    'td': td
+                };
+                
+                 
+                // console.log(td);
+                if(oldValue != newValue){
+                    cellChanges.push(cellChange);
+                    td.style.color = 'forestgreen';
+                }
+            });
+    },
+        afterRender: function () {
+            // var instance = container.handsontable('getInstance');
+            $.each(cellChanges, function (index, element) {
+                var cellChange = element;
+                var rowIndex = cellChange['rowIndex'];
+                var columnIndex = cellChange['columnIndex'];
+                // var grilla = $('#grilla');
+                var td=cellChange['td'];
+                // var td = container.handsontable('getCell', rowIndex, columnIndex);
+                td.style.color = 'forestgreen'; 
+                // cell.style.background = backgroundColor;
+                // console.log(td);
+            });
+        },
 
   	});
 
@@ -312,7 +394,8 @@ function seedstable(data, table, thispage){
 	});
   var handsontable = container.data('handsontable');
 
-	parent.find('button[name=datasave]').click(function () {
+
+	parent.find('button[name=datasave'+census+']').click(function () {
 		$('.seedssavenote').html('');
 
 		$.ajaxSetup({
@@ -322,7 +405,7 @@ function seedstable(data, table, thispage){
 			});
 
 		  $.ajax({
-		    url: "/fsseedssavedata",
+		    url: "/fsseedssavedata/record",
 		    data: {
 		    	data: handsontable.getSourceData(),
 		    	// _token : '{{csrf-token()}}'
@@ -353,17 +436,58 @@ function seedstable(data, table, thispage){
 		  // console.log(handsontable.getData());
 	});
 
+	parent.find('button[name=datasave2'+census+']').click(function () {
+		$('.seedssavenote').html('');
+
+		$.ajaxSetup({
+			  headers: {
+			    'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+			  }
+			});
+
+		  $.ajax({
+		    url: "/fsseedssavedata/fulldata",
+		    data: {
+		    	data: handsontable.getSourceData(),
+		    	// _token : '{{csrf-token()}}'
+		    }, //returns all cells' data
+		    // dataType: 'json',
+		    type: 'POST',
+		    success: function (res) {
+		      if (res.result === 'ok') {
+		        console.log('Data saved');
+		        console.log(res);
+
+		        if (res.seedssavenote !=''){
+		        	$('.seedssavenote').html(res.seedssavenote);
+		        }
+		        seedstableupdate(res.data, res.thispage);
+		        // console.log(thispage);
+		        fdata=res.data;
+
+		      }
+		      else {
+		        console.log('Save error');
+		      }
+		    },
+		    error: function () {
+		      console.log('Save error2.');
+		    }
+		  });
+		  // console.log(handsontable.getData());
+	});	
 }
 
 
 function seedstableupdate(data, thispage){
 
+const census=data[0]['census'];
 	$('#seedstableout').show();
 	$('#seedstableout_empty').hide();
-	var container = $("#seedstable");
+	var container = $("#seedstable"+census);
 	var handsontable = container.data('handsontable');
 
-	totalpage=Math.ceil(data.length/20);
+	totalpage=Math.ceil(data.length/29);
 	$('.pagenote').html(`共 ${data.length} 筆資料。`);
 
 	if (totalpage>1){
@@ -372,7 +496,7 @@ function seedstableupdate(data, thispage){
 		data3=datapages[1];
 	} else {data3=data;}
 	
-
+	console.log(data3, thispage);
 
 
 	handsontable.updateData(data3, thispage);
@@ -408,13 +532,13 @@ function seedstableupdate(data, thispage){
 
 // }
 
-  function deleteid(id, info, thispage){
+  function deleteid(id, info, thispage, type){
     
     if(confirm('確定刪除 '+info+' 種子雨資料??')) 
     {
       $('.seedssavenote').html('');
         $.ajax({
-        url: `/fsseedsdeletedata/${id}/${info}/${thispage}`,
+        url: `/fsseedsdeletedata/${id}/${info}/${thispage}/${type}`,
         type: 'get',
         success: function (res) {
           if (res.result === 'ok') {
@@ -423,7 +547,7 @@ function seedstableupdate(data, thispage){
             if (res.seedssavenote !=''){
               $('.seedssavenote').html(res.seedssavenote);
             }
-		        seedstableupdate(res.data, thispage);
+		        seedstableupdate(res.data, res.thispage);
 		        fdata=res.data;
 
           }
@@ -443,9 +567,10 @@ function seedstableupdate(data, thispage){
 
 	$(".prev").unbind();
 	$(".next").unbind();
+	
 
-		start=20*(thispage-1);
-		end=start+20;
+		start=29*(thispage-1);
+		end=start+29;
 		// console.log(thispage);
 		data2=data.slice(start, end);
 		// $('.prev').show();
@@ -477,14 +602,14 @@ function seedstableupdate(data, thispage){
 			$('.prev').on('click', function() {
 				thispage=$(this).attr('thispage');
 				gopage=parseInt(thispage)-1;
-
+				$('.seedssavenote').html('');
 				seedstableupdate(data, gopage);
 			})
 
 			$('.next').on('click', function() {
 				thispage=$(this).attr('thispage');
 				gopage=parseInt(thispage)+1;
-
+				$('.seedssavenote').html('');
 				// console.log(data);
 				seedstableupdate(data, gopage);
 			})

@@ -12,6 +12,7 @@ use App\Models\FsSeedsDateinfo;
 use App\Models\FsSeedsFulldata;
 use App\Models\FsSeedsRecord1;
 use App\Models\FsSeedsSplist;
+use App\Models\FsSeedsFixlog;
 
 use App\Jobs\fsSeedsCheck;
 use App\Jobs\fsSeedsAddButton;
@@ -19,6 +20,15 @@ use App\Jobs\fsSeedsAddButton;
 
 class fsSeedsSaveController extends Controller
 {
+
+
+    public function getTableInstance($type) {
+        if ($type == 'record') {
+            return new FsSeedsRecord1;
+        } else {
+            return new FsSeedsFulldata;
+        }
+    }
 
 
     public function spinfo(){
@@ -30,8 +40,32 @@ class fsSeedsSaveController extends Controller
         return $spinfo;
     }
 
+    public $identifier='蔡佳秀';
+
+    public function getRedata(){
+
+        $data1=FsSeedsRecord1::query()->get()->toArray();
+        $ob_table = new fsSeedsAddButton;
+        $redata=$ob_table->addbutton($data1, 'record');
+
+        return $redata; 
+
+    }
+    public function getRedata2($census){
+
+        $data1=FsSeedsFulldata::where('census', 'like', $census)->get()->toArray();
+        $ob_table = new fsSeedsAddButton;
+        $redata=$ob_table->addbutton($data1, 'fulldata');
+
+        return $redata; 
+
+    }
+
 //修改表單
-    public function savedata(Request $request){
+    public function savedata(Request $request, $type){
+
+        $table = $this->getTableInstance($type);
+
 
         $data_all = request()->all();
         // // print_r($savecov);
@@ -58,15 +92,18 @@ class fsSeedsSaveController extends Controller
         for ($i=0;$i<count($data);$i++){
             // $list[]=$data[$i]['tag'];
                 $data[$i]['checknote']='';
+                $checknote='';
                 $data[$i]['trap'] = str_pad($data[$i]['trap'], 3, '0', STR_PAD_LEFT);
                 $temp=[];
-                $temp=FsSeedsRecord1::where('id','like',$data[$i]['id'])->get()->toArray();
+                $temp=$table::where('id','like',$data[$i]['id'])->get()->toArray();
                 $exarray=['checknote', 'updated_at', 'update_id'];
                 $up='no';
+                $updatedes=[];
                 foreach($temp[0] as $key=>$value){
                     if(!in_array($key, $exarray)){
                         if($temp[0][$key]!=$data[$i][$key]){
-                            $up='yes'; break;
+                            $up='yes'; // break;
+                            $updatedes[$key]=$temp[0][$key]."=>".$data[$i][$key];
                         }
                     }
                 }
@@ -75,17 +112,19 @@ class fsSeedsSaveController extends Controller
 
                 $check = new fsSeedsCheck;
                 // $checknote=$check->check($data[$i], $spinfo, 'o');
-                $result=$check->check($data[$i], $spinfo, 'o');
+                $result=$check->check($data[$i], $spinfo, 'o', $type);
                 $checknote=$result['checknote'];
                 $data[$i]=$result['result'];
                 // // $checknote1.=$checknote;
                 $uplist=[];
+                // $type2=$result['type2'];
 
                 foreach ($data[$i] as $key => $value){
                     if ($value==Null){$value='';}
                     if ($key=='d'){continue;}
 
                     $uplist[$key] = $value;
+
                 }
                 $thisid=$data[$i]['id'];
 
@@ -95,19 +134,43 @@ class fsSeedsSaveController extends Controller
 
                 // $uplist['updated_at']=date("Y-m-d H:i:s");
 
-                FsSeedsRecord1::where('id', 'like', $data[$i]['id'])->update($uplist);
-
+                $table::where('id', 'like', $data[$i]['id'])->update($uplist);
+                $upfixlog=[];
                 $datasavenote='已更新資料';
+                if($updatedes!=[]){
+                    $updatedes['id']=$data[$i]['id'];
+                }
+
+                if ($type=='fulldata'){
+                    $upfixlog['id']='0';
+                    $upfixlog['type']='update';
+                    $upfixlog['census']=$uplist['census'];
+                    $upfixlog['descript']=json_encode($updatedes, JSON_UNESCAPED_UNICODE);
+                    $upfixlog['update_id']=$user;
+                    $upfixlog['updated_at']=date("Y-m-d H:i:s");
+
+                    FsSeedsFixlog::insert($upfixlog);
+
+                } 
             // $uplist=[];
 
        
         } 
 //更新data
-        $data1=FsSeedsRecord1::query()->orderBy('trap', 'asc')->orderBy('csp', 'asc')->orderBy('code', 'asc')->get()->toArray();
-        $ob_table = new fsSeedsAddButton;
-        $redata=$ob_table->addbutton($data1);
+        // $data1=FsSeedsRecord1::query()->orderBy('trap', 'asc')->get()->toArray();
+        // $ob_table = new fsSeedsAddButton;
+        // $redata=$ob_table->addbutton($data1);
 
-        $thispage=ceil($thisid/20);
+        if ($type=='record'){
+            $redata=$this->getRedata();
+            $thispage=ceil($thisid/29);            
+        } else {
+            $redata=$this->getRedata2($data[0]['census']);
+            $k=($thisid-$redata[0]['id'])+1;
+            $thispage=ceil($k/29);            
+        }
+
+
 
 
             return [
@@ -115,14 +178,16 @@ class fsSeedsSaveController extends Controller
                 'uplist' => $uplist,
                 'data' => $redata,
                 'thispage' => $thispage,
-                // 'list' => $list,
+                // 'type2' => $result,
                 'seedssavenote' => $datasavenote
 
             ];
         
     }
 //空白表單
-    public function savedata1(Request $request){
+    public function savedata1(Request $request, $type){
+
+        $table = $this->getTableInstance($type);
 
         $data_all = request()->all();
         // // print_r($savecov);
@@ -154,7 +219,7 @@ class fsSeedsSaveController extends Controller
                 $data[$i]['trap'] = str_pad($data[$i]['trap'], 3, '0', STR_PAD_LEFT);
                 $check = new fsSeedsCheck;
                 // $checknote=$check->check($data[$i], $spinfo, 'n');
-                $result=$check->check($data[$i], $spinfo, 'n');
+                $result=$check->check($data[$i], $spinfo, 'n', $type);
                 $checknote=$result['checknote'];
                 $data[$i]=$result['result'];                // $checknote1.=$checknote;
 
@@ -172,15 +237,56 @@ class fsSeedsSaveController extends Controller
                 $inlist['update_id']=$user;
                 $inlist['updated_at']=date("Y-m-d H:i:s");
 
-                FsSeedsRecord1::insert($inlist);
+                if ($type=='fulldata'){
+                    $inlist['id']='0';
+                    // $inlist['census']=$datacol['census'];
+                        if (isset($spinfo[$inlist['csp']])){
+                            $inlist['sp']=$spinfo[$inlist['csp']]['sp'];
+                            $inlist['identified']=$spinfo[$inlist['csp']]['identified'];
+                        } else {
+                            $inlist['sp']='';
+                            $inlist['identified']='N';
+                        }
+
+                }
+
+                $table::insert($inlist);
+
+
+                if ($type=='fulldata'){
+                    $updatedes['trap']=$inlist['trap'];
+                    $updatedes['csp']=$inlist['csp'];
+                    $updatedes['code']=$inlist['code'];
+
+                    $upfixlog['id']='0';
+                    $upfixlog['type']='insert';
+                    $upfixlog['census']=$inlist['census'];
+                    $upfixlog['descript']=json_encode($updatedes, JSON_UNESCAPED_UNICODE);
+                    $upfixlog['update_id']=$user;
+                    $upfixlog['updated_at']=date("Y-m-d H:i:s");
+
+                    FsSeedsFixlog::insert($upfixlog);
+
+                }
+
             }
 
         } 
 
 // // 更新data
-        $data1=FsSeedsRecord1::query()->orderBy('trap', 'asc')->orderBy('csp', 'asc')->orderBy('code', 'asc')->get()->toArray();
-        $ob_table = new fsSeedsAddButton;
-        $redata=$ob_table->addbutton($data1);
+        // $data1=FsSeedsRecord1::query()->orderBy('trap', 'asc')->get()->toArray();
+        // $ob_table = new fsSeedsAddButton;
+        // $redata=$ob_table->addbutton($data1);
+
+
+        if ($type=='record'){
+            $redata=$this->getRedata();
+        
+        } else {
+            $redata=$this->getRedata2($data[0]['census']);
+         
+        }
+
 
         $emptytable=[];
 
@@ -195,7 +301,7 @@ class fsSeedsSaveController extends Controller
             $emptytable[$k]['viability']='';
             $emptytable[$k]['fragments']='';
             $emptytable[$k]['sex']='';
-            $emptytable[$k]['identifier']='';
+            $emptytable[$k]['identifier']=$this->identifier;
             $emptytable[$k]['note']='';
         }
 
@@ -211,7 +317,7 @@ class fsSeedsSaveController extends Controller
     }
 
 
-    public function deletedata(Request $request, $id, $info, $thispage){
+    public function deletedata(Request $request, $id, $info, $thispage, $type){
         $test='';
             $user = $request->session()->get('user', function () {
                 return view('login1', [
@@ -220,23 +326,52 @@ class fsSeedsSaveController extends Controller
             });
         // $user='chialing';
         $datasavenote='';
-    
 
-            $d_record = FsSeedsRecord1::where('id', 'like', $id)->delete();
+    
+            $table = $this->getTableInstance($type);
+            $census=$table::where('id', 'like', $id)->first()->toArray();
+            $d_record = $table::where('id', 'like', $id)->delete();
 
             $datasavenote='已刪除 '.$info.' 種子雨資料';
 
             // 重新載入資料
+            if ($type=='fulldata'){
+                $updatedes['trap']=$census['trap'];
+                $updatedes['csp']=$census['csp'];
+                $updatedes['code']=$census['code'];
+
+                $upfixlog['id']='0';
+                $upfixlog['type']='delete';
+                $upfixlog['census']=$census['census'];
+                $upfixlog['descript']=json_encode($updatedes, JSON_UNESCAPED_UNICODE);
+                $upfixlog['update_id']=$user;
+                $upfixlog['updated_at']=date("Y-m-d H:i:s");
+
+                FsSeedsFixlog::insert($upfixlog);
+
+            }
 
 //更新data
-        $data1=FsSeedsRecord1::query()->orderBy('trap', 'asc')->orderBy('csp', 'asc')->orderBy('code', 'asc')->get()->toArray();
-        $ob_table = new fsSeedsAddButton;
-        $redata=$ob_table->addbutton($data1);
+        // $data1=FsSeedsRecord1::query()->orderBy('trap', 'asc')->get()->toArray();
+        // $ob_table = new fsSeedsAddButton;
+        // $redata=$ob_table->addbutton($data1);
+
+        if ($type=='record'){
+            $redata=$this->getRedata();
+            $thispage=ceil($id/29);            
+        } else {
+            $redata=$this->getRedata2($census['census']);
+            $k=($id-$redata[0]['id'])+1;
+            $thispage=ceil($k/29);            
+        }
+        // $thispage=ceil($id/29);
+
 
         return [
             'result' => 'ok',
             // 'test'=> $test, 
             'data' => $redata,
+            'thispage' => $thispage,
             'seedssavenote' => $datasavenote
         ];
     }
@@ -266,7 +401,7 @@ class fsSeedsSaveController extends Controller
             }
             $inlistf['id']='0';
             $inlistf['census']=$datacol['census'];
-            unset($inlistf['checknote']);
+            // unset($inlistf['checknote']);
             // print_r($inlistf);
             // $traps=FsSeedsRecord1::select('trap')->groupBy('trap')->get()->toArray();
 
@@ -278,7 +413,7 @@ class fsSeedsSaveController extends Controller
 
                     for($i=0;$i<count($datas);$i++){
 
-                        unset($datas[$i]['checknote']);
+                        // unset($datas[$i]['checknote']);
                         $datas[$i]['id']='0';
 
 
@@ -295,7 +430,11 @@ class fsSeedsSaveController extends Controller
                             $inlist['sp']='';
                             $inlist['identified']='N';
                         }
-
+                        $inlist['update_id']=$user;
+                        $inlist['updated_at']=date("Y-m-d H:i:s");
+                        // print_r($inlist);
+                        // echo "<br>";
+                        FsSeedsFulldata::insert($inlist);
                     }
 
                 } else {
@@ -310,16 +449,15 @@ class fsSeedsSaveController extends Controller
                     $inlist['viability']='0';
                     $inlist['fragments']='0';
                     $inlist['sex']='';
-                    $inlist['identifier']='';
+                    $inlist['identifier']=$this->identifier;
                     $inlist['note']='';
-
-                }
+                    $inlist['checknote']='';
                     $inlist['update_id']=$user;
                     $inlist['updated_at']=date("Y-m-d H:i:s");
                     // print_r($inlist);
                     // echo "<br>";
                     FsSeedsFulldata::insert($inlist);
-
+                }
             }
 
             //刪除資料表內的資料
@@ -340,6 +478,5 @@ class fsSeedsSaveController extends Controller
 
 
     }
-
 
 }

@@ -17,6 +17,10 @@ $('.listlink').on('click', function(){
 
 })
 
+  function toggleTip(element) {
+    $('.tip').toggle();
+    $('.tiptriangle').toggleClass('tiptriangletoggled');
+  }
 
 // $('.list4, .list4inner').on('mouseenter', function() {
 //   $('.list4inner').css('display', 'inline-flex');
@@ -271,10 +275,10 @@ function alternotetable(alterdata, stemid, entry, thispage){
     colHeaders: true,
     removeRowPlugin: true,
     // minSpareRows: 1,
-    colWidths: [25,25,25,25,80, 40, 120,70,70],
+    colWidths: [25,25,25,25,80, 40, 120,70,70,150],
     licenseKey: 'non-commercial-and-evaluation',
  
-    colHeaders: ["20x","20y","5x","5y", "tag", "b", "csp", "dbh(<1)" ,"原始POM", "stemid"],
+    colHeaders: ["20x","20y","5x","5y", "tag", "b", "csp", "dbh(<1)" ,"原始POM","其他", "stemid"],
     columns: [
       {data: "qx", type: 'numeric'},
       {data: "qy", type: 'numeric'},
@@ -285,6 +289,7 @@ function alternotetable(alterdata, stemid, entry, thispage){
       {data: "csp", type: 'autocomplete', source: csplist, strict: false, visibleRows: 10, allowInvalid: false,},
       {data: "dbh", type: 'numeric'},
       {data: "pom"},
+      {data: "other"},
       {data: "stemid"}
     ],
     currentRowClassName: 'currentRow',
@@ -292,7 +297,7 @@ function alternotetable(alterdata, stemid, entry, thispage){
   	manualColumnResize: true,
   	hiddenColumns: {
     // specify columns hidden by default
-   		columns: [9],
+   		columns: [10],
   	},
   });
 
@@ -392,6 +397,12 @@ $('.finishnote').html();
 		var data2=data;
 	}
 
+	for (let i = 0; i < data2.length; i++) {
+	    if (data2[i]['date'] === '0000-00-00') {
+	        data2[i]['date'] = ''; // 使用单等号进行赋值
+	    }
+	}
+
 // console.log(data);  
 	// recruittable(data);
   var container = $("#datatable"+site);
@@ -429,35 +440,7 @@ $('.finishnote').html();
       {data: "confirm", type: 'checkbox', checkedTemplate: '1', uncheckedTemplate: ''},
       {data: "alternotetable", renderer: "html", readOnly: true},
       {data: "update_id"}
-      // {data: "alterdata", type:'handsontable', 
-      // 	handsontable:{
-			//   	// data: data2.alterdata,
-			//     // height: 320,
-			//     startRows: 1,
-			//     colHeaders: true,
-			//     // removeRowPlugin: true,
-			//     // minSpareRows: 1,
-			//     // colWidths: [25,25,25,25,80, 40, 120,70],
-			//     licenseKey: 'non-commercial-and-evaluation',
-			 
-			//     colHeaders: ["20x","20y","5x","5y", "tag", "b", "csp","原始POM"],
-			//     // colHeaders:['欄位名稱'],
-			//     columns: [
-			//       {data: "qx", type: 'numeric'},
-			//       {data: "qy", type: 'numeric'},
-			//       {data: "sqx", type: 'numeric'},
-			//       {data: "sqy", type: 'numeric'},
-			//       {data: "tag"},
-			//       {data: "b", type: 'numeric'},
-			//       {data: "csp", type: 'autocomplete', source: csplist, strict: false, visibleRows: 10, allowInvalid: false,},
-			//       {data: "pom"}
-			//     ],
-			//     currentRowClassName: 'currentRow',
-			//     // autoWrapRow: true,   //自動換行
-			//   	// manualColumnResize: true,
 
-     	// 	}
-     	// }
     ],
     hiddenColumns: {
     // specify columns hidden by default
@@ -478,7 +461,6 @@ $('.finishnote').html();
           	}
 
           }
-
 
           // if (col == 11 || col==12) {            //column needs to be read only               
           //  //if status is Active
@@ -951,6 +933,15 @@ window.addEventListener('rePlots', event => {
 
 });
 
+window.addEventListener('rePlotsentry', event => {
+  const sqx=event.detail.sqx;
+  const sqy=event.detail.sqy;
+  $('.plottable2').removeClass('selected');
+  $('.plot'+sqx+sqy).addClass('selected');
+  // canselectchcek(plots)
+
+});
+
 function canselectchcek(plots){
 
 	$('.plottable').attr('show', '0').removeClass('plotselect').removeClass('cannotselect').addClass('canselect');
@@ -975,4 +966,322 @@ $('.canselect').click(function(){
 }
 
 
+//進行個別修改
 
+window.addEventListener('stemiddata', event => {
+
+	stemid=event.detail.stemid;
+	stemdata=event.detail.stemdata;
+	csplist=event.detail.csplist;
+	from=event.detail.from;
+	// console.log(stemid);
+    fstreealtertable(stemid, stemdata, csplist, from);
+
+});
+
+Livewire.on('updateStemidlist', function(data) {
+    // 更新 Livewire 组件中的数组
+    Livewire.emit('updateStemidList', data);
+});
+
+function fstreealtertable(stemid, stemdata, csplist, from){
+
+//basetable
+	stemid = stemid.replace('.', ''); // Remove the period
+  var container1 = $("#basetable"+stemid);
+  // console.log(stemdata);
+  var parent = container1.parent();
+  var cellChanges = [];
+
+  container1.handsontable({
+    data: stemdata[0],
+    // height: 320,
+    // startRows: 3,
+    colHeaders: true,
+    rowHeaders: true,
+    rowHeaderWidth: 25,
+    rowHeights: 38,
+    removeRowPlugin: true,
+    // minSpareRows: 1,
+    colWidths: [25,25,25,25,80, 40, 120],
+    licenseKey: 'non-commercial-and-evaluation',
+ 
+    colHeaders: ["20x","20y","5x","5y", "tag", "b", "csp"],
+    columns: [
+      // {data: "date", dateFormat: 'YYYY-MM-DD', type: 'date', allowInvalid: false},
+      {data: "qx", type: 'numeric'},
+      {data: "qy", type: 'numeric'},
+      {data: "sqx", type: 'numeric'},
+      {data: "sqy", type: 'numeric'},
+      {data: "tag",},
+      {data: "branch", type: 'numeric'},
+      {data: "csp", type: 'autocomplete', source: csplist, strict: true, visibleRows: 10, allowInvalid: false,},
+    ],
+    hiddenColumns: {
+    // specify columns hidden by default
+   		// columns: [15],
+  	},
+    currentRowClassName: 'currentRow',
+    autoWrapRow: true,   //自動換行
+  	manualColumnResize: true,
+  	// manualRowResize: true,
+    cells: function (row, col, prop) {
+    	var cellProperties = {};
+          if (container1.handsontable('getData')[row][5]!='0'){
+          	cellProperties.readOnly = true; 
+	          	if (col==5 || col==4){
+	          		cellProperties.readOnly = false; 
+	          	}
+          }
+          return cellProperties;
+    },
+
+
+    afterChange: function (changes, source) {
+	    if (!changes) {
+	        return;
+	    }
+            $.each(changes, function (index, element) {
+                var change = element;
+                var rowIndex = change[0];
+                var columnIndex = change[1];
+                
+                var oldValue = change[2];
+                var newValue = change[3];
+                col=container1.handsontable('propToCol', columnIndex);
+                // console.log(col);
+                var td = container1.handsontable('getCell', rowIndex, col);
+                var cellChange = {
+                    'rowIndex': rowIndex,
+                    'columnIndex': col, 
+                    'td': td
+                };
+                
+                 
+                // console.log(td);
+                if(oldValue != newValue){
+                    cellChanges.push(cellChange);
+                    td.style.color = 'forestgreen';
+                }
+            });
+    },
+        afterRender: function () {
+            // var instance = container.handsontable('getInstance');
+            $.each(cellChanges, function (index, element) {
+                var cellChange = element;
+                var rowIndex = cellChange['rowIndex'];
+                var columnIndex = cellChange['columnIndex'];
+                // var grilla = $('#grilla');
+                var td=cellChange['td'];
+                // var td = container.handsontable('getCell', rowIndex, columnIndex);
+                td.style.color = 'forestgreen'; 
+                // cell.style.background = backgroundColor;
+                // console.log(td);
+            });
+        },
+});
+
+//datatable
+
+  var stemdata2=stemdata.slice(1, 6);
+// console.log(stemdata);
+  var container2 = $("#datatable"+stemid);
+  // var parent2 = container2.parent();
+  var cellChanges = [];
+  container2.handsontable({
+    data: stemdata2,
+    // height: 320,
+    // startRows: 3,
+    colHeaders: true,
+    rowHeaders: true,
+    rowHeaderWidth: 25,
+    rowHeights: 38,
+    removeRowPlugin: true,
+    // minSpareRows: 1,
+    colWidths: [80,120, 50,50,50,50,50,170,50, 170],
+    licenseKey: 'non-commercial-and-evaluation',
+ 
+    colHeaders: ["census","date",'status', "code","dbh","h高","POM","note","縮水","特殊修改"],
+    columns: [
+    	{data: "census", readOnly:true},
+      {data: "date", dateFormat: 'YYYY-MM-DD', type: 'date', allowInvalid: false},
+      {data: "status", type: 'dropdown', source: ['', '0', '-1', '-2', '-3'], allowInvalid: false},
+      {data: "code"},
+      {data: "dbh", type: 'numeric'},
+      {data: "h高", type: 'numeric'},
+
+      {data: "pom"},
+      {data: "note"},
+      {data: "confirm", type: 'checkbox', checkedTemplate: '1', uncheckedTemplate: ''},
+      {data: "alternote"},
+    ],
+    hiddenColumns: {
+    // specify columns hidden by default
+   		// columns: [15],
+  	},
+    currentRowClassName: 'currentRow',
+    autoWrapRow: true,   //自動換行
+  	manualColumnResize: true,
+  	// manualRowResize: true,
+    cells: function (row, col, prop) {
+	
+          var cellProperties = {};
+
+          if (col == 7 || col==9){
+          	cellProperties.className = 'fs08'; 
+          }
+
+         return cellProperties;
+
+    },
+
+
+    afterChange: function (changes, source) {
+	    if (!changes) {
+	        return;
+	    }
+            $.each(changes, function (index, element) {
+                var change = element;
+                var rowIndex = change[0];
+                var columnIndex = change[1];
+                
+                var oldValue = change[2];
+                var newValue = change[3];
+                col=container2.handsontable('propToCol', columnIndex);
+                // console.log(col);
+                var td = container2.handsontable('getCell', rowIndex, col);
+                var cellChange = {
+                    'rowIndex': rowIndex,
+                    'columnIndex': col, 
+                    'td': td
+                };
+                
+                 
+                // console.log(td);
+                if(oldValue != newValue){
+                    cellChanges.push(cellChange);
+                    td.style.color = 'forestgreen';
+                }
+            });
+    },
+        afterRender: function () {
+            // var instance = container.handsontable('getInstance');
+            $.each(cellChanges, function (index, element) {
+                var cellChange = element;
+                var rowIndex = cellChange['rowIndex'];
+                var columnIndex = cellChange['columnIndex'];
+                // var grilla = $('#grilla');
+                var td=cellChange['td'];
+                // var td = container.handsontable('getCell', rowIndex, columnIndex);
+                td.style.color = 'forestgreen'; 
+                // cell.style.background = backgroundColor;
+                // console.log(td);
+            });
+        },
+});
+
+
+  var handsontable1 = container1.data('handsontable');
+  var handsontable2 = container2.data('handsontable');
+
+	parent.find('button[name=datasave'+stemid+']').click(function () {
+		$('.datasavenote').html('');
+
+		$.ajaxSetup({
+			  headers: {
+			    'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+			  }
+			});
+
+		  var data1 = handsontable1.getSourceData();
+  		var data2 = handsontable2.getSourceData();
+// console.log(handsontable.getSourceData());
+		  $.ajax({
+		    url: "/fstreeupdate",
+		    data: {
+		    	data1: data1,
+		    	data2: data2,
+		    	from: from,
+		    	// stemid: stemid,
+		    	user: user
+		    	// _token : '{{csrf-token()}}'
+		    }, //returns all cells' data
+		    // dataType: 'json',
+		    type: 'POST',
+		    success: function (res) {
+		      if (res.result === 'ok') {
+		        console.log('Data saved');
+		     
+		        if (res.datasavenote !=''){
+		        	$('.datasavenote').html(res.datasavenote);
+		        } 
+
+		        if (res.thisstemid !=''){
+		        	Livewire.emit('updateStemidlist', {thisstemid: res.thisstemid, from: res.from});
+
+		        }
+		        console.log(res);
+		        // console.log(res.list);
+
+		      }
+		      else {
+		        console.log('Save error');
+		      }
+		    },
+		    error: function () {
+		      console.log('Save error2.');
+		    }
+		  });
+		  // console.log(handsontable.getSourceData());
+	});
+
+}
+
+function deleteCensusDataButtonClick(button){
+  const stemid = $(button).attr('stemid');
+  const from = $(button).attr('from');
+  deleteCensusData(stemid, from);	
+}
+
+
+function deleteCensusData(stemid, from){
+    if(confirm('確定刪除 '+stemid+' 的所有資料??')) 
+    {
+      $('.altersavenote').html('');
+        $.ajax({
+        url: `/fstreedeletecensusdata`,
+        data: {
+		    	stemid: stemid,
+		    	from: from,
+		    	// stemid: stemid,
+		    	user: user
+		    	// _token : '{{csrf-token()}}'
+		    },
+        type: 'post',
+        success: function (res) {
+        	console.log(res);
+          if (res.result === 'ok') {
+            console.log('Data saved');
+            // console.log(res);
+
+		        if (res.datasavenote !=''){
+		        	$('.datasavenote').html(res.datasavenote);
+		        } 
+
+		        if (res.thisstemid !=''){
+		        	Livewire.emit('updateStemidlist', {thisstemid: res.thisstemid, from: res.from});
+
+		        }
+
+          }
+          else {
+            console.log('Save error');
+          }
+        },
+        error: function () {
+          console.log('Save error2.');
+        }
+      });
+    }
+
+}

@@ -12,6 +12,11 @@ use App\Models\FsTreeRecord1;
 use App\Models\FsTreeRecord2;
 use App\Models\FsTreeCensus4;
 use App\Models\FsTreeCensus3;
+use App\Models\FsTreeCensus2;
+use App\Models\FsTreeCensus1;
+use App\Models\FsTreeCensus5;
+use App\Models\FsTreeBase;
+use App\Models\FsTreeFixlog;
 use App\Models\FsTreeEntrycom;
 
 use App\Jobs\fsTreeDataCheck;
@@ -47,11 +52,11 @@ class fsTreeSaveController extends Controller
         $uplist['update_date'.$entry]=date("Y-m-d H:i:s");
         FsTreeEntrycom::where('qx', 'like', $qx)->where('qy', 'like', $qy)->update($uplist);
         $uplist2['compareOK']='0';
-        $uplist2['compareOKdate']='';
+        $uplist2['compareOK_at']='';
 
         FsTreeEntrycom::where('qx', 'like', $qx)->update($uplist2);
 
-        return $redata;
+        return $redata; 
 
     }
 
@@ -73,6 +78,7 @@ class fsTreeSaveController extends Controller
             $data[$i]['stemid']=$data[$i]['tag'].".".$data[$i]['branch'];
             $uplist=[];
             // $datacheck=['pass'=>'1', 'datasavenote'=>''];
+            if ($data[$i]['date']==''){$data[$i]['date']='0000-00-00';}
 
             $check = new fsTreeDataCheck;
             $datacheck=$check->check($data[$i]);
@@ -395,19 +401,39 @@ class fsTreeSaveController extends Controller
 
         if (!empty($data2)){
 
-            // 轉換為 JSON 字串
-            $alterdata = json_encode($data2, JSON_UNESCAPED_UNICODE);
-
             $table = $this->getTableInstance($entry);
-          
-            $olddata=$table::where('stemid', 'like', $data['stemid'])->get()->toArray();
 
-            if ($olddata[0]['alternote']!=$alterdata){
-                $uplist['alternote']=$alterdata;
-                $uplist['update_id']=$user;
-                $table::where('stemid', 'like', $data['stemid'])->update($uplist);
+            $olddata=$table::where('stemid', 'like', $data['stemid'])->get()->toArray();
+            //檢查alternote後是否重號
+
+            if (isset($data2['tag'])){
+                if (isset($data2['b'])){
+                    $newstemid=$data2['tag'].".".$data2['b'];
+                } else {
+                    $newstemid=$data2['tag'].".".$olddata[0]['branch'];
+                }
+                
+                $check=$table::where('stemid', 'like', $newstemid)->get()->toArray();
+                if (count($check)>0){
+                    $datasavenote=$olddata[0]['stemid'].'特殊修改後重號，故不儲存號碼部分。  ';
+                    unset($data2['tag']);
+                    if (isset($data2['b'])){unset($data2['b']);}
+                    
+                }
             }
-            $datasavenote='資料已儲存';
+
+            if (!empty($data2)){
+            // 轉換為 JSON 字串
+                $alterdata = json_encode($data2, JSON_UNESCAPED_UNICODE);
+
+                if ($olddata[0]['alternote']!=$alterdata){
+                    $uplist['alternote']=$alterdata;
+                    $uplist['update_id']=$user;
+                    $table::where('stemid', 'like', $data['stemid'])->update($uplist);
+                    $datasavenote=$datasavenote.'資料已儲存';
+                }
+            }
+            
         }
 
 
@@ -426,7 +452,7 @@ class fsTreeSaveController extends Controller
 
         return [
             'result' => 'ok',
-            'datasavenote' => '資料已儲存',
+            'datasavenote' => $datasavenote,
             'data' => $redata,
             'thispage' => $thispage
             // 'inlist'=>$sql
@@ -625,6 +651,353 @@ class fsTreeSaveController extends Controller
 
             'finishnote' => $finishnote
         ];
+
+    }
+
+    public function saveupdate (Request $request){
+
+        $data_all = request()->all();
+        $splist = $request->session()->get('splist');
+
+        $user=$data_all['user'];
+        $from=$data_all['from'];
+
+        $test='';
+        $datasavenote='';
+//base
+        $base=$data_all['data1'][0];  
+        $base['spcode'] = array_search($base['csp'], $splist); 
+        //原有編號       
+        $stemidtemp=explode('.', $base['stemid']);
+        $otag=$stemidtemp[0];
+        $ostemid=$base['stemid'];
+        if (count($stemidtemp)>1){
+            $obranch=$stemidtemp[1];
+        } else {
+            $obranch='0';
+            $ostemid=$ostemid.".0";
+        }
+        //新編號
+        $newstemid=$base['tag'].".".$base['branch'];
+        $baseWay='0';
+
+        if ($newstemid!=$ostemid){
+            $check=FsTreeCensus5::where('stemid', 'like', $newstemid)->count();
+            if ($check>0){
+                $datasavenote='重號。不予更新。';
+            } else {
+                 if ($base['branch']=='0'){ //變成主幹
+                    if ($obranch!='0'){ //原本是分支
+                        //分支變主幹  //新增base
+                        $baseWay='1';
+                    } else {
+                        $baseWay='0';  //換號
+                    }
+                } else{  //變成別人的分支  //先確定是否有主幹
+                    $baseWay='2';  //不更動base的號碼部分
+                    $check2=FsTreeBase::where('tag', 'like', $base['tag'])->count();
+                    if ($check2==0){
+                        $datasavenote='沒有主幹，不予更新。';
+                    }
+                }
+            }
+        }
+
+        $fixlog=[];
+        $thisstemid='';
+
+        if ($datasavenote==''){
+        
+       //沒有重號再改$thisstemid
+            if ($from=='alternote' && $newstemid!=$ostemid){
+                $thisstemid=$newstemid;
+            }  
+
+        $obase=FsTreeBase::where('tag','like',$otag)->first()->toArray();
+        
+        $updatedes=[];
+        $base_uplist=[];
+        //如果改號碼，多是換號，直接改掉base的資料
+            if ($baseWay=='0'){  //修改base
+                //base
+                $exarray=['update_id', 'updated_at', 'deleted_at'];
+                foreach($obase as $key=>$value){
+                    if (!in_array($key, $exarray)){
+                        if ($value != $base[$key]){
+                            $base_uplist[$key]=$base[$key];
+                            $updatedes[$key]=$value."=>".$base[$key];
+                        }
+                    }
+                }
+               $fixlog['type']='update';
+            } else if ($baseWay=='1'){  //新增
+                $exarray=['update_id', 'updated_at', 'deleted_at'];
+                foreach($obase as $key=>$value){
+                    if (!in_array($key, $exarray)){
+                        if(isset($base[$key])){
+                            $base_uplist[$key]=$base[$key];
+                            $updatedes[$key]=$value."=>".$base[$key];
+                        } else {
+                            $base_uplist[$key]='0';
+                        }
+                    }
+                }
+                $fixlog['type']='insert';
+            } else if ($baseWay=='2'){  //不更新號碼部分
+                $exarray=['update_id', 'updated_at', 'tag', 'deleted_at'];
+                foreach($obase as $key=>$value){
+                    if (!in_array($key, $exarray)){
+                        if ($value != $base[$key]){
+                            $base_uplist[$key]=$base[$key];
+                            $updatedes[$key]=$value."=>".$base[$key];
+                        }
+                    }
+                }
+                $fixlog['type']='update';
+            }
+
+            if ($base_uplist!=[]){
+                $base_uplist['update_id']=$user;
+                if ($baseWay=='0'){
+                    FsTreeBase::where('tag', 'like', $otag)->update($base_uplist);
+                } else if ($baseWay=='1'){ 
+                    $base_uplist['updated_at']=date("Y-m-d H:i:s");
+                    $base_uplist['deleted_at']='';
+                    FsTreeBase::insert($base_uplist);
+                }
+
+
+                $fixlog['id']='0';
+                $fixlog['from']=$from;
+                $fixlog['sheet']='base';
+                $fixlog['qx']=$base['qx'];
+                $fixlog['stemid']=$otag;
+                $fixlog['descript']=json_encode($updatedes, JSON_UNESCAPED_UNICODE);
+                $fixlog['update_id']=$user;
+                $fixlog['updated_at']=date("Y-m-d H:i:s");
+                FsTreeFixlog::insert($fixlog);
+
+
+                $datasavenote='已更新資料';
+
+            }
+            $stemidlist=[];
+            
+
+// //census
+            for ($i = 1; $i <= 5; $i++) {
+                ${"census$i"} = $data_all['data2'][$i-1];
+                if ($newstemid!=$ostemid){
+                    ${"census$i"}['stemid']=$newstemid;
+                    ${"census$i"}['tag']=$base['tag'];
+                    ${"census$i"}['branch']=$base['branch'];
+                }
+
+                if ($i==1){
+                    $census1['h']=$census1['h1'];
+                }
+
+                if ($i==3 || $i==4){
+                    ${"census$i"}['tocheck']='';
+                }
+                
+                // $table= new FsTreeCensus$i;
+                switch ($i) {
+                    case 1:$table= new FsTreeCensus1; break;
+                    case 2:$table= new FsTreeCensus2; break;
+                    case 3:$table= new FsTreeCensus3; break;
+                    case 4:$table= new FsTreeCensus4; break;
+                    case 5:$table= new FsTreeCensus5; break;
+                }
+
+                
+                $temp= $table::where('stemid','like',$ostemid)->get()->toArray();
+                if (count($temp)>0){
+                    ${"ocensus$i"}=$temp[0];
+                } else {
+                    ${"ocensus$i"}=[];
+                }
+                $updatedes=[];
+                $census_uplist=[];
+                $keylist=[];
+
+                foreach (${"census$i"} as $key=>$value){
+                    if (is_null($value)) {
+                        ${"census$i"}[$key] = '';
+                    }
+                }
+
+                if (count(${"ocensus$i"})>0){
+                    $exarray=['code2','status2','update_id', 'updated_at', 'deleted_at'];
+                    foreach (${"ocensus$i"} as $key =>$value){
+                        
+                        if (!in_array($key, $exarray)){
+                            if (!isset(${"census$i"}[$key])){
+                                $keylist[]=$key;
+                            }
+                            if ($value != ${"census$i"}[$key]){
+                                $census_uplist[$key]=${"census$i"}[$key];
+                                $updatedes[$key]=$value."=>".${"census$i"}[$key];
+                            }
+                        }                    
+                    }
+                 }
+
+                $fixlog=[];
+                if ($census_uplist!=[]){
+                    $census_uplist['update_id']=$user;
+                    $table::where('stemid', 'like', $ostemid)->update($census_uplist);
+                    $fixlog['id']='0';
+                    $fixlog['from']=$from;
+                    $fixlog['type']='update';
+                    $fixlog['sheet']="census".$i;
+                    $fixlog['qx']=$base['qx'];
+                    $fixlog['stemid']=$ostemid;
+                    $fixlog['descript']=json_encode($updatedes, JSON_UNESCAPED_UNICODE);
+                    $fixlog['update_id']=$user;
+                    $fixlog['updated_at']=date("Y-m-d H:i:s");
+                    FsTreeFixlog::insert($fixlog);
+                    $datasavenote='已更新資料';
+                }
+            }
+        }
+
+        
+
+
+            return [
+                'result' => 'ok',
+                'thisstemid' => $thisstemid,
+                // 'stemidlist'=>$keylist,
+                // 'uplist' => $base_uplist,
+                'from'=> $from,
+                // 'tag' => $census1['stemid'],
+                'datasavenote' => $datasavenote
+
+            ];
+    }
+
+
+    public function fsTreeDeleteCensusData(Request $request){
+
+        $data_all = request()->all();
+
+        $user=$data_all['user'];
+        $from=$data_all['from'];
+        $stemid=$data_all['stemid'];
+
+
+        $thisstemid='';
+        $fixlog=[];
+        $fixall=[];
+        $datasavenote='';
+        $uplist=[];
+
+        //如果是分支，之前調查判斷錯誤，直接刪除資料
+        //如果是主幹，物種鑑定錯誤，非需要做的種類，則全株包含分支皆軟刪除，保留以避免牌號誤用
+
+        $stemidtemp=explode('.', $stemid);
+        $tag=$stemidtemp[0];
+        $b=$stemidtemp[1]; 
+
+        if ($b!='0'){
+
+            for ($j = 1; $j <= 5; $j++) {
+                $temp=[];
+
+                switch ($j) {
+                    case '1':$table= new FsTreeCensus1; break;
+                    case '2':$table= new FsTreeCensus2; break;
+                    case '3':$table= new FsTreeCensus3; break;
+                    case '4':$table= new FsTreeCensus4; break;
+                    case '5':$table= new FsTreeCensus5; break;
+                }
+                
+                $temp = $table::where('stemid', 'like', $stemid)->get()->toArray();
+
+                if (count($temp)>0){
+
+                    $table::where('stemid','like', $stemid)->delete();
+                    $datasavenote='已刪除 '.$stemid.' 資料';
+                    $fixlog['id']='0';
+                    $fixlog['from']=$from;
+                    $fixlog['type']='delete';
+                    $fixlog['sheet']="census".$j;
+                    $fixlog['qx']=substr($stemid, 0, 2);
+                    $fixlog['stemid']=$stemid;
+                    $fixlog['descript']='刪除此編號資料';
+                    $fixlog['update_id']=$user;
+                    $fixlog['updated_at']=date("Y-m-d H:i:s");
+                    FsTreeFixlog::insert($fixlog);
+                    $thisstemid=$stemid;
+                } 
+
+            }
+        } else {
+
+            $uplist['deleted_at']=date("Y-m-d H:i:s");
+            $uplist['update_id']=$user;
+
+            FsTreeBase::where('tag', 'like', $tag)->update($uplist);
+                    $fixlog['id']='0';
+                    $fixlog['from']=$from;
+                    $fixlog['type']='delete';
+                    $fixlog['sheet']='base';
+                    $fixlog['qx']=substr($stemid, 0, 2);
+                    $fixlog['stemid']=$tag;
+                    $fixlog['descript']='軟刪除此編號base資料';
+                    $fixlog['update_id']=$user;
+                    $fixlog['updated_at']=date("Y-m-d H:i:s");
+                    // $fixall[]=$fixlog;
+                    FsTreeFixlog::insert($fixlog);
+
+            for ($j = 1; $j <= 5; $j++) {
+                $temp=[];
+                $fixlog=[];
+                switch ($j) {
+                    case '1':$table= new FsTreeCensus1; break;
+                    case '2':$table= new FsTreeCensus2; break;
+                    case '3':$table= new FsTreeCensus3; break;
+                    case '4':$table= new FsTreeCensus4; break;
+                    case '5':$table= new FsTreeCensus5; break;
+                }
+                
+                $temp = $table::where('tag', 'like', $tag)->get()->toArray();
+
+                if (count($temp)>0){
+
+                    $table::where('tag', 'like', $tag)->update($uplist);
+                    $datasavenote='已刪除 '.$tag.' 所有資料';
+                    $fixlog['id']='0';
+                    $fixlog['from']=$from;
+                    $fixlog['type']='delete';
+                    $fixlog['sheet']="census".$j;
+                    $fixlog['qx']=substr($stemid, 0, 2);
+                    $fixlog['stemid']=$tag;
+                    $fixlog['descript']='軟刪除此編號所有植株資料';
+                    $fixlog['update_id']=$user;
+                    $fixlog['updated_at']=date("Y-m-d H:i:s");
+                    // $fixall[]=$fixlog;
+                    FsTreeFixlog::insert($fixlog);
+                } 
+
+            }
+
+        }
+
+       
+
+
+            return [
+                'result' => 'ok',
+                'thisstemid' => $thisstemid,
+                'from'=>$from,
+                // 'uplist' => $base_uplist,
+                // 'tag' => $census1['stemid'],
+                'datasavenote' => $datasavenote
+
+            ];
+
 
     }
 

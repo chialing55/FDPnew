@@ -89,57 +89,49 @@ Route::get('/fushan/{project}/{type}', function($project, $type){
   $site='fushan';
         if ($project=='seedling'){
 
-            if ($type=='doc'){
-                return App::call('App\Http\Controllers\fsSeedlingController@seedling',['site' => $site] );
-            } else if ($type=='note'){
-                return App::call('App\Http\Controllers\fsSeedlingController@note',['site' => $site] );
-            } else if ($type=='entry1'){
-                return App::call('App\Http\Controllers\fsSeedlingController@entry',['site' => $site, 'entry'=> '1'] );
-            } else if ($type=='entry2'){
-                return App::call('App\Http\Controllers\fsSeedlingController@entry',['site' => $site, 'entry'=> '2'] );
-            } else if ($type=='compare'){
-                return App::call('App\Http\Controllers\fsSeedlingController@compare',['site' => $site] );
-            } else if ($type=='import'){
-                return App::call('App\Http\Controllers\fsSeedlingController@import',['site' => $site] );
+            switch ($type){
+                case 'doc': return App::call('App\Http\Controllers\fsSeedlingController@seedling',['site' => $site] );
+                case 'note': return App::call('App\Http\Controllers\fsSeedlingController@note',['site' => $site] );
+                case 'entry1': return App::call('App\Http\Controllers\fsSeedlingController@entry',['site' => $site, 'entry'=> '1'] );
+                case 'entry2': return App::call('App\Http\Controllers\fsSeedlingController@entry',['site' => $site, 'entry'=> '2'] );
+                case 'compare': return App::call('App\Http\Controllers\fsSeedlingController@compare',['site' => $site] );
+                case 'import': return App::call('App\Http\Controllers\fsSeedlingController@import',['site' => $site] );
             }
 
         }
 
         else if ($project=='tree'){
-            if ($type=='doc'){
-                return App::call('App\Http\Controllers\fsTreeController@tree',['site' => $site] );
-            } else if ($type=='note'){
-                return App::call('App\Http\Controllers\fsTreeController@note',['site' => $site] );
-            } else if ($type=='entry1'){
-                return App::call('App\Http\Controllers\fsTreeController@entry',['site' => $site, 'entry'=>'1'] );
-            } else if ($type=='entry2'){
-                return App::call('App\Http\Controllers\fsTreeController@entry',['site' => $site, 'entry' => '2'] );
-            } else if ($type=='progress'){
-                return App::call('App\Http\Controllers\fsTreeController@progress',['site' => $site] );
-            } else if ($type=='dataviewer'){
-                return App::call('App\Http\Controllers\fsTreeController@dataviewer',['site' => $site] );
-            } else if ($type=='entryprogress'){
-                return App::call('App\Http\Controllers\fsTreeController@entryprogress',['site' => $site] );
-            } else if ($type=='compare'){
-                return App::call('App\Http\Controllers\fsTreeController@compare',['site' => $site] );
+
+            switch ($type){
+                case 'doc': return App::call('App\Http\Controllers\fsTreeController@tree',['site' => $site] );
+                case 'note': return App::call('App\Http\Controllers\fsTreeController@note',['site' => $site] );
+                case 'entry1': return App::call('App\Http\Controllers\fsTreeController@entry',['site' => $site, 'entry'=>'1'] );
+                case 'entry2': return App::call('App\Http\Controllers\fsTreeController@entry',['site' => $site, 'entry' => '2'] );
+                case 'progress': return App::call('App\Http\Controllers\fsTreeController@progress',['site' => $site] );
+                case 'dataviewer': return App::call('App\Http\Controllers\fsTreeController@dataviewer',['site' => $site] );
+                case 'entryprogress': return App::call('App\Http\Controllers\fsTreeController@entryprogress',['site' => $site] );
+                case 'compare': return App::call('App\Http\Controllers\fsTreeController@compare',['site' => $site] );
+                case 'modifyPathway': return App::call('App\Http\Controllers\fsTreeController@modifyPathway',['site' => $site] );
+                case 'updateTable': return App::call('App\Http\Controllers\fsTreeController@updateTable',['site' => $site] );
+                case 'updateBackData': return App::call('App\Http\Controllers\fsTreeController@updateBackData',['site' => $site] );
+                case 'addData': return App::call('App\Http\Controllers\fsTreeController@addData',['site' => $site] );
             }
-            
+
         }
 
         else if ($project=='seeds'){
-            if ($type=='doc'){
-                return App::call('App\Http\Controllers\fsSeedsController@seeds',['site' => $site] );
-            } else if ($type=='note'){
-                return App::call('App\Http\Controllers\fsSeedsController@note',['site' => $site] );
-
-            } else if ($type=='entry'){
-                return App::call('App\Http\Controllers\fsSeedsController@entry',['site' => $site] );
-            } else if ($type=='showdata'){
-                return App::call('App\Http\Controllers\fsSeedsController@showdata',['site' => $site] );
-            } else if ($type=='unknown'){
-                return App::call('App\Http\Controllers\fsSeedsController@unknown',['site' => $site] );
+            switch ($type) {
+                case 'doc': return App::call('App\Http\Controllers\fsSeedsController@seeds', ['site' => $site]);
+                case 'note': return App::call('App\Http\Controllers\fsSeedsController@note', ['site' => $site]);
+                case 'entry': return App::call('App\Http\Controllers\fsSeedsController@entry', ['site' => $site]);
+                case 'showdata': return App::call('App\Http\Controllers\fsSeedsController@showdata', ['site' => $site]);
+                case 'unknown': return App::call('App\Http\Controllers\fsSeedsController@unknown', ['site' => $site]);
+                case 'updateBackData': return App::call('App\Http\Controllers\fsSeedsController@updateBackData', ['site' => $site]);
+                // Add more cases if needed
+                // default:
+                //     // Handle the case where $type does not match any of the above
+                //     break;
             }
-            
         }
     
 });
@@ -150,29 +142,33 @@ Route::get('/shoushan/{project}/{type}', function($project, $type){
   $site='shoushan';
         if ($project=='plot'){
 
-            if ($type=='doc'){
-                return App::call('App\Http\Controllers\ssPlotController@plot',['site' => $site] );
-            } else if ($type=='1ha_note'){
-                return App::call('App\Http\Controllers\ssPlotController@note1ha',['site' => $site] );
-            } else if ($type=='1ha_entry1'){
-                return App::call('App\Http\Controllers\ssPlotController@entry1ha',['site' => $site, 'entry'=> '1'] );
-            } else if ($type=='1ha_entry2'){
-                return App::call('App\Http\Controllers\ssPlotController@entry1ha',['site' => $site, 'entry'=> '2'] );
-            } else if ($type=='1ha_compare'){
-                return App::call('App\Http\Controllers\ssPlotController@compare1ha',['site' => $site] );
-            } else if ($type=='10m_note'){
-                return App::call('App\Http\Controllers\ssPlotController@note10m',['site' => $site] );
-            } else if ($type=='10m_entry1'){
-                return App::call('App\Http\Controllers\ssPlotController@entry10m',['site' => $site, 'entry'=> '1'] );
-            } else if ($type=='10m_entry2'){
-                return App::call('App\Http\Controllers\ssPlotController@entry10m',['site' => $site, 'entry'=> '2'] );
-            } else if ($type=='10m_compare'){
-                return App::call('App\Http\Controllers\ssPlotController@compare10m',['site' => $site] );
-            } else if ($type=='10m_dataviewer'){
-                return App::call('App\Http\Controllers\ssPlotController@dataviewer10m',['site' => $site] );
-            } else if ($type=='1ha_dataviewer'){
-                return App::call('App\Http\Controllers\ssPlotController@dataviewer1ha',['site' => $site] );
+            switch ($type) {
+                case 'doc':
+                    return App::call('App\Http\Controllers\ssPlotController@plot', ['site' => $site]);
+                case '1ha_note':
+                    return App::call('App\Http\Controllers\ssPlotController@note1ha', ['site' => $site]);
+                case '1ha_entry1':
+                case '1ha_entry2':
+                    return App::call('App\Http\Controllers\ssPlotController@entry1ha', ['site' => $site, 'entry' => substr($type, -1)]);
+                case '1ha_compare':
+                    return App::call('App\Http\Controllers\ssPlotController@compare1ha', ['site' => $site]);
+                case '10m_note':
+                    return App::call('App\Http\Controllers\ssPlotController@note10m', ['site' => $site]);
+                case '10m_entry1':
+                case '10m_entry2':
+                    return App::call('App\Http\Controllers\ssPlotController@entry10m', ['site' => $site, 'entry' => substr($type, -1)]);
+                case '10m_compare':
+                    return App::call('App\Http\Controllers\ssPlotController@compare10m', ['site' => $site]);
+                case '10m_dataviewer':
+                    return App::call('App\Http\Controllers\ssPlotController@dataviewer10m', ['site' => $site]);
+                case '1ha_dataviewer':
+                    return App::call('App\Http\Controllers\ssPlotController@dataviewer1ha', ['site' => $site]);
+                // // Add more cases if needed
+                // default:
+                //     // Handle the case where $type does not match any of the above
+                //     break;
             }
+
         }
 
 });
@@ -187,8 +183,10 @@ Route::post('/fstreesavedata', [App\Http\Controllers\fsTreeSaveController::class
 Route::post('/fstreesaverecruit', [App\Http\Controllers\fsTreeSaveController::class, 'saverecruit']);
 Route::get('/fstreeaddalternote/{stemid}/{entry}/{thispage}', [App\Http\Controllers\fsTreeAlternote::class, 'alternote']);
 Route::post('/fstreesavealternote', [App\Http\Controllers\fsTreeSaveController::class, 'savealternote']);
+Route::post('/fstreeupdate', [App\Http\Controllers\fsTreeSaveController::class, 'saveupdate']);
 Route::get('/fstreedeletealter/{stemid}/{entry}/{thispage}', [App\Http\Controllers\fsTreeSaveController::class, 'deletealter']);
 Route::get('/fstreefinish/{qx}/{qy}/{entry}', [App\Http\Controllers\fsTreeSaveController::class, 'finishnote']);
+Route::post('/fstreedeletecensusdata', [App\Http\Controllers\fsTreeSaveController::class, 'fsTreeDeleteCensusData']);
 
 //fsseedling entry
 Route::post('/fsseedlingsavecov', [App\Http\Controllers\fsSeedlingSaveController::class, 'savecov'])->name('savecov');
@@ -203,10 +201,13 @@ Route::get('/fsseedlingdeletealter/{stemid}/{entry}/{thispage}', [App\Http\Contr
 Route::get('/fsseedlingfinish/{entry}', [App\Http\Controllers\fsSeedlingSaveController::class, 'finishnote']);
 
 
-Route::post('/fsseedssavedata', [App\Http\Controllers\fsSeedsSaveController::class, 'savedata'])->name('savedata');
-Route::post('/fsseedssavedata1', [App\Http\Controllers\fsSeedsSaveController::class, 'savedata1'])->name('savedata1');
-Route::get('/fsseedsdeletedata/{id}/{info}/{thispage}', [App\Http\Controllers\fsSeedsSaveController::class, 'deletedata'])->name('deletedata');
+Route::post('/fsseedssavedata/{type}', [App\Http\Controllers\fsSeedsSaveController::class, 'savedata'])->name('savedata');
+Route::post('/fsseedssavedata1/{type}', [App\Http\Controllers\fsSeedsSaveController::class, 'savedata1'])->name('savedata1');
+Route::get('/fsseedsdeletedata/{id}/{info}/{thispage}/{type}', [App\Http\Controllers\fsSeedsSaveController::class, 'deletedata'])->name('deletedata');
 Route::get('/fsseedsfinish', [App\Http\Controllers\fsSeedsSaveController::class, 'finishnote'])->name('finishnote');
+
+
+
 
 
 //ssplot entry

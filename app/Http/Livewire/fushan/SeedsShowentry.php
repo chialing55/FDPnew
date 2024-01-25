@@ -28,7 +28,6 @@ class SeedsShowentry extends Component
     public $thiscensus;
     public $dateinfo;
 
-
     public function mount(){
         $maxcensus=FsSeedsDateinfo::query()->max('census');
         $this->census=$maxcensus+1;   
@@ -61,37 +60,58 @@ class SeedsShowentry extends Component
     public $person1='';
     public $person2='';
     public $person3='';
-    
+    public $submitformnote='';
 
     public function submitForm(Request $request){
         $user = $request->session()->get('user', function () {
             return 'no';
         });
-
+        $pass='yes';
 
         if ($this->date!=''){
 
-            $datecheck=$this->datecheck($this->census, $this->date, $this->person1, $this->person2, $this->person3);
+            //check
+            $date1=explode('-', $this->date);
+            $year=$date1[0];
+            $thisyear=date('Y');
+            if ($year!=$thisyear && $year!=($thisyear-1)){
+                $pass='no';
+            }
 
-            $this->census2date['date']=$this->date;
+            $pervdate=FsSeedsDateinfo::query()->where('census', 'like', ($this->census-1))->get()->toArray();
+            $pdate=Carbon::parse($pervdate[0]['date']);
+            $ndate=Carbon::parse($this->date);
+            $interval = $pdate->diffInDays($ndate);
+            if ($interval<5 || $interval>10){
+                $pass='no';
+            }            
 
-            $inlist['year']=$datecheck['year'];
-            $inlist['month']=$datecheck['month'];
-            $inlist['date1']=$datecheck['date1'];
-            $inlist['period']=$datecheck['period'];
-            $inlist['workers']=$datecheck['workers'];
+            if ($pass=='no'){
+                $this->submitformnote='日期輸入錯誤';
 
-            $additionalData=['date'=>$this->date, 'census'=>$this->census,  'update_id' => $user,'note'=>$this->note ,'updated_at' => date("Y-m-d H:i:s")];
-            $inlist = array_merge($inlist, $additionalData);
-            FsSeedsDateinfo::insert($inlist);
+            } else {
+                $datecheck=$this->dateinfo($this->census, $this->date, $this->person1, $this->person2, $this->person3);
 
-            $this->createTable($this->census);
+                $this->census2date['date']=$this->date;
+
+                $inlist['year']=$datecheck['year'];
+                $inlist['month']=$datecheck['month'];
+                $inlist['date1']=$datecheck['date1'];
+                $inlist['period']=$datecheck['period'];
+                $inlist['workers']=$datecheck['workers'];
+
+                $additionalData=['date'=>$this->date, 'census'=>$this->census,  'update_id' => $user,'note'=>$this->note ,'updated_at' => date("Y-m-d H:i:s")];
+                $inlist = array_merge($inlist, $additionalData);
+                FsSeedsDateinfo::insert($inlist);
+
+                $this->createTable($this->census);
+            }
 
         }
     }
 
 
-    public function datecheck($census, $date, $person1, $person2, $person3){
+    public function dateinfo($census, $date, $person1, $person2, $person3){
             $date1=explode('-', $date);
             $year=$date1[0];
             $month=$date1[1];
@@ -109,7 +129,7 @@ class SeedsShowentry extends Component
             $pcensus=FsSeedsDateinfo::query()->where('census', 'like', $census-1)->get()->toArray();
             if ($pcensus[0]['month']!=$month){
                 $pdate=Carbon::parse($pcensus[0]['date']);
-                $ndate=Carbon::parse($this->date);
+                $ndate=Carbon::parse($date);
                 $interval = $pdate->diffInDays($ndate);
                 if ($day<($interval/2)){
                     $month=$month-1;
@@ -172,13 +192,14 @@ class SeedsShowentry extends Component
     }
 
     public $entrytable;
-
+    public $identifier='蔡佳秀';
+    
     public function createTable($census){
 
         $entrytable1=FsSeedsRecord1::query()->orderBy('trap', 'asc')->orderBy('csp', 'asc')->orderBy('code', 'asc')->get()->toArray();
 
         $ob_table = new fsSeedsAddButton;
-        $entrytable=$ob_table->addbutton($entrytable1);
+        $entrytable=$ob_table->addbutton($entrytable1, 'record');
 
 
 
@@ -210,7 +231,7 @@ class SeedsShowentry extends Component
             $emptytable[$k]['viability']='';
             $emptytable[$k]['fragments']='';
             $emptytable[$k]['sex']='';
-            $emptytable[$k]['identifier']='';
+            $emptytable[$k]['identifier']=$this->identifier;
             $emptytable[$k]['note']='';
         }
 

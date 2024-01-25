@@ -147,6 +147,26 @@ border: 1px solid  #A568FF;
 	font-weight: normal;
 }
 
+.plottable2 {
+	line-height: 1.5; 
+	width: 30px; 
+	vertical-align: middle; 
+	height: 25px; 
+	float: left; 
+	border: 1px solid #555; 
+	padding: 1px; 
+	margin: 1px 1px; 
+	text-align: center; 
+	cursor: pointer; 
+	background-color: #ffffb985; 
+	color: black; 
+	font-weight: normal;
+}
+
+.selected {
+	background-color: yellowgreen;
+}
+
 .finishtable td{
 	vertical-align: middle; 
 	text-align: center; 
@@ -211,6 +231,16 @@ border: 1px solid  #A568FF;
 
 }
 
+.loadingfin {
+	background-color: lightsalmon;
+
+}
+
+.importfin {
+	background-color: steelblue;
+
+}
+
 .entryfinshow {
 	width: 25px;
 	height: 25px;
@@ -221,4 +251,22 @@ border: 1px solid  #A568FF;
 
 .dataviewerdownload span{
 	margin-left: 10px;
+}
+
+.thistype{
+	background-color: gainsboro;
+}
+
+.deleteCensusDataB {
+
+}
+
+.tiptriangletoggled {
+  transform: rotate(90deg);
+}
+
+.tiptriangle {
+	display: inline-block;
+/*	transition: transform 0.3s;*/
+	margin-right:20px;
 }

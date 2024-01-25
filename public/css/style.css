@@ -447,3 +447,12 @@ button:-webkit-details-marker {
 .photo {
   margin-bottom: 10px;
 }
+
+.prevshow, .nextshow{
+  padding-left:25px;
+}
+
+.prevhidden, .nexthidden{
+  padding-left:25px;
+  visibility: hidden;
+}

@@ -13,7 +13,8 @@ $personlist=['','蔡佳秀'];
 @if($entry=='')
     @if($census==$census2)
     <div class='text_box'>
-        <h6>新建種子雨收集日期</h6>
+        <h6>新建種子雨收集日期<span style='font-weight: 500; color: red; margin-left: 20px ;'>{{$submitformnote}}</span></h6>
+
             <form wire:submit.prevent="submitForm" method="POST">
                 <p>census：{{$census}}</p>
                 <p>調查日期：<input name='date' id='date' type='date' placeholder="YYYY-MM-DD" style='width:120px; ' class='fs100' wire:model="date"></p>
@@ -109,7 +110,7 @@ $personlist=['','蔡佳秀'];
             <li>不確定種類，一律輸入「<b>UNKUNK</b>」，並將疑似種類名稱寫在 note。</li>
             <li>若為小種子植物的果實或種子，無法計算種子數量，種子數及活性欄位皆填NA。</li>
             <li>不需記錄種子數、活性、碎片3數量時，可填入 0 或保留空白(系統會自動補 0)。</li>
-            <li>長葉木薑子的花，需記錄性別 F / M。</li>
+            <li><span class='line'>長葉木薑子</span>的花，需記錄性別 F / M。</li>
             <li>若不符合規則，會在檢查欄位顯示錯誤之處，若未更改，將無法完成輸入。</li>
             <li><b>輸入完成後請按下<button class='datasavebutton' style='width: auto;'>輸入完成</button></b>，檢查通過後，即會將資料匯入大表。</li>
             </ul>
@@ -126,9 +127,9 @@ $personlist=['','蔡佳秀'];
                     <div style='margin-left: 20px;'><button name='creattable'>開啟新空白頁</button></div>
                 </div>
 
-                <div id='seedstable' class='fs100' >
+                <div id='seedstable{{$thiscensus}}' class='fs100' >
                     <span class='seedssavenote savenote'></span>
-                    <p style='margin-top:5px; text-align: center'><button name='datasave' class='datasavebutton' style='width:550px'>儲存</button></p>
+                    <p style='margin-top:5px; text-align: center'><button name='datasave{{$thiscensus}}' class='datasavebutton' style='width:550px'>儲存</button></p>
 
                 </div>
             </div>
@@ -136,9 +137,9 @@ $personlist=['','蔡佳秀'];
                 <div class='pages'>
                     <button name='show_seedstable'>檢視輸入資料</button>
                 </div>
-                <div id='seedstable_empty' class='fs100' >
+                <div id='seedstable_empty{{$thiscensus}}' class='fs100' >
                      
-                    <p style='margin-top:5px; text-align: center'><button name='newdatasave' class='datasavebutton' style='width:550px'>儲存</button></p>
+                    <p style='margin-top:5px; text-align: center'><button name='newdatasave{{$thiscensus}}' class='datasavebutton' style='width:550px'>儲存</button></p>
 
                 </div>
             </div>

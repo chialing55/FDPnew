@@ -7,6 +7,7 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\App;
 use Livewire\Component;
 use Livewire\WithPagination;
+use Illuminate\Support\Facades\File;
 
 
 use App\Models\FsBaseTreeSplist;
@@ -14,8 +15,12 @@ use App\Models\FsTreeRecord1;
 use App\Models\FsTreeRecord2;
 use App\Models\FsTreeCensus4;
 use App\Models\FsTreeCensus3;
+use App\Models\FsTreeEntrycom;
+use App\Models\FsTreeCensus5;
+
 
 use App\Jobs\fsTreeAddButton;
+use App\Jobs\fsTreeCensus5Progress;
 
 class TreeShowentry extends Component
 {
@@ -29,6 +34,25 @@ class TreeShowentry extends Component
     public $sqx;
     public $sqy;
     public $record;
+
+    public $comparelist=[];
+    public $updatelist=[];
+    public $directories = [];
+
+    public function mount(){
+
+        $ob_result = new fsTreeCensus5Progress;
+        $result=$ob_result->showProgress();
+
+        // Extract only the directory names
+        $this->directories = $result['directorieslist'];
+        // dd($this->directories);
+        $this->updatelist=$result['updatelist'];
+        $this->comparelist=$result['comparelist'];
+    }
+
+
+
     
 
     public function searchsite(Request $request, $qx, $qy, $sqx, $sqy){
@@ -169,13 +193,13 @@ class TreeShowentry extends Component
         $this->qy=$qy;
         $this->sqx=$sqx;
         $this->sqy=$sqy;
-    
+        
 
         // $this->csplist=$csplist;
         // dd($result);
 
         $this->dispatchBrowserEvent('data', ['record' => $result,  'emptytable' => $emptytable, 'csplist' => $csplist]);
-  
+        $this->dispatchBrowserEvent('rePlotsentry', ['sqx'=>$sqx, 'sqy'=>$sqy]);
 
         // Livewire::emitTo('livewire.fushan.tree-showentry', '$refresh');
 
@@ -189,9 +213,9 @@ class TreeShowentry extends Component
     }
 
 
-    public function submitsqxForm(Request $request){
+    public function submitsqxForm(Request $request, $sqx, $sqy){
 
-        $this->searchsite($request, $this->qx, $this->qy, $this->sqx, $this->sqy);
+        $this->searchsite($request, $this->qx, $this->qy, $sqx, $sqy);
     }
 
     public function render()

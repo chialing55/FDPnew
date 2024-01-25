@@ -46,8 +46,8 @@
       <div class='list list4 ' >資料輸入<hr></div>
 
       <div class='list list5 listlink' type='dataviewer' >資料檢視<hr></div>
-      @if($user=='chialing')
-      <div class='list list6 ' type='modify'>資料修改<hr>
+     
+      <div class='list list6 ' type='modify'>資料處理<hr>
       </div>
   {{--         <div class='listinner list6inner'>
             <li>每木調查資料修改流程</li>
@@ -55,7 +55,7 @@
             <li>後端資料更正</li>
             <li>新增資料</li>
           </div> --}}
-      @endif
+      
       <div class='list list7 ' type='map'>樹位置圖輸入<hr></div>
   </div>
 
@@ -70,10 +70,12 @@
           <li class='innerlist list45 listlink' type='entryprogress'>資料輸入進度<hr></li>
       </div>
       <div class='listinner list6inner'>
-          <li class='innerlist list61' type=''>每木調查資料修改流程<hr></li>
-          <li class='innerlist list62' type='' >更新census5資料表<hr></li>
-          <li class='innerlist list63' type='' >後端資料更正<hr></li>
-          <li class='innerlist list64' type=''>新增資料<hr></li>
+          <li class='innerlist list61 listlink' type='modifyPathway'>每木調查資料修改流程<hr></li>
+           @if($user=='chialing')
+          <li class='innerlist list62 listlink' type='updateTable' >更新census5資料表<hr></li>
+          <li class='innerlist list63 listlink' type='updateBackData' >後端資料更正<hr></li>
+           @endif
+          <li class='innerlist list64 listlink' type='addData'>新增資料<hr></li>
 
       </div>
 @endsection

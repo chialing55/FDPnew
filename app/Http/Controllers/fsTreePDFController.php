@@ -24,7 +24,7 @@ class fsTreePDFController extends Controller
         //從base裡挑資料
         $input=$request->session()->all();
 
-        $treelist=FsTreeBase::where('qx','like',$qx)->where('qy', 'like', $qy)->orderBy('tag', 'asc')->get()->toArray();
+        $treelist=FsTreeBase::where('qx','like',$qx)->where('qy', 'like', $qy)->where('deleted_at', 'like', '')->orderBy('tag', 'asc')->get()->toArray();
 
         if (!isset($input['splist'])){
             $splists=FsBaseTreeSplist::select('spcode', 'csp')->get()->toArray();
@@ -52,7 +52,7 @@ class fsTreePDFController extends Controller
             $maxG='';
         }
 //排除status=0
-        $treedatas=FsTreeCensus4::whereIn('tag', $taglist)->where('status','not like', '0')->where('date', 'not like', '0000-00-00')->orderBy('tag', 'asc')->orderBy('branch', 'asc')->get()->toArray();
+        $treedatas=FsTreeCensus4::whereIn('tag', $taglist)->where('status','not like', '0')->where('date', 'not like', '0000-00-00')->where('deleted_at', 'like', '')->orderBy('tag', 'asc')->orderBy('branch', 'asc')->get()->toArray();
         $totalnum=0;
         for($i=0;$i<count($treedatas);$i++){
             //排除分支為-3, -2, -1

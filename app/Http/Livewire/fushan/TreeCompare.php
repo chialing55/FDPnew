@@ -53,7 +53,7 @@ class TreeCompare extends Component
         $comnote='';
 
         $qx=$this->qx;
-            // 比對小苗資料
+            
         $pass='1';
         $tag1=array();
         $tag2=array();
@@ -215,7 +215,7 @@ class TreeCompare extends Component
             $comnote='資料皆相符。恭喜比對完成。';
             
             $uplist['compareOK']=$user;
-            $uplist['compareOKdate']=date("Y-m-d H:i:s");
+            $uplist['compareOK_at']=date("Y-m-d H:i:s");
 
             FsTreeEntrycom::where('qx', 'like', $qx)->update($uplist);
         }

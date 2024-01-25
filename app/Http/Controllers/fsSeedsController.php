@@ -156,4 +156,28 @@ class fsSeedsController extends Controller
         }
     }
 
+    public function updateBackData(Request $request, $site){
+
+        $user = $request->session()->get('user', function () {
+            return 'no';
+        });
+
+        if ($user=='no'){
+            return view('login1', [
+                'check' => 'no'
+            ]);
+        } else {
+
+
+            return view('pages/fushan/seeds_updatebackdata', [
+                'site' => $site,
+                'project' => '種子雨',
+                'user' => $user
+                
+
+            ]);
+        }
+    }
+
+
 }
