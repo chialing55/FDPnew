@@ -456,7 +456,7 @@ $('.finishnote').html();
           // var curData = container.handsontable('getData')[row][10]; //column 10 is the field "sprout"
           if (container.handsontable('getData')[row][8]=='-9'){
           	cellProperties.readOnly = false; 
-          	if (col==1 || col ==2 || col == 8){
+          	if (col==1 || col ==2 || col == 8 || col == 14){
           		cellProperties.readOnly = true; 
           	}
 
@@ -664,7 +664,11 @@ function fstreetableupdate(data, thispage, pps){
 
 	var data3 = (totalpage > 1) ? pages(data, thispage, totalpage, pps)[1] : data;
 	// pages(data, thispage, totalpage, pps)
-
+    for (let i = 0; i < data3.length; i++) {
+      if (data3[i]['date'] === '0000-00-00') {
+          data3[i]['date'] = ''; // 使用单等号进行赋值
+      }
+  }
 // console.log(data3);
 	handsontable.updateData(data3, thispage);
 	handsontable.updateSettings({
@@ -674,7 +678,7 @@ function fstreetableupdate(data, thispage, pps){
           // var curData = container.handsontable('getData')[row][10]; //column 10 is the 
           if (container.handsontable('getData')[row][8]=='-9'){
           	cellProperties.readOnly = false; 
-          	if (col==1 || col ==2 || col == 8){
+          	if (col==1 || col ==2 || col == 8 || col == 14){
           		cellProperties.readOnly = true; 
           	}
           }

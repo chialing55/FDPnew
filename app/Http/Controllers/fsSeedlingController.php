@@ -49,7 +49,7 @@ class fsSeedlingController extends Controller
             } else {
                 //沒有紀錄紙，建一個新表
               // echo 'n';
-                $c_table=DB::connection('mysql3')->select("create table slrecord as select seedling.*, base.x,base.y from seedling left join base on seedling.mtag = base.mtag where seedling.census like ? and (seedling.status like 'A' or seedling.status like 'N') order by seedling.trap, seedling.plot, seedling.tag", [$maxCensus]);
+                $c_table=DB::connection('mysql3')->select("create table slrecord ENGINE = MyISAM as select seedling.*, base.x,base.y from seedling left join base on seedling.mtag = base.mtag where seedling.census like ? and (seedling.status like 'A' or seedling.status like 'N') order by seedling.trap, seedling.plot, seedling.tag", [$maxCensus]);
                 //刪除死亡的萌蘗苗(個體未死)  高度 = -7, sprout = True
                 $d_record=DB::connection('mysql3')->select("delete from slrecord where ht = '-7' and sprout ='True'");
                 //刪除-2的萌蘗苗(個體DBH>1)  高度 = -2, sprout = True

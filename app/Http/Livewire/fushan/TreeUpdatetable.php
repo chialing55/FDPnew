@@ -83,8 +83,9 @@ class TreeUpdatetable extends Component
                  foreach ($basekeyarray as $key){
                     if(isset($importdata[$key])){
                         $inlist2[$key]=$importdata[$key];
-                    } else 
+                    } else {
                         $inlist2[$key]='0';
+                    }
                     }
                 }
                 $inlist2['update_id']=$this->user;
@@ -102,7 +103,8 @@ class TreeUpdatetable extends Component
             }
                 //dd($inlist);
 
-        }
+        
+        $uplist=[];
         $uplist['census5update']=$this->user;
         $uplist['census5update_at']=date("Y-m-d H:i:s");
 

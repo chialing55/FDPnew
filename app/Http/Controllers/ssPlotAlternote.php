@@ -12,18 +12,32 @@ use Illuminate\Support\Facades\Schema;
 
 use App\Models\Ss10mTreeRecord1;
 use App\Models\Ss10mTreeRecord2;
+use App\Models\Ss1haRecord1;
+use App\Models\Ss1haRecord2;
 
 
-class ss10mAlternote extends Controller
+
+class ssPlotAlternote extends Controller
 {
 
-    public function alternote(Request $request, $stemid, $entry){
+    public function alternote(Request $request, $stemid, $entry, $plotType, $thispage){
 
 
-        if ($entry=='1'){
-            $table= new Ss10mTreeRecord1;
+        if ($plotType=='ss10m'){
+            if ($entry == '1') {
+                $table= new Ss10mTreeRecord1;
+            } else {
+                $table= new Ss10mTreeRecord2;
+            }
+            $alterdata=['stemid'=>$stemid, 'plot'=>'', 'sqx'=>'', 'sqy' => '', 'tag'=>'', 'b'=>'', 'csp'=>''];
         } else {
-            $table= new Ss10mTreeRecord2;
+
+            if ($entry == '1') {
+                $table= new Ss1haRecord1;
+            } else {
+                $table= new Ss1haRecord2;
+            }
+            $alterdata=['stemid'=>$stemid, 'qx'=>'','qy'=>'',  'sqx'=>'', 'sqy' => '', 'tag'=>'', 'b'=>'', 'csp'=>''];
         }
 
         $user = $request->session()->get('user', function () {
@@ -31,10 +45,8 @@ class ss10mAlternote extends Controller
         });
 
 
-
-
         $result=$table::where('stemid', 'like', $stemid)->get()->toArray();
-        $alterdata=['stemid'=>$stemid, 'plot'=>'', 'sqx'=>'', 'sqy' => '', 'tag'=>'', 'b'=>'', 'csp'=>''];
+        
 
         if ($result[0]['alternote']==''){
             $mergedArray=$alterdata;
@@ -54,6 +66,7 @@ class ss10mAlternote extends Controller
             'stemid' => $stemid,
             'entry' => $entry,
             'user' => $user,
+            'thispage' => $thispage,
             'alterdata' => $mergedArray,
             // 'csplist' => $csplist,
             'havedata' => $havedata

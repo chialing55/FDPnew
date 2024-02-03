@@ -95,7 +95,7 @@ $nowplot=$plot2list[$nowplotkey[0]];
     <ul >
 
     <li><b>輸入資料後需按 <button class='datasavebutton' style='width: auto;'>儲存</button> ，才能確實將資料儲存。</b>請確實依照紙本資料輸入，以減少兩次輸入的不一致。</li>
-    <li>日期格式： YYYY-MM-DD。每筆資料皆需輸入日期，<b>日期為 0000-00-00 者視同未輸入</b>。</li>
+    <li>日期格式： YYYY-MM-DD。每筆資料皆需輸入日期，<b>日期為 0000-00-00 / 空白者視同未輸入</b>。</li>
     <li>status 為 0(全株死亡),-1(全株失蹤),-2(全株 dbh < 1 cm),-3(枝幹死亡)，則 dbh 需為0，且 code 不得有值。status 為空值，則 dbh 不得為 0。</li>
     <li>dbh/h高 必須<b>大於或等於</b>上次調查，或勾選縮水。</li>
     <li>code：CIPR。若 code 包含 C，則 POM 不得同於前次 POM。code R 只能出現在分支。<b>code 代碼間可共存</b>，多碼時照字母排列，<b>中間不留空格</b>。</li>
@@ -115,6 +115,9 @@ $nowplot=$plot2list[$nowplotkey[0]];
 $fileqx=str_pad($qx, 2, '0', STR_PAD_LEFT);
 $fileqy=str_pad($qy, 2, '0', STR_PAD_LEFT);
 $filesqx=$fileqx.$fileqy;
+$searchSiteVar=$qx.",".$qy;
+$tableVar=$qx.$qy.$sqx.$sqy;
+$alterOtherNote="*如為換號請在號碼後方備註，如:156601(換號)";
 
 @endphp
 
@@ -124,66 +127,10 @@ $filesqx=$fileqx.$fileqy;
 
 <div class='text_box'>
     <div class='entrytablediv'>
-        <h2 style='display: inline-block;'>({{$sqx}}, {{$sqy}}) </h2>
-        <div class='tablenote'>
-            @if($record!='無')
-            <span style='margin-right: 20px' class='totalnum'></span>
-            @else
-            <span style='margin-right: 20px'> 沒有舊資料</span>
-            @endif
-@php
-
-    $prevshow = (($sqx.$sqy) == $plot2list[0]) ? 'prevhidden' : 'prevshow';
-    $nextshow = (($sqx.$sqy) == $plot2list[15]) ? 'prevhidden' : 'prevshow';
-
-    $prev = ($prevshow == 'prevshow') ? $plot2list[($nowplotkey[0]-1)] : '00';
-    $next = ($nextshow == 'prevshow') ? $plot2list[($nowplotkey[0]+1)] : '00';
-
-@endphp
-
-            <span class='{{$prevshow}}'><a class="a_" wire:click.once="searchsite({{$qx}}, {{$qy}}, {{$prev[0]}}, {{$prev[1]}})">上一個樣區</a></span>
-            <span class='{{$nextshow}}'><a class="a_" wire:click.once="searchsite({{$qx}}, {{$qy}}, {{$next[0]}}, {{$next[1]}})">下一個樣區</a></span>
-
-        </div>
 
 
-
-        @if($record!='無')
-
-        
-        <span class='datasavenote savenote'></span>
-        <div class='pages' style='margin-top: 5px;'>
-           <div class='pagenote'></div>
-           <div class='prev'>上一頁</div>
-           <div class='next'>下一頁</div>
-           <div class='showall'><button>顯示較多資料</button></div>
-       </div>
-        <div id='datatable{{$qx}}{{$qy}}{{$sqx}}{{$sqy}}' style='margin-top: 20px;' class='fs100' ></div>
-
-
-        <p style='margin-top:5px; text-align: center;'><span class='datasavenote savenote' style='margin: 0 30px 0 0'></span><button name='datasave{{$qx}}{{$qy}}{{$sqx}}{{$sqy}}' class='datasavebutton'>儲存</button></p>
-        
-        <div class='alternotetalbeouter'>
-            <h6 class='alterh6'>特殊修改</h6>
-            <span style='margin-left: 20px; font-size: 80%; font-weight: 500;'>*只需填寫需修改的資料  *如為換號請在號碼後方備註，如:156601(換號)</span>
-
-            <p ><span class='alterstemid'></span>
-            <span class='altersavenote savenote'></span></p>
-            <div id='alternotetable' style='margin-top: 5px;' class='fs100' ></div>
-
-
-            <p style='margin-top:10px; text-align: right;'><button name='alternotesave' class='datasavebutton' style='width: auto;' >儲存</button>
-
-            <button name='deletealternote' class='deletealternotebutton' onclick="deletealternoteButtonClick(this)">刪除此資料</button>
-            <button class='close' onclick="$('.alternotetalbeouter').hide(); $('.alternotetable').html();" >X</button>
-
-            </p>
-
-
-        </div>
-
-    @endif
-</div>
+@include('includes.str-tree-entrytable')
+    </div>
 </div>    
 
 <div style='margin-left: 30px;'>
@@ -206,15 +153,7 @@ $filesqx=$fileqx.$fileqy;
             
         </ul>
     </div>
-    <div class='entrytablediv'>
-        <p class='recruitsavenote savenote'></p>
-        
-        
-        <div id='recruittable{{$qx}}{{$qy}}{{$sqx}}{{$sqy}}' style='margin-top: 10px;'></div>
-        <p style='text-align: center;'><span class='recruitsavenote savenote' style='margin: 0 30px 0 0'></span><button name='recruitsave{{$qx}}{{$qy}}{{$sqx}}{{$sqy}}' class="save2 datasavebutton">儲存</button></p>
-        <span class='datasavenote savenote'></span>
-        <p style='margin-top:5px;'><button name='clearrecruittable' class="save2">清空新增表單</button></p>
-    </div>
+@include('includes.str-recruit-entrytable')
 </div>
 <div style='margin: 30px 0 0 30px ;'>
 <button class='finish finishbutton' onclick="finish({{$qx}}, {{$qy}}, {{$entry}})">輸入完成</button>

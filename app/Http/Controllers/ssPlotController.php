@@ -16,6 +16,12 @@ use App\Models\Ss10mTreeRecord2;
 use App\Models\Ss10mTreeEnviR1;
 use App\Models\Ss10mTreeEnviR2;
 
+use App\Models\Ss1haData2015;
+use App\Models\Ss1haRecord1;
+use App\Models\Ss1haRecord2;
+use App\Models\Ss1haEnviR1;
+use App\Models\Ss1haEnviR2;
+
 class ssPlotController extends Controller
 {
 
@@ -106,13 +112,61 @@ class ssPlotController extends Controller
             ]);
         } else {
             // echo "1";
+        // 產生輸入表單
+            if (Schema::connection('mysql5')->hasTable('1ha_record1'))
+            {
+                  //有輸入表單
+            } else {
+                DB::connection('mysql5')->select('CREATE TABLE 1ha_record1 LIKE 1ha_data_2015;');
+                DB::connection('mysql5')->statement("ALTER TABLE 1ha_record1 ENGINE = MyISAM;");
+                DB::connection('mysql5')->statement("INSERT IGNORE INTO 1ha_record1 SELECT * FROM 1ha_data_2015");
+
+                DB::connection('mysql5')->statement("ALTER TABLE  `1ha_record1` ADD COLUMN (`date` char(10) not null, `code` char(10) not null,`ill` int(1) default '0',`leave` float default '0',`show` int(1) not null default '1',`confirm` char(2) not null, `tofix` char(2) not null, `alternote` varchar(255) CHARACTER SET utf8 NOT NULL)");
+                //status=0, status=-3&branch=0
+
+                Ss1haRecord1::where('branch','!=', '0')->where('status', 'like', '-3')->update(['show'=>'0']);
+                Ss1haRecord1::where('status', 'like', '0')->update(['show'=>'0']);
+            //分支status=-1, -2 show=0
+                Ss1haRecord1::where('status', 'like', '-1')->where('branch', '!=', '0')->update(['show'=>'0']);
+                Ss1haRecord1::where('status', 'like', '-2')->where('branch', '!=', '0')->update(['show'=>'0']);
+
+                Ss1haRecord1::query()->update(['dbh'=>'0', 'height'=>'0', 'date'=>'0000-00-00']);
+                Ss1haRecord1::where('status', 'like', '-9')->update(['status'=>'']);
+
+                //刪除欄位
+                DB::connection('mysql5')->statement("ALTER TABLE `1ha_record1` DROP COLUMN `height`");
+
+                //產生record2
+                DB::connection('mysql5')->select('CREATE TABLE 1ha_record2 LIKE 1ha_record1');
+           
+                DB::connection('mysql5')->select("INSERT INTO 1ha_record2 SELECT * FROM 1ha_record1");
+
+            }
 
 
+            if (Schema::connection('mysql5')->hasTable('1ha_envi_r1'))
+            {
+                  //有輸入表單
+            } else {
+                DB::connection('mysql5')->select('CREATE TABLE 1ha_envi_r1 (`id`  INT(11) NOT NULL AUTO_INCREMENT, `qx` int(2) not null, `qy` int(2) not null, `rocky` float not null, `exposed_surface` float not null, `litter_cover` float not null, `fallen_tree` float not null, `arenga` float not null, `T1` float not null, `T2` float not null, `S` float not null, `H` float not null, `update_id` char(20) not null, `updated_at` char(100) not null , PRIMARY KEY (  `id` ) , index(  `qx`, `qy`  )) ENGINE  =  MyISAM  DEFAULT CHARSET  = utf8');
 
-        //產生紀錄紙
 
+                for ($x=-4; $x<11;$x++){
+                    for ($y=13;$y<20;$y++){
+                        $insert=[];
+                        $insert=['qx'=> $x, 'qy'=> $y, 'rocky'=>'0', 'rocky'=>'0','exposed_surface'=>'0','litter_cover'=>'0','fallen_tree'=>'0','arenga'=>'0','T1'=>'0', 'H'=>'0','T2'=>'0','S'=>'0', 'update_id'=>'', 'updated_at'=>''];
+                        Ss1haEnviR1::insert($insert);
+                    }
+                }
 
+                //產生1ha_envi_r2
+                DB::connection('mysql5')->select('CREATE TABLE 1ha_envi_r2 LIKE 1ha_envi_r1');
+                DB::connection('mysql5')->select("INSERT INTO 1ha_envi_r2 SELECT * FROM 1ha_envi_r1");
+     
+           
+                // DB::connection('mysql5')->select("INSERT INTO 1ha_envi_r2 SELECT * FROM 1ha_envi_r1");
 
+            }
 
             // print_r($user);
             return view('pages/shoushan/1ha_entry', [
@@ -143,7 +197,7 @@ class ssPlotController extends Controller
         //產生輸入表單
 
 
-            //檢查是否有紀錄紙資料表
+            //檢查是否有輸入資料表
 
             if (Schema::connection('mysql5')->hasTable('10m_tree_record1'))
             {
@@ -179,22 +233,22 @@ class ssPlotController extends Controller
 
             }
 
-            // if (Schema::connection('mysql5')->hasTable('10m_tree_envi_r1'))
-            // {
-            //       //有輸入表單
-            // } else {
-            //     DB::connection('mysql5')->select('CREATE TABLE 10m_tree_envi_r1 LIKE 10m_quad_2014');
-            //     DB::connection('mysql5')->statement("INSERT IGNORE INTO 10m_tree_envi_r1 SELECT * FROM 10m_quad_2014 where type like '森林'");
+            if (Schema::connection('mysql5')->hasTable('10m_tree_envi_r1'))
+            {
+                  //有輸入表單
+            } else {
+                DB::connection('mysql5')->select('CREATE TABLE 10m_tree_envi_r1 LIKE 10m_quad_2014');
+                DB::connection('mysql5')->statement("INSERT IGNORE INTO 10m_tree_envi_r1 SELECT * FROM 10m_quad_2014 where type like '森林'");
 
-            //     DB::connection('mysql5')->statement("ALTER TABLE  `10m_tree_envi_r1` ADD  (`sqx` int(2) not null,`sqy` int(2) not null, `note` varchar(255) not Null,  `date` CHAR(10) NOT NULL default '0000-00-00'), `update_id` CHAR(20) NOT NULL,`updated_at` varchar(255) CHARACTER SET utf8 COLLATE utf8_general_ci NOT NULL");
-            //     //刪除欄位
-            //     DB::connection('mysql5')->statement("ALTER TABLE `10m_tree_envi_r1` DROP COLUMN `plot_2015`, `plot_2012`, `type`, `gps_x`, `gps_y`, `altitude`, `cluster`");
-            //     //改欄位名稱
-            //     DB::connection('mysql5')->statement("ALTER TABLE `10m_tree_envi_r1` CHANGE COLUMN `plot_2023` `plot`");
+                DB::connection('mysql5')->statement("ALTER TABLE  `10m_tree_envi_r1` ADD  (`sqx` int(2) not null,`sqy` int(2) not null, `note` varchar(255) not Null,  `date` CHAR(10) NOT NULL default '0000-00-00'), `update_id` CHAR(20) NOT NULL,`updated_at` varchar(255) CHARACTER SET utf8 COLLATE utf8_general_ci NOT NULL");
+                //刪除欄位
+                DB::connection('mysql5')->statement("ALTER TABLE `10m_tree_envi_r1` DROP COLUMN `plot_2015`, `plot_2012`, `type`, `gps_x`, `gps_y`, `altitude`, `cluster`");
+                //改欄位名稱
+                DB::connection('mysql5')->statement("ALTER TABLE `10m_tree_envi_r1` CHANGE COLUMN `plot_2023` `plot`");
 
-            //     //篩選森林資料
-            //     $plotlist=Ss10mTreeEnviR1::query()->get()->toArray();
-            // }
+                //篩選森林資料
+                $plotlist=Ss10mTreeEnviR1::query()->get()->toArray();
+            }
 
             // print_r($user);
             return view('pages/shoushan/10m_entry', [

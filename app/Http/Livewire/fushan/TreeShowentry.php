@@ -55,7 +55,7 @@ class TreeShowentry extends Component
 
     
 
-    public function searchsite(Request $request, $qx, $qy, $sqx, $sqy){
+    public function searchSite(Request $request, $qx, $qy, $sqx, $sqy){
         $this->entrynote='';
     // $request->session()->forget('csplist');
         $splist = $request->session()->get('splist');
@@ -209,13 +209,13 @@ class TreeShowentry extends Component
 
     public function submitForm(Request $request){
 
-        $this->searchsite($request, $this->qx, $this->qy, 1, 1);
+        $this->searchSite($request, $this->qx, $this->qy, 1, 1);
     }
 
 
     public function submitsqxForm(Request $request, $sqx, $sqy){
 
-        $this->searchsite($request, $this->qx, $this->qy, $sqx, $sqy);
+        $this->searchSite($request, $this->qx, $this->qy, $sqx, $sqy);
     }
 
     public function render()

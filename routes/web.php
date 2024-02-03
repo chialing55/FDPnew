@@ -163,6 +163,7 @@ Route::get('/shoushan/{project}/{type}', function($project, $type){
                     return App::call('App\Http\Controllers\ssPlotController@dataviewer10m', ['site' => $site]);
                 case '1ha_dataviewer':
                     return App::call('App\Http\Controllers\ssPlotController@dataviewer1ha', ['site' => $site]);
+
                 // // Add more cases if needed
                 // default:
                 //     // Handle the case where $type does not match any of the above
@@ -211,16 +212,17 @@ Route::get('/fsseedsfinish', [App\Http\Controllers\fsSeedsSaveController::class,
 
 
 //ssplot entry
-Route::post('/ss10msaveenvi', [App\Http\Controllers\ss10mSaveController::class, 'saveenvi']);
-Route::post('/ss10msavedata', [App\Http\Controllers\ss10mSaveController::class, 'savedata']);
-Route::post('/ss10msaverecruit', [App\Http\Controllers\ss10mSaveController::class, 'saverecruit']);
-Route::get('/ss10mdeletedata/{stemid}/{entry}', [App\Http\Controllers\ss10mSaveController::class, 'deletedata']);
-Route::get('/ss10maddalternote/{stemid}/{entry}', [App\Http\Controllers\ss10mAlternote::class, 'alternote']);
-Route::post('/ss10msavealternote', [App\Http\Controllers\ss10mSaveController::class, 'savealternote']);
-Route::get('/ss10mdeletealter/{stemid}/{entry}', [App\Http\Controllers\ss10mSaveController::class, 'deletealter']);
-Route::post('/ss10msaveaddcov', [App\Http\Controllers\ss10mSaveController::class, 'saveaddcov']);
-Route::get('/ss10mdeletecov/{id}/{entry}', [App\Http\Controllers\ss10mSaveController::class, 'deletecov']);
-Route::post('/ss10msavecov', [App\Http\Controllers\ss10mSaveController::class, 'savecov']);
+Route::post('/ssPlotsaveenvi', [App\Http\Controllers\ssPlotSaveController::class, 'saveenvi']);
+Route::post('/ssPlotsavedata', [App\Http\Controllers\ssPlotSaveController::class, 'savedata']);
+Route::post('/ssPlotsaverecruit', [App\Http\Controllers\ssPlotSaveController::class, 'saverecruit']);
+// Route::post('/ss1hasaverecruit', [App\Http\Controllers\ssPlotSaveController::class, 'saverecruit1ha']);
+Route::get('/ssPlotdeletedata/{stemid}/{entry}/{plotType}/{thispage}', [App\Http\Controllers\ssPlotSaveController::class, 'deletedata']);
+Route::get('/ssPlotalternote/{stemid}/{entry}/{plotType}/{thispage}', [App\Http\Controllers\ssPlotAlternote::class, 'alternote']);
+Route::post('/ssPlotsavealternote', [App\Http\Controllers\ssPlotSaveController::class, 'savealternote']);
+Route::get('/ssPlotdeletealter/{stemid}/{entry}/{plotType}/{thispage}', [App\Http\Controllers\ssPlotSaveController::class, 'deletealter']);
+Route::post('/ss10msaveaddcov', [App\Http\Controllers\ssPlotSaveController::class, 'saveaddcov']);
+Route::get('/ss10mdeletecov/{id}/{entry}', [App\Http\Controllers\ssPlotSaveController::class, 'deletecov']);
+Route::post('/ss10msavecov', [App\Http\Controllers\ssPlotSaveController::class, 'savecov']);
 
 
 

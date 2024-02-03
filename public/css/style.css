@@ -424,8 +424,19 @@ button:-webkit-details-marker {
 
 
 /*結構*/
-.pages{
+/*.pages{
   display: flex;
+  margin-bottom: 10px;
+}*/
+
+.prev, .next, .showall {
+  margin-left: 20px;
+  cursor: pointer;
+  text-decoration: underline;
+}
+
+.pages{
+  display: none;
   margin-bottom: 10px;
 }
 

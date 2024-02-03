@@ -19,8 +19,9 @@ class fsTreeAddButton
         for($q=0;$q<count($records);$q++){
             $stemid = $records[$q]['stemid'];
             $entry = $entry;
+            $m=$q+1;
 
-            if ($q==0){ $thispage=1;} else { $thispage=ceil($q/20);}
+            $thispage=ceil($m/20);
 
 
             // HTML 輸出編碼

@@ -113,10 +113,10 @@ $list=0;
     @endif</span></div>
 </header>
 
-<footer>
-  <p>[樣區上方光度] U：多層樹冠；I：一層樹冠；G：孔隙    <span style='padding-left: 30px;'>[長度/葉片數] -1：因故沒有測量；-2：DBH>=1；-4：死亡；-6：消失；-7：枝幹死亡但個體存活</span><span style='padding-left: 30px;'>[狀態] G：見環不見苗；D：死亡；N：消失；L：離開</span></p>
+<footer style="margin-bottom: 10px;">
+  <p>[樣區上方光度] U：多層樹冠；I：一層樹冠；G：孔隙    <span style='padding-left: 30px;'>[長度/葉片數] -1：因故沒有測量；-2：DBH>=1；-4：死亡；-6：消失；-7：枝幹死亡但個體存活</span><span style='padding-left: 30px;'>[狀態] A：存活；G：見環不見苗；D：死亡；N：消失</span></p>
 </footer>
-<div class='record_pdf'>
+<div class='record_pdf' >
 {{-- <?php echo count($record);?> --}}
 <table width="100%"  cellpadding="6" cellspacing="0" class=' chinese'>
     <thead class='table-header'>

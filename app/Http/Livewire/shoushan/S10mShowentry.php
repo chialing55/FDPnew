@@ -60,7 +60,7 @@ class S10mShowentry extends Component
 
     }
 
-    public function searchplot(Request $request, $selectPlot, $sqx, $sqy){
+    public function searchSite(Request $request, $selectPlot, $sqx, $sqy){
 
         $plot=$this->plots[$selectPlot];
 

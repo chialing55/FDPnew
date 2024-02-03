@@ -17,9 +17,15 @@ use App\Models\Ss10mTreeCovR2;
 use App\Models\Ss10mTreeRecord1;
 use App\Models\Ss10mTreeRecord2;
 
-class ss10mDataCheck
+use App\Models\Ss1haData2015;
+use App\Models\Ss1haRecord1;
+use App\Models\Ss1haRecord2;
+use App\Models\Ss1haEnviR1;
+use App\Models\Ss1haEnviR2;
+
+class ssPlotDataCheck
 {
-	public function check($data2){
+	public function check($data2, $plotType){
 		$data[0]=$data2;
 		$pass='1';
 		$datasavenote='';
@@ -31,8 +37,14 @@ class ss10mDataCheck
                 break;
             }
             //舊資料(census2015)  //確定dbh大小
+
+            if ($plotType=='ss10m'){
+                $table= new Ss10mTree2015;
+            } else {
+                $table= new Ss1haData2015;
+            }
          
-            $census2015=Ss10mTree2015::where('stemid', 'like', $data[$i]['stemid'])->get()->toArray();
+            $census2015=$table::where('stemid', 'like', $data[$i]['stemid'])->get()->toArray();
 
             //將code拆開
             $data[$i]['code']=strtoupper($data[$i]['code']);  //轉為皆大寫
@@ -52,6 +64,37 @@ class ss10mDataCheck
                         break;
                     }
                 }
+                if ($data[$i]['status']=='-3'){
+                    $data[$i]['ill']='0';
+                    $data[$i]['leave']='0';
+                } else if ($data[$i]['status']=='-2'){
+                    if ($data[$i]['branch']!='0'){
+                        if ($plotType=='ss10m'){
+                            $mtagData=$table::where('tag','like',$data[$i]['tag'])->where('plot', 'like', $data[$i]['plot'])->where('branch', 'like', '0')->get()->toArray();
+
+                        } else {
+                            $mtagData=$table::where('tag','like',$data[$i]['tag'])->where('branch', 'like', '0')->get()->toArray();
+                        }
+                         if (count($mtagData)>0){
+                            $data[$i]['ill']=$mtagData[0]['ill'];
+                            $data[$i]['leave']=$mtagData[0]['leave'];
+                        }
+                    } else {
+                        if ($data[$i]['ill']=='0'){
+                            $datasavenote=$data[$i]['stemid'].' status為 -2，ill 不得為0。';
+                            $pass='0';
+                            break;
+                        }
+                    }                   
+                } else {
+                    if ($data[$i]['ill']=='0'){
+                        $datasavenote=$data[$i]['stemid'].' status為 -2，ill 不得為0。';
+                        $pass='0';
+                        break;
+                    }
+                }
+
+
             }  else {
             //3. status 為空值，dbh不得為0
                 if ($data[$i]['dbh']=='0'){
@@ -131,8 +174,13 @@ class ss10mDataCheck
                     }
                 }
 
-                if (in_array("F",$codea)){  
-                    if ($data[$i]['branch']=='0'){
+                if (in_array("F",$codea)){ 
+                    $ficus=['雀榕', '榕樹'];
+                    if (!in_array($data[$i]['csp'], $ficus)){
+                        $datasavenote=$data[$i]['stemid']." code F 只能記錄在 雀榕/榕樹 的氣生根。";
+                        $pass='0';
+                        break;
+                    } else if ($data[$i]['branch']=='0'){
                         $datasavenote=$data[$i]['stemid']." code F 只能記錄在分支。";
                         $pass='0';
                         break;

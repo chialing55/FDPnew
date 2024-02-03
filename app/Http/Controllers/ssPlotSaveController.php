@@ -16,17 +16,22 @@ use App\Models\Ss10mTreeCovR1;
 use App\Models\Ss10mTreeCovR2;
 use App\Models\Ss10mTreeRecord1;
 use App\Models\Ss10mTreeRecord2;
+use App\Models\Ss1haData2015;
+use App\Models\Ss1haRecord1;
+use App\Models\Ss1haRecord2;
+use App\Models\Ss1haEnviR1;
+use App\Models\Ss1haEnviR2;
 
-use App\Jobs\ss10mDataCheck;
-use App\Jobs\ss10mRecruitCheck;
+use App\Jobs\ssPlotDataCheck;
+use App\Jobs\ssPlotRecruitCheck;
 use App\Jobs\fsTreeAddButton;
 // use fsTreeAlternote;
 
 
-class ss10mSaveController extends Controller
+class ssPlotSaveController extends Controller
 {
 
-    public function getEnviTableInstance($entry) {
+    public function get10mEnviTableInstance($entry) {
         if ($entry == '1') {
             return new Ss10mTreeEnviR1;
         } else {
@@ -35,7 +40,7 @@ class ss10mSaveController extends Controller
     }
 
 
-    public function getCovTableInstance($entry) {
+    public function get10mCovTableInstance($entry) {
         if ($entry == '1') {
             return new Ss10mTreeCovR1;
         } else {
@@ -44,7 +49,7 @@ class ss10mSaveController extends Controller
     }
 
 
-    public function getDataTableInstance($entry) {
+    public function get10mDataTableInstance($entry) {
         if ($entry == '1') {
             return new Ss10mTreeRecord1;
         } else {
@@ -52,9 +57,26 @@ class ss10mSaveController extends Controller
         }
     }
 
-    public function getRedata($entry, $plot, $sqx, $sqy, $user){
+    public function get1haEnviTableInstance($entry) {
+        if ($entry == '1') {
+            return new Ss1haEnviR1;
+        } else {
+            return new Ss1haTreeEnviR2;
+        }
+    }
 
-        $table = $this->getDataTableInstance($entry);
+
+    public function get1haDataTableInstance($entry) {
+        if ($entry == '1') {
+            return new Ss1haRecord1;
+        } else {
+            return new Ss1haRecord2;
+        }
+    }
+
+    public function get10mRedata($entry, $plot, $sqx, $sqy, $user){
+
+        $table = $this->get10mDataTableInstance($entry);
 
         $redatas=$table::where('plot', 'like', $plot)->where('sqx', 'like', $sqx)->where('sqy', 'like', $sqy)->where('show', 'like', '1')->orderBy('tag', 'asc')->orderBy('branch', 'asc')->get();
 
@@ -65,9 +87,22 @@ class ss10mSaveController extends Controller
 
     }
 
-    public function getRecovdata($entry, $plot, $sqx, $sqy, $user){
+    public function get1haRedata($entry, $qx, $qy, $sqx, $sqy, $user){
 
-        $table = $this->getCovTableInstance($entry);
+        $table = $this->get1haDataTableInstance($entry);
+
+        $redatas=$table::where('qx', 'like', $qx)->where('qy', 'like', $qy)->where('sqx', 'like', $sqx)->where('sqy', 'like', $sqy)->where('show', 'like', '1')->orderBy('tag', 'asc')->orderBy('branch', 'asc')->get();
+
+        $ob_redata = new fsTreeAddButton;
+        $redata=$ob_redata->addbutton($redatas, $entry);
+
+        return $redata;
+
+    }
+
+    public function get10mRecovdata($entry, $plot, $sqx, $sqy, $user){
+
+        $table = $this->get10mCovTableInstance($entry);
         $redata=[];
 
         $redata=$table::where('plot', 'like', $plot)->orderBy('sqx', 'asc')->orderBy('sqy', 'asc')->orderBy('layer', 'desc')->orderBy('id', 'asc')->get();
@@ -94,30 +129,25 @@ class ss10mSaveController extends Controller
         $envi=$data_all['data'][0];
         $entry=$data_all['entry'];
         $user=$data_all['user'];
-        // $user = $request->session()->get('user', function () {
-        //     return view('login1', [
-        //     'check' => 'no'
-        //     ]);
-        // });
+        $plotType=$data_all['plotType'];
 
         $envisavenote='';
-
-        // $test='';
-
-        $table = $this->getEnviTableInstance($entry);
 
         foreach ($envi as $key => $value){
             if ($value==null){$value='';}
             $uplist[$key]=$value;
         }
         $uplist['update_id']=$user;
-        $table::where('plot', $envi['plot'])->update($uplist);
-            //重新下載資料
 
+        if ($plotType=='ss10m'){
+            $table = $this->get10mEnviTableInstance($entry);
+            $table::where('plot', $envi['plot'])->update($uplist);
+        } else {
+            $table = $this->get1haEnviTableInstance($entry);
+            $table::where('qx', $envi['qx'])->where('qy', $envi['qy'])->update($uplist);
+        }
 
         $envisavenote='已儲存環境資料';
-            
-    
 
 // echo 'hi';
             return [
@@ -127,9 +157,6 @@ class ss10mSaveController extends Controller
                 'envisavenote' => $envisavenote
 
             ];
-
-
-
     }
 
 
@@ -141,25 +168,31 @@ class ss10mSaveController extends Controller
         $entry=$data_all['entry'];
         $user=$data_all['user'];
         $test='';
+        $plotType=$data_all['plotType'];
 
         $datasavenote='';
-
+        if ($plotType=='ss10m'){
+            $table = $this->get10mDataTableInstance($entry);
+        } else {
+            $table = $this->get1haDataTableInstance($entry);
+        }
         
-        $table = $this->getDataTableInstance($entry);
+        
 
         for($i=0; $i<count($data);$i++){
-            
+            if ($plotType=='ss1ha'){
+                $data[$i]['stemid']=$data[$i]['tag'].".".$data[$i]['branch'];
+            }
             $uplist=[];
             $datacheck=['pass'=>'1', 'datasavenote'=>''];
+            if ($data[$i]['date']==''){$data[$i]['date']='0000-00-00';}
 
-            $check = new ss10mDataCheck;
-            $datacheck=$check->check($data[$i]);
+            $check = new ssPlotDataCheck;
+            $datacheck=$check->check($data[$i], $plotType);
 
             if ($datacheck['pass']==1){
 
                 $odata=$table::where('stemid', 'like', $data[$i]['stemid'])->get()->toArray();
-
-
             //更新
                 foreach($data[$i] as $key => $value){
                     $excludedKeys=['update_id', 'updated_at', 'alternotetable'];
@@ -171,11 +204,8 @@ class ss10mSaveController extends Controller
                     }
                 }
                 if ($uplist!=[]){
-
                     $uplist['update_id']=$user;
-
                     $table::where('stemid', 'like', $data[$i]['stemid'])->update($uplist);
-
                     $datasavenote='資料已儲存';
                 }
 
@@ -186,21 +216,19 @@ class ss10mSaveController extends Controller
 
             }
         }//最外層
+        if ( $plotType=='ss10m'){
+            $redata=$this->get10mRedata($entry, $data[0]['plot'], $data[0]['sqx'], $data[0]['sqy'], $user);
+        } else {
+            $redata=$this->get1haRedata($entry, $data[0]['qx'], $data[0]['qy'], $data[0]['sqx'], $data[0]['sqy'], $user);
+        }
 
-//         //重新載入資料
-        // $redatas=$table::where('qx', 'like', $data[0]['qx'])->where('qy', 'like', $data[0]['qy'])->where('sqx', 'like', $data[0]['sqx'])->where('sqy', 'like', $data[0]['sqy'])->where('show', 'like', '1')->orderBy('tag', 'asc')->orderBy('branch', 'asc')->get();
-
-
-        // $ob_redata = new fsTreeAddButton;
-        // $redata=$ob_redata->addbutton($redatas, $entry);
-
-        $redata=$this->getRedata($entry, $data[0]['plot'], $data[0]['sqx'], $data[0]['sqy'], $user);
+        
 
             return [
                 'result' => 'ok',
                 'data' => $redata,
-                'codea' => $uplist,
-                'datacheck' => $datacheck,
+                // 'codea' => $uplist,
+                // 'datacheck' => $datacheck,
                 'datasavenote' => $datasavenote
 
             ];
@@ -214,6 +242,8 @@ class ss10mSaveController extends Controller
         $data=$data_all['data'];
         $entry=$data_all['entry'];
         $user=$data_all['user'];
+        $thispage=$data_all['thispage'];
+        $plotType=$data_all['plotType'];
         $recruitsavenote='';
         $datacheck='';
         $uplistalter='';
@@ -222,7 +252,15 @@ class ss10mSaveController extends Controller
         $sqx='';
         $sqy='';
 
-        $table = $this->getDataTableInstance($entry);
+        if ($plotType=='ss10m'){
+            $table = $this->get10mDataTableInstance($entry);
+            $includeKeys = ['plot', 'sqx', 'sqy', 'csp'];
+        } else {
+            $table = $this->get1haDataTableInstance($entry);
+            $includeKeys = ['qx','qy', 'sqx', 'sqy', 'csp'];
+        }
+
+        // $table = $this->get10mDataTableInstance($entry);
 
         for($i=0; $i<count($data);$i++){
             $pass='1';
@@ -251,18 +289,23 @@ class ss10mSaveController extends Controller
                     $sqx=$data[$i]['sqx'];
                     $sqy=$data[$i]['sqy'];}   
 
+            if ($plotType=='ss10m'){
+                $data[$i]['tag']=str_pad($data[$i]['tag'],3,'0',STR_PAD_LEFT);  //在左側補0;
+                
+                $data[$i]['stemid']=$data[$i]['plot']."-".$data[$i]['tag'].".".$data[$i]['branch'];
+            } else {
+                $data[$i]['stemid']=$data[$i]['tag'].".".$data[$i]['branch'];
+            }
 
-            $data[$i]['tag']=str_pad($data[$i]['tag'],3,'0',STR_PAD_LEFT);  //在左側補0;
             $data[$i]['code']=strtoupper($data[$i]['code']);
-            $data[$i]['stemid']=$data[$i]['plot']."-".$data[$i]['tag'].".".$data[$i]['branch'];
             $data[$i]['status']='-9';
             
             
             $datacheck=['pass'=>'1', 'datasavenote'=>''];
 
-            $check = new ss10mRecruitCheck;
-            $datacheck=$check->check($data[$i], $entry);
-
+            $check = new ssPlotRecruitCheck;
+            $datacheck=$check->check($data[$i], $entry, $plotType);
+            // $datacheck['pass']=0;
             if ($datacheck['pass']==1){
 
 
@@ -280,7 +323,7 @@ class ss10mSaveController extends Controller
                     $odata=$table::where('stemid', 'like', $data[$i]['stemid'])->get();
                     $pass='1';
 
-                    $data[$i]['spcode']=$temp[0];
+                    // $data[$i]['spcode']=$temp[0];
 
 
                     foreach($data[$i] as $key => $value){
@@ -288,9 +331,6 @@ class ss10mSaveController extends Controller
                         if (!in_array($key, $excludedKeysall)){
                             if ($odata[0][$key] != $value){
                                 if($value==Null){$value='';}
-                                
-
-                                $includeKeys = ['qx', 'qy', 'sqx', 'sqy', 'csp'];
 
                                 if (in_array($key, $includeKeys)) {
                                     $uplistalter[$key] = $value;
@@ -330,10 +370,11 @@ class ss10mSaveController extends Controller
                     }
                     $inlist2=$inlist;
                     $table::insert($inlist);
+                    
                 }
+
                 $recruitsavenote=$recruitsavenote."<br>第".($i+1).'筆資料已儲存';
                     $nonsavelist[$i]['date']='';
-                    $nonsavelist[$i]['plot']=$data[$i]['plot'];
                     $nonsavelist[$i]['sqx']='';
                     $nonsavelist[$i]['sqy']='';
                     $nonsavelist[$i]['tag']='';
@@ -345,27 +386,29 @@ class ss10mSaveController extends Controller
                     $nonsavelist[$i]['leave']='';
                     $nonsavelist[$i]['note']='';
                     $nonsavelist[$i]['tofix']='';
-
+                    if ($plotType=='ss10m'){
+                        $nonsavelist[$i]['plot']=$data[$i]['plot'];
+                    } else {
+                        $nonsavelist[$i]['qx']=$data[$i]['qx'];
+                        $nonsavelist[$i]['qy']=$data[$i]['qy'];
+                    }
 
 
             } else {  // $datacheck['pass']!=1
                 $recruitsavenote=$recruitsavenote."<br>".$datacheck['datasavenote'];
                 $nonsavelist[$i]=$data[$i];
                 // break;
-
             }
         }//最外層
 
 
 //         //重新載入資料
         if($sqx!=''){
-            // $redatas=$table::where('qx', 'like', $data[0]['qx'])->where('qy', 'like', $data[0]['qy'])->where('sqx', 'like', $sqx)->where('sqy', 'like', $sqy)->where('show', 'like', '1')->orderBy('tag', 'asc')->orderBy('branch', 'asc')->get();
-
-
-            // $ob_redata = new fsTreeAddButton;
-            // $redata=$ob_redata->addbutton($redatas, $entry);
-
-            $redata=$this->getRedata($entry, $data[0]['plot'], $sqx, $sqy, $user);
+            if ($plotType=='ss10m'){
+                $redata=$this->get10mRedata($entry, $data[0]['plot'], $sqx, $sqy, $user);
+            } else {
+                $redata=$this->get1haRedata($entry, $data[0]['qx'],$data[0]['qy'], $sqx, $sqy, $user);
+            }
 
         } else {
             $redata=[];
@@ -376,10 +419,11 @@ class ss10mSaveController extends Controller
             'data' => $redata,
             'odata' => $data,
             'nonsavelist' => $nonsavelist,
+            'thispage' => $thispage,
             // 'q'=>$q,
             // 'uplistalter' => $uplistalter,
             // 'pass' => $inlist2,
-            // 'entry' => $entry,
+            'entry' => $entry,
             // 'test' => $arr3,
             'recruitsavenote' => $recruitsavenote
 
@@ -388,7 +432,7 @@ class ss10mSaveController extends Controller
     }
 
 
-    public function deletedata(Request $request, $stemid, $entry){
+    public function deletedata(Request $request, $stemid, $entry, $plotType, $thispage){
         $test='';
             $user = $request->session()->get('user', function () {
                 return view('login1', [
@@ -398,34 +442,41 @@ class ss10mSaveController extends Controller
         // $user='chialing';
         $datasavenote='';
 
-        $table = $this->getDataTableInstance($entry);
+        if ($plotType=='ss10m'){
+            $table = $this->get10mDataTableInstance($entry);
+        } else {
+            $table = $this->get1haDataTableInstance($entry);
+        }
 
           
             $thisdata=$table::where('stemid','like', $stemid)->get();
-            $thisplot=$thisdata[0]['plot'];
+            if ($plotType=='ss10m'){
+                $thisplot=$thisdata[0]['plot'];
+            } else {
+                $thisqx=$thisdata[0]['qx'];
+                $thisqy=$thisdata[0]['qy'];
+            }
+            
             $thissqx=$thisdata[0]['sqx'];
             $thissqy=$thisdata[0]['sqy'];
-            // $total=$table::where('plot', 'like', $thisplot)->where('sqx', 'like', $thissqx)->where('sqy', 'like', $thissqy)->orderBy('stemid', 'asc')->get();
 
             $d_record = $table::where('stemid', $stemid)->delete();
 
-                // $test='y';
 
             $datasavenote='已刪除 '.$stemid.' 新增樹資料';
 
-
-            // 重新載入資料
-            // $redatas=$table::where('qx', 'like', $thisqx)->where('qy', 'like', $thisqy)->where('sqx', 'like', $thissqx)->where('sqy', 'like', $thissqy)->where('show', 'like', '1')->orderBy('tag', 'asc')->orderBy('branch', 'asc')->get();
-
-            // $ob_redata = new fsTreeAddButton;
-            // $redata=$ob_redata->addbutton($redatas, $entry);
-            $redata=$this->getRedata($entry, $thisplot, $thissqx, $thissqy, $user);
+            if ($plotType=='ss10m'){
+                $redata=$this->get10mRedata($entry, $thisplot, $thissqx, $thissqy, $user);
+            } else {
+                $redata=$this->get1haRedata($entry, $thisqx, $thisqy, $thissqx, $thissqy, $user);
+            }
+            
 
             return [
                 'result' => 'ok',
                 // 'user' => $user,
                 // 'test'=> $test,
-                // 'thispage' => $thispage,
+                'thispage' => $thispage,
                 'recruit' => $redata,
 
                 'datasavenote' => $datasavenote
@@ -439,19 +490,24 @@ class ss10mSaveController extends Controller
         $data=$data_all['data'][0];
         $entry=$data_all['entry'];
         $user=$data_all['user'];
+        $plotType=$data_all['plotType'];
+        $thispage=$data_all['thispage'];
         $inlist=[];
         $datasavenote='';
 
         $data2 = array_filter($data);
         unset($data2['stemid']);
-        $table = $this->getDataTableInstance($entry);
+        if ($plotType=='ss10m'){
+            $table = $this->get10mDataTableInstance($entry);
+        } else {
+            $table = $this->get1haDataTableInstance($entry);
+        }
         if (!empty($data2)){
 
             // 轉換為 JSON 字串
             $alterdata = json_encode($data2, JSON_UNESCAPED_UNICODE);
 
-            
-          
+
             $olddata=$table::where('stemid', 'like', $data['stemid'])->get()->toArray();
 
             if ($olddata[0]['alternote']!=$alterdata){
@@ -467,13 +523,17 @@ class ss10mSaveController extends Controller
 
         $site=$table::where('stemid', 'like', $data['stemid'])->get();
 
+        if ( $plotType=='ss10m'){
+            $redata=$this->get10mRedata($entry, $site[0]['plot'], $site[0]['sqx'], $site[0]['sqy'], $user);
+        } else {
+            $redata=$this->get1haRedata($entry, $site[0]['qx'], $site[0]['qy'], $site[0]['sqx'], $site[0]['sqy'], $user);
+        }
 
-        $redata=$this->getRedata($entry, $site[0]['plot'], $site[0]['sqx'], $site[0]['sqy'], $user);
 
 
         return [
             'result' => 'ok',
-            
+            'thispage' => $thispage,
             'data' => $redata,
             'datasavenote' => '資料已儲存'
             // 'inlist'=>$sql
@@ -481,14 +541,20 @@ class ss10mSaveController extends Controller
 
     }
 
-    public function deletealter(Request $request, $stemid, $entry){
+    public function deletealter(Request $request, $stemid, $entry, $plotType, $thispage){
 
         $user = $request->session()->get('user', function () {
             return view('login1', [
             'check' => 'no'
             ]);
         });
-        $table = $this->getDataTableInstance($entry);
+
+        if ($plotType=='ss10m'){
+            $table = $this->get10mDataTableInstance($entry);
+        } else {
+            $table = $this->get1haDataTableInstance($entry);
+        }
+
         $datasavenote='';
        
 
@@ -504,14 +570,20 @@ class ss10mSaveController extends Controller
         $site=$table::where('stemid', 'like', $stemid)->get();
 
 
-        $redata=$this->getRedata($entry, $site[0]['plot'], $site[0]['sqx'], $site[0]['sqy'], $user);
+        if ( $plotType=='ss10m'){
+            $redata=$this->get10mRedata($entry, $site[0]['plot'], $site[0]['sqx'], $site[0]['sqy'], $user);
+            $realterdata=['stemid'=>$stemid, 'plot'=>'', 'sqx'=>'', 'sqy' => '', 'tag'=>'', 'b'=>'', 'csp'=>''];
+        } else {
+            $redata=$this->get1haRedata($entry, $site[0]['qx'], $site[0]['qy'], $site[0]['sqx'], $site[0]['sqy'], $user);
+            $realterdata=['stemid'=>$stemid, 'qx'=>'', 'qy'=>'','sqx'=>'', 'sqy' => '', 'tag'=>'', 'b'=>'', 'csp'=>''];
+        }
 
-        $realterdata=['stemid'=>$stemid, 'plot'=>'', 'sqx'=>'', 'sqy' => '', 'tag'=>'', 'b'=>'', 'csp'=>''];
+
         $havedata='no';
 
         return [
             'result' => 'ok',
- 
+            'thispage' => $thispage,
             'data' => $redata,
             'realterdata' => $realterdata,
             'havedata' => $havedata,
@@ -539,7 +611,7 @@ class ss10mSaveController extends Controller
         $sqy='0';
 
 
-        $table = $this->getCovTableInstance($entry);
+        $table = $this->get10mCovTableInstance($entry);
 
         for($i=0; $i<count($data);$i++){
             $pass='1';
@@ -643,7 +715,7 @@ class ss10mSaveController extends Controller
 //         //重新載入資料
         if($sqx=='0'){$sqx='1'; $sqy='1';}
 
-            $redata=$this->getRecovdata($entry, $data[0]['plot'], $sqx, $sqy, $user);
+            $redata=$this->get10mRecovdata($entry, $data[0]['plot'], $sqx, $sqy, $user);
 
         return [
             'result' => 'ok',
@@ -673,7 +745,7 @@ class ss10mSaveController extends Controller
         // $user='chialing';
         $covsavenote='';
 
-        $table = $this->getCovTableInstance($entry);
+        $table = $this->get10mCovTableInstance($entry);
 
           
             $thisdata=$table::where('id','like', $id)->get();
@@ -688,7 +760,7 @@ class ss10mSaveController extends Controller
 
             $covsavenote='已刪除 '.$thisdata[0]['csp'] .' 覆蓋度資料';
 
-            $redata=$this->getRecovdata($entry, $thisplot, $thissqx, $thissqy, $user);
+            $redata=$this->get10mRecovdata($entry, $thisplot, $thissqx, $thissqy, $user);
 
             return [
                 'result' => 'ok',
@@ -712,7 +784,7 @@ class ss10mSaveController extends Controller
 
         $covsavenote='';
 
-        $table = $this->getCovTableInstance($entry);
+        $table = $this->get10mCovTableInstance($entry);
 
         for($i=0; $i<count($data);$i++){
          
@@ -777,7 +849,7 @@ class ss10mSaveController extends Controller
 
 // //         //重新載入資料
 
-            $redata=$this->getRecovdata($entry, $data[0]['plot'], $data[0]['sqx'], $data[0]['sqy'], $user);
+            $redata=$this->get10mRecovdata($entry, $data[0]['plot'], $data[0]['sqx'], $data[0]['sqy'], $user);
 
         return [
             'result' => 'ok',

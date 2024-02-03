@@ -1,6 +1,6 @@
 @extends('layouts/ssplot') 
 @section('pagejs')
-
+<script src="{{asset('/js/ss1ha.js')}}"></script>
 <script>
   // var element = document.getElementById("#list1");
   // element.classList.add("now");

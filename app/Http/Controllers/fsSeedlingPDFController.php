@@ -76,6 +76,14 @@ class fsSeedlingPDFController extends Controller
 
             $pdf = PDF::loadView('pages.fushan.seedling_record', $data)->setPaper('A4', 'landscape');
             $pdf ->set_option( 'isFontSubsettingEnabled' , true );
+            // $options = [
+            //     'margin-top' => 10,    // 上邊界
+            //     'margin-right' => 10,  // 右邊界
+            //     'margin-bottom' => 20, // 下邊界
+            //     'margin-left' => 10,   // 左邊界
+            // ];
+
+            // $pdf->setOptions($options);
 
         // return $dompdf->output();
             return $pdf->stream($data['title'].".pdf");   
