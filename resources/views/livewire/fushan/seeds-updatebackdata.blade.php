@@ -36,14 +36,15 @@
             <span class='seedssavenote savenote'></span>
            <div id='seedstableout' class='seedstable fs100'>
                 <div class='pages'>
+                    <div class='totalnum'></div>
                     <div class='pagenote'></div>
                     <div class='prev'>上一頁</div>
                     <div class='next'>下一頁</div>
                     <div style='margin-left: 20px;'><button name='creattable'>開啟新空白頁</button></div>
                 </div>
 
-                <div id='seedstable{{$selectCensus}}' class='fs100' >
-                    <span class='seedssavenote savenote'></span>
+                <div id='datatable{{$selectCensus}}' class='fs100' >
+                    <span class='datasavenote savenote'></span>
                     <p style='margin-top:5px; text-align: center'><button name='datasave2{{$selectCensus}}' class='datasavebutton' style='width:550px'>儲存</button></p>
 
                 </div>

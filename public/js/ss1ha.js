@@ -23,8 +23,8 @@ window.addEventListener('data', event => {
   }
 });
 
-function cellfunction(type, container, row, col, prop){
-        if (type=='data'){
+function cellfunction(tableType, container, row, col, prop){
+        if (tableType=='data'){
           var cellProperties = {};
           if (container.handsontable('getData')[row][8]=='-9'){
             cellProperties.readOnly = false; 
@@ -79,14 +79,14 @@ function ssenvitable(envi, qx, qy ,sqx, sqy){
 function ssdatatable(data, thispage, pps){
   $('.envisavenote').html('');
   $('.finishnote').html();
-  $('.totalnum').html(`共有 ${data.length} 筆資料`);
+  $('.totalnum').html(`共有 ${data.length} 筆資料。`);
   var site=`${data[0].qx}${data[0].qy}${data[0].sqx}${data[0].sqy}`;
   var container = $(`#datatable${site}`);
 
   var saveButtonName=`datasave${site}`;
   var tableType='data';
   ppsall=pps;
-  var data2 = processDataTable(data, thispage, pps, site);
+  var data2 = processDataTable(data, thispage, pps, site, plotType);
 
   var columns = [
       {data: "date", dateFormat: 'YYYY-MM-DD', type: 'date', allowInvalid: false},
@@ -168,7 +168,7 @@ function alternotetable(alterdata, stemid, entry, thispage){
   if (container.handsontable('getInstance')) {
     container.handsontable('destroy');
   }
-  $('.deletealternotebutton').attr({'stemid': String(stemid)});
+  $('.deletealternotebutton').attr({'stemid': stemid,  'thispage': thispage});
 
   var saveButtonName='alternotesave';
   var tableType='alternote';

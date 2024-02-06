@@ -5,7 +5,7 @@
     <div class='text_box'>
         <h2>已完成資料比對、上傳檔案、匯入大表的樣線</h2>
         <br>
-        @include('includes.census5Progress')
+        @include('includes.fstree-census5-progress')
     </div>
     <div class='text_box'>
         

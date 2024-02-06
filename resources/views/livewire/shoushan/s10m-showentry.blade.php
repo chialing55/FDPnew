@@ -110,7 +110,8 @@ $alterOtherNote="";
                 <p class='covsavenote savenote'></p>
 
                 <div id='covtable{{$tableVar}}' style='margin-top: 10px;'></div>
-                <p style='text-align: center'><span class='covsavenote savenote'></span><button name='covsave{{$tableVar}}' class="datasavebutton" style='width: 400px;'>儲存</button></p>
+                <span class='covsavenote savenote'></span>
+                <p style='text-align: center'><button name='covsave{{$tableVar}}' class="datasavebutton" style='width: 400px;'>儲存</button></p>
 
             </div>
                 <div class='entrytablediv nocovdata'>
@@ -140,11 +141,9 @@ $alterOtherNote="";
                 </div>
                 <div class='entrytablediv'>
                     <p class='addcovsavenote savenote'></p>
-                    
-                    
                     <div id='addcovtable{{$tableVar}}' style='margin-top: 10px;'></div>
-                    <p style='text-align: center;'><span class='addcovsavenote savenote' style='margin: 0 30px 0 0'></span><button name='addcovsave{{$tableVar}}' class="save2 datasavebutton" style='width:400px'>儲存</button></p>
-                    <span class='datasavenote savenote'></span>
+                    <span class='addcovsavenote savenote'></span>
+                    <p style='text-align: center;'><button name='addcovsave{{$tableVar}}' class="save2 datasavebutton" style='width:400px'>儲存</button></p>
                     <p style='margin-top:5px;'><button name='clearaddcovtable' class="save2">清空新增表單</button></p>
                 </div>
             </div>

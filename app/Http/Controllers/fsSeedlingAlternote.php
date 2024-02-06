@@ -33,7 +33,7 @@ class fsSeedlingAlternote extends Controller
 
         $result=$table::where('tag', 'like', $tag)->get()->toArray();
         // print_r($result);
-        $alterdata=['Tag'=>'', 'Trap'=>'', 'Plot' => '', '原長度'=>'', '原葉片數'=>'', '狀態' => '', 'id'=> $result[0]['id']];
+        $alterdata=['Tag'=>'', 'Trap'=>'', 'Plot' => '', '原長度'=>'', '原葉片數'=>'', '狀態' => '', 'id'=> $result[0]['id'], 'other' => ''];
         if ($result[0]['alternote']==''){
             $mergedArray=$alterdata;
             $havedata='no';

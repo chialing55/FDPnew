@@ -137,8 +137,13 @@ class S10mShowentry extends Component
 
             for($m=0;$m<count($cov);$m++){
 
-                $cov[$m]['delete']="<button class='deletecov' deleteid='".$cov[$m]['id']."' entry='".$this->entry."' plot='".$plot."'>X</button>";
+            // HTML 輸出編碼
+            $deleteid = htmlspecialchars($cov[$m]['id']);
+            $escapedEntry = htmlspecialchars($this->entry);
 
+
+                $cov[$m]['delete']="<button class='deletecov' onclick='deletecov(\"$deleteid\", \"$escapedEntry\")' deleteid='".$cov[$m]['id']."' entry='".$this->entry."' plot='".$plot."'>X</button>";
+ 
         }} 
 
 

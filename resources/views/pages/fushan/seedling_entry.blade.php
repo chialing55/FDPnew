@@ -4,7 +4,7 @@
 
 echo "<script>
 const entry = ".$entry.";
-
+const user = '".$user."';
 </script>";
 
 @endphp
@@ -18,7 +18,7 @@ $(function() {
   $('.list4 hr').css('color', '#91A21C');
 })
 
-</script>
+</script> 
 @endsection
 @section('rightbox')
 

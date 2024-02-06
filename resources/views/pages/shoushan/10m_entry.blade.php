@@ -1,5 +1,6 @@
 @extends('layouts/ssplot') 
 @section('pagejs')
+
 <script src="{{asset('/js/ss10m.js')}}"></script>
 <script>
   // var element = document.getElementById("#list1");

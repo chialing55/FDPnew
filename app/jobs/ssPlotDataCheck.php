@@ -63,11 +63,10 @@ class ssPlotDataCheck
                         $pass='0';
                         break;
                     }
-                }
-                if ($data[$i]['status']=='-3'){
-                    $data[$i]['ill']='0';
-                    $data[$i]['leave']='0';
-                } else if ($data[$i]['status']=='-2'){
+
+                } 
+
+                if ($data[$i]['status']=='-2'){
                     if ($data[$i]['branch']!='0'){
                         if ($plotType=='ss10m'){
                             $mtagData=$table::where('tag','like',$data[$i]['tag'])->where('plot', 'like', $data[$i]['plot'])->where('branch', 'like', '0')->get()->toArray();
@@ -86,17 +85,21 @@ class ssPlotDataCheck
                             break;
                         }
                     }                   
-                } else {
-                    if ($data[$i]['ill']=='0'){
-                        $datasavenote=$data[$i]['stemid'].' status為 -2，ill 不得為0。';
-                        $pass='0';
-                        break;
-                    }
+                }  else {   //$data[$i]['status']==-1, -3, -4, 0
+                    $data[$i]['ill']='0';
+                    $data[$i]['leave']='0';                
                 }
-
 
             }  else {
             //3. status 為空值，dbh不得為0
+
+
+                if ($data[$i]['ill']=='0'){
+                    $datasavenote=$data[$i]['stemid'].' status為 -2，ill 不得為0。';
+                    $pass='0';
+                    break;
+                }
+                
                 if ($data[$i]['dbh']=='0'){
                     $datasavenote=$data[$i]['stemid'].' status 為空值，dbh/h高 不得為0。';
                     $pass='0';

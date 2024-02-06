@@ -1,12 +1,4 @@
-
-
-// console.log(type);
-//重新選擇工作項目
-	$('.back').on('click', function(){
-		location.href=`/choice`;
-	})
-
-//左側選單
+//上方選單
 
 $('.listlink').on('click', function(){
 	let type=$(this).attr('type');
@@ -22,37 +14,6 @@ $('.listlink').on('click', function(){
     $('.tiptriangle').toggleClass('tiptriangletoggled');
   }
 
-// $('.list4, .list4inner').on('mouseenter', function() {
-//   $('.list4inner').css('display', 'inline-flex');
-//   $('.list4').css({'color': '#fff','background-color': '#91A21C'}); 
-//   $('.now hr').css('color', 'transparent');
-// }).on('mouseleave', function() {
-//   $('.list4inner').hide();
-//   $('.list4').css({'color': '','background-color': ''}); 
-//   $('.now hr').css('color', '#91A21C');
-// });
-
-// $('.list6, .list6inner').on('mouseenter', function() {
-//   $('.list6inner').css('display', 'inline-flex');
-//   $('.list6').css({'color': '#fff','background-color': '#91A21C'}); 
-//   $('.now hr').css('color', 'transparent');
-// }).on('mouseleave', function() {
-//   $('.list6inner').hide();
-//   $('.list6').css({'color': '','background-color': ''}); 
-//   $('.now hr').css('color', '#91A21C');
-// });
-
-function handleHoverEvents(selector, innerSelector) {
-  $(selector + ', ' + innerSelector).on('mouseenter', function() {
-    $(innerSelector).css('display', 'inline-flex');
-    $(selector).css({'color': '#fff', 'background-color': '#91A21C'}); 
-    $('.now hr').css('color', 'transparent');
-  }).on('mouseleave', function() {
-    $(innerSelector).hide();
-    $(selector).css({'color': '', 'background-color': ''}); 
-    $('.now hr').css('color', '#91A21C');
-  });
-}
 
 // 使用
 handleHoverEvents('.list4', '.list4inner');
@@ -74,9 +35,9 @@ handleHoverEvents('.list6', '.list6inner');
 	
 
 //download record 全線
-	$(".button2").click(function(){
+$(".button2").click(function(){
 
-		 $("#downloadMessage").text("下載中...").show();
+$("#downloadMessage").text("下載中...").show();
 
 let totalRequests = 25;  // 請求的總數量
 let completedRequests = 0;  // 已完成的請求數量
@@ -120,166 +81,108 @@ for (let i = 0; i < totalRequests; i++) {
 	});
 
 
-// $(document).ready(function() {
-//     adjustFooterPosition();
-// });
 
-// $(document).ajaxComplete(function() {
-//     adjustFooterPosition();
-// });
-
-// function adjustFooterPosition() {
-//     var windowHeight = $(window).height();
-//     var bodyHeight = $('body').height();
-
-//     if (bodyHeight < windowHeight) {
-
-//         $('.footer').css('position', 'relative').css('bottom', 0);
-//     }
-// }
 var ppsall;
+var plotType='fstree';
 window.addEventListener('data', event => {
 
 	data=event.detail.record;
 	emptytable=event.detail.emptytable;
 	csplist=event.detail.csplist;
-	// entry=event.detail.entry;
-    // data=event.detail;
-	// console.log(data);
-	// console.log(slroll);
-	// console.log(emptytable);
-    // $('#slrolltable').html('');
-    $(".save2").off();
+	realemptytable = deepCopy(emptytable);
 
+  $(".save2").off();
 	$('.finishnote').html();
-    // fscovtable(covs);
-    // //一開始,thispage=1
 
-    fstreetable(data, 1, 20);
+  fstreetable(data, 1, 20);
+  recruittable(data, emptytable, csplist);
 
-    recruittable(data, emptytable, csplist);
-    // fsslrolltable(slroll, covs);
-	// return(entry, user);
 });
 
+function handleSuccessAllTable(res, tableType, handsontable) {
+  var noteProperty = `${tableType}savenote`;
+
+  if (res[noteProperty] != '') {
+    $(`.${noteProperty}`).html(res[noteProperty]);
+  }
+
+  if (tableType === 'data') {
+
+  } else if (tableType === 'recruit') {
+    handsontable.updateData(res.nonsavelist);
+    if (res.data.length !== 0) {
+      $('.datasavenote').html('');
+      fstreetableupdate(res.data, res.thispage, ppsall);
+    }
+  } else if (tableType === 'alternote') {
+    if (res.datasavenote != '') {
+      $('.altersavenote').html(res.datasavenote);
+    }
+    $('.datasavenote').html('');
+		fstreetableupdate(res.data, res.thispage, ppsall);
+		$('.deletealternotebutton').show();
+  } 
+}
+
+function cellfunction(tableType, container, row, col, prop){
+	var cellProperties = {};
+      if (tableType=='data'){
+
+          if (container.handsontable('getData')[row][8]=='-9'){
+            cellProperties.readOnly = false; 
+            if (col==1 || col ==2 || col == 8 || col == 14){
+              cellProperties.readOnly = true; 
+            }
+          }
+//note字變小
+          if (col == 12 || col==14){
+            cellProperties.className = 'fs08'; 
+          }
+         return cellProperties;
+      } else if (tableType=='updateData1'){
+      	  if (container1.handsontable('getData')[row][5]!='0'){
+          	cellProperties.readOnly = true; 
+	          	if (col==5 || col==4){
+	          		cellProperties.readOnly = false; 
+	          	}
+          }
+          return cellProperties;
+      } else if (tableType=='updateData2'){
+          if (col == 7 || col==9){
+          	cellProperties.className = 'fs08'; 
+          }
+         return cellProperties;
+      }
+}
 
 
-
-
-
-
-
-function alternote(stemid, entry, thispage) {
+function alternote(stemid, entry, thispage, event) {
 	// console.log(stemid);
-	$('.altersavenote').html('');
+    var saveUrl=`/fstreeaddalternote/${stemid}/${entry}/${thispage}`;
+    handleAlternote(stemid, entry, thispage, saveUrl);
 
-
-	var posX = $("button[name='alternoteshow"+stemid+"']").offset().left;
-    var posY = $("button[name='alternoteshow"+stemid+"']").offset().top;
-    console.log(posX+", "+posY);
-
-    $('.alternotetalbeouter').css('top', posY);
-    $('.alternotetalbeouter').css('left', posX-550);
-	
-// $(".deletealternotebutton").removeAttr("stemid thispage");
-
-	$('.alternotetalbeouter').show();
-	$('.alterstemid').html(stemid);
-
-		  $.ajax({
-		    url: "/fstreeaddalternote/"+stemid+"/"+entry+"/"+thispage,
-		    type: 'get',
-		    success: function (res) {
-		      if (res.result === 'ok') {
-		        console.log('Data show');
-				    alternotetable(res.alterdata,stemid, entry, res.thispage);
-
-				if (res.havedata=='yes'){
-					$('.deletealternotebutton').show();
-					$('.deletealternotebutton').attr({'stemid': stemid,  'thispage': thispage});
-					
-				} else {
-					$('.deletealternotebutton').hide();
-				}
-		        // console.log(res);
-		      }
-		      else {
-		        console.log('Save error');
-		      }
-		    },
-		    error: function () {
-		      console.log('Save error2.');
-		    }
-		  });
-
-	// alternotetable(stemid, entry);
 }
-
-function deletealternoteButtonClick(button){
-  const stemid = $(button).attr('stemid');
-  const thispage = $(button).attr('thispage');
-  deletealternote(stemid, thispage);	
-}
-
 
 function deletealternote(stemid, thispage){
-    if(confirm('確定刪除 '+stemid+' 特殊修改??')) 
-    {
-      $('.altersavenote').html('');
-        $.ajax({
-        url: `/fstreedeletealter/${stemid}/${entry}/${thispage}`,
-        type: 'get',
-        success: function (res) {
-        	// console.log(res);
-          if (res.result === 'ok') {
-            console.log('Data saved');
-            // console.log(res);
-            if (res.datasavenote !=''){
-              $('.altersavenote').html(res.datasavenote);
-            }
-            fstreetableupdate(res.data, res.thispage, ppsall);
 
-			var container = $("#alternotetable");
-			var handsontable = container.data('handsontable');
-			handsontable.updateData(res.realterdata);
-			$('.deletealternotebutton').hide();
-
-          }
-          else {
-            console.log('Save error');
-          }
-        },
-        error: function () {
-          console.log('Save error2.');
-        }
-      });
-    }
+  var saveUrl=`/fstreedeletealter/${stemid}/${entry}/${thispage}`;
+  handleDeleteAlternote(stemid, plotType, saveUrl)
 
 }
 
-
-
 function alternotetable(alterdata, stemid, entry, thispage){
-	$("button[name=alternotesave]").off();
+  $("button[name=alternotesave]").off();
   var container = $("#alternotetable");
-  var container = $("#alternotetable");
-	container.handsontable('destroy');
+ 
+  if (container.handsontable('getInstance')) {
+    container.handsontable('destroy');
+  }
 	$('.deletealternotebutton').attr({'stemid': stemid,  'thispage': thispage});
 
-  var parent = container.parent();
-  var cellChanges = [];
-  container.handsontable({
-  	data: alterdata,
-    // height: 320,
-    startRows: 1,
-    colHeaders: true,
-    removeRowPlugin: true,
-    // minSpareRows: 1,
-    colWidths: [25,25,25,25,80, 40, 120,70,70,150],
-    licenseKey: 'non-commercial-and-evaluation',
- 
-    colHeaders: ["20x","20y","5x","5y", "tag", "b", "csp", "dbh(<1)" ,"原始POM","其他", "stemid"],
-    columns: [
+  var saveButtonName='alternotesave';
+  var tableType='alternote';
+
+  var columns = [
       {data: "qx", type: 'numeric'},
       {data: "qy", type: 'numeric'},
       {data: "sqx", type: 'numeric'},
@@ -291,138 +194,41 @@ function alternotetable(alterdata, stemid, entry, thispage){
       {data: "pom"},
       {data: "other"},
       {data: "stemid"}
-    ],
-    currentRowClassName: 'currentRow',
-    autoWrapRow: true,   //自動換行
-  	manualColumnResize: true,
-  	hiddenColumns: {
-    // specify columns hidden by default
-   		columns: [10],
-  	},
-  });
 
-  var handsontable = container.data('handsontable');
+    ];
 
-	parent.find('button[name=alternotesave]').click(function () {
-		$('.altersavenote').html('');
+  var colWidths=[25,25,25,25,80, 40, 120,70,70,150];
+  var colHeaders=["20x","20y","5x","5y", "tag", "b", "csp", "dbh(<1)" ,"原始POM","其他", "stemid"];
 
-		$.ajaxSetup({
-			  headers: {
-			    'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
-			  }
-			});
+  var hiddenColumns ={
+      columns: [10],
+    };
+  return createHandsontable(container, columns, alterdata, saveButtonName, "/fstreesavealternote", tableType, colWidths, hiddenColumns, colHeaders, thispage );  
 
-		  $.ajax({
-		    url: "/fstreesavealternote",
-		    data: {
-		    	data: handsontable.getSourceData(),
-		    	entry: entry,
-		    	thispage: thispage
+}
 
-		    }, 
-		    type: 'POST',
-		    success: function (res) {
-		      if (res.result === 'ok') {
-		        console.log('Data saved');
-		        if (res.datasavenote !=''){
-		        	$('.altersavenote').html(res.datasavenote);
-		        } 
-		        console.log(res);
-		        fstreetableupdate(res.data, res.thispage, ppsall);
-		        $('.deletealternotebutton').show();
-		      }
-		      else {
-		        console.log('Save error');
-		      }
-		    },
-		    error: function () {
-		      console.log('Save error2.');
-		    }
-		  });
-	});
+
+function deleteid(stemid, entry, thispage){  //刪除新增樹資料
+  var saveUrl=`/fstreedeletedata/${stemid}/${entry}/${thispage}`;
+  handleDeleteid(stemid,  saveUrl)
 }
 
 
 
-  function deleteid(stemid, entry, thispage){
-    // console.log(entry);
-    if(confirm('確定刪除 '+stemid+' 新增樹資料??')) 
-    {
-      $('.datasavenote').html('');
-        $.ajax({
-        url: `/fstreedeletedata/${stemid}/${entry}/${thispage}`,
-        type: 'get',
-        success: function (res) {
-        	// console.log(res);
-          if (res.result === 'ok') {
-            console.log('Data saved');
-            // console.log(res);
-            if (res.datasavenote !=''){
-              $('.datasavenote').html(res.datasavenote);
-            }
-            fstreetableupdate(res.recruit, res.thispage, ppsall);
-          }
-          else {
-            console.log('Save error');
-          }
-        },
-        error: function () {
-          console.log('Save error2.');
-        }
-      });
-    }
-  }
-
-
 function fstreetable(data, thispage, pps){
-$('.finishnote').html();
-	// datapage=pages(data, thispage);
-	// console.log(datapage);
-	// console.log(entry, user);
-	ppsall=pps;
-	// console.log(pps);
-	var site=data[0].qx+data[0].qy+data[0].sqx+data[0].sqy;
-	$('.totalnum').html(`共有 ${data.length} 筆資料`);
 
-// 分頁
-	var totalpage=Math.ceil(data.length/pps);
-	// console.log(data);
-		$('.prev').addClass('prev'+site);
-		$('.next').addClass('next'+site);
+  $('.finishnote').html();
+  $('.totalnum').html(`共有 ${data.length} 筆資料。`);
+  var site=`${data[0].qx}${data[0].qy}${data[0].sqx}${data[0].sqy}`;
+  var container = $(`#datatable${site}`);
 
-	if (totalpage>1){
-		datapage=pages(data, thispage, totalpage, 20);
-		var data2=datapage[1];
-	} else {
-		var data2=data;
-	}
+  var saveButtonName=`datasave${site}`;
+  var tabletype='data';
+  ppsall=pps;
 
-	for (let i = 0; i < data2.length; i++) {
-	    if (data2[i]['date'] === '0000-00-00') {
-	        data2[i]['date'] = ''; // 使用单等号进行赋值
-	    }
-	}
+  var data2 = processDataTable(data, thispage, pps, site, plotType);
 
-// console.log(data);  
-	// recruittable(data);
-  var container = $("#datatable"+site);
-  var parent = container.parent();
-  var cellChanges = [];
-  container.handsontable({
-    data: data2,
-    // height: 320,
-    // startRows: 3,
-    colHeaders: true,
-    rowHeaders: true,
-    rowHeaderWidth: 25,
-    rowHeights: 38,
-    removeRowPlugin: true,
-    // minSpareRows: 1,
-    colWidths: [120, 25,25,25,25,80, 40, 120,50,50,60,50,160,50, 160],
-    licenseKey: 'non-commercial-and-evaluation',
- 
-    colHeaders: ["Date","20x","20y","5x","5y", "tag", "b", "csp",'status', "code","dbh/h高","POM","note","縮水",""],
-    columns: [
+  var columns = [
       {data: "date", dateFormat: 'YYYY-MM-DD', type: 'date', allowInvalid: false},
       {data: "qx", readOnly: true},
       {data: "qy", readOnly: true},
@@ -433,265 +239,34 @@ $('.finishnote').html();
       {data: "csp", readOnly: true, type: 'autocomplete', source: csplist, strict: true, visibleRows: 10, allowInvalid: false,},
       {data: "status", type: 'dropdown', source: ['', '0', '-1', '-2', '-3'], allowInvalid: false},
       {data: "code"},
-      {data: "dbh", type: 'numeric'},
+      {data: "dbh", type: 'numeric', allowInvalid: false},
 
-      {data: "pom"},
+      {data: "pom", type: 'numeric', allowInvalid: false},
       {data: "note"},
       {data: "confirm", type: 'checkbox', checkedTemplate: '1', uncheckedTemplate: ''},
       {data: "alternotetable", renderer: "html", readOnly: true},
       {data: "update_id"}
 
-    ],
-    hiddenColumns: {
-    // specify columns hidden by default
-   		columns: [15],
-  	},
-    currentRowClassName: 'currentRow',
-    autoWrapRow: true,   //自動換行
-  	manualColumnResize: true,
-  	// manualRowResize: true,
-    cells: function (row, col, prop) {
-	
-          var cellProperties = {};
-          // var curData = container.handsontable('getData')[row][10]; //column 10 is the field "sprout"
-          if (container.handsontable('getData')[row][8]=='-9'){
-          	cellProperties.readOnly = false; 
-          	if (col==1 || col ==2 || col == 8 || col == 14){
-          		cellProperties.readOnly = true; 
-          	}
+    ];
 
-          }
+  var colWidths=[120, 25,25,25,25,80, 40, 120,50,50,60,50,160,50, 160];
+  var colHeaders=["Date","20x","20y","5x","5y", "tag", "b", "csp",'status', "code","dbh/h高","POM","note","縮水",""];
 
-          // if (col == 11 || col==12) {            //column needs to be read only               
-          //  //if status is Active
-		// 	if (curData=== 'TRUE') { 
-          //       cellProperties.readOnly = true; 
-          //   }
-          // }
-//note字變小
-          if (col == 12 || col==14){
-          	cellProperties.className = 'fs08'; 
-          }
-          // if (container.handsontable('getData')[row][16]!=''){
-          // 	// let cell = $(container.getCell(row, col));
-          // 	cellProperties.className = 'text-red-500';
-          // }
+  var hiddenColumns ={
+      columns: [15],
+    };
 
-         return cellProperties;
-
-    },
-
-
-    afterChange: function (changes, source) {
-	    if (!changes) {
-	        return;
-	    }
-            $.each(changes, function (index, element) {
-                var change = element;
-                var rowIndex = change[0];
-                var columnIndex = change[1];
-                
-                var oldValue = change[2];
-                var newValue = change[3];
-                col=container.handsontable('propToCol', columnIndex);
-                // console.log(col);
-                var td = container.handsontable('getCell', rowIndex, col);
-                var cellChange = {
-                    'rowIndex': rowIndex,
-                    'columnIndex': col, 
-                    'td': td
-                };
-                
-                 
-                // console.log(td);
-                if(oldValue != newValue){
-                    cellChanges.push(cellChange);
-                    td.style.color = 'forestgreen';
-                }
-            });
-    },
-        afterRender: function () {
-            // var instance = container.handsontable('getInstance');
-            $.each(cellChanges, function (index, element) {
-                var cellChange = element;
-                var rowIndex = cellChange['rowIndex'];
-                var columnIndex = cellChange['columnIndex'];
-                // var grilla = $('#grilla');
-                var td=cellChange['td'];
-                // var td = container.handsontable('getCell', rowIndex, columnIndex);
-                td.style.color = 'forestgreen'; 
-                // cell.style.background = backgroundColor;
-                // console.log(td);
-            });
-        },
-});
- 
-
-  var handsontable = container.data('handsontable');
-
-	parent.find('button[name=datasave'+site+']').click(function () {
-		$('.datasavenote').html('');
-
-		$.ajaxSetup({
-			  headers: {
-			    'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
-			  }
-			});
-console.log(handsontable.getSourceData());
-		  $.ajax({
-		    url: "/fstreesavedata",
-		    data: {
-		    	data: handsontable.getSourceData(),
-		    	entry: entry,
-		    	user: user
-		    	// _token : '{{csrf-token()}}'
-		    }, //returns all cells' data
-		    // dataType: 'json',
-		    type: 'POST',
-		    success: function (res) {
-		      if (res.result === 'ok') {
-		        console.log('Data saved');
-		     
-		        if (res.datasavenote !=''){
-		        	$('.datasavenote').html(res.datasavenote);
-		        	// fstreetableupdate(res.data, thispage);
-		        	// console.log(thispage);
-		        	// handsontable.updateData(res.data, thispage);
-		        	// console.log(res.datasavenote);
-		        	// container.render();
-		        } 
-		        console.log(res);
-		        // console.log(res.list);
-
-		      }
-		      else {
-		        console.log('Save error');
-		      }
-		    },
-		    error: function () {
-		      console.log('Save error2.');
-		    }
-		  });
-		  // console.log(handsontable.getSourceData());
-	});
-
+  return createHandsontable(container, columns, data2, saveButtonName, "/fstreesavedata", tabletype, colWidths, hiddenColumns, colHeaders, thispage );
 }
-
-
-function pages(data, thispage, totalpage, pps){
-
-	// $(".prev").unbind();
-	// $(".next").unbind();
-		site=data[0].qx+data[0].qy+data[0].sqx+data[0].sqy;
-
-		start=pps*(thispage-1);
-		end=start+pps;
-		// console.log(thispage);
-		data2=data.slice(start, end);
-		$('.pages').css('display', 'flex');
-		$('.pagenote').html('第 '+thispage+' ／ '+totalpage+' 頁');
-		$('.prev').attr('thispage', thispage);
-		$('.next').attr('thispage', thispage);
-
-
-		// console.log('1');
-		if (totalpage>1){
-			if (thispage==1){
-				$('.prev').hide();
-				$('.next').show();
-			} else if (thispage==totalpage){
-				$('.prev').show();
-				$('.next').hide();			
-			} else {
-				$('.prev').show();
-				$('.next').show();
-			}
-		} else {
-			$('.pages').hide();
-
-		}
-
-		$('.prev'+site).off('click').on('click', function() {
-			thispage=$(this).attr('thispage');
-			gopage=parseInt(thispage)-1;
-
-			fstreetableupdate(data, gopage, pps);
-		})
-
-		$('.next'+site).off('click').on('click', function() {
-			thispage=$(this).attr('thispage');
-			gopage=parseInt(thispage)+1;
-								// console.log(data);
-			fstreetableupdate(data, gopage, pps);
-
-		})
-
-		$('.showall').off('click').on('click', function() {
-								// console.log(data);
-			
-			if (data.length>40){
-				ppsall=40;
-
-			} else {
-				ppsall=data.length;
-				$('.pages').hide();
-			}
-		
-			fstreetableupdate(data, 1, ppsall);
-			// recruittable(data, emptytable, csplist);
-		})
-
-			datapage=[data, data2, thispage];
-
-	return datapage;
-
-}
-
-
-
-
 
 
 function fstreetableupdate(data, thispage, pps){
 	$('.finishnote').html('');
-    var site=data[0].qx+data[0].qy+data[0].sqx+data[0].sqy;
-	$('.datasavenote').html('');
-	var container = $("#datatable"+site);
-	var handsontable = container.data('handsontable');
-	// console.log(data);
-	var totalpage=Math.ceil(data.length/pps);
-	$('.totalnum').html(`共有 ${data.length} 筆資料`);
+  var site=`${data[0].qx}${data[0].qy}${data[0].sqx}${data[0].sqy}`;
 
-	var data3 = (totalpage > 1) ? pages(data, thispage, totalpage, pps)[1] : data;
-	// pages(data, thispage, totalpage, pps)
-    for (let i = 0; i < data3.length; i++) {
-      if (data3[i]['date'] === '0000-00-00') {
-          data3[i]['date'] = ''; // 使用单等号进行赋值
-      }
-  }
-// console.log(data3);
-	handsontable.updateData(data3, thispage);
-	handsontable.updateSettings({
-		cells: function (row, col, prop) {
-	
-          var cellProperties = {};
-          // var curData = container.handsontable('getData')[row][10]; //column 10 is the 
-          if (container.handsontable('getData')[row][8]=='-9'){
-          	cellProperties.readOnly = false; 
-          	if (col==1 || col ==2 || col == 8 || col == 14){
-          		cellProperties.readOnly = true; 
-          	}
-          }
 
-          if (col == 12 || col == 14){
-          	cellProperties.className = 'fs08'; 
-          }
-         return cellProperties;
-		}
-    });
-
-    // Livewire.emit('updateAmount', data.length);
-
+  var tableType='data';
+  dataTableUpdate(data, thispage, pps, plotType, tableType, site);
 }
 
 
@@ -700,57 +275,23 @@ function fstreetableupdate(data, thispage, pps){
 function recruittable(data, emptytable, csplist){
 // console.log(csplist);
 // console.log(csplist);
-  var site=data[0].qx+data[0].qy+data[0].sqx+data[0].sqy;
+  var site=`${data[0].qx}${data[0].qy}${data[0].sqx}${data[0].sqy}`;
+  var thispage=Math.ceil(data.length/20); //指定新增後前往最後一頁
  
-$(`button[name=recruitsave${site}]`).off();
-  var container = $("#recruittable"+site);
-  var parent = container.parent();
-  // var emptytable=emptytable;
+	$(`button[name=recruitsave${site}]`).off();
+  var container = $(`#recruittable${site}`);
 
-	const qqValidator = (value, callback) => {
-		if ([1, 2, 3, 4, ''].includes(value)) {   //允許1234和空格
-		  callback(true);
-		} else {
-		  callback(false);
-		}
-	};
+  var saveButtonName=`recruitsave${site}`;
+  var tableType='recruit';
 
-  container.handsontable({
-    // data: emptytable,
-    dataSchema: {
-      qx: data[0].qx,
-      qy: data[0].qy,
-      date: '',
-      sqx: '',
-      sqy: '',
-      tag: '',
-      branch: '0',
-      csp: '',
-      code: '',
-      dbh: '',
-      pom: '1.3',
-      note: '',
-      tofix: ''
-    },
-    startRows: 30,
-    colHeaders: true,
-    rowHeaders: true,
-    rowHeaderWidth: 25,
-    contextMenu: ['row_above', 'row_below', 'remove_row'],
-    // minSpareRows: 1,
-    rowHeights: 35,
-    colWidths: [120, 25,25,25,25,80, 40, 120,50,60,70,160,50],
-    licenseKey: 'non-commercial-and-evaluation',
- 
-    colHeaders: ["Date","20x","20y","5x","5y", "tag", "b", "csp", "code","dbh/h高","POM/h低","note","漏資料"],
-    columns: [
+  var columns = [
       {data: "date", dateFormat: 'YYYY-MM-DD', type: 'date', allowInvalid: false},
       {data: "qx", type: 'numeric', readOnly: true},
       {data: "qy", type: 'numeric', readOnly: true},
-      {data: "sqx", type: 'numeric', allowInvalid: false, validator: qqValidator},
-      {data: "sqy", type: 'numeric', allowInvalid: false, validator: qqValidator},
+      {data: "sqx", type: 'numeric', allowInvalid: false, validator: qqValidator4},
+      {data: "sqy", type: 'numeric', allowInvalid: false, validator: qqValidator4},
       {data: "tag"},
-      {data: "branch", type: 'numeric'},
+      {data: "branch", type: 'numeric', allowInvalid: false},
       {data: "csp", type: 'autocomplete', source: csplist, strict: true, visibleRows: 10, allowInvalid: false,},
       {data: "code"},
       {data: "dbh", type: 'numeric', allowInvalid: false},
@@ -758,78 +299,13 @@ $(`button[name=recruitsave${site}]`).off();
       {data: "note"},
       {data: "tofix", type: 'checkbox', checkedTemplate: '1', uncheckedTemplate: ''}
 
-    ],
-    currentRowClassName: 'currentRow',
-    manualColumnResize: true,
+    ];
 
-    cells: function (row, col, prop) {
-  
-   	 }
+  var colWidths=[120, 25,25,25,25,80, 40, 120,50,60,70,160,50];
+  var colHeaders=["Date","20x","20y","5x","5y", "tag", "b", "csp", "code","dbh/h高","POM/h低","note","漏資料"];
 
-  	});
-
-
-  var handsontable = container.data('handsontable');
-
-	parent.find('button[name=recruitsave'+site+']').click(function () {
-		$('.recruitsavenote').html('');
-
-		$.ajaxSetup({
-			  headers: {
-			    'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
-			  }
-			});
-
-		  $.ajax({
-		    url: "/fstreesaverecruit",
-		    data: {
-		    	data: handsontable.getSourceData(),
-		    	entry: entry,
-		    	user: user
-		    	// _token : '{{csrf-token()}}'
-		    }, //returns all cells' data
-		    // dataType: 'json',
-		    type: 'POST',
-		    success: function (res) {
-		      if (res.result === 'ok') {
-		        console.log('Data saved');
-		        console.log(res);
-
-		        if (res.recruitsavenote !=''){
-		        	$('.recruitsavenote').html(res.recruitsavenote);
-		        }
-
-		        // $('#seedlingtable'+res.recruit[0].trap).html('');
-		        // $('#recruittable'+res.recruit[0].trap).html('');
-				// console.log(res.recruit.data[0].trap);
-				//新增完，thispage=1
-		        handsontable.updateData(res.nonsavelist);
-		        if (res.data.length !== 0){
-							fstreetableupdate(res.data, 1, ppsall);
-						}
-				// handsontable.clear();
-				// handsontable.loadData(res.temp);
-
-		      }
-		      else {
-		        console.log('Save error');
-		      }
-		    },
-		    error: function () {
-		      console.log('Save error2.');
-		    }
-		  });
-		  // console.log(handsontable.getData());
-	});
-
-// console.log(emptytable);
-	parent.find('button[name=clearrecruittable]').click(function () {
-		// data2=[];
-		// handsontable.clear();
-		// console.log(emptytable);
-		$('.recruitsavenote').html('');
-		handsontable.updateData(emptytable);
-	});
+  var hiddenColumns =[];
+  return createHandsontable(container, columns, emptytable, saveButtonName, "/fstreesaverecruit", tableType, colWidths, hiddenColumns, colHeaders, thispage );
 
 }
 
@@ -837,27 +313,22 @@ $(`button[name=recruitsave${site}]`).off();
   function finish(qx, qy, entry){
 
   	console.log(qx, qy, entry);
-        $.ajax({
-        url: `/fstreefinish/${qx}/${qy}/${entry}`,
-        type: 'get',
-        success: function (res) {
-        	// console.log(res);
-          if (res.result === 'ok') {
-            console.log('Data saved');
-            console.log(res);
-            if (res.finishnote !=''){
-              $('.finishnote').html(res.finishnote);
-            }
+
+    var saveUrl=`/fstreefinish/${qx}/${qy}/${entry}`;
+    var ajaxData={};
+    var ajaxType='get';
+
+    function handleSuccess(res) {
+          if (res.finishnote !=''){
+            $('.finishnote').html(res.finishnote);
           }
-          else {
-            console.log('Save error');
-          }
-        },
-        error: function () {
-          console.log('Save error2.');
-        }
-      });
-    
+    }
+    makeAjaxRequest(
+      saveUrl, ajaxData, ajaxType,
+      handleSuccess,
+      function () {}
+    );
+
   }
 
 
@@ -970,7 +441,7 @@ $('.canselect').click(function(){
 }
 
 
-//進行個別修改
+//進行個別修改 //資料處理，後端資料更正
 
 window.addEventListener('stemiddata', event => {
 
@@ -992,27 +463,13 @@ function fstreealtertable(stemid, stemdata, csplist, from){
 
 //basetable
 	stemid = stemid.replace('.', ''); // Remove the period
-  var container1 = $("#basetable"+stemid);
-  // console.log(stemdata);
-  var parent = container1.parent();
-  var cellChanges = [];
 
-  container1.handsontable({
-    data: stemdata[0],
-    // height: 320,
-    // startRows: 3,
-    colHeaders: true,
-    rowHeaders: true,
-    rowHeaderWidth: 25,
-    rowHeights: 38,
-    removeRowPlugin: true,
-    // minSpareRows: 1,
-    colWidths: [25,25,25,25,80, 40, 120],
-    licenseKey: 'non-commercial-and-evaluation',
- 
-    colHeaders: ["20x","20y","5x","5y", "tag", "b", "csp"],
-    columns: [
-      // {data: "date", dateFormat: 'YYYY-MM-DD', type: 'date', allowInvalid: false},
+  var container1 = $(`#basetable${stemid}`);
+  var saveButtonName=`basetable${stemid}`;
+  var tabletype1='updateData1';
+
+
+  var columns1 = [
       {data: "qx", type: 'numeric'},
       {data: "qy", type: 'numeric'},
       {data: "sqx", type: 'numeric'},
@@ -1020,93 +477,24 @@ function fstreealtertable(stemid, stemdata, csplist, from){
       {data: "tag",},
       {data: "branch", type: 'numeric'},
       {data: "csp", type: 'autocomplete', source: csplist, strict: true, visibleRows: 10, allowInvalid: false,},
-    ],
-    hiddenColumns: {
-    // specify columns hidden by default
-   		// columns: [15],
-  	},
-    currentRowClassName: 'currentRow',
-    autoWrapRow: true,   //自動換行
-  	manualColumnResize: true,
-  	// manualRowResize: true,
-    cells: function (row, col, prop) {
-    	var cellProperties = {};
-          if (container1.handsontable('getData')[row][5]!='0'){
-          	cellProperties.readOnly = true; 
-	          	if (col==5 || col==4){
-	          		cellProperties.readOnly = false; 
-	          	}
-          }
-          return cellProperties;
-    },
+
+    ];
+
+  var colWidths1=[25,25,25,25,80, 40, 120];
+  var colHeaders1=["20x","20y","5x","5y", "tag", "b", "csp"];
+
+  var hiddenColumns1 =[];
+
+  var handsontable1=createHandsontable(container1, columns1, stemdata[0], saveButtonName, "/fstreeupdate", tabletype1, colWidths1, hiddenColumns1, colHeaders1, 1 );
+
+	var stemdata2=stemdata.slice(1, 6);
+
+  var container2 = $(`#datatable${stemid}`);
+  var saveButtonName=`basetable${stemid}`;
+  var tabletype2='updateData2';
 
 
-    afterChange: function (changes, source) {
-	    if (!changes) {
-	        return;
-	    }
-            $.each(changes, function (index, element) {
-                var change = element;
-                var rowIndex = change[0];
-                var columnIndex = change[1];
-                
-                var oldValue = change[2];
-                var newValue = change[3];
-                col=container1.handsontable('propToCol', columnIndex);
-                // console.log(col);
-                var td = container1.handsontable('getCell', rowIndex, col);
-                var cellChange = {
-                    'rowIndex': rowIndex,
-                    'columnIndex': col, 
-                    'td': td
-                };
-                
-                 
-                // console.log(td);
-                if(oldValue != newValue){
-                    cellChanges.push(cellChange);
-                    td.style.color = 'forestgreen';
-                }
-            });
-    },
-        afterRender: function () {
-            // var instance = container.handsontable('getInstance');
-            $.each(cellChanges, function (index, element) {
-                var cellChange = element;
-                var rowIndex = cellChange['rowIndex'];
-                var columnIndex = cellChange['columnIndex'];
-                // var grilla = $('#grilla');
-                var td=cellChange['td'];
-                // var td = container.handsontable('getCell', rowIndex, columnIndex);
-                td.style.color = 'forestgreen'; 
-                // cell.style.background = backgroundColor;
-                // console.log(td);
-            });
-        },
-});
-
-//datatable
-
-  var stemdata2=stemdata.slice(1, 6);
-// console.log(stemdata);
-  var container2 = $("#datatable"+stemid);
-  // var parent2 = container2.parent();
-  var cellChanges = [];
-  container2.handsontable({
-    data: stemdata2,
-    // height: 320,
-    // startRows: 3,
-    colHeaders: true,
-    rowHeaders: true,
-    rowHeaderWidth: 25,
-    rowHeights: 38,
-    removeRowPlugin: true,
-    // minSpareRows: 1,
-    colWidths: [80,120, 50,50,50,50,50,170,50, 170],
-    licenseKey: 'non-commercial-and-evaluation',
- 
-    colHeaders: ["census","date",'status', "code","dbh","h高","POM","note","縮水","特殊修改"],
-    columns: [
+  var columns2 = [
     	{data: "census", readOnly:true},
       {data: "date", dateFormat: 'YYYY-MM-DD', type: 'date', allowInvalid: false},
       {data: "status", type: 'dropdown', source: ['', '0', '-1', '-2', '-3'], allowInvalid: false},
@@ -1118,127 +506,49 @@ function fstreealtertable(stemid, stemdata, csplist, from){
       {data: "note"},
       {data: "confirm", type: 'checkbox', checkedTemplate: '1', uncheckedTemplate: ''},
       {data: "alternote"},
-    ],
-    hiddenColumns: {
-    // specify columns hidden by default
-   		// columns: [15],
-  	},
-    currentRowClassName: 'currentRow',
-    autoWrapRow: true,   //自動換行
-  	manualColumnResize: true,
-  	// manualRowResize: true,
-    cells: function (row, col, prop) {
-	
-          var cellProperties = {};
 
-          if (col == 7 || col==9){
-          	cellProperties.className = 'fs08'; 
-          }
+    ];
 
-         return cellProperties;
+  var colWidths2=[80,120, 50,50,50,50,50,170,50, 170];
+  var colHeaders2=["census","date",'status', "code","dbh","h高","POM","note","縮水","特殊修改"];
 
-    },
+  var hiddenColumns2 =[];
 
-
-    afterChange: function (changes, source) {
-	    if (!changes) {
-	        return;
-	    }
-            $.each(changes, function (index, element) {
-                var change = element;
-                var rowIndex = change[0];
-                var columnIndex = change[1];
-                
-                var oldValue = change[2];
-                var newValue = change[3];
-                col=container2.handsontable('propToCol', columnIndex);
-                // console.log(col);
-                var td = container2.handsontable('getCell', rowIndex, col);
-                var cellChange = {
-                    'rowIndex': rowIndex,
-                    'columnIndex': col, 
-                    'td': td
-                };
-                
-                 
-                // console.log(td);
-                if(oldValue != newValue){
-                    cellChanges.push(cellChange);
-                    td.style.color = 'forestgreen';
-                }
-            });
-    },
-        afterRender: function () {
-            // var instance = container.handsontable('getInstance');
-            $.each(cellChanges, function (index, element) {
-                var cellChange = element;
-                var rowIndex = cellChange['rowIndex'];
-                var columnIndex = cellChange['columnIndex'];
-                // var grilla = $('#grilla');
-                var td=cellChange['td'];
-                // var td = container.handsontable('getCell', rowIndex, columnIndex);
-                td.style.color = 'forestgreen'; 
-                // cell.style.background = backgroundColor;
-                // console.log(td);
-            });
-        },
-});
+  var handsontable2=createHandsontable(container2, columns2, stemdata2, saveButtonName, "/fstreeupdate", tabletype2, colWidths2, hiddenColumns2, colHeaders2, 1 );
 
 
   var handsontable1 = container1.data('handsontable');
   var handsontable2 = container2.data('handsontable');
 
-	parent.find('button[name=datasave'+stemid+']').click(function () {
+	container2.parent().find(`button[name=datasave${stemid}]`).click(function () {
 		$('.datasavenote').html('');
-
-		$.ajaxSetup({
-			  headers: {
-			    'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
-			  }
-			});
 
 		  var data1 = handsontable1.getSourceData();
   		var data2 = handsontable2.getSourceData();
-// console.log(handsontable.getSourceData());
-		  $.ajax({
-		    url: "/fstreeupdate",
-		    data: {
+
+      var saveUrl=`/fstreeupdate`;
+      var ajaxData={
 		    	data1: data1,
 		    	data2: data2,
 		    	from: from,
-		    	// stemid: stemid,
 		    	user: user
-		    	// _token : '{{csrf-token()}}'
-		    }, //returns all cells' data
-		    // dataType: 'json',
-		    type: 'POST',
-		    success: function (res) {
-		      if (res.result === 'ok') {
-		        console.log('Data saved');
-		     
+      };
+      var ajaxType='POST';
+
+      function handleSuccess(res) {
 		        if (res.datasavenote !=''){
 		        	$('.datasavenote').html(res.datasavenote);
 		        } 
-
 		        if (res.thisstemid !=''){
 		        	Livewire.emit('updateStemidlist', {thisstemid: res.thisstemid, from: res.from});
-
 		        }
-		        console.log(res);
-		        // console.log(res.list);
-
-		      }
-		      else {
-		        console.log('Save error');
-		      }
-		    },
-		    error: function () {
-		      console.log('Save error2.');
-		    }
-		  });
-		  // console.log(handsontable.getSourceData());
+      }
+      makeAjaxRequest(
+        saveUrl, ajaxData, ajaxType,
+        handleSuccess,
+        function () {}
+      );
 	});
-
 }
 
 function deleteCensusDataButtonClick(button){
@@ -1252,40 +562,29 @@ function deleteCensusData(stemid, from){
     if(confirm('確定刪除 '+stemid+' 的所有資料??')) 
     {
       $('.altersavenote').html('');
-        $.ajax({
-        url: `/fstreedeletecensusdata`,
-        data: {
-		    	stemid: stemid,
-		    	from: from,
-		    	// stemid: stemid,
-		    	user: user
-		    	// _token : '{{csrf-token()}}'
-		    },
-        type: 'post',
-        success: function (res) {
-        	console.log(res);
-          if (res.result === 'ok') {
-            console.log('Data saved');
-            // console.log(res);
 
+      var saveUrl=`/fstreedeletecensusdata`;
+      var ajaxData={
+      			stemid: stemid,
+		    		from: from,
+		    		// stemid: stemid,
+		    		user: user
+		    	};
+      var ajaxType='post';
+
+      function handleSuccess(res) {
 		        if (res.datasavenote !=''){
 		        	$('.datasavenote').html(res.datasavenote);
 		        } 
-
 		        if (res.thisstemid !=''){
 		        	Livewire.emit('updateStemidlist', {thisstemid: res.thisstemid, from: res.from});
-
 		        }
-
-          }
-          else {
-            console.log('Save error');
-          }
-        },
-        error: function () {
-          console.log('Save error2.');
-        }
-      });
+      }
+      makeAjaxRequest(
+        saveUrl, ajaxData, ajaxType,
+        handleSuccess,
+        function () {}
+      );
     }
 
 }

@@ -116,6 +116,8 @@ class fsSeedlingSaveController extends Controller
 
         for($i=0; $i<count($savecov);$i++){
 
+            if ($savecov[$i]['date']==''){$savecov[$i]['date']='0000-00-00';}
+
             if ($savecov[$i]['date']=='0000-00-00'){
                 $covsavenote='需有日期資料';
                 break;
@@ -171,6 +173,7 @@ class fsSeedlingSaveController extends Controller
         $table = $this->getTableInstance($entry);
 
         for ($i=0;$i<count($data);$i++){
+            if ($data[$i]['date']==''){$data[$i]['date']='0000-00-00';}
             // $list[]=$data[$i]['tag'];
             $uplist=[];
 //需有資料

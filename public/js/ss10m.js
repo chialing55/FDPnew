@@ -61,8 +61,8 @@ window.addEventListener('data', event => {
     }
   };
 
-function cellfunction(type, container, row, col, prop){
-        if (type=='data'){
+function cellfunction(tableType, container, row, col, prop){
+      if (tableType=='data'){
           var cellProperties = {};
           if (container.handsontable('getData')[row][7]=='-9'){
             cellProperties.readOnly = false; 
@@ -118,14 +118,14 @@ function ssenvitable(envi, sqx, sqy){
 function ssdatatable(data, thispage, pps){
   $('.envisavenote').html('');
   $('.finishnote').html();
-  $('.totalnum').html(`共有 ${data.length} 筆資料`);
+  $('.totalnum').html(`共有 ${data.length} 筆資料。`);
   var site=`${data[0].plot}${data[0].sqx}${data[0].sqy}`;
   var container = $(`#datatable${site}`);
 
   var saveButtonName=`datasave${site}`;
   var tabletype='data';
   ppsall=pps;
-  var data2 = processDataTable(data, thispage, pps, site);
+  var data2 = processDataTable(data, thispage, pps, site, plotType);
 
   var columns = [
       {data: "date", dateFormat: 'YYYY-MM-DD', type: 'date', allowInvalid: false},
@@ -154,8 +154,7 @@ function ssdatatable(data, thispage, pps){
       columns: [15],
     };
 
-  return createHandsontable(container, columns, data2, saveButtonName, "/ssPlotsavedata", tabletype, colWidths, hiddenColumns, colHeaders, thispage );  
-
+  return createHandsontable(container, columns, data2, saveButtonName, "/ssPlotsavedata", tabletype, colWidths, hiddenColumns, colHeaders, thispage );
 }
 
 function ssrecruittable(data, emptytable, csplist){
@@ -202,7 +201,7 @@ function alternotetable(alterdata, stemid, entry, thispage){
   if (container.handsontable('getInstance')) {
     container.handsontable('destroy');
   }
-  $('.deletealternotebutton').attr({'stemid': String(stemid)});
+  $('.deletealternotebutton').attr({'stemid': stemid,  'thispage': thispage});
 
   var saveButtonName='alternotesave';
   var tableType='alternote';
@@ -240,6 +239,7 @@ function ssaddcovtable(covs, data, emptytable2, covcsplist){
   // console.log(site);
   var saveButtonName=`addcovsave${site}`;
   var tableType='addcov';
+  var thispage=1;
 
   var columns = [
       {data: "date", dateFormat: 'YYYY-MM-DD', type: 'date'},
@@ -261,7 +261,7 @@ function ssaddcovtable(covs, data, emptytable2, covcsplist){
   var hiddenColumns ={
       columns: [9],
     };
-  return createHandsontable(container, columns, emptytable2, saveButtonName, "/ss10msaveaddcov", tableType, colWidths, hiddenColumns, colHeaders, '30' );  
+  return createHandsontable(container, columns, emptytable2, saveButtonName, "/ss10msaveaddcov", tableType, colWidths, hiddenColumns, colHeaders, thispage );  
 
 }
 
@@ -273,7 +273,7 @@ function sscovtable(covs, data, covcsplist){
 
   var saveButtonName=`covsave${site}`;
   var tableType='cov';
-
+  var thispage=1;
 
   var columns = [
       {data: "date", dateFormat: 'YYYY-MM-DD', type: 'date'},
@@ -296,7 +296,7 @@ function sscovtable(covs, data, covcsplist){
   var hiddenColumns ={
       columns: [10],
     };
-  return createHandsontable(container, columns, covs, saveButtonName, "/ss10msavecov", tableType, colWidths, hiddenColumns, colHeaders, '30' );  
+  return createHandsontable(container, columns, covs, saveButtonName, "/ss10msavecov", tableType, colWidths, hiddenColumns, colHeaders, thispage );  
 
 }
 
@@ -307,31 +307,27 @@ function sscovtable(covs, data, covcsplist){
     if(confirm('確定刪除此筆覆蓋度資料??')) 
     {
       $('.covsavenote').html('');
-        $.ajax({
-        url: `/ss10mdeletecov/${id}/${entry}`,
-        type: 'get',
-        success: function (res) {
-          if (res.result === 'ok') {
-            console.log('Data saved');
-            console.log(res);
+
+      var saveUrl=`/ss10mdeletecov/${id}/${entry}`;
+      var ajaxData={};
+      var ajaxType='get';
+
+      function handleSuccess(res) {
             if (res.covsavenote !=''){
               $('.covsavenote').html(res.covsavenote);
             }
             sscovtableupdate(res.covs);
-          }
-          else {
-            console.log('Save error');
-          }
-        },
-        error: function () {
-          console.log('Save error2.');
-        }
-      });
+      }
+      makeAjaxRequest(
+        saveUrl, ajaxData, ajaxType,
+        handleSuccess,
+        function () {}
+      );
     }
   }
 
 function sscovtableupdate(covs){
-  $('.addcovsavenote').html('');
+  // $('.addcovsavenote').html('');
   var site=`${data[0].plot}${data[0].sqx}${data[0].sqy}`;
   // console.log(site);
   if (covs.length>0){
@@ -347,10 +343,5 @@ function sscovtableupdate(covs){
   var handsontable = container.data('handsontable');
 // console.log(covs);
   handsontable.updateData(covs);
-
-  $('.deletecov').on('click', function(){
-    id=$(this).attr('deleteid');
-    entry1=$(this).attr('entry');
-    deletecov(id, entry1);
-  })
 }
+

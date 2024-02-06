@@ -170,7 +170,7 @@ $alterOtherNote="*如為換號請在號碼後方備註，如:156601(換號)";
 
     </p>
     <hr>
-@include('includes.census5Progress')
+@include('includes.fstree-census5-progress')
 </div>
 
 @endif

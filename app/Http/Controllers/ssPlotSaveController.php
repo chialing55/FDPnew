@@ -111,7 +111,12 @@ class ssPlotSaveController extends Controller
             if (!$redata->isEmpty()){
                 $redata=$redata->toArray();
                 for($m=0;$m<count($redata);$m++){
-                    $redata[$m]['delete']="<button class='deletecov' deleteid='".$redata[$m]['id']."' entry='".$entry."' >X</button>";
+                    $deleteid = htmlspecialchars($redata[$m]['id']);
+                    $escapedEntry = htmlspecialchars($entry);
+
+
+                    $redata[$m]['delete']="<button class='deletecov' onclick='deletecov(\"$deleteid\", \"$escapedEntry\")' deleteid='".$redata[$m]['id']."' entry='".$entry."' plot='".$plot."'>X</button>";
+
                 }
 
             } else {

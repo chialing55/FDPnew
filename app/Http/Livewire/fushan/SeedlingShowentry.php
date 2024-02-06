@@ -141,6 +141,7 @@ class SeedlingShowentry extends Component
         if ($slrecord->isEmpty()){
             $slrecord1[0]['trap']=$selectTrap;
             $slrecord1[0]['tag']='無';
+            // $slrecord1=='無';
             // $slrecord='無';
         } else {
             $ob_redata = new fsSeedlingAddButton;

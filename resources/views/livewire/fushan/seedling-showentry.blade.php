@@ -96,14 +96,25 @@
         <li>資料輸入完成至Trap=107時，請按<button class='datasavebutton' style='width: auto;'>輸入完成</button>，以做最後檢查。</li>
     </ul>
 </div>
+
+@php
+// print_r($record[1][1]);
+
+$tableVar=$selectTrap;
+$alterOtherNote="";
+@endphp
+
+
         @if($record[0]['tag']=='無')
            <div style='margin:20px 0'><p>沒有舊資料</p></div>
         
         @else
     <div class='entrytablediv'>
+
+@include('includes.str-main-entrytable')        
         {{-- <h2>測試</h2> --}}
-        <span class='seedlingsavenote savenote'></span>
-       <div class='pages'>
+{{--         <span class='seedlingsavenote savenote'></span>
+       <div class='pages'> 
            <div class='pagenote'></div>
            <div class='prev'>上一頁</div>
            <div class='next'>下一頁</div>
@@ -124,7 +135,7 @@
             <button class='close' onclick="$('.alternotetalbeouter').hide(); $('.alternotetable').html();" >X</button>
 
             </p>
-        </div>
+        </div> --}}
 
     </div>
         @endif   

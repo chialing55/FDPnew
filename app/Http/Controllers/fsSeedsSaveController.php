@@ -71,15 +71,11 @@ class fsSeedsSaveController extends Controller
         // // print_r($savecov);
         $data=$data_all['data'];
         // $entry=$data_all['entry'];
-        $user = $request->session()->get('user', function () {
-            return view('login1', [
-            'check' => 'no'
-            ]);
-        });
+        $user = $data_all['user'];
         // $user=$data[0]['user'];
         // // $temp=[];
         // $list='';
-        $datasavenote='';
+        $datasavenote=''; 
 
         $spinfo=$this->spinfo();
 
@@ -92,6 +88,7 @@ class fsSeedsSaveController extends Controller
         for ($i=0;$i<count($data);$i++){
             // $list[]=$data[$i]['tag'];
                 $data[$i]['checknote']='';
+                
                 $checknote='';
                 $data[$i]['trap'] = str_pad($data[$i]['trap'], 3, '0', STR_PAD_LEFT);
                 $temp=[];
