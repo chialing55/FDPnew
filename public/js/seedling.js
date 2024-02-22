@@ -21,16 +21,22 @@ $('.listlink').on('click', function(){
 })
 
 
-
-
 // 使用
 handleHoverEvents('.list4', '.list4inner');
 // handleHoverEvents('.list6', '.list6inner');
 
-
-
 var plotType='fsseedling';
 var thispage=1;
+
+
+window.addEventListener('initTablesorter', event => {
+
+  tag=event.detail.tag;
+  // console.log(tag);
+  $(`#progressTable${tag}`).tablesorter();
+
+});
+
 
 window.addEventListener('data', event => {
 
@@ -66,17 +72,20 @@ function handleSuccessAllTable(res, tableType, handsontable) {
     $(`.${noteProperty}`).html(res[noteProperty]);
   }
 
-  if (tableType === 'recruit') {
+  if (tableType === 'data') {
+        // handsontable.updateData(res.data);
+
+  } else if (tableType === 'recruit') {
         handsontable.updateData(res.nonsavelist);
         if (res.recruit.length != 0){
-          fsseedlingtableupdate(res.recruit, 1, pps,  res.maxid);
+          fsseedlingtableupdate(res.recruit, res.thispage, ppsall,  res.maxid);
         }
   } else if (tableType === 'alternote') {
     if (res.datasavenote != '') {
       $('.altersavenote').html(res.datasavenote);
     }
     $('.datasavenote').html('');
-    fsseedlingtableupdate(res.recruit, 1, pps,  res.maxid);
+    fsseedlingtableupdate(res.data, res.thispage, ppsall,  res.maxid);
     $('.deletealternotebutton').show();
   } else if (tableType === 'roll'){
     fsrolltableupdate(res.data, res.trap);
@@ -162,7 +171,8 @@ function fscovtable(covs){
             if (res.datasavenote !=''){
               $('.datasavenote').html(res.datasavenote);
             }
-            fsseedlingtableupdate(res.recruit, res.maxid, res.thispage);
+
+            fsseedlingtableupdate(res.recruit, res.thispage, ppsall, res.maxid);
       }
       makeAjaxRequest(
         saveUrl, ajaxData, ajaxType,
@@ -187,10 +197,11 @@ function fsseedlingtable(data, thispage, pps, maxid){
 
   var site=`${data[0].trap}`;
   var container = $(`#datatable${site}`);
-
+  $(`button[name=datasave${site}]`).off();
   var saveButtonName=`datasave${site}`;
   var tabletype='data';
   ppsall=pps;
+  pps=pps;
   var data2 = processDataTable(data, thispage, pps, site, plotType);
 
   var columns = [
@@ -278,11 +289,12 @@ function recruittable(data, emptytable, csplist){
       {data: "x", type: 'numeric', allowInvalid: false},
       {data: "y", type: 'numeric', allowInvalid: false},
       {data: "note"},
+      {data: "tofix", type: 'checkbox', checkedTemplate: '1', uncheckedTemplate: ''}
 
     ];
 
-  var colWidths=[120, 40, 40, 80, 120,50,50,50,40,90,35,35, 160];
-  var colHeaders=["Date", "Trap", "Plot", "Tag", "種類", "長度","子葉","真葉","新舊","萌櫱","X","Y", "Note"];
+  var colWidths=[120, 40, 40, 80, 120,50,50,50,40,90,35,35, 160,50];
+  var colHeaders=["Date", "Trap", "Plot", "Tag", "種類", "長度","子葉","真葉","新舊","萌櫱","X","Y", "Note", "漏資料"];
 
   var hiddenColumns =[];
   return createHandsontable(container, columns, emptytable, saveButtonName, "/fsseedlingsaverecruit", tabletype, colWidths, hiddenColumns, colHeaders, thispage );  
@@ -418,7 +430,7 @@ function alternotetable(alterdata, tag, entry, thispage){
 
     ];
 
-  var colWidths=[40,40,80,120,60, 60];
+  var colWidths=[40,40,80,120,60, 60, 100];
   var colHeaders=["Trap","Plot","Tag","種類", "原長度", "原葉片數",  "other", "狀態"];
 
   var hiddenColumns ={

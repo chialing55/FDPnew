@@ -47,7 +47,7 @@ class fsSeedlingAddButton
 
 
            
-            if ($records[$q]['id']>$maxid){   //id>maxid，不會有alternote
+            if ($records[$q]['id']>$maxid && $records[$q]['alternotetable']==''){   //id>maxid，不會有alternote
                 $records[$q]['alternotetable'] = $button1;
             } else {
 

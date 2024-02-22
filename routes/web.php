@@ -96,6 +96,7 @@ Route::get('/fushan/{project}/{type}', function($project, $type){
                 case 'entry2': return App::call('App\Http\Controllers\fsSeedlingController@entry',['site' => $site, 'entry'=> '2'] );
                 case 'compare': return App::call('App\Http\Controllers\fsSeedlingController@compare',['site' => $site] );
                 case 'import': return App::call('App\Http\Controllers\fsSeedlingController@import',['site' => $site] );
+                case 'dataviewer': return App::call('App\Http\Controllers\fsSeedlingController@dataviewer',['site' => $site] );
             }
 
         }

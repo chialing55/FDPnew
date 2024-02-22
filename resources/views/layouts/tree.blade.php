@@ -93,9 +93,9 @@
 <div class='content'>
     
   <div class='right'>
-
+<div style="display: grid; justify-items: center;">
 @yield('rightbox')
-
+</div>
   </div>
 
 </div>

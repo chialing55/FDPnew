@@ -93,7 +93,7 @@
 
     <div class='text_box'>     
         <h2>查詢個別植株資料</h2>
-        <p style='font-size: 80%;'>* census5 為此次調查，若未輸入資料則保留空白。</p>
+        
         <hr>
         <div style='margin-top: 10px; line-height: 1.8em; display: inline-flex;'>
             <span style='margin-right: 20px;'>枝幹編號：</span>     
@@ -109,6 +109,7 @@
 
             <p class='savenote'>{{$resultnote}}</p>
             @elseif(!empty($basedata))
+            <p style='font-size: 80%;'>* [census5] 為此次調查，若未輸入資料則保留空白。</p>
             <div class='fstreeStemidtable'>
             <table class='tablesorter'>
                 

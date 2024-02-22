@@ -18,7 +18,7 @@
     <div class='text_box entrytableout'>
         <h6>第 {{$selectCensus}} 次 調查資料檢視 / 更新</h6>
        
-        <div id='simplenote' class='text_box'>
+        <div id='simplenote' class='text_box2'>
             <ul>
             <li><b>輸入資料後需按 <button class='datasavebutton' style='width: auto;'>儲存</button> ，才能確實將資料儲存。</b></li>
             <li>Trap欄位會自動在左側補0。</li>

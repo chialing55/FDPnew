@@ -261,4 +261,26 @@ class fsSeedlingController extends Controller
         }
     }
 
+    public function dataviewer(Request $request, $site){
+
+        $user = $request->session()->get('user', function () {
+            return 'no';
+        });
+
+        if ($user=='no'){
+            return view('login1', [
+                'check' => 'no'
+            ]);
+        } else {
+
+
+            return view('pages/fushan/seedling_dataviewer', [
+                'site' => $site,
+                'project' => '小苗',
+                'user' => $user,
+                
+
+            ]);
+        }
+    }
 }

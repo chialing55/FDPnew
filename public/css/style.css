@@ -467,3 +467,10 @@ button:-webkit-details-marker {
   padding-left:25px;
   visibility: hidden;
 }
+
+.simplenote{
+  border: 1px dotted #F7C600;
+  background-color: #FFFFB9;
+  line-height: 1.5em;
+  max-width: 800px;
+}

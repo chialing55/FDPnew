@@ -48,7 +48,7 @@ $alterOtherNote="";
            
             <h6>樣區環境資料</h6>
             <hr>
-            <div id='simplenote' class='text_box'>
+            <div id='simplenote' class='text_box2'>
                 <ul>
                 <li><b>輸入資料後需按 <button class='datasavebutton' style='width: auto;'>儲存</button> ，才能確實將資料儲存。</b></li>
                 <li>除地形外，其餘欄位皆須輸入數字。</li>
@@ -63,7 +63,7 @@ $alterOtherNote="";
         <h6>每木調查資料</h6>
         <hr>
 
-            <div id='simplenote' class='text_box'>
+            <div id='simplenote' class='text_box2'>
                 <ul>
 @include('includes.ss-entrynote')
                     {{-- <li>最後一個樣區為 S-F-38</li> --}}
@@ -82,7 +82,7 @@ $alterOtherNote="";
 
    <h6>新增樹與漏資料樹</h6>
    <hr>
-   <div id='simplenote' class='text_box'>
+   <div id='simplenote' class='text_box2'>
         <ul>
 @include('includes.ss-recruit-entrynote')
             
@@ -98,7 +98,7 @@ $alterOtherNote="";
 
             <h6>地被覆蓋資料</h6>
             <hr>
-            <div id='simplenote' class='text_box'>
+            <div id='simplenote' class='text_box2'>
                 <ul>
                 <li><b>輸入資料後需按 <button class='datasavebutton' style='width: auto;'>儲存</button> ，才能確實將資料儲存。</b></li>
                 <li>layer: u (地被層，understory)，o (上木層，overstory)。</li>
@@ -106,7 +106,12 @@ $alterOtherNote="";
             </div>
 
             <div class='entrytablediv covtable'>
-
+                <div class='cov_pages' style='margin-bottom: 5px'>
+                    <div class='cov_totalnum'></div>
+                    <div class='cov_pagenote'></div>
+                    <div class='cov_prev'>上一頁</div>
+                    <div class='cov_next'>下一頁</div>
+                </div>
                 <p class='covsavenote savenote'></p>
 
                 <div id='covtable{{$tableVar}}' style='margin-top: 10px;'></div>
@@ -127,7 +132,7 @@ $alterOtherNote="";
 
                <h6>新增覆蓋度資料</h6>
                <hr>
-               <div id='simplenote' class='text_box'>
+               <div id='simplenote' class='text_box2'>
                     <ul>
                         <li><b>輸入資料後需按 <button class='datasavebutton' style='width: auto;'>儲存</button> ，才能確實將資料儲存。</b></li>
                         <li>需有日期資料才會進入輸入檢查。資料不完整不予儲存。</li>

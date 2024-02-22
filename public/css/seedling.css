@@ -27,11 +27,7 @@
 }
 
 /*輸入表*/
-.simplenote{
-	border: 1px dotted #F7C600;
-	background-color: #FFFFB9;
-	line-height: 1.5em;
-}
+
 
 
 
@@ -117,3 +113,6 @@ border: 1px solid  #A568FF;
 
 
 
+.fsSeedlingTagtable{
+	margin: 20px 20px;
+}

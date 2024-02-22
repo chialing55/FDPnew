@@ -40,7 +40,9 @@
 @section('headerList')
   <div class='headerlist iflex'>
       <div class='list list1 listlink' type='doc'>相關文件<hr></div>
+
       <div class='list list4 listlink' >資料輸入<hr></div>
+      <div class='list list2 listlink' type='dataviewer'>資料檢視<hr></div>
   </div>
 
 @endsection
@@ -71,9 +73,9 @@
 <div class='content'>
     
   <div class='right'>
-
+<div style="display: grid; justify-items: center;">
 @yield('rightbox')
-
+</div>
   </div>
 
 </div>

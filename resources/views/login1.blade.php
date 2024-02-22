@@ -1,4 +1,4 @@
-@extends('layouts/app2') 
+@extends('layouts/app') 
 
 @section('title', '登入-台灣森林動態樣區資料管理系統')
 
@@ -12,8 +12,9 @@
 @section('js')
 <!-- js -->
 <script type="text/javascript">
+
   $('.icon').hide();
-  $("footer").hide();
+  // $("footer").hide();
 </script>
 
 @endsection

@@ -35,8 +35,8 @@
    else if ($qy==25){$prevshow='prevshow'; $nextshow='prevhidden';}
    else {$prevshow='prevshow'; $nextshow='prevshow';}
 @endphp
-            <span class='{{$prevshow}}'><a class='a_' wire:click.once="searchsite({{$qx}}, {{$qy-1}}, 1, 1)">上一個樣方</a></span>
-            <span class='{{$nextshow}}'><a class='a_' wire:click.once="searchsite({{$qx}}, {{$qy+1}}, 1, 1)">下一個樣方</a></span>
+            <span class='{{$prevshow}}'><a class='a_' wire:click.once="searchSite({{$qx}}, {{$qy-1}}, 1, 1)">上一個樣方</a></span>
+            <span class='{{$nextshow}}'><a class='a_' wire:click.once="searchSite({{$qx}}, {{$qy+1}}, 1, 1)">下一個樣方</a></span>
 
 @endif
     </div>

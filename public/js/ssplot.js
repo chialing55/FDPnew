@@ -87,6 +87,7 @@ function handleSuccessAllTable(res, tableType, handsontable) {
 
 
 function ssdatatableupdate(data, thispage, pps){
+  
   $('.finishnote').html('');
   if (plotType === 'ss10m'){
     var site=`${data[0].plot}${data[0].sqx}${data[0].sqy}`;

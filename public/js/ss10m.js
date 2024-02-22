@@ -86,19 +86,19 @@ function ssenvitable(envi, sqx, sqy){
 
   var columns = [
       {data: "plot", readOnly:true},
-      {data: "aspect1", type: 'numeric', allowInvalid: false, validator: aspectValidator, placeholder: "(1,1)"},
-      {data: "aspect2", type: 'numeric', allowInvalid: false, validator: aspectValidator, placeholder: "(1,2)"},
-      {data: "aspect3", type: 'numeric', allowInvalid: false, validator: aspectValidator, placeholder: "(2,2)"},
-      {data: "aspect4", type: 'numeric', allowInvalid: false, validator: aspectValidator, placeholder: "(2,1)"},
       {data: "slope1", type: 'numeric', allowInvalid: false, validator: slopeValidator, placeholder: "(1,1)"},
       {data: "slope2", type: 'numeric', allowInvalid: false, validator: slopeValidator, placeholder: "(1,2)"},
       {data: "slope3", type: 'numeric', allowInvalid: false, validator: slopeValidator, placeholder: "(2,2)"},
       {data: "slope4", type: 'numeric', allowInvalid: false, validator: slopeValidator, placeholder: "(2,1)"},
+      {data: "aspect1", type: 'numeric', allowInvalid: false, validator: aspectValidator, placeholder: "(1,1)"},
+      {data: "aspect2", type: 'numeric', allowInvalid: false, validator: aspectValidator, placeholder: "(1,2)"},
+      {data: "aspect3", type: 'numeric', allowInvalid: false, validator: aspectValidator, placeholder: "(2,2)"},
+      {data: "aspect4", type: 'numeric', allowInvalid: false, validator: aspectValidator, placeholder: "(2,1)"},
       {data: "terrain", type: 'dropdown', source: ['上坡', '中坡', '下坡', '稜線'], allowInvalid: false},
-      {data: "rocky", type: 'numeric', allowInvalid: false, validator: numericValidator10},
-      {data: "exposed_surface", type: 'numeric', allowInvalid: false, validator: numericValidator10},
-      {data: "litter_cover", type: 'numeric', allowInvalid: false, validator: numericValidator10},
-      {data: "fallen_tree", type: 'numeric', allowInvalid: false, validator: numericValidator10},
+      {data: "rocky", type: 'numeric', allowInvalid: false, validator: numericValidator100},
+      {data: "exposed_surface", type: 'numeric', allowInvalid: false, validator: numericValidator100},
+      {data: "litter_cover", type: 'numeric', allowInvalid: false, validator: numericValidator100},
+      {data: "fallen_tree", type: 'numeric', allowInvalid: false, validator: numericValidator100},
       {data: "T1", type: 'numeric', allowInvalid: false, validator: numericValidator20},
       {data: "T2", type: 'numeric', allowInvalid: false, validator: numericValidator20},
       {data: "S", type: 'numeric', allowInvalid: false, validator: numericValidator20},
@@ -116,12 +116,13 @@ function ssenvitable(envi, sqx, sqy){
 }
 
 function ssdatatable(data, thispage, pps){
+
   $('.envisavenote').html('');
   $('.finishnote').html();
   $('.totalnum').html(`共有 ${data.length} 筆資料。`);
   var site=`${data[0].plot}${data[0].sqx}${data[0].sqy}`;
   var container = $(`#datatable${site}`);
-
+  $(`button[name=datasave${site}]`).off();
   var saveButtonName=`datasave${site}`;
   var tabletype='data';
   ppsall=pps;
@@ -233,7 +234,9 @@ function alternotetable(alterdata, stemid, entry, thispage){
 
 
 function ssaddcovtable(covs, data, emptytable2, covcsplist){
+
   var site=`${data[0].plot}${data[0].sqx}${data[0].sqy}`;
+    $(`button[name=addcovsave${site}]`).off();  
 // console.log(emptytable2);
   var container = $(`#addcovtable${site}`);
   // console.log(site);
@@ -268,7 +271,7 @@ function ssaddcovtable(covs, data, emptytable2, covcsplist){
 
 function sscovtable(covs, data, covcsplist){
   var site=`${data[0].plot}${data[0].sqx}${data[0].sqy}`;
-
+$(`button[name=covsave${site}]`).off();
   var container = $(`#covtable${site}`);
 
   var saveButtonName=`covsave${site}`;

@@ -190,15 +190,15 @@ function alternotetable(alterdata, stemid, entry, thispage){
       {data: "tag"},
       {data: "b", type: 'numeric'},
       {data: "csp", type: 'autocomplete', source: csplist, strict: false, visibleRows: 10, allowInvalid: false,},
-      {data: "dbh", type: 'numeric'},
+      {data: "dbh(<1)", type: 'numeric'},
       {data: "pom"},
       {data: "other"},
       {data: "stemid"}
 
     ];
 
-  var colWidths=[25,25,25,25,80, 40, 120,70,70,150];
-  var colHeaders=["20x","20y","5x","5y", "tag", "b", "csp", "dbh(<1)" ,"原始POM","其他", "stemid"];
+  var colWidths=[25,25,25,25,80, 35, 120,55,55,100];
+  var colHeaders=["20x","20y","5x","5y", "tag", "b", "csp", "dbh(<1)" ,"原POM","其他", "stemid"];
 
   var hiddenColumns ={
       columns: [10],
@@ -221,7 +221,7 @@ function fstreetable(data, thispage, pps){
   $('.totalnum').html(`共有 ${data.length} 筆資料。`);
   var site=`${data[0].qx}${data[0].qy}${data[0].sqx}${data[0].sqy}`;
   var container = $(`#datatable${site}`);
-
+  $(`button[name=datasave${site}]`).off();
   var saveButtonName=`datasave${site}`;
   var tabletype='data';
   ppsall=pps;

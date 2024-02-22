@@ -34,7 +34,7 @@ class fsTreeAlternote extends Controller
 
 
         $result=$table::where('stemid', 'like', $stemid)->get()->toArray();
-        $alterdata=['stemid'=>$stemid, 'qx'=>'', 'qy' => '', 'sqx'=>'', 'sqy' => '', 'tag'=>'', 'b'=>'', 'csp'=>'', 'pom'=>'', 'other'=>''];
+        $alterdata=['stemid'=>$stemid, 'qx'=>'', 'qy' => '', 'sqx'=>'', 'sqy' => '', 'tag'=>'', 'b'=>'', 'csp'=>'', 'dbh(<1)'=>'',  'pom'=>'', 'other'=>''];
 
         if ($result[0]['alternote']==''){
             $mergedArray=$alterdata;

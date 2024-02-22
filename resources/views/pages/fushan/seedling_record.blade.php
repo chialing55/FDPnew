@@ -147,9 +147,11 @@ $list=0;
  
 
 
+@php 
+$excludeArray=['33-3', '42-1', '42-2', '42-3'];
+@endphp
 
-
-  @if($plot[$k]!='33-3')
+  @if(!in_Array($plot[$k], $excludeArray))
 
   <tr>
     

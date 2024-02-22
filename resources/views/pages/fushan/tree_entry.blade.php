@@ -25,4 +25,5 @@ const user = '".$user."';
 @section('rightbox')
 
 @livewire($site.'.tree-showentry', ['entry' =>$entry, 'user' => $user, 'site' => $site])
+
 @endsection

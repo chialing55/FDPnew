@@ -22,7 +22,7 @@ $(function() {
 
 @endsection
 @section('rightbox')
-
+<div>
 <h2>每木調查資料輸入注意事項</h2>
 
 <div class='note'>
@@ -63,6 +63,8 @@ $(function() {
                 <li>若無測量(即有Status需要紀錄)，則填入<b>0</b>。</li>
                 <li>一般喬木/灌木填入dbh，樹蕨則填入h高。</li>
                 <li>dbh需 ≥ 上次調查之dbh，若有縮小，則勾選「縮水」。</li>
+                <li>若此次調查植株縮水至 dbh < 1 cm，原dbh欄位仍填寫1，並另在 dbh(<1)欄位中填寫此次調查數值。</li>
+                <li>若發現此次調查與上次調查結果有不正常的變化，如縮水很多或是增長過多，請查閱上次紙本以檢查是否有輸入錯誤。</li>
             </ul>
         </li>
         <li><b>POM</b> - dbh 測量高度，預設值為原 pom。
@@ -108,7 +110,9 @@ $(function() {
         </li>
         <li><b>特殊修改<i class='fa-regular fa-note-sticky'></i></b> - 需更新原始資料的修改。包含：<span class='line'>樣區，號碼，種類，原始 pom。</span>。
             <ul>
-            <li>將欲修改的欄位，分別填入格子內。</li>
+            <li>將欲修改的欄位，分別填入格子內。僅需填寫需修改的欄位。</li>
+            <li>如原為分支而此次要改為單獨編號之個體，除在特殊修改號碼欄位填寫新號碼外，亦需將填寫b欄位為0。</li>
+            <li>若此次調查植株縮水至 dbh < 1 cm，原dbh欄位仍填寫1，並另在 dbh(<1)欄位中填寫此次調查數值。</li>
             <li>若調查發現現場調查之 pom 與原 pom 不同者(並非於這次修改 pom)，<span class='line'>請將數值填入「特殊修改<i class='fa-regular fa-note-sticky'></i>」中的 原始 POM 欄位中</span>，而不在 POM 欄位做修改。</li>
             </ul>
         </li>
@@ -229,5 +233,5 @@ $(function() {
     </div>
 </div>
 </div>
-
+</div>
 @endsection

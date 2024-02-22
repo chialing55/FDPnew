@@ -174,9 +174,6 @@ function createHandsontable(container, columns, sourceData, saveButtonName, save
   });
 
 
-
-
-
   return handsontable;
 }
 

@@ -37,8 +37,8 @@
    else if ($qy==19){$prevshow='prevshow'; $nextshow='prevhidden';}
    else {$prevshow='prevshow'; $nextshow='prevshow';}
 @endphp
-            <span class='{{$prevshow}}'><a class='a_' wire:click.once="searchsite({{$qx}}, {{$qy-1}}, 1, 1)">上一個樣方</a></span>
-            <span class='{{$nextshow}}'><a class='a_' wire:click.once="searchsite({{$qx}}, {{$qy+1}}, 1, 1)">下一個樣方</a></span>
+            <span class='{{$prevshow}}'><a class='a_' wire:click.once="searchSite({{$qx}}, {{$qy-1}}, 1, 1)">上一個樣方</a></span>
+            <span class='{{$nextshow}}'><a class='a_' wire:click.once="searchSite({{$qx}}, {{$qy+1}}, 1, 1)">下一個樣方</a></span>
         @endif
 
     </div>
@@ -57,7 +57,7 @@ $alterOtherNote="";
            
             <h6>樣區環境資料</h6>
             <hr>
-            <div id='simplenote' class='text_box'>
+            <div id='simplenote' class='text_box2'>
                 <ul>
                 <li><b>輸入資料後需按 <button class='datasavebutton' style='width: auto;'>儲存</button> ，才能確實將資料儲存。</b></li>
                 <li>各欄位皆須輸入數字。</li>
@@ -73,12 +73,13 @@ $alterOtherNote="";
         <h6>每木調查資料</h6>
         <hr>
 
-            <div id='simplenote' class='text_box'>
+            <div id='simplenote' class='text_box2'>
                 <ul>
 @include('includes.ss-entrynote')
                     
                 </ul>
             </div>
+     
             
 @include('includes.str-tree-entrytable')
         </div>
@@ -91,7 +92,7 @@ $alterOtherNote="";
 
    <h6>新增樹與漏資料樹</h6>
    <hr>
-   <div id='simplenote' class='text_box'>
+   <div id='simplenote' class='text_box2'>
         <ul>
 @include('includes.ss-recruit-entrynote')
             

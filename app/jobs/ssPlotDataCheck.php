@@ -47,8 +47,9 @@ class ssPlotDataCheck
             $census2015=$table::where('stemid', 'like', $data[$i]['stemid'])->get()->toArray();
 
             //將code拆開
-            $data[$i]['code']=strtoupper($data[$i]['code']);  //轉為皆大寫
+
             $codea=str_split($data[$i]['code']);
+            // $codea=$data[$i]['code'];
           //2. status 若不為空值，dbh須為0
             if ($data[$i]['status']!=''){
                 if ($data[$i]['status']!='-9'){
@@ -79,11 +80,11 @@ class ssPlotDataCheck
                             $data[$i]['leave']=$mtagData[0]['leave'];
                         }
                     } else {
-                        if ($data[$i]['ill']=='0'){
-                            $datasavenote=$data[$i]['stemid'].' status為 -2，ill 不得為0。';
-                            $pass='0';
-                            break;
-                        }
+                        // if ($data[$i]['ill']=='0'){
+                        //     $datasavenote=$data[$i]['stemid'].' status為 -2，ill 不得為0。';
+                        //     $pass='0';
+                        //     break;
+                        // }
                     }                   
                 }  else {   //$data[$i]['status']==-1, -3, -4, 0
                     $data[$i]['ill']='0';
@@ -94,11 +95,11 @@ class ssPlotDataCheck
             //3. status 為空值，dbh不得為0
 
 
-                if ($data[$i]['ill']=='0'){
-                    $datasavenote=$data[$i]['stemid'].' status為 -2，ill 不得為0。';
-                    $pass='0';
-                    break;
-                }
+                // if ($data[$i]['ill']=='0'){
+                //     $datasavenote=$data[$i]['stemid'].' status 為空值，ill 不得為0。';
+                //     $pass='0';
+                //     break;
+                // }
                 
                 if ($data[$i]['dbh']=='0'){
                     $datasavenote=$data[$i]['stemid'].' status 為空值，dbh/h高 不得為0。';
@@ -139,24 +140,6 @@ class ssPlotDataCheck
             
             //4.1  若code包含C，則POM不得同於前次pom
             if ($data[$i]['code']!=''){
-                if (in_array("C",$codea)){
-                    if ($data[$i]['status']!='-9'){
-                        if ($data[$i]['pom']==$census2015[0]['pom']){
-                            $datasavenote=$data[$i]['stemid']." code包含C，則pom應與前次不同。";
-                            $pass='0';
-                            break;
-                        }
-                        if ($data[$i]['note']==''){
-                            $datasavenote=$data[$i]['stemid']." code包含C，請在note欄位說明。";
-                            $pass='0';
-                            break;
-                        }
-                    } else {
-                        $datasavenote=$data[$i]['stemid']." 為新增，code不得為C。";
-                        $pass='0';
-                        break;
-                    }
-                }
             //4.2 code只能是CIPR
                 $codaarray=array("C","I","P","R","F");
 
@@ -188,7 +171,28 @@ class ssPlotDataCheck
                         $pass='0';
                         break;
                     }
-                }                
+                } 
+
+                
+                if (in_array("C", $codea)){
+                    if ($data[$i]['status']!='-9'){
+                        // if ($data[$i]['pom']==$census2015[0]['pom']){
+                        //     $datasavenote=$data[$i]['stemid']." code包含C，則pom應與前次不同。";
+                        //     $pass='0';
+                        //     break;
+                        // }
+                        if ($data[$i]['note']==''){
+                            $datasavenote=$data[$i]['stemid']." code包含C，請在note欄位說明。";
+                            $pass='0';
+                            break;
+                        }
+                    } else {
+                        $datasavenote=$data[$i]['stemid']." 為新增，code不得為C。";
+                        $pass='0';
+                        break;
+                    }
+                }
+               
             }
         }
 

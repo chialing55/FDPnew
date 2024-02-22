@@ -61,7 +61,7 @@ class ssPlotSaveController extends Controller
         if ($entry == '1') {
             return new Ss1haEnviR1;
         } else {
-            return new Ss1haTreeEnviR2;
+            return new Ss1haEnviR2;
         }
     }
 
@@ -116,16 +116,11 @@ class ssPlotSaveController extends Controller
 
 
                     $redata[$m]['delete']="<button class='deletecov' onclick='deletecov(\"$deleteid\", \"$escapedEntry\")' deleteid='".$redata[$m]['id']."' entry='".$entry."' plot='".$plot."'>X</button>";
-
                 }
-
             } else {
                 $redata=[];
             }
-
-
         return $redata;
-
     }
 
     public function saveenvi (Request $request){
@@ -191,9 +186,10 @@ class ssPlotSaveController extends Controller
             $uplist=[];
             $datacheck=['pass'=>'1', 'datasavenote'=>''];
             if ($data[$i]['date']==''){$data[$i]['date']='0000-00-00';}
-
+            $data[$i]['code']=strtoupper($data[$i]['code']);  //轉為皆大寫
             $check = new ssPlotDataCheck;
             $datacheck=$check->check($data[$i], $plotType);
+
 
             if ($datacheck['pass']==1){
 
@@ -281,7 +277,7 @@ class ssPlotSaveController extends Controller
             }
 
             foreach ($data[$i] as $key => $value){
-                $excludedKeys = ['code', 'tofix', 'note', 'confirm', 'alternote', 'status'];
+                $excludedKeys = ['ill','leave','code', 'tofix', 'note', 'confirm', 'alternote', 'status'];
                 if (!in_array($key, $excludedKeys) && is_null($value)) {
                     $pass = '0';
                     $recruitsavenote = $recruitsavenote."<br> 第".($i+1)."筆 ".$data[$i]['tag'] ." ". $key.'資料不全，不予處理。';

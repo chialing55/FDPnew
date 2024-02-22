@@ -63,7 +63,7 @@
 <h6>樣站環境資料</h6>
 <hr>
 
-    <div id='simplenote' class='text_box'>
+    <div id='simplenote' class='text_box2'>
         <ul>
         <li><b>輸入資料後需按 <button class='datasavebutton' style='width: auto;'>儲存</button> ，才能確實將資料儲存。</b></li>
         <li>樣區上方光度 - <b>U</b>: 多層樹冠 (預設)，<b>I</b>: 一層樹冠，<b>G</b>: 沒有樹冠。</li>
@@ -85,7 +85,7 @@
 <h6>小苗調查資料</h6>
 <hr>
 
-<div id='simplenote' class='text_box'>
+<div id='simplenote' class='text_box2'>
     <ul>
         <li><b>輸入資料後需按 <button class='datasavebutton' style='width: auto;'>儲存</button> ，才能確實將資料儲存。</b></li>
         <li>長度及葉片數：<b>-1</b>: 沒有測量，<b>-2</b>: DBH >= 1，<b>-4</b>: 見環不見苗或死亡，<b>-6</b>: 消失，<b>-7</b>: 主幹或分枝死亡但個體存活。<span class='line'>長度不可為 0</span>。</li>
@@ -163,7 +163,7 @@ $alterOtherNote="";
 <div class='recruittableout text_box' style='margin-top: 20px;'>
    <h6>新增苗</h6>
    <hr>
-   <div id='simplenote' class='text_box'>
+   <div id='simplenote' class='text_box2'>
     <ul>
         <li><b>輸入資料後需按 <button class='datasavebutton' style='width: auto;'>儲存</button> ，才能確實將資料儲存。</b></li>
         <li>長度及葉片數：<b>-1</b>: 沒有測量，<b>-2</b>: DBH >= 1。<span class='line'>長度不可為 0</span>。</li>

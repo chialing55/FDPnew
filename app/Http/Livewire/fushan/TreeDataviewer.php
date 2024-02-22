@@ -34,6 +34,8 @@ class TreeDataviewer extends Component
     public $qx1='0';
     public $qy1='0';
 
+
+
     public function mount(Request $request)
     {
         
@@ -328,9 +330,6 @@ class TreeDataviewer extends Component
 
                 
             }
-
-
-
         }
     }
 

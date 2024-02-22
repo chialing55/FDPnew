@@ -22,7 +22,7 @@ $(function() {
 
 @endsection
 @section('rightbox')
-
+<div>
 <h2>種子雨輸入注意事項</h2>
 <div class='note'>
     <ul style='font-weight: 800;'>
@@ -96,7 +96,7 @@ $(function() {
                     </ul>
                 <b>6：花。花苞不計。</b>
                     <ul>
-                        <li><span class='line'>不論多少，數量皆為 1。</sapn></li>
+                        <li><span class='line'>不論多少，數量皆為 1。</span></li>
                         <li>種子數可為 0 或空白(系統會自動補0)。</li>
                         <li>種子活性可為 0 或空白(系統會自動補0)。</li>
                         <li>碎片3數量可為 0 或空白(系統會自動補0)。</li>
@@ -122,6 +122,7 @@ $(function() {
 
     
 
+</div>
 </div>
 </div>
 @endsection

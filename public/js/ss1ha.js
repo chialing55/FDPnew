@@ -77,12 +77,13 @@ function ssenvitable(envi, qx, qy ,sqx, sqy){
 }
 
 function ssdatatable(data, thispage, pps){
+
   $('.envisavenote').html('');
   $('.finishnote').html();
   $('.totalnum').html(`共有 ${data.length} 筆資料。`);
   var site=`${data[0].qx}${data[0].qy}${data[0].sqx}${data[0].sqy}`;
   var container = $(`#datatable${site}`);
-
+  $(`button[name=datasave${site}]`).off();
   var saveButtonName=`datasave${site}`;
   var tableType='data';
   ppsall=pps;
@@ -127,7 +128,7 @@ function ssrecruittable(data, emptytable, csplist){
   var site=`${data[0].qx}${data[0].qy}${data[0].sqx}${data[0].sqy}`;
   var thispage=Math.ceil(data.length/20); //指定新增後前往最後一頁
  
-$(`button[name=recruitsave${site}]`).off();
+  $(`button[name=recruitsave${site}]`).off();
   var container = $(`#recruittable${site}`);
   // console.log(site);
   var saveButtonName=`recruitsave${site}`;

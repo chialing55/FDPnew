@@ -200,6 +200,7 @@ class SeedlingShowentry extends Component
             $emptytable[$k]['x']='';
             $emptytable[$k]['y']='';
             $emptytable[$k]['note']='';
+            $emptytable[$k]['tofix']='';
         }
 
         // $this->recordstart='0';

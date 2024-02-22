@@ -1,5 +1,5 @@
-<div>
-    <div  style='margin: 0 auto;'>
+<div style='display: flex; align-items: center;flex-direction: column;'>
+        
         <h2>UNKNOWN</h2>
 
         <div style='margin-top:20px'>
@@ -11,8 +11,10 @@
                 @endfor
             </select>
         </div>
+    <div  style=''>
 
-        <div  style='display: flex; flex-wrap: wrap; /*justify-content: space-evenly;*/'>
+
+        <div  style='display: flex; flex-wrap: wrap; justify-content: center;'>
             @foreach($unkdes as $unk)
             <div class='photocombo text_box' >
                 <h6>{{$unk['unkname']}} 

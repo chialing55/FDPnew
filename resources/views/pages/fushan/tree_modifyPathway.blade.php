@@ -23,10 +23,11 @@ const user = '".$user."';
 @endphp
 @endsection
 @section('rightbox')
+
+<div>
 <h2>每木調查資料處理流程</h2>
-
-
     <div class='text_box'>
+
       <ol>
         <li style="font-weight: 800;">輸入完成，檢查地圖。</li>
         <ul>
@@ -69,5 +70,5 @@ const user = '".$user."';
       </ol>
     </div>
 
-
+</div>
 @endsection

@@ -22,7 +22,7 @@ $(function() {
 
 @endsection
 @section('rightbox')
-
+<div>
 <h2>小苗輸入注意事項</h2>
 <div class='note'>
     <ul style='font-weight: 800;'>
@@ -147,6 +147,7 @@ $(function() {
 
     
 
+</div>
 </div>
 </div>
 @endsection
