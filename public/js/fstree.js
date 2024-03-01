@@ -121,7 +121,13 @@ function handleSuccessAllTable(res, tableType, handsontable) {
     $('.datasavenote').html('');
 		fstreetableupdate(res.data, res.thispage, ppsall);
 		$('.deletealternotebutton').show();
-  } 
+  } else if (tableType==='addTreeData'){
+    handsontable.updateData(res.nonsavelist);
+    if (res.recruitsavenote != '') {
+      $(`.recruitsavenote`).html(res.recruitsavenote);
+    }
+
+  }
 }
 
 function cellfunction(tableType, container, row, col, prop){
@@ -130,7 +136,7 @@ function cellfunction(tableType, container, row, col, prop){
 
           if (container.handsontable('getData')[row][8]=='-9'){
             cellProperties.readOnly = false; 
-            if (col==1 || col ==2 || col == 8 || col == 14){
+            if (col==1 || col ==2 || col ==5 || col ==6 || col == 8 || col == 14){
               cellProperties.readOnly = true; 
             }
           }
@@ -140,7 +146,7 @@ function cellfunction(tableType, container, row, col, prop){
           }
          return cellProperties;
       } else if (tableType=='updateData1'){
-      	  if (container1.handsontable('getData')[row][5]!='0'){
+      	  if (container.handsontable('getData')[row][5]!='0'){
           	cellProperties.readOnly = true; 
 	          	if (col==5 || col==4){
 	          		cellProperties.readOnly = false; 
@@ -441,6 +447,8 @@ $('.canselect').click(function(){
 }
 
 
+
+
 //進行個別修改 //資料處理，後端資料更正
 
 window.addEventListener('stemiddata', event => {
@@ -449,8 +457,8 @@ window.addEventListener('stemiddata', event => {
 	stemdata=event.detail.stemdata;
 	csplist=event.detail.csplist;
 	from=event.detail.from;
-	// console.log(stemid);
-    fstreealtertable(stemid, stemdata, csplist, from);
+	console.log(stemid);
+    fstreeupdatatable(stemid, stemdata, csplist, from);
 
 });
 
@@ -459,7 +467,9 @@ Livewire.on('updateStemidlist', function(data) {
     Livewire.emit('updateStemidList', data);
 });
 
-function fstreealtertable(stemid, stemdata, csplist, from){
+//後端資料更正
+
+function fstreeupdatatable(stemid, stemdata, csplist, from){
 
 //basetable
 	stemid = stemid.replace('.', ''); // Remove the period
@@ -586,5 +596,63 @@ function deleteCensusData(stemid, from){
         function () {}
       );
     }
+
+}
+
+//資料處理=>新增資料
+
+window.addEventListener('updata', event => {
+  emptytable_addtree=event.detail.emptytable;
+  csplist=event.detail.csplist;
+  realemptytable_addtree = deepCopy(emptytable_addtree);
+  updatelist=event.detail.updatelist;
+  // console.log('1');
+  // $('.updataTableOut').show();
+  addDataTable(emptytable_addtree, csplist);
+
+});
+
+  const qxValidator = (value, callback) => {
+    if (updatelist.includes(value)) {   //
+      callback(true);
+    } else {
+      callback(false);
+    }
+  };
+
+
+function addDataTable(emptytable, csplist){
+// console.log(csplist);
+// console.log(csplist);
+  var entry=3;
+
+ var thispage='1';
+  $(`button[name=recruitsave]`).off();
+  var container = $(`#recruittable`);
+
+  var saveButtonName=`recruitsave`;
+  var tableType='addTreeData';
+
+  var columns = [
+      {data: "date", dateFormat: 'YYYY-MM-DD', type: 'date', allowInvalid: false},
+      {data: "qx", type: 'numeric', validator: qxValidator},
+      {data: "qy", type: 'numeric', validator: qxValidator},
+      {data: "sqx", type: 'numeric', allowInvalid: false, validator: qqValidator4},
+      {data: "sqy", type: 'numeric', allowInvalid: false, validator: qqValidator4},
+      {data: "tag"},
+      {data: "branch", type: 'numeric', allowInvalid: false},
+      {data: "csp", type: 'autocomplete', source: csplist, strict: true, visibleRows: 10, allowInvalid: false,},
+      {data: "code"},
+      {data: "dbh", type: 'numeric', allowInvalid: false},
+      {data: "pom", type: 'numeric', allowInvalid: false},
+      {data: "note"},
+
+    ];
+
+  var colWidths=[120, 30,30,25,25,80, 40, 120,50,60,70,160];
+  var colHeaders=["Date","20x","20y","5x","5y", "tag", "b", "csp", "code","dbh/h高","POM/h低","note"];
+
+  var hiddenColumns =[];
+  return createHandsontable(container, columns, emptytable, saveButtonName, "/fstreeadddata", tableType, colWidths, hiddenColumns, colHeaders, thispage );
 
 }

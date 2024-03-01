@@ -6,5 +6,5 @@
                     <li>note： TAB=#。統一使用<b>「中文」標點符號</b>。<b>「半形」英文符號</b>。<b>「半形」阿拉伯數字</b>，數字後留一格空白。先確認原始 note，加「。」，再輸入本次note。不同類型 note 間用「。」分隔。</li>
                     <li>plot，5x，5y，tag，b，csp 等欄位需要修改時，請至「特殊修改<i class='fa-regular fa-note-sticky'></i>」填寫。<b>只需填寫需修改的部分。</b></li>
                     <li>若調查後的 dbh < 1 cm，請在表格內填寫 1，再至「特殊修改<i class='fa-regular fa-note-sticky'></i>」的 dbh(<1) 欄位填寫正確之調查資料。</li>
-                    <li>新樹資料可以修改或刪除。</li>
+                    <li>新樹資料可以修改或刪除。但無法修改編號，若編號輸入錯誤，請刪除重輸。</li>
                     {{-- <li>最後一個樣區輸入完成後，請按<button class='datasavebutton' style='width: auto;'>輸入完成</button>以做檢查。若有更新資料，則需重新按<button class='datasavebutton' style='width: auto;'>輸入完成</button>，以再次檢查。</li> --}}

@@ -1,5 +1,15 @@
+@php
+if (isset($selectPlot)){
+    $add='<li>tag 最多為三碼。</li>';
+
+} else {
+    $add='';
+}
+@endphp
+
             <li><b>輸入資料後需按 <button class='datasavebutton' style='width: auto;'>儲存</button> ，才能確實將資料儲存。</b></li>
             <li>需有日期資料才會進入輸入檢查。資料不完整不予儲存。</li>
+            {!!$add!!}
             <li>新增種類需為名錄內植物。如有需新增名錄，請洽管理員。</li>
             <li>dbh - 新增樹的 dbh <b>必須 ≥ 1</b>。</li>
             <li>新增狀態 - 預設為新增。若為漏資料的樹，請記得點選。</li>

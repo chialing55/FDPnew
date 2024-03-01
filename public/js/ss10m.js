@@ -66,7 +66,7 @@ function cellfunction(tableType, container, row, col, prop){
           var cellProperties = {};
           if (container.handsontable('getData')[row][7]=='-9'){
             cellProperties.readOnly = false; 
-            if (col==1 || col == 7 || col == 14){
+            if (col==1 || col == 7 || col == 4 || col == 5 || col == 14){
               cellProperties.readOnly = true; 
             }
           }
@@ -158,6 +158,14 @@ function ssdatatable(data, thispage, pps){
   return createHandsontable(container, columns, data2, saveButtonName, "/ssPlotsavedata", tabletype, colWidths, hiddenColumns, colHeaders, thispage );
 }
 
+  const tagValidator = (value, callback) => {
+  if (!value || value === '') {
+    callback(true);
+  } else {
+    callback(value.length <= 3);
+  }
+  };
+
 function ssrecruittable(data, emptytable, csplist){
 // console.log(csplist);
 // console.log(emptytable);
@@ -174,7 +182,7 @@ $(`button[name=recruitsave${site}]`).off();
       {data: "plot", readOnly: true},
       {data: "sqx", type: 'numeric', allowInvalid: false, validator: qqValidator},
       {data: "sqy", type: 'numeric', allowInvalid: false, validator: qqValidator},
-      {data: "tag"},
+      {data: "tag", validator: tagValidator},
       {data: "branch", type: 'numeric', allowInvalid: false},
       {data: "csp", type: 'autocomplete', source: csplist, strict: true, visibleRows: 10, allowInvalid: false},
       {data: "code"},

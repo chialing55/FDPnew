@@ -122,7 +122,7 @@ class S10mShowentry extends Component
 
         $envi=$tableenvi::query()->where('plot', 'like', $plot)->get()->toArray();
         $records=$table::query()->where('plot', 'like', $plot)->where('sqx', 'like', $sqx)->where('sqy', 'like', $sqy)->where('show', 'like', '1')->orderBy('tag', 'asc')->orderBy('branch', 'asc')->get()->toArray();
-        $cov=$tablecov::query()->where('plot', 'like', $plot)->orderBy('sqx', 'asc')->orderBy('sqy', 'asc')->orderBy('layer', 'desc')->orderBy('id', 'asc')->get()->toArray();
+        $cov=$tablecov::query()->where('plot', 'like', $plot)->where('sqx', 'like', $sqx)->where('sqy', 'like', $sqy)->orderBy('sqx', 'asc')->orderBy('sqy', 'asc')->orderBy('layer', 'desc')->orderBy('id', 'asc')->get()->toArray();
 
         //新增樹為刪除按鍵，其他加入特殊修改按鍵
         if (count($records)>0){
@@ -156,7 +156,7 @@ class S10mShowentry extends Component
         $this->sqx=$sqx;
         $this->sqy=$sqy;
 
-        //recruittable
+        //covtable 
         for($k=0;$k<20;$k++){
             $emptytable2[$k]['date']='';
             $emptytable2[$k]['plot']=$plot;
@@ -184,6 +184,8 @@ class S10mShowentry extends Component
             $emptytable[$k]['leave']='';
             $emptytable[$k]['date']='';
             $emptytable[$k]['tofix']='';
+
+
         }
 
         $this->dispatchBrowserEvent('data', ['covs' => $cov, 'record' => $result, 'emptytable' => $emptytable,'emptytable2' => $emptytable2, 'csplist' => $ss10mcsplist, 'covcsplist' => $ss10mcovcsplist, 'envi' => $envi]);
@@ -195,6 +197,11 @@ class S10mShowentry extends Component
 
         $this->searchsite($request, $this->selectPlot, $this->sqx, $this->sqy);
     }
+
+
+        // 其他程式碼...
+
+
 
     public function render()
     {

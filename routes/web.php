@@ -189,6 +189,7 @@ Route::post('/fstreeupdate', [App\Http\Controllers\fsTreeSaveController::class, 
 Route::get('/fstreedeletealter/{stemid}/{entry}/{thispage}', [App\Http\Controllers\fsTreeSaveController::class, 'deletealter']);
 Route::get('/fstreefinish/{qx}/{qy}/{entry}', [App\Http\Controllers\fsTreeSaveController::class, 'finishnote']);
 Route::post('/fstreedeletecensusdata', [App\Http\Controllers\fsTreeSaveController::class, 'fsTreeDeleteCensusData']);
+Route::post('/fstreeadddata', [App\Http\Controllers\fsTreeSaveController::class, 'fsTreeAddData']);
 
 //fsseedling entry
 Route::post('/fsseedlingsavecov', [App\Http\Controllers\fsSeedlingSaveController::class, 'savecov'])->name('savecov');

@@ -132,29 +132,34 @@ $ficus=['雀榕', '榕樹'];
 	// 8. 如果只有分支沒有主幹，不予新增
 			if ($data[$i]['branch']!='0'){
 				if ($plotType=='ss10m'){
-					$stemid3=$table::where('tag', 'like', $data[$i]['tag'])->where('branch', 'like', '0')->where('plot', 'like', $data[$i]['plot'])->get();
-					$site1_1=$stemid3[0]['plot'];
-					$site2_1=$data[$i]['plot'];
+					$stemid3=$table::where('tag', 'like', $data[$i]['tag'])->where('branch', 'like', '0')->where('plot', 'like', $data[$i]['plot'])->get()->toArray();
 				} else {
-					$stemid3=$table::where('tag', 'like', $data[$i]['tag'])->where('branch', 'like', '0')->get();
-					$site1_1=$stemid3[0]['qx'].$stemid3[0]['qy'];
-					$site2_1=$data[$i]['qx'].$data[$i]['qy'];
+					$stemid3=$table::where('tag', 'like', $data[$i]['tag'])->where('branch', 'like', '0')->get()->toArray();
+
 				}
 
-				if ($stemid3->isEmpty()){
+				if (count($stemid3)==0){
 					$datasavenote=$data[$i]['stemid'].' 此分支沒有主幹。';
 					$pass="0";break;
 				} else {
+					if ($plotType=='ss10m'){
+						$site1_1=$stemid3[0]['plot'];
+						$site2_1=$data[$i]['plot'];
+					} else {
+						$site1_1=$stemid3[0]['qx'].$stemid3[0]['qy'];
+						$site2_1=$data[$i]['qx'].$data[$i]['qy'];
+					}
 
 					$site1=$site1_1.$stemid3[0]['sqx'].$stemid3[0]['sqy'];
 					$site2=$site2_1.$data[$i]['sqx'].$data[$i]['sqy'];
 					if ($site1 != $site2){
 						if (in_array($data[$i]['csp'], $ficus)){
-							
-							if (!in_array('F', $codea)){
-								$datasavenote=$data[$i]['stemid'].' 分支與主幹不在同一小區，請在code註記F。';
-								$pass="0";break;
-							}
+
+								if (!in_array('F', $codea)){
+									$datasavenote=$data[$i]['stemid'].' 分支與主幹不在同一小區，若為榕屬氣根，請在code註記F。';
+									$pass="0";break;
+								}								
+
 						} else {
 							$datasavenote=$data[$i]['stemid'].' 分支與主幹需在同一小區。如為R，請將R分支之位置註記在note。';
 							$pass="0";break;

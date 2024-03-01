@@ -192,10 +192,11 @@ class fsSeedlingSaveController extends Controller
 
             // $list[]=$data[$i]['tag'];
             $uplist=[];
-//需有資料
+//需有資料  
+            $datacheck=['pass'=>'1', 'datasavenote'=>''];
 
             $check = new FsSeedlingDataCheck;
-            $datacheck=$check->check($data[$i]);
+            $datacheck=$check->check($data[$i], $table);
 
 //修改tag  //如果是修改新增小苗的號碼，則mtag也要一起修改
             $alterdata=[];
@@ -341,7 +342,7 @@ $datacheck=['pass'=>'1', 'datasavenote'=>''];
                             }
                         }
                     $check = new FsSeedlingDataCheck;
-                    $datacheck=$check->check($recruit[$i]);
+                    $datacheck=$check->check($recruit[$i], $table);
 
                     }
 

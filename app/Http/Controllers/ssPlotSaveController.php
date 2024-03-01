@@ -105,7 +105,7 @@ class ssPlotSaveController extends Controller
         $table = $this->get10mCovTableInstance($entry);
         $redata=[];
 
-        $redata=$table::where('plot', 'like', $plot)->orderBy('sqx', 'asc')->orderBy('sqy', 'asc')->orderBy('layer', 'desc')->orderBy('id', 'asc')->get();
+        $redata=$table::where('plot', 'like', $plot)->where('sqx', 'like', $sqx)->where('sqy', 'like', $sqy)->orderBy('sqx', 'asc')->orderBy('sqy', 'asc')->orderBy('layer', 'desc')->orderBy('id', 'asc')->get();
 
 
             if (!$redata->isEmpty()){
@@ -188,8 +188,8 @@ class ssPlotSaveController extends Controller
             if ($data[$i]['date']==''){$data[$i]['date']='0000-00-00';}
             $data[$i]['code']=strtoupper($data[$i]['code']);  //轉為皆大寫
             $check = new ssPlotDataCheck;
-            $datacheck=$check->check($data[$i], $plotType);
-
+            $datacheck=$check->check($data[$i], $plotType, $entry);
+            $data[$i]=$datacheck['data'];
 
             if ($datacheck['pass']==1){
 
@@ -277,7 +277,7 @@ class ssPlotSaveController extends Controller
             }
 
             foreach ($data[$i] as $key => $value){
-                $excludedKeys = ['ill','leave','code', 'tofix', 'note', 'confirm', 'alternote', 'status'];
+                $excludedKeys = ['ill','leave','code', 'tofix', 'note', 'status'];
                 if (!in_array($key, $excludedKeys) && is_null($value)) {
                     $pass = '0';
                     $recruitsavenote = $recruitsavenote."<br> 第".($i+1)."筆 ".$data[$i]['tag'] ." ". $key.'資料不全，不予處理。';
@@ -289,7 +289,7 @@ class ssPlotSaveController extends Controller
             else {
                     $sqx=$data[$i]['sqx'];
                     $sqy=$data[$i]['sqy'];}   
-
+ 
             if ($plotType=='ss10m'){
                 $data[$i]['tag']=str_pad($data[$i]['tag'],3,'0',STR_PAD_LEFT);  //在左側補0;
                 

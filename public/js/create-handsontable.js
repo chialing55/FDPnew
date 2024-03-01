@@ -72,8 +72,9 @@ function createHandsontable(container, columns, sourceData, saveButtonName, save
     cells: function (row, col, prop) {
       return cellfunction(tableType, container, row, col, prop);
     },
+
     afterChange: function (changes, source) {
-      if (tableType!='recruit' && tableType!='addcov' && tableType!='alternote' && tableType!='adddata'){
+      if (tableType!='recruit' && tableType!='addcov' && tableType!='alternote' && tableType!='addseedsdata'){
         if (!changes) {
             return;
         }
@@ -101,7 +102,7 @@ function createHandsontable(container, columns, sourceData, saveButtonName, save
       }
     },
     afterRender: function () {
-      if (tableType=='recruit' && tableType!='addcov' && tableType!='alternote' && tableType!='adddata'){
+      if (tableType=='recruit' && tableType!='addcov' && tableType!='alternote' && tableType!='addseedsdata'){
             // var instance = container.handsontable('getInstance');
             $.each(cellChanges, function (index, element) {
                 var cellChange = element;
@@ -158,13 +159,15 @@ function createHandsontable(container, columns, sourceData, saveButtonName, save
 //新增資料表更新
   parent.find('button[name=clearrecruittable]').click(function () {
     $('.recruitsavenote').html('');
-    handsontable.updateData(realemptytable);
+    emptytable2=deepCopy(realemptytable);
+    handsontable.updateData(emptytable2);
     // console.log('ww');
   });
 //新增地被資料表更新
   parent.find('button[name=clearaddcovtable]').click(function () {
     $('.addcovsavenote').html('');
-    handsontable.updateData(realemptytable2);
+    emptytable2=deepCopy(realemptytable);
+    handsontable.updateData(emptytable2);
   });
 
   parent.find('button[name=deletecov]').click(function () {
@@ -254,6 +257,7 @@ function handleDeleteAlternote(stemid, plotType, saveUrl){
           // ssdatatableupdate(res.data, res.thispage, ppsall);
           var container = $("#alternotetable");
           var handsontable = container.data('handsontable');
+          
           handsontable.updateData(res.realterdata);
           $('.deletealternotebutton').hide();
       }

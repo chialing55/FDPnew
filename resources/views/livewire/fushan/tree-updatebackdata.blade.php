@@ -1,7 +1,3 @@
-
-
-
-
 <div class='flex text_outbox' style='flex-direction: column; align-items: center;'>
     <div style='display: flex;'>
 @php 

@@ -11,7 +11,9 @@ use App\Models\FsBaseTreeSplist;
 use App\Models\FsTreeRecord1;
 use App\Models\FsTreeRecord2;
 use App\Models\FsTreeCensus4;
+use App\Models\FsTreeCensus5;
 use App\Models\FsTreeCensus3;
+use App\Models\FsTreeBase;
  
 class fsTreeRecruitCheck
 {
@@ -22,19 +24,27 @@ class fsTreeRecruitCheck
 
         if ($entry == '1') {
             $table= new FsTreeRecord1;
-        } else {
+        } else if ($entry == '2') {
             $table= new FsTreeRecord2;
-        }		
+        } else if ($entry == '3') {
+            $table= new FsTreeCensus5;
+        }	
 
 
 		for($i=0;$i<1;$i++){
 
 			//是否重號
-			
+			if ($entry == '3') {
+			    $data[$i]['tofix']='0';
+			}
 			$checkstemid=$table::where('stemid', 'like', $data[$i]['stemid'])->get();
 
 			if (!$checkstemid->isEmpty()){  //重號
 				$double="重號樹在 (".$checkstemid[0]['qx']." ,".$checkstemid[0]['qy'].")(".$checkstemid[0]['sqx']." ,".$checkstemid[0]['sqy'].")";
+				if ($entry == '3') {
+				    $base=FsTreeBase::where('tag', 'like', $data[$i]['tag'])->first()->toArray();
+				    $double="重號樹在 (".$base['qx']." ,".$base['qy'].")(".$base['sqx']." ,".$base['sqy'].")";
+				}
 				if ($checkstemid[0]['status']=='-9'){
 					$datasavenote=$data[$i]['stemid'].' 已新增(重號)。['.$double."]";
 					$pass="0";

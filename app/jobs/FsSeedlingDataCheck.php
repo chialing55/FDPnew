@@ -15,7 +15,7 @@ use App\Models\FsSeedlingSlrecord2;
 
 class FsSeedlingDataCheck
 {
-	public function check($data2){
+	public function check($data2, $table){
 		$data[0]=$data2;
 		$pass='1';
 		$datasavenote='';
@@ -27,7 +27,7 @@ class FsSeedlingDataCheck
                 break;
             }
 
-//             // if (!isset($data[$i]['note'])){$data[$i]['note']='';}
+            // if (!isset($data[$i]['note'])){$data[$i]['note']='';}
 
             if ($data[$i]['sprout']=='TRUE'){///sprout
 
@@ -66,8 +66,6 @@ class FsSeedlingDataCheck
                         $pass='0';
                         break;
                     }
-
-
                 }
             }
 

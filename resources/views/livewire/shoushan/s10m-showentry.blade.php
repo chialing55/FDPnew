@@ -72,6 +72,13 @@ $alterOtherNote="";
 
 
 @include('includes.str-tree-entrytable')
+
+@if($record!='無')
+
+@include('includes.str-main-entrytable')
+
+@endif
+
 </div>
 <div style='margin-left: 30px;'>
 <button class='recruit recruitbutton' onclick="$('.recruittableout').toggle();">新增樹與漏資料樹</button>
@@ -104,14 +111,10 @@ $alterOtherNote="";
                 <li>layer: u (地被層，understory)，o (上木層，overstory)。</li>
                 </ul>
             </div>
-
+            <h2 style='display: inline-block;'>({{$sqx}}, {{$sqy}}) </h2>
+@include('includes.str-tree-pages')
             <div class='entrytablediv covtable'>
-                <div class='cov_pages' style='margin-bottom: 5px'>
-                    <div class='cov_totalnum'></div>
-                    <div class='cov_pagenote'></div>
-                    <div class='cov_prev'>上一頁</div>
-                    <div class='cov_next'>下一頁</div>
-                </div>
+
                 <p class='covsavenote savenote'></p>
 
                 <div id='covtable{{$tableVar}}' style='margin-top: 10px;'></div>
@@ -122,6 +125,7 @@ $alterOtherNote="";
                 <div class='entrytablediv nocovdata'>
                 <p>尚未有覆蓋度資料</p>
                </div>
+
         </div>
         <div style='margin-left: 30px;'>
             <button class='addcov rollbutton' onclick="$('.addcovtableout').toggle();">新增覆蓋度資料</button>

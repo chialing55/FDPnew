@@ -116,7 +116,7 @@ $(function() {
             <li>若調查發現現場調查之 pom 與原 pom 不同者(並非於這次修改 pom)，<span class='line'>請將數值填入「特殊修改<i class='fa-regular fa-note-sticky'></i>」中的 原始 POM 欄位中</span>，而不在 POM 欄位做修改。</li>
             </ul>
         </li>
-
+        <li>新增資料可修改或刪除。但無法修改編號，若編號輸入錯誤，請刪除重輸。</li>
         <li><span class='line'>若有輸入的資料不符驗證規定，系統將會提示錯誤，請重新輸入。</span></li>   
          
         </ol>

@@ -28,7 +28,7 @@ function cellfunction(tableType, container, row, col, prop){
           var cellProperties = {};
           if (container.handsontable('getData')[row][8]=='-9'){
             cellProperties.readOnly = false; 
-            if (col==1 || col == 2 || col == 8 || col == 15){
+            if (col==1 || col == 2 || col == 5 || col == 6 || col == 8 || col == 15){
               cellProperties.readOnly = true; 
             }
           }

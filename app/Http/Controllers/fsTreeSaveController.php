@@ -653,7 +653,7 @@ class fsTreeSaveController extends Controller
         ];
 
     }
-
+//後端資料更正
     public function saveupdate (Request $request){
 
         $data_all = request()->all();
@@ -998,6 +998,165 @@ class fsTreeSaveController extends Controller
 
             ];
 
+
+    }
+
+    public function fsTreeAddData(Request $request){
+        $splist = $request->session()->get('splist');
+        $data_all = request()->all();
+
+        $data=$data_all['data'];
+        $entry=$data_all['entry'];
+        $user=$data_all['user'];
+
+        $recruitsavenote='';
+        $datacheck='';
+        $uplistalter='';
+        $q=0;
+        $nonsavelist=[];
+        $sqx='';
+        $sqy='';
+            $inlist=[];
+            $inlist2=[];
+
+
+        for($i=0; $i<count($data);$i++){
+            $pass='1';
+
+
+
+            if (is_null($data[$i]['date']) || $data[$i]['date']==''){
+                $q=$q+1;
+                $nonsavelist[$i]=$data[$i];
+                continue;
+
+            }
+
+            foreach ($data[$i] as $key => $value){
+                $excludedKeys = ['code', 'tofix', 'note', 'confirm', 'alternote', 'status'];
+                if (!in_array($key, $excludedKeys) && is_null($value)) {
+                    $pass = '0';
+                    $recruitsavenote = $recruitsavenote."<br> 第".($i+1)."筆 ".$data[$i]['tag'] ." ". $key.'資料不全，不予處理。';
+                    break;  //離開檢查
+                } 
+            }
+            
+            if ($pass=='0') {$nonsavelist[$i]=$data[$i]; continue;} //跳過這筆資料
+            else {
+                    $sqx=$data[$i]['sqx'];
+                    $sqy=$data[$i]['sqy'];}   
+
+            $data[$i]['tag']=strtoupper($data[$i]['tag']);
+            $data[$i]['code']=strtoupper($data[$i]['code']);
+            $data[$i]['stemid']=$data[$i]['tag'].".".$data[$i]['branch'];
+            
+            
+            $datacheck=['pass'=>'1', 'datasavenote'=>''];
+
+            $check = new fsTreeRecruitCheck;
+            $datacheck=$check->check($data[$i], $entry);
+
+            if ($datacheck['pass']==1){
+            $inlist=[];
+            $inlist2=[];
+
+            // 6.1 樹蕨之dbh&h高
+                if ($data[$i]['stemid'][0]=='G'){
+                    $data[$i]['h2']=$data[$i]['dbh'];
+                    $data[$i]['dbh']='0';
+                    $data[$i]['h1']=$data[$i]['pom'];
+
+                } else {
+                    $data[$i]['h2']='0';
+                    $data[$i]['h1']='0';
+                }
+                $data[$i]['update_id']=$user;
+                $data[$i]['updated_at']=date("Y-m-d H:i:s");
+
+                if ($data[$i]['note']==Null){$data[$i]['note']='';}
+
+//如果是新增樹
+// 8.1 新增樹種需要spcode
+                    $temp=array_keys($splist, $data[$i]['csp']);
+                    $data[$i]['spcode']=$temp[0];
+                    $data[$i]['status']='-9';
+                    // $data2=$data[$i];
+                //新增
+//獲得census5 key
+             
+
+              
+
+                    $census5key=FsTreeCensus5::first()->toArray();
+                    foreach ($census5key as $key5 =>$value5){
+                        if (isset($data[$i][$key5])){
+
+                            $inlist[$key5]=$data[$i][$key5];
+                        } else {
+                            $inlist[$key5]='';
+                        }
+                        
+                    }
+
+                    $inlist['alternote']="{\"other\":\"由後端新增資料\"}";
+
+                    $basekey=FsTreeBase::first()->toArray();
+                    foreach ($basekey as $keybase =>$valuebase){
+                        if (isset($data[$i][$keybase])){
+                            $inlist2[$keybase]=$data[$i][$keybase];
+                        } else {
+                            $inlist2[$keybase]='0';
+                        }
+                        
+                    }
+                    $inlist2['deleted_at']='';
+
+
+
+                    FsTreeCensus5::insert($inlist);
+                    FsTreeBase::insert($inlist2);
+                
+
+                $recruitsavenote=$recruitsavenote."<br>第".($i+1).'筆資料已儲存';
+                    $nonsavelist[$i]['qx']='';
+                    $nonsavelist[$i]['qy']='';
+                    $nonsavelist[$i]['branch']='0';
+                    $nonsavelist[$i]['pom']='1.3';
+                    $nonsavelist[$i]['date']='';
+                    $nonsavelist[$i]['code']='';
+                    $nonsavelist[$i]['sqx']='';
+                    $nonsavelist[$i]['sqy']='';
+                    $nonsavelist[$i]['tag']='';
+                    $nonsavelist[$i]['csp']='';
+                    $nonsavelist[$i]['dbh']='';
+                    $nonsavelist[$i]['note']='';
+
+
+
+
+            } else {  // $datacheck['pass']!=1
+                $recruitsavenote=$recruitsavenote."<br>".$datacheck['datasavenote'];
+                $nonsavelist[$i]=$data[$i];
+                // break;
+
+            }
+        }//最外層
+
+          
+
+        return [
+            'result' => 'ok',
+ 
+            'odata' => $data,
+            'nonsavelist' => $nonsavelist,
+            // 'q'=>$q,
+            // 'uplistalter' => $uplistalter,
+            'pass' => $inlist2,
+            // 'entry' => $entry,
+            // 'test' => $arr3,
+            'recruitsavenote' => $recruitsavenote
+
+        ];
 
     }
 

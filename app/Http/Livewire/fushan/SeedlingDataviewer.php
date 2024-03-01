@@ -58,50 +58,72 @@ class SeedlingDataviewer extends Component
 
 
         $result=FsSeedlingData::where('tag', 'like', $tag)->orderBy('census', 'ASC')->get()->toArray();
-        $result2=FsSeedlingData::where('mtag', 'like', $mtag)->orderBy('census', 'ASC')->get()->toArray();
-       // dd($result);
-        if ($result==[]){
-            $this->resultnote='查無此苗';
-        } else {
-            $this->resultnote='';
-        $q=count($result);
+        // $result2=FsSeedlingData::where('mtag', 'like', $mtag)->orderBy('census', 'ASC')->get()->toArray();
 
         $resultRecord1=FsSeedlingSlrecord1::where('tag', 'like', $tag)->get()->toArray();
         $resultRecord2=FsSeedlingSlrecord2::where('tag', 'like', $tag)->get()->toArray();
-        if ($resultRecord1!=[]){
 
-            $sourceRecord = $resultRecord1[0]['updated_at'] != '' ? $resultRecord1[0] : $resultRecord2[0];
 
-            foreach ($result[0] as $key => $value) {
-                $result[$q][$key] = $sourceRecord[$key];
-                $result[$q]['note']=$sourceRecord['note']." ".$sourceRecord['alternote'];
+       // dd($result);
+        if ($result==[]){
+
+            if ($resultRecord1!=[]){
+                $result=$resultRecord1;
+                $result2=FsSeedlingSlrecord1::where('mtag', 'like', $mtag)->get()->toArray();
+                $basedata=FsSeedlingSlrecord1::where('mtag','like', $mtag)->first();
+            } else if ($resultRecord2!=[]){
+                $result=$resultRecord2;
+                $result2=FsSeedlingSlrecord2::where('mtag', 'like', $mtag)->get()->toArray();
+                $basedata=FsSeedlingSlrecord2::where('mtag','like', $mtag)->first();
+            } 
+        } else {
+            $result2=FsSeedlingData::where('mtag', 'like', $mtag)->orderBy('census', 'ASC')->get()->toArray();
+            $basedata=FsSeedlingBase::where('mtag','like', $mtag)->first();
+
+            if ($resultRecord1!=[]){
+
+                $sourceRecord = $resultRecord1[0]['updated_at'] != '' ? $resultRecord1[0] : $resultRecord2[0];
+
+                foreach ($result[0] as $key => $value) {
+                    $result[$q][$key] = $sourceRecord[$key];
+                    $result[$q]['note']=$sourceRecord['note']." ".$sourceRecord['alternote'];
+                }
             }
+
         }
+
+        if ($result==[]){
+                $this->resultnote='查無此苗';
+        } else {
+            $this->resultnote='';
+            $q=count($result);
+
+
 
         // dd($result);
 
-        $b=0;
-        foreach ($result2 as $res){
-            $b1=explode('.',$res['tag']);
+            $b=0;
+            foreach ($result2 as $res){
+                $b1=explode('.',$res['tag']);
 
-            if(!isset($b1[1])){$b1[1]='0';}
+                if(!isset($b1[1])){$b1[1]='0';}
 
-            if ($b1[1]>$b){
-                $b=$b1[1];
+                if ($b1[1]>$b){
+                    $b=$b1[1];
+                }
             }
-        }
 
-        $this->result=$result;
-
-        $basedata=FsSeedlingBase::where('mtag','like', $mtag)->first();
-        // dd($basedata);
-        $basedata['maxb']=$b;
-        $basedata['csp']=$result[0]['csp'];
-
-        $this->basedata=$basedata;
+            $this->result=$result;
 
 
-        $this->dispatchBrowserEvent('initTablesorter', ['tag' => $this->tableTag]);        
+            // dd($basedata);
+            $basedata['maxb']=$b;
+            $basedata['csp']=$result[0]['csp'];
+
+            $this->basedata=$basedata;
+
+
+            $this->dispatchBrowserEvent('initTablesorter', ['tag' => $this->tableTag]);        
         }
 
 

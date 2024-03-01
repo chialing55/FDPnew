@@ -17,7 +17,7 @@ use App\Models\Ss10mTreeCovR2;
 use App\Models\Ss10mTreeRecord1;
 use App\Models\Ss10mTreeRecord2;
 
-use App\Models\Ss1haData2015;
+use App\Models\Ss1haData2015; 
 use App\Models\Ss1haRecord1;
 use App\Models\Ss1haRecord2;
 use App\Models\Ss1haEnviR1;
@@ -25,7 +25,7 @@ use App\Models\Ss1haEnviR2;
 
 class ssPlotDataCheck
 {
-	public function check($data2, $plotType){
+	public function check($data2, $plotType, $entry){
 		$data[0]=$data2;
 		$pass='1';
 		$datasavenote='';
@@ -40,8 +40,18 @@ class ssPlotDataCheck
 
             if ($plotType=='ss10m'){
                 $table= new Ss10mTree2015;
+                if ($entry==1){
+                    $table2= new Ss10mTreeRecord1;
+                } else {
+                    $table2= new Ss10mTreeRecord2;
+                }
             } else {
                 $table= new Ss1haData2015;
+                if ($entry==1){
+                    $table2= new Ss1haRecord1;
+                } else {
+                    $table2= new Ss1haRecord2;
+                }
             }
          
             $census2015=$table::where('stemid', 'like', $data[$i]['stemid'])->get()->toArray();
@@ -51,8 +61,7 @@ class ssPlotDataCheck
             $codea=str_split($data[$i]['code']);
             // $codea=$data[$i]['code'];
           //2. status 若不為空值，dbh須為0
-            if ($data[$i]['status']!=''){
-                if ($data[$i]['status']!='-9'){
+            if ($data[$i]['status']!='' && $data[$i]['status']!='-9'){
                     if ($data[$i]['dbh']!='0'){
                         $datasavenote=$data[$i]['stemid'].' status不為空值，dbh/h高 需為0。';
                         $pass='0';
@@ -65,15 +74,13 @@ class ssPlotDataCheck
                         break;
                     }
 
-                } 
-
                 if ($data[$i]['status']=='-2'){
                     if ($data[$i]['branch']!='0'){
                         if ($plotType=='ss10m'){
-                            $mtagData=$table::where('tag','like',$data[$i]['tag'])->where('plot', 'like', $data[$i]['plot'])->where('branch', 'like', '0')->get()->toArray();
+                            $mtagData=$table2::where('tag','like',$data[$i]['tag'])->where('plot', 'like', $data[$i]['plot'])->where('branch', 'like', '0')->get()->toArray();
 
                         } else {
-                            $mtagData=$table::where('tag','like',$data[$i]['tag'])->where('branch', 'like', '0')->get()->toArray();
+                            $mtagData=$table2::where('tag','like',$data[$i]['tag'])->where('branch', 'like', '0')->get()->toArray();
                         }
                          if (count($mtagData)>0){
                             $data[$i]['ill']=$mtagData[0]['ill'];

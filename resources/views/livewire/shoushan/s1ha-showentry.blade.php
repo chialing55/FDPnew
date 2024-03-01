@@ -82,6 +82,12 @@ $alterOtherNote="";
      
             
 @include('includes.str-tree-entrytable')
+
+@if($record!='無')
+
+@include('includes.str-main-entrytable')
+
+@endif
         </div>
 <div style='margin-left: 30px;'>
 <button class='recruit recruitbutton' onclick="$('.recruittableout').toggle();">新增樹與漏資料樹</button>

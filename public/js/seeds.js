@@ -75,12 +75,15 @@ function handleSuccessAllTable(res, tableType, handsontable) {
     $(`.${noteProperty}`).html(res[noteProperty]);
   }
 
-  if (tableType === 'adddata') {
+  if (tableType === 'addseedsdata') {
         if (res.seedssavenote !=''){
         	$('.seedssavenote').html(res.seedssavenote);
         }
         // console.log(emptytable);
-        handsontable.updateData(realemptytable);
+        emptytable2=deepCopy(realemptytable);
+        console.log(emptytable2);
+        handsontable.updateData(emptytable2);
+
         totalpage=Math.ceil(res.data.length/29);
 
     $('#seedstableout').show();
@@ -134,7 +137,7 @@ function emptyseedstable(emptytable){
   $(`button[name=newdatasave${site}]`).off();
   var container = $(`#seedstable_empty${site}`);
   var saveButtonName=`newdatasave${site}`;
-  var tableType='adddata';
+  var tableType='addseedsdata';
   // var emptytable=emptytable;
   var columns = [
     	{data: "id"},
@@ -210,7 +213,7 @@ function seedstable(data, thispage, pps, emptytable){
 	totalpage=Math.ceil(data.length/pps);
 	$('.totalnum').html(`共有 ${data.length} 筆資料。`);
 
-  var site=data[0]['census'];
+  var site=emptytable[0]['census'];
   var container = $(`#datatable${site}`);
 
   var saveButtonName=`datasave${site}`;

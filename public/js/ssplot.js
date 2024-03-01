@@ -58,11 +58,12 @@ function handleSuccessAllTable(res, tableType, handsontable) {
       $('.envisavenote').html(res.envisavenote);
     }
   } else if (tableType === 'data') {
-
+    // ssdatatableupdate(res.data, res.thispage, ppsall);
   } else if (tableType === 'recruit') {
     handsontable.updateData(res.nonsavelist);
     if (res.data.length !== 0) {
       $('.datasavenote').html('');
+      // window.livewire.emit('backData', res.data);
       ssdatatableupdate(res.data, res.thispage, ppsall);
     }
   } else if (tableType === 'alternote') {
@@ -75,6 +76,7 @@ function handleSuccessAllTable(res, tableType, handsontable) {
   } else if (tableType === 'addcov') {
     if (res.addcovsavenote != '') {
       $('.addcovsavenote').html(res.addcovsavenote);
+
     }
     handsontable.updateData(res.nonsavelist);
     if (res.data.length !== 0) {
