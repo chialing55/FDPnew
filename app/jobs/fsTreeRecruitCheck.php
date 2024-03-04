@@ -15,7 +15,7 @@ use App\Models\FsTreeCensus5;
 use App\Models\FsTreeCensus3;
 use App\Models\FsTreeBase;
  
-class fsTreeRecruitCheck
+class FsTreeRecruitCheck
 {
 	public function check($data2, $entry){
 		$data[0]=$data2;

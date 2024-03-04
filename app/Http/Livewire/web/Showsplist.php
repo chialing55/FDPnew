@@ -10,7 +10,7 @@ use Illuminate\Http\Response;
 use Livewire\WithPagination;
 
 use App\Models\FsBaseSpinfo;
-use App\Http\Controllers\updateController;
+use App\Http\Controllers\UpdateController;
 
 
 class Showsplist extends Component
@@ -27,7 +27,7 @@ class Showsplist extends Component
 
         if ($lasterUpdate=='no'){
             $lasterUpdate='';
-            $ob_update = new updateController;
+            $ob_update = new UpdateController;
             $lasterUpdate=$ob_update->latestUpdates();
           
             $request->session()->put('latest_update', $lasterUpdate);

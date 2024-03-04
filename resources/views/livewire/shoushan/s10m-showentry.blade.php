@@ -18,6 +18,8 @@
         </select>
 
 
+
+
         @if (!$record)
         <span style='padding-left:20px'>{{$entrynote}}</span>
         @else
@@ -103,7 +105,7 @@ $alterOtherNote="";
 
         <div class='text_box'>
 
-            <h6>地被覆蓋資料</h6>
+            <h6>地被資料</h6>
             <hr>
             <div id='simplenote' class='text_box2'>
                 <ul>
@@ -113,9 +115,8 @@ $alterOtherNote="";
             </div>
             <h2 style='display: inline-block;'>({{$sqx}}, {{$sqy}}) </h2>
 @include('includes.str-tree-pages')
+<span class='covsavenote savenote'></span>
             <div class='entrytablediv covtable'>
-
-                <p class='covsavenote savenote'></p>
 
                 <div id='covtable{{$tableVar}}' style='margin-top: 10px;'></div>
                 <span class='covsavenote savenote'></span>
@@ -123,18 +124,18 @@ $alterOtherNote="";
 
             </div>
                 <div class='entrytablediv nocovdata'>
-                <p>尚未有覆蓋度資料</p>
+                <p>尚未有地被資料</p>
                </div>
 
         </div>
         <div style='margin-left: 30px;'>
-            <button class='addcov rollbutton' onclick="$('.addcovtableout').toggle();">新增覆蓋度資料</button>
+            <button class='addcov rollbutton' onclick="$('.addcovtableout').toggle();">新增地被資料</button>
         </div>
 
         
             <div class=' text_box addcovtableout'>
 
-               <h6>新增覆蓋度資料</h6>
+               <h6>新增地被資料</h6>
                <hr>
                <div id='simplenote' class='text_box2'>
                     <ul>

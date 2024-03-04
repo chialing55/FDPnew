@@ -15,7 +15,7 @@ use App\Models\FsTreeRecord2;
 use App\Models\FsTreeCensus4;
 use App\Models\FsTreeCensus3;
 
-class fsTreeController extends Controller
+class FsTreeController extends Controller
 {
 
     public function tree(Request $request, $site){

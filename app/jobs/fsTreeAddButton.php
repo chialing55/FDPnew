@@ -11,7 +11,7 @@ use App\Models\FsBaseTreeSplist;
 use App\Models\FsTreeCensus4;
 use App\Models\FsTreeCensus3;
 
-class fsTreeAddButton
+class FsTreeAddButton
 {
 	public function addbutton($records, $entry){
 

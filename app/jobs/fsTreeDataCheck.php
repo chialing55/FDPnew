@@ -13,7 +13,7 @@ use App\Models\FsTreeRecord2;
 use App\Models\FsTreeCensus4;
 use App\Models\FsTreeCensus3;
 
-class fsTreeDataCheck
+class FsTreeDataCheck
 {
 	public function check($data2){
 		$data[0]=$data2;

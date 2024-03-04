@@ -10,4 +10,4 @@
 
         <span class='{{$prevshow}}'><a class="a_" wire:click.once="searchSite({{$searchSiteVar}}, {{$prev[0]}},{{$prev[1]}})">上一個樣區</a></span>
         <span class='{{$nextshow}}'><a class="a_" wire:click.once="searchSite({{$searchSiteVar}}, {{$next[0]}},{{$next[1]}})">下一個樣區</a></span>
-        <span class='datasavenote savenote'></span>
+        

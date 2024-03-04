@@ -14,7 +14,7 @@ use App\Models\FsTreeRecord1;
 use App\Models\FsTreeRecord2;
 
 
-class fsTreeAlternote extends Controller
+class FsTreeAlternote extends Controller
 {
 
     public function alternote(Request $request, $stemid, $entry, $thispage){

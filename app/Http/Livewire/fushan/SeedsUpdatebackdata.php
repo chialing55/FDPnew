@@ -14,7 +14,7 @@ use App\Models\FsSeedsFulldata;
 use App\Models\FsSeedsRecord1;
 use App\Models\FsSeedsSplist;
 
-use App\Jobs\fsSeedsAddButton;
+use App\Jobs\FsSeedsAddButton;
 
 class SeedsUpdatebackdata extends Component
 {
@@ -53,7 +53,7 @@ class SeedsUpdatebackdata extends Component
 
         $censusdata1=FsSeedsFulldata::where('census', 'like', $census)->get()->toArray();
 
-        $ob_table = new fsSeedsAddButton;
+        $ob_table = new FsSeedsAddButton;
         $censusdata=$this->censusdata=$ob_table->addbutton($censusdata1, 'fulldata');
 
 

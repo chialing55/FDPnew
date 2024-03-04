@@ -16,7 +16,7 @@ use App\Models\FsSeedlingSlcov2;
 use App\Models\FsSeedlingSlroll1;
 use App\Models\FsSeedlingSlroll2;
 
-class fsSeedlingAddButton
+class FsSeedlingAddButton
 {
 	public function addbutton($records, $entry){
 

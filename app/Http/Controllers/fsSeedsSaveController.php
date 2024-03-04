@@ -14,11 +14,11 @@ use App\Models\FsSeedsRecord1;
 use App\Models\FsSeedsSplist;
 use App\Models\FsSeedsFixlog;
 
-use App\Jobs\fsSeedsCheck;
-use App\Jobs\fsSeedsAddButton;
+use App\Jobs\FsSeedsCheck;
+use App\Jobs\FsSeedsAddButton;
 
 
-class fsSeedsSaveController extends Controller
+class FsSeedsSaveController extends Controller
 {
 
 
@@ -45,7 +45,7 @@ class fsSeedsSaveController extends Controller
     public function getRedata(){
 
         $data1=FsSeedsRecord1::query()->get()->toArray();
-        $ob_table = new fsSeedsAddButton;
+        $ob_table = new FsSeedsAddButton;
         $redata=$ob_table->addbutton($data1, 'record');
 
         return $redata; 
@@ -54,7 +54,7 @@ class fsSeedsSaveController extends Controller
     public function getRedata2($census){
 
         $data1=FsSeedsFulldata::where('census', 'like', $census)->get()->toArray();
-        $ob_table = new fsSeedsAddButton;
+        $ob_table = new FsSeedsAddButton;
         $redata=$ob_table->addbutton($data1, 'fulldata');
 
         return $redata; 
@@ -107,7 +107,7 @@ class fsSeedsSaveController extends Controller
 
                 if($up=='no') continue;
 
-                $check = new fsSeedsCheck;
+                $check = new FsSeedsCheck;
                 // $checknote=$check->check($data[$i], $spinfo, 'o');
                 $result=$check->check($data[$i], $spinfo, 'o', $type);
                 $checknote=$result['checknote'];
@@ -155,7 +155,7 @@ class fsSeedsSaveController extends Controller
         } 
 //更新data
         // $data1=FsSeedsRecord1::query()->orderBy('trap', 'asc')->get()->toArray();
-        // $ob_table = new fsSeedsAddButton;
+        // $ob_table = new FsSeedsAddButton;
         // $redata=$ob_table->addbutton($data1);
 
         if ($type=='record'){
@@ -214,7 +214,7 @@ class fsSeedsSaveController extends Controller
                     $data[$i]['count']='0';
                 }
                 $data[$i]['trap'] = str_pad($data[$i]['trap'], 3, '0', STR_PAD_LEFT);
-                $check = new fsSeedsCheck;
+                $check = new FsSeedsCheck;
                 // $checknote=$check->check($data[$i], $spinfo, 'n');
                 $result=$check->check($data[$i], $spinfo, 'n', $type);
                 $checknote=$result['checknote'];
@@ -272,7 +272,7 @@ class fsSeedsSaveController extends Controller
 
 // // 更新data
         // $data1=FsSeedsRecord1::query()->orderBy('trap', 'asc')->get()->toArray();
-        // $ob_table = new fsSeedsAddButton;
+        // $ob_table = new FsSeedsAddButton;
         // $redata=$ob_table->addbutton($data1);
 
 
@@ -350,7 +350,7 @@ class fsSeedsSaveController extends Controller
 
 //更新data
         // $data1=FsSeedsRecord1::query()->orderBy('trap', 'asc')->get()->toArray();
-        // $ob_table = new fsSeedsAddButton;
+        // $ob_table = new FsSeedsAddButton;
         // $redata=$ob_table->addbutton($data1);
 
         if ($type=='record'){

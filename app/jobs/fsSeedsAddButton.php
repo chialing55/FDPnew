@@ -12,7 +12,7 @@ use App\Models\FsSeedsFulldata;
 use App\Models\FsSeedsRecord1;
 use App\Models\FsSeedsSplist;
 
-class fsSeedsAddButton
+class FsSeedsAddButton
 {
 	public function addbutton($entrytable, $type){
 

@@ -14,7 +14,7 @@ use App\Models\FsSeedsFulldata;
 use App\Models\FsSeedsRecord1;
 use App\Models\FsSeedsSplist;
 
-use App\Jobs\fsSeedsAddButton;
+use App\Jobs\FsSeedsAddButton;
 
 class SeedsShowentry extends Component
 {
@@ -198,7 +198,7 @@ class SeedsShowentry extends Component
 
         $entrytable1=FsSeedsRecord1::query()->orderBy('trap', 'asc')->orderBy('csp', 'asc')->orderBy('code', 'asc')->get()->toArray();
 
-        $ob_table = new fsSeedsAddButton;
+        $ob_table = new FsSeedsAddButton;
         $entrytable=$ob_table->addbutton($entrytable1, 'record');
 
 

@@ -8,9 +8,9 @@ use Illuminate\Support\Facades\App;
 // use Illuminate\Support\Facades\Input;
 
 use App\Models\FsBaseLogin;
-use App\Http\Controllers\updateController;
+use App\Http\Controllers\UpdateController;
 
-class loginController extends Controller
+class LoginController extends Controller
 {
 
 
@@ -18,7 +18,7 @@ class loginController extends Controller
         // Session::start();
         // $input = Request::all();
         $lasterUpdate='';
-        $ob_update = new updateController;
+        $ob_update = new UpdateController;
         $lasterUpdate=$ob_update->latestUpdates();
       
         $request->session()->put('latest_update', $lasterUpdate);

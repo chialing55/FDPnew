@@ -21,14 +21,15 @@ use App\Models\Ss1haRecord1;
 use App\Models\Ss1haRecord2;
 use App\Models\Ss1haEnviR1;
 use App\Models\Ss1haEnviR2;
+use App\Models\SsEntrycom;
 
-use App\Jobs\ssPlotDataCheck;
-use App\Jobs\ssPlotRecruitCheck;
-use App\Jobs\fsTreeAddButton;
-// use fsTreeAlternote;
+use App\Jobs\SsPlotDataCheck;
+use App\Jobs\SsPlotRecruitCheck;
+use App\Jobs\FsTreeAddButton;
 
 
-class ssPlotSaveController extends Controller
+
+class SsPlotSaveController extends Controller
 {
 
     public function get10mEnviTableInstance($entry) {
@@ -80,8 +81,12 @@ class ssPlotSaveController extends Controller
 
         $redatas=$table::where('plot', 'like', $plot)->where('sqx', 'like', $sqx)->where('sqy', 'like', $sqy)->where('show', 'like', '1')->orderBy('tag', 'asc')->orderBy('branch', 'asc')->get();
 
-        $ob_redata = new fsTreeAddButton;
+        $ob_redata = new FsTreeAddButton;
         $redata=$ob_redata->addbutton($redatas, $entry);
+
+        $col='entry'.$entry.'com';
+
+        $entrycomUpdate=SsEntrycom::query()->where('plot', 'like', '10m')->update([$col => '', 'update_id'=>$user]);
 
         return $redata;
 
@@ -93,8 +98,12 @@ class ssPlotSaveController extends Controller
 
         $redatas=$table::where('qx', 'like', $qx)->where('qy', 'like', $qy)->where('sqx', 'like', $sqx)->where('sqy', 'like', $sqy)->where('show', 'like', '1')->orderBy('tag', 'asc')->orderBy('branch', 'asc')->get();
 
-        $ob_redata = new fsTreeAddButton;
+        $ob_redata = new FsTreeAddButton;
         $redata=$ob_redata->addbutton($redatas, $entry);
+
+        $col='entry'.$entry.'com';
+
+        $entrycomUpdate=SsEntrycom::query()->where('plot', 'like', '1ha')->update([$col => '', 'update_id'=>$user]);
 
         return $redata;
 
@@ -120,6 +129,11 @@ class ssPlotSaveController extends Controller
             } else {
                 $redata=[];
             }
+
+        $col='entry'.$entry.'com';
+
+        $entrycomUpdate=SsEntrycom::query()->where('plot', 'like', '10m')->update([$col => '', 'update_id'=>$user]);
+
         return $redata;
     }
 
@@ -142,10 +156,17 @@ class ssPlotSaveController extends Controller
         if ($plotType=='ss10m'){
             $table = $this->get10mEnviTableInstance($entry);
             $table::where('plot', $envi['plot'])->update($uplist);
+            $plotvalue='10m';
         } else {
             $table = $this->get1haEnviTableInstance($entry);
             $table::where('qx', $envi['qx'])->where('qy', $envi['qy'])->update($uplist);
+            $plotvalue='1ha';
         }
+
+        $col='entry'.$entry.'com';
+
+        $entrycomUpdate=SsEntrycom::query()->where('plot', 'like', $plotvalue)->update([$col => '', 'update_id'=>$user]);
+
 
         $envisavenote='已儲存環境資料';
 
@@ -187,7 +208,7 @@ class ssPlotSaveController extends Controller
             $datacheck=['pass'=>'1', 'datasavenote'=>''];
             if ($data[$i]['date']==''){$data[$i]['date']='0000-00-00';}
             $data[$i]['code']=strtoupper($data[$i]['code']);  //轉為皆大寫
-            $check = new ssPlotDataCheck;
+            $check = new SsPlotDataCheck;
             $datacheck=$check->check($data[$i], $plotType, $entry);
             $data[$i]=$datacheck['data'];
 
@@ -304,7 +325,7 @@ class ssPlotSaveController extends Controller
             
             $datacheck=['pass'=>'1', 'datasavenote'=>''];
 
-            $check = new ssPlotRecruitCheck;
+            $check = new SsPlotRecruitCheck;
             $datacheck=$check->check($data[$i], $entry, $plotType);
             // $datacheck['pass']=0;
             if ($datacheck['pass']==1){

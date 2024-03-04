@@ -20,7 +20,7 @@ use App\Models\FsSeedlingSlroll1;
 use App\Models\FsSeedlingSlroll2;
 
 
-class fsSeedlingController extends Controller
+class FsSeedlingController extends Controller
 {
 
 

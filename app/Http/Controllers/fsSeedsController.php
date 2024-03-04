@@ -14,7 +14,7 @@ use App\Models\FsSeedsRecord1;
 use App\Models\FsSeedsSplist;
 
 
-class fsSeedsController extends Controller
+class FsSeedsController extends Controller
 {
 
 

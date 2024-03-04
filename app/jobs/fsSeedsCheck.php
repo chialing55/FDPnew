@@ -12,7 +12,7 @@ use App\Models\FsSeedsFulldata;
 use App\Models\FsSeedsRecord1;
 use App\Models\FsSeedsSplist;
  
-class fsSeedsCheck
+class FsSeedsCheck
 {
 	public function check($record, $spinfo, $type, $type2){
 

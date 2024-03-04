@@ -14,7 +14,7 @@ use App\Models\FsSeedlingSlrecord1;
 use App\Models\FsSeedlingSlrecord2;
 
 
-class fsSeedlingAlternote extends Controller
+class FsSeedlingAlternote extends Controller
 {
 
     public function alternote(Request $request, $tag, $entry, $thispage){

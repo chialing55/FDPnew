@@ -8,9 +8,9 @@ use Illuminate\Support\Facades\App;
 // use Illuminate\Support\Facades\Input;
 
 // use App\Models\FsBaseLogin;
-use App\Http\Controllers\updateController;
+use App\Http\Controllers\UpdateController;
 
-class webIndexController extends Controller
+class WebIndexController extends Controller
 {
 
 

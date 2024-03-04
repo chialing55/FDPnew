@@ -17,7 +17,7 @@ use App\Models\FsTreeCensus4;
 use App\Models\FsTreeCensus3;
 use App\Models\FsBaseTreeSplist;
 
-class fsTreePDFController extends Controller
+class FsTreePDFController extends Controller
 {
     public function record(Request $request, $qx, $qy, $type){
         // echo '1';

@@ -17,7 +17,7 @@ use App\Models\Ss1haRecord2;
 
 
 
-class ssPlotAlternote extends Controller
+class SsPlotAlternote extends Controller
 {
 
     public function alternote(Request $request, $stemid, $entry, $plotType, $thispage){

@@ -22,7 +22,7 @@ use App\Models\Ss1haRecord2;
 use App\Models\Ss1haEnviR1;
 use App\Models\Ss1haEnviR2;
 
-class ssPlotController extends Controller
+class SsPlotController extends Controller
 {
 
     public function plot(Request $request, $site){
@@ -279,7 +279,6 @@ class ssPlotController extends Controller
             return view('pages/shoushan/1ha_compare', [
                 'site' => $site,
                 'project' => '樣區監測',
-                'entry' => $entry,
                 'user' => $user
 
             ]);
@@ -305,7 +304,6 @@ class ssPlotController extends Controller
             return view('pages/shoushan/10m_compare', [
                 'site' => $site,
                 'project' => '樣區監測',
-                'entry' => $entry,
                 'user' => $user
 
             ]);

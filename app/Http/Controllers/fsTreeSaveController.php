@@ -19,13 +19,13 @@ use App\Models\FsTreeBase;
 use App\Models\FsTreeFixlog;
 use App\Models\FsTreeEntrycom;
 
-use App\Jobs\fsTreeDataCheck;
-use App\Jobs\fsTreeRecruitCheck;
-use App\Jobs\fsTreeAddButton;
-use fsTreeAlternote;
+use App\Jobs\FsTreeDataCheck;
+use App\Jobs\FsTreeRecruitCheck;
+use App\Jobs\FsTreeAddButton;
+use FsTreeAlternote;
 
 
-class fsTreeSaveController extends Controller
+class FsTreeSaveController extends Controller
 {
 
     public function getTableInstance($entry) {
@@ -43,7 +43,7 @@ class fsTreeSaveController extends Controller
 
         $redatas=$table::where('qx', 'like', $qx)->where('qy', 'like', $qy)->where('sqx', 'like', $sqx)->where('sqy', 'like', $sqy)->where('show', 'like', '1')->orderBy('tag', 'asc')->orderBy('branch', 'asc')->get();
 
-        $ob_redata = new fsTreeAddButton;
+        $ob_redata = new FsTreeAddButton;
         $redata=$ob_redata->addbutton($redatas, $entry);
 
         $thisentry='entry'.$entry;
@@ -80,7 +80,7 @@ class fsTreeSaveController extends Controller
             // $datacheck=['pass'=>'1', 'datasavenote'=>''];
             if ($data[$i]['date']==''){$data[$i]['date']='0000-00-00';}
 
-            $check = new fsTreeDataCheck;
+            $check = new FsTreeDataCheck;
             $datacheck=$check->check($data[$i]);
 
             if ($datacheck['pass']==1){
@@ -132,7 +132,7 @@ class fsTreeSaveController extends Controller
         // $redatas=$table::where('qx', 'like', $data[0]['qx'])->where('qy', 'like', $data[0]['qy'])->where('sqx', 'like', $data[0]['sqx'])->where('sqy', 'like', $data[0]['sqy'])->where('show', 'like', '1')->orderBy('tag', 'asc')->orderBy('branch', 'asc')->get();
 
 
-        // $ob_redata = new fsTreeAddButton;
+        // $ob_redata = new FsTreeAddButton;
         // $redata=$ob_redata->addbutton($redatas, $entry);
 
         $redata=$this->getRedata($entry, $data[0]['qx'], $data[0]['qy'], $data[0]['sqx'], $data[0]['sqy'], $user);
@@ -199,7 +199,7 @@ class fsTreeSaveController extends Controller
             
             $datacheck=['pass'=>'1', 'datasavenote'=>''];
 
-            $check = new fsTreeRecruitCheck;
+            $check = new FsTreeRecruitCheck;
             $datacheck=$check->check($data[$i], $entry);
 
             if ($datacheck['pass']==1){
@@ -311,7 +311,7 @@ class fsTreeSaveController extends Controller
             // $redatas=$table::where('qx', 'like', $data[0]['qx'])->where('qy', 'like', $data[0]['qy'])->where('sqx', 'like', $sqx)->where('sqy', 'like', $sqy)->where('show', 'like', '1')->orderBy('tag', 'asc')->orderBy('branch', 'asc')->get();
 
 
-            // $ob_redata = new fsTreeAddButton;
+            // $ob_redata = new FsTreeAddButton;
             // $redata=$ob_redata->addbutton($redatas, $entry);
 
             $redata=$this->getRedata($entry, $data[0]['qx'], $data[0]['qy'], $sqx, $sqy, $user);
@@ -367,7 +367,7 @@ class fsTreeSaveController extends Controller
             // 重新載入資料
             // $redatas=$table::where('qx', 'like', $thisqx)->where('qy', 'like', $thisqy)->where('sqx', 'like', $thissqx)->where('sqy', 'like', $thissqy)->where('show', 'like', '1')->orderBy('tag', 'asc')->orderBy('branch', 'asc')->get();
 
-            // $ob_redata = new fsTreeAddButton;
+            // $ob_redata = new FsTreeAddButton;
             // $redata=$ob_redata->addbutton($redatas, $entry);
             $redata=$this->getRedata($entry, $thisqx, $thisqy, $thissqx, $thissqy, $user);
 
@@ -444,7 +444,7 @@ class fsTreeSaveController extends Controller
         // // $redata='1';
 
 
-        // $ob_redata = new fsTreeAddButton;
+        // $ob_redata = new FsTreeAddButton;
         // $redata=$ob_redata->addbutton($redatas, $entry);
 
         $redata=$this->getRedata($entry, $site[0]['qx'], $site[0]['qy'], $site[0]['sqx'], $site[0]['sqy'], $user);
@@ -483,7 +483,7 @@ class fsTreeSaveController extends Controller
         $site=$table::where('stemid', 'like', $stemid)->get();
         // $redatas=$table::where('qx', 'like', $site[0]['qx'])->where('qy', 'like', $site[0]['qy'])->where('sqx', 'like', $site[0]['sqx'])->where('sqy', 'like', $site[0]['sqy'])->where('show', 'like', '1')->orderBy('tag', 'asc')->orderBy('branch', 'asc')->get();
 
-        // $ob_redata = new fsTreeAddButton;
+        // $ob_redata = new FsTreeAddButton;
         // $redata=$ob_redata->addbutton($redatas, $entry);
 
         $redata=$this->getRedata($entry, $site[0]['qx'], $site[0]['qy'], $site[0]['sqx'], $site[0]['sqy'], $user);
@@ -542,7 +542,7 @@ class fsTreeSaveController extends Controller
 
         // for($i=0;$i<count($data2);$i++){
         //                 //全部檢查一次
-        //         $check = new fsTreeDataCheck;
+        //         $check = new FsTreeDataCheck;
         //         $datacheck=$check->check($data2[$i]);
 
         //         if ($datacheck['pass']=='0'){
@@ -878,7 +878,7 @@ class fsTreeSaveController extends Controller
     }
 
 
-    public function fsTreeDeleteCensusData(Request $request){
+    public function deleteCensusData(Request $request){
 
         $data_all = request()->all();
 
@@ -1001,7 +1001,7 @@ class fsTreeSaveController extends Controller
 
     }
 
-    public function fsTreeAddData(Request $request){
+    public function addData(Request $request){
         $splist = $request->session()->get('splist');
         $data_all = request()->all();
 
@@ -1053,7 +1053,7 @@ class fsTreeSaveController extends Controller
             
             $datacheck=['pass'=>'1', 'datasavenote'=>''];
 
-            $check = new fsTreeRecruitCheck;
+            $check = new FsTreeRecruitCheck;
             $datacheck=$check->check($data[$i], $entry);
 
             if ($datacheck['pass']==1){

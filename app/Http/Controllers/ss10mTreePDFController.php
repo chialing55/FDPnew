@@ -17,7 +17,7 @@ use App\Models\Ss10mTree2015;
 use App\Models\Ss10mTreeRecord1;
 use App\Models\Ss10mTreeRecord2;
 
-class ss10mTreePDFController extends Controller
+class Ss10mTreePDFController extends Controller
 {
     public function record(Request $request, $plot){
         // echo '1';

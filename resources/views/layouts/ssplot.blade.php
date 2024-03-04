@@ -53,7 +53,7 @@
           <li class='innerlist list41' type='1ha_note'>資料輸入注意事項<hr></li>
           <li class='innerlist list42 listlink' type='1ha_entry1' >第一次輸入<hr></li>
           <li class='innerlist list43 listlink' type='1ha_entry2' >第二次輸入<hr></li>
-          <li class='innerlist list44' type='1ha_compare'>資料比對<hr></li>
+          <li class='innerlist list44 listlink' type='1ha_compare'>資料檢查/比對<hr></li>
           <li class='innerlist list45 listlink' type='1ha_dataviewer'>資料檢視<hr></li>
       </div>
 
@@ -61,7 +61,7 @@
           <li class='innerlist list61 ' type='10m_note'>資料輸入注意事項<hr></li>
           <li class='innerlist list62 listlink' type='10m_entry1' >第一次輸入<hr></li>
           <li class='innerlist list63 listlink' type='10m_entry2' >第二次輸入<hr></li>
-          <li class='innerlist list64' type='10m_compare'>資料比對<hr></li>
+          <li class='innerlist list64 listlink' type='10m_compare'>資料檢查/比對<hr></li>
           <li class='innerlist list65 listlink' type='10m_dataviewer'>資料檢視<hr></li>
 
       </div>

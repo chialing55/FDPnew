@@ -12,7 +12,7 @@ use PDF;
 use App\Models\FsSeedlingSlrecord;
 use App\Models\FsSeedlingData;
 
-class fsSeedlingPDFController extends Controller
+class FsSeedlingPDFController extends Controller
 {
     public function record($start, $end){
         // echo '1';

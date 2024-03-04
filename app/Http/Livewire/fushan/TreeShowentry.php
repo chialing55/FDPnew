@@ -19,8 +19,8 @@ use App\Models\FsTreeEntrycom;
 use App\Models\FsTreeCensus5;
 
 
-use App\Jobs\fsTreeAddButton;
-use App\Jobs\fsTreeCensus5Progress;
+use App\Jobs\FsTreeAddButton;
+use App\Jobs\FsTreeCensus5Progress;
 
 class TreeShowentry extends Component
 {
@@ -41,7 +41,7 @@ class TreeShowentry extends Component
 
     public function mount(){
 
-        $ob_result = new fsTreeCensus5Progress;
+        $ob_result = new FsTreeCensus5Progress;
         $result=$ob_result->showProgress();
 
         // Extract only the directory names
@@ -157,7 +157,7 @@ class TreeShowentry extends Component
                     }
                 }
 
-                $ob_redata = new fsTreeAddButton;
+                $ob_redata = new FsTreeAddButton;
                 $result=$ob_redata->addbutton($records1, $this->entry);
             } else {
                 $result='無';

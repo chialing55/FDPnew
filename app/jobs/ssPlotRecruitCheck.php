@@ -23,7 +23,7 @@ use App\Models\Ss1haRecord2;
 use App\Models\Ss1haEnviR1;
 use App\Models\Ss1haEnviR2;
 
-class ssPlotRecruitCheck
+class SsPlotRecruitCheck
 {
 	public function check($data2, $entry, $plotType){
 		$data[0]=$data2;

@@ -18,9 +18,7 @@ use App\Models\FsTreeCensus3;
 use App\Models\FsTreeEntrycom;
 use App\Models\FsTreeCensus5;
 
-
-use App\Jobs\fsTreeAddButton;
-use App\Jobs\fsTreeCensus5Progress;
+use App\Jobs\FsTreeCensus5Progress;
 
 class TreeAdddata extends Component
 {
@@ -37,7 +35,7 @@ class TreeAdddata extends Component
 
     public function mount(Request $request){
 
-        $ob_result = new fsTreeCensus5Progress;
+        $ob_result = new FsTreeCensus5Progress;
         $result=$ob_result->showProgress();
 
         // Extract only the directory names

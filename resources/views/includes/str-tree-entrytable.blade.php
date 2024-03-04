@@ -7,5 +7,6 @@
         <span style='margin-right: 20px'> 沒有舊資料</span>
 @endif
 @include('includes.str-tree-pages')
+<span class='datasavenote savenote'></span>
     </div>
 </div>

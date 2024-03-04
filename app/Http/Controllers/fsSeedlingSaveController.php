@@ -22,9 +22,9 @@ use App\Models\FsSeedlingSlroll2;
 use App\Jobs\FsSeedlingDataCheck;
 use App\Jobs\FsSeedlingRecruitCheck;
 
-use App\Jobs\fsSeedlingAddButton;
+use App\Jobs\FsSeedlingAddButton;
 
-class fsSeedlingSaveController extends Controller
+class FsSeedlingSaveController extends Controller
 {
 
      public function getTableInstance($entry) {
@@ -58,7 +58,7 @@ class fsSeedlingSaveController extends Controller
         $redata=$table::where('trap', 'like', $trap)->orderBy('plot', 'asc')->orderBy('tag', 'asc')->get();
     
 
-        $ob_redata = new fsSeedlingAddButton;
+        $ob_redata = new FsSeedlingAddButton;
         $redata=$ob_redata->addbutton($redata, $entry);
 
         return $redata; 

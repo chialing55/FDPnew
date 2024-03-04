@@ -16,7 +16,7 @@ use App\Models\Ss1haBase2015;
 use App\Models\Ss1haData2015;
 
 
-class ss1haPDFController extends Controller
+class Ss1haPDFController extends Controller
 {
     public function record(Request $request, $qx, $qy){
         // echo '1';

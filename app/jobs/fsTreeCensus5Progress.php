@@ -11,7 +11,7 @@ use Illuminate\Support\Facades\File;
 use App\Models\FsTreeEntrycom;
 
 
-class fsTreeCensus5Progress
+class FsTreeCensus5Progress
 {
 	public function showProgress(){
 

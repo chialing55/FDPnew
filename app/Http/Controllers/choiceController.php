@@ -12,7 +12,7 @@ use Illuminate\Support\Facades\App;
 use App\Models\FsBaseLogin;
 
 
-class choiceController extends Controller
+class ChoiceController extends Controller
 {
 
 

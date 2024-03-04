@@ -18,7 +18,7 @@ use App\Models\FsSeedlingSlroll1;
 use App\Models\FsSeedlingSlroll2;
 // use App\Post;
 
-use App\Jobs\fsSeedlingAddButton;
+use App\Jobs\FsSeedlingAddButton;
 
 class SeedlingShowentry extends Component
 {
@@ -144,7 +144,7 @@ class SeedlingShowentry extends Component
             // $slrecord1=='無';
             // $slrecord='無';
         } else {
-            $ob_redata = new fsSeedlingAddButton;
+            $ob_redata = new FsSeedlingAddButton;
             $slrecord1=$ob_redata->addbutton($slrecord, $this->entry);
         }
  

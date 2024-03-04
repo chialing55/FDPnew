@@ -18,7 +18,7 @@ use App\Models\Ss1haEnviR2;
 
 use App\Models\SsSplist;
 
-use App\Jobs\fsTreeAddButton;
+use App\Jobs\FsTreeAddButton;
 
 class S1haShowentry extends Component
 {
@@ -115,7 +115,7 @@ class S1haShowentry extends Component
         //新增樹為刪除按鍵，其他加入特殊修改按鍵
         if (count($records)>0){
 
-            $ob_redata = new fsTreeAddButton;
+            $ob_redata = new FsTreeAddButton;
             $result=$ob_redata->addbutton($records, $this->entry);
         } else {
             $result='無';
