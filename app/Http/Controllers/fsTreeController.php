@@ -336,4 +336,27 @@ class FsTreeController extends Controller
         }
     }
 
+    public function map(Request $request, $site){
+
+        $user = $request->session()->get('user', function () {
+            return 'no';
+        });
+
+        if ($user=='no'){
+            return view('login1', [
+                'check' => 'no'
+            ]);
+        } else {
+            // echo "1";
+            //最近一次調
+
+            // print_r($user);
+            return view('pages/fushan/tree_map', [
+                'site' => $site,
+                'project' => '每木',
+                'user' => $user,
+            ]);
+        }
+    }
+
 }

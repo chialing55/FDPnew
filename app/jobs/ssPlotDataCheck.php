@@ -59,6 +59,7 @@ class SsPlotDataCheck
             //將code拆開
 
             $codea=str_split($data[$i]['code']);
+            
             // $codea=$data[$i]['code'];
           //2. status 若不為空值，dbh須為0
             if ($data[$i]['status']!='' && $data[$i]['status']!='-9'){
@@ -68,35 +69,19 @@ class SsPlotDataCheck
                         break;
                     }
 
-                    if ($data[$i]['code']!=''){
+                    if ($data[$i]['code']!='' && !in_array('F', $codea)){
+
                         $datasavenote=$data[$i]['stemid'].' status不為空值，code不得有值。';
                         $pass='0';
                         break;
                     }
 
-                if ($data[$i]['status']=='-2'){
-                    if ($data[$i]['branch']!='0'){
-                        if ($plotType=='ss10m'){
-                            $mtagData=$table2::where('tag','like',$data[$i]['tag'])->where('plot', 'like', $data[$i]['plot'])->where('branch', 'like', '0')->get()->toArray();
-
-                        } else {
-                            $mtagData=$table2::where('tag','like',$data[$i]['tag'])->where('branch', 'like', '0')->get()->toArray();
-                        }
-                         if (count($mtagData)>0){
-                            $data[$i]['ill']=$mtagData[0]['ill'];
-                            $data[$i]['leave']=$mtagData[0]['leave'];
-                        }
-                    } else {
-                        // if ($data[$i]['ill']=='0'){
-                        //     $datasavenote=$data[$i]['stemid'].' status為 -2，ill 不得為0。';
-                        //     $pass='0';
-                        //     break;
-                        // }
-                    }                   
-                }  else {   //$data[$i]['status']==-1, -3, -4, 0
-                    $data[$i]['ill']='0';
-                    $data[$i]['leave']='0';                
-                }
+                    if ($data[$i]['ill']!='0' && $data[$i]['leave']!='0' && $data[$i]['branch']!='0'){
+                        $datasavenote=$data[$i]['stemid'].' status不為空值，ill, leave 應為 0。';
+                        $pass='0';
+                        break;
+                    }
+              
 
             }  else {
             //3. status 為空值，dbh不得為0
@@ -144,9 +129,11 @@ class SsPlotDataCheck
             }
         //4. code CIPRF
             //自動轉為大寫
-            
+
             //4.1  若code包含C，則POM不得同於前次pom
             if ($data[$i]['code']!=''){
+
+
             //4.2 code只能是CIPR
                 $codaarray=array("C","I","P","R","F");
 
@@ -183,11 +170,11 @@ class SsPlotDataCheck
                 
                 if (in_array("C", $codea)){
                     if ($data[$i]['status']!='-9'){
-                        // if ($data[$i]['pom']==$census2015[0]['pom']){
-                        //     $datasavenote=$data[$i]['stemid']." code包含C，則pom應與前次不同。";
-                        //     $pass='0';
-                        //     break;
-                        // }
+                        if ($data[$i]['pom']=='1.3'){ //第一次預設皆為1.3
+                            $datasavenote=$data[$i]['stemid']." code包含C，則pom應與前次不同。";
+                            $pass='0';
+                            break;
+                        }
                         if ($data[$i]['note']==''){
                             $datasavenote=$data[$i]['stemid']." code包含C，請在note欄位說明。";
                             $pass='0';

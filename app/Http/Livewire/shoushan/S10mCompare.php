@@ -64,7 +64,9 @@ class S10mCompare extends Component
     public $finishnote='';
     public $finishEntry='';
 
+
     public function entryFinish(Request $request, $entry){
+
 
         if ($entry==1){
             $table= new Ss10mTreeRecord1;
@@ -114,8 +116,11 @@ class S10mCompare extends Component
     }
 
     public $comnote='';
+    
 
     public function compare(Request $request){
+
+        $this->finishEntry='';
         $this->finishnote='';
         $comnote='';
         $comnote1='';
@@ -158,7 +163,7 @@ class S10mCompare extends Component
 
         $allStemid = array_unique(array_merge($record1Stemid, $record2Stemid));
         sort($allStemid);
-        // dd($record1);
+        dd($record1['S-F-06-002.2']);
         $plotSize='10';
         $plotType='ss10m';
 

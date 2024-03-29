@@ -19,7 +19,8 @@
                     @for($j=-4;$j<11;$j++)
                     @php 
                     $finishSiteClass='';
-                    $plot=$i.'-'.$j;
+                    $plot=$j.'-'.$i;
+                    // echo $plot."<br>";
                     if (!in_array($plot, $entrycom1) && !in_array($plot, $entrycom2)) {
                     $finishSiteClass = 'entryallfin ';
                     } elseif (!in_array($plot, $entrycom1)) {
@@ -29,7 +30,7 @@
                     }
                     @endphp
 
-                    <td class='{{$j}}-{{$i}}  '></td>
+                    <td class='{{$j}}-{{$i}}  {{$finishSiteClass}}'></td>
 
                     @endfor
                 </tr>
@@ -60,6 +61,11 @@
                     <button wire:click.prevent="entryFinish(2)" style="margin-left: 20px;" >第二次輸入檢查</button></div>
                     @endif
             </div>
+            <div style="margin-bottom: 10px;">
+                <span wire:loading>
+                     檢查中....
+                </span>
+            </div>
             @if($finishEntry!='')
             <div>
                 <h6>{{$finishEntry}} 檢查結果</h6>
@@ -77,11 +83,16 @@
         <p>兩次輸入皆通過檢查後，即可進行資料比對。</p>
         @if($entry2done=='1' && $entry1done=='1')
         <button wire:click.prevent="compare()">資料比對</button>
-            @if($comnote!='')
-            <div style='margin-top:20px;'>
-                {!!$comnote!!}
-            </div>
-            @endif
+        <div style="margin-bottom: 10px;">
+            <span wire:loading>
+                     檢查中....
+            </span>
+        </div>
+        @if($comnote!='')
+        <div style='margin-top:20px;'>
+            {!!$comnote!!}
+        </div>
+        @endif
         @endif
     </div>
     

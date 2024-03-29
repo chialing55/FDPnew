@@ -116,6 +116,7 @@ Route::get('/fushan/{project}/{type}', function($project, $type){
                 case 'updateTable': return App::call('App\Http\Controllers\FsTreeController@updateTable',['site' => $site] );
                 case 'updateBackData': return App::call('App\Http\Controllers\FsTreeController@updateBackData',['site' => $site] );
                 case 'addData': return App::call('App\Http\Controllers\FsTreeController@addData',['site' => $site] );
+                case 'map': return App::call('App\Http\Controllers\FsTreeController@map',['site' => $site] );
             }
 
         }

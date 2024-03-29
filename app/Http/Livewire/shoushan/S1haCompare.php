@@ -37,7 +37,7 @@ class S1haCompare extends Component
         $entrycom1=[];
 
         $entrycom1data = Ss1haRecord1::select('qx', 'qy')->where('date', 'like', '0000-00-00')->where('show', 'like', '1')->groupBy('qx', 'qy')->get()->toArray();
-        $entrycom2data = Ss1haRecord1::select('qx', 'qy')->where('date', 'like', '0000-00-00')->where('show', 'like', '1')->groupBy('qx', 'qy')->get()->toArray();
+        $entrycom2data = Ss1haRecord2::select('qx', 'qy')->where('date', 'like', '0000-00-00')->where('show', 'like', '1')->groupBy('qx', 'qy')->get()->toArray();
         if($entrycom1data!=[]){
             foreach($entrycom1data as $item){
                 $this->entrycom1[]=$item['qx']."-".$item['qy'];
@@ -50,7 +50,7 @@ class S1haCompare extends Component
             }
         }
 
-        // dd($entrycom1);
+        // dd($this->entrycom1);
 
 
         // $finishSite["'".$table['qx']."-".$table['qy']."'"]=$table['entry1'].$table['entry2'];
@@ -69,6 +69,7 @@ class S1haCompare extends Component
 
     public $finishnote='';
     public $finishEntry='';
+
 
     public function entryFinish(Request $request, $entry){
 
@@ -116,7 +117,7 @@ class S1haCompare extends Component
         }
         
         $this->comnote='';
-
+        
     }
 
     public $comnote='';

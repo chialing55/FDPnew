@@ -71,7 +71,7 @@ function cellfunction(tableType, container, row, col, prop){
             }
           }
 //note字變小
-          if (col == 12 || col==14){
+          if (col == 13 || col==15){
             cellProperties.className = 'fs08'; 
           }
          return cellProperties;
@@ -141,6 +141,7 @@ function ssdatatable(data, thispage, pps){
       {data: "dbh", type: 'numeric', allowInvalid: false},
       {data: "ill", type: 'numeric', allowInvalid: false, validator: numericValidator5},
       {data: "leave", type: 'numeric', allowInvalid: false, validator: numericValidator100},
+      {data: "pom", type: 'numeric'},
       {data: "note"},
       {data: "confirm", type: 'checkbox', checkedTemplate: '1', uncheckedTemplate: ''},
       {data: "alternotetable", renderer: "html", readOnly: true},
@@ -148,11 +149,11 @@ function ssdatatable(data, thispage, pps){
 
     ];
 
-  var colWidths=[120, 80,25,25,80, 40, 120,50,50,60,50,50,160,50, 160];
-  var colHeaders=["Date","plot","5x","5y", "tag", "b", "csp",'status', "code","dbh","ill","leave","note","縮水",""];
+  var colWidths=[120, 80,25,25,80, 40, 120,50,50,60,50,50,50,160,50, 160];
+  var colHeaders=["Date","plot","5x","5y", "tag", "b", "csp",'status', "code","dbh","ill","leave","pom","note","縮水",""];
 
   var hiddenColumns ={
-      columns: [15],
+      columns: [16],
     };
 
   return createHandsontable(container, columns, data2, saveButtonName, "/ssPlotsavedata", tabletype, colWidths, hiddenColumns, colHeaders, thispage );
@@ -189,13 +190,14 @@ $(`button[name=recruitsave${site}]`).off();
       {data: "dbh", type: 'numeric' , allowInvalid: false},
       {data: "ill", type: 'numeric', allowInvalid: false, validator: numericValidator5},
       {data: "leave", type: 'numeric', allowInvalid: false, validator: numericValidator100 },
+      {data: "pom", type: 'numeric'},
       {data: "note"},
       {data: "tofix", type: 'checkbox', checkedTemplate: '1', uncheckedTemplate: ''}
 
     ];
 
-  var colWidths=[120, 80,25,25,80, 40, 120,50,60,50,50,160,50];
-  var colHeaders=["Date","plot","5x","5y", "tag", "b", "csp", "code","dbh","ill","leave","note","漏資料"];
+  var colWidths=[120, 80,25,25,80, 40, 120,50,60,50,50,50,160,50];
+  var colHeaders=["Date","plot","5x","5y", "tag", "b", "csp", "code","dbh","ill","leave","pom","note","漏資料"];
 
   var hiddenColumns =[];
   return createHandsontable(container, columns, emptytable, saveButtonName, "/ssPlotsaverecruit", tabletype, colWidths, hiddenColumns, colHeaders, thispage );
@@ -225,16 +227,17 @@ function alternotetable(alterdata, stemid, entry, thispage){
       {data: "b", type: 'numeric', allowInvalid: false},
       {data: "csp", type: 'autocomplete', source: csplist, strict: true, visibleRows: 10, allowInvalid: false,},
       {data: "dbh", type: 'numeric', allowInvalid: false},
+      {data: "原POM", type: 'numeric'},
       {data: "other"},
       {data: "stemid"},
 
     ];
 
-  var colWidths=[80,25,25,80, 40, 120,70, 100];
-  var colHeaders=["plot","5x","5y", "tag", "b", "csp", "dbh(<1)", "other","stemid"];
+  var colWidths=[80,25,25,80, 40, 120,70,70, 100];
+  var colHeaders=["plot","5x","5y", "tag", "b", "csp", "dbh(<1)", "原POM","other","stemid"];
 
   var hiddenColumns ={
-      columns: [8],
+      columns: [9],
     };
   return createHandsontable(container, columns, alterdata, saveButtonName, "/ssPlotsavealternote", tableType, colWidths, hiddenColumns, colHeaders, thispage );  
 

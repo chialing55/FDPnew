@@ -794,7 +794,7 @@ class FsTreeSaveController extends Controller
                 }
 
                 if ($i==1){
-                    $census1['h']=$census1['h1'];
+                    $census1['h']=$census1['h2'];
                 }
 
                 if ($i==3 || $i==4){
@@ -1022,7 +1022,8 @@ class FsTreeSaveController extends Controller
 
         for($i=0; $i<count($data);$i++){
             $pass='1';
-
+            $fixlog1=[];
+            $fixlog2=[];
 
 
             if (is_null($data[$i]['date']) || $data[$i]['date']==''){
@@ -1130,9 +1131,28 @@ class FsTreeSaveController extends Controller
                     $nonsavelist[$i]['csp']='';
                     $nonsavelist[$i]['dbh']='';
                     $nonsavelist[$i]['note']='';
+//fixlog
+                    $fixlog1['id']='0';
+                    $fixlog1['from']='addData';
+                    $fixlog1['type']='insert';
+                    $fixlog1['sheet']="census5";
+                    $fixlog1['qx']=$data[$i]['qx'];
+                    $fixlog1['stemid']=$data[$i]['stemid'];
+                    $fixlog1['descript']=json_encode($inlist, JSON_UNESCAPED_UNICODE);
+                    $fixlog1['update_id']=$user;
+                    $fixlog1['updated_at']=date("Y-m-d H:i:s");
+                    FsTreeFixlog::insert($fixlog1);
 
-
-
+                    $fixlog2['id']='0';
+                    $fixlog2['from']='addData';
+                    $fixlog2['type']='insert';
+                    $fixlog2['sheet']="base";
+                    $fixlog2['qx']=$data[$i]['qx'];
+                    $fixlog2['stemid']=$data[$i]['stemid'];
+                    $fixlog2['descript']=json_encode($inlist2, JSON_UNESCAPED_UNICODE);
+                    $fixlog2['update_id']=$user;
+                    $fixlog2['updated_at']=date("Y-m-d H:i:s");
+                    FsTreeFixlog::insert($fixlog2);
 
             } else {  // $datacheck['pass']!=1
                 $recruitsavenote=$recruitsavenote."<br>".$datacheck['datasavenote'];

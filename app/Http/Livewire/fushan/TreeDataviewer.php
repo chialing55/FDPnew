@@ -195,7 +195,11 @@ class TreeDataviewer extends Component
             foreach ($censusTables as $index => $censusTable) {
                 if (count($$censusTable) > 0) {
                     if ($tag[0] == 'G') {
+                        if (isset($$censusTable[0]['h2'])){
                         $$censusTable[0]['dbh'] = $$censusTable[0]['h2'];
+                        } else {
+                            $$censusTable[0]['dbh'] = $$censusTable[0]['h']-$$censusTable[0]['pom'];
+                        }
                     }
                     if ($censusTable=='census1'){
                         $$censusTable[0]['status']='';

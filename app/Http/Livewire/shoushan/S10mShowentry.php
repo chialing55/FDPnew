@@ -182,6 +182,7 @@ class S10mShowentry extends Component
             $emptytable[$k]['code']='';
             $emptytable[$k]['ill']='';
             $emptytable[$k]['leave']='';
+            $emptytable[$k]['pom']='1.3';
             $emptytable[$k]['date']='';
             $emptytable[$k]['tofix']='';
 

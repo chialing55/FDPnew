@@ -62,7 +62,11 @@
             <button type="submit" style='margin-left: 20px;'>開始比對</button>
         </form>
     </div>
-    </div>
+    <div style="margin-bottom: 10px;">
+        <span wire:loading>
+                 檢查中....
+        </span>
+    </div>    </div>
 
     @if (isset($comnote))
     <div class='text_box' style='background-color:lightyellow;'> 

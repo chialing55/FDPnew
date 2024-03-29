@@ -12,4 +12,5 @@ class FsTreeBase extends Model
 
     protected $table = "base";
     protected $connection = 'mysql';
+
 }

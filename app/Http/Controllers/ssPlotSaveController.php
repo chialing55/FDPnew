@@ -406,6 +406,7 @@ class SsPlotSaveController extends Controller
                     $nonsavelist[$i]['dbh']='';
                     $nonsavelist[$i]['ill']='';
                     $nonsavelist[$i]['leave']='';
+                    $nonsavelist[$i]['pom']='';
                     $nonsavelist[$i]['note']='';
                     $nonsavelist[$i]['tofix']='';
                     if ($plotType=='ss10m'){

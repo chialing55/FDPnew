@@ -234,7 +234,7 @@ class TreeUpdatebackdata extends Component
                     }
                 }
                 if ($j==1){
-                    $data[$j]['h1']=$temp[0]['h'];
+                    $data[$j]['h2']=$temp[0]['h'];
                 }
             } else {
                 

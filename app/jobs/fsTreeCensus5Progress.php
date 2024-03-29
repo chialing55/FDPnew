@@ -21,6 +21,7 @@ class FsTreeCensus5Progress
 
         $compareok=FsTreeEntrycom::select('qx',  'compareOK')->where('compareOK', '!=', '0')->groupBy('qx', 'compareOK')->get()->toArray();
         $updateok=FsTreeEntrycom::select('qx',  'census5update')->where('census5update', '!=', '0')->groupBy('qx', 'census5update')->get()->toArray();
+        $alternoteOK=FsTreeEntrycom::select('qx',  'alternoteOK')->where('alternoteOK', '!=', '')->groupBy('qx', 'alternoteOK')->get()->toArray();
 
 
         foreach ($compareok as $entry){
@@ -29,6 +30,10 @@ class FsTreeCensus5Progress
 
         foreach ($updateok as $entry){
                 $updatelist[]=$entry['qx'];
+        }
+
+        foreach ($updateok as $entry){
+                $alternotelist[]=$entry['qx'];
         }        
         // dd($compareok);
 
@@ -44,7 +49,8 @@ class FsTreeCensus5Progress
 	return $result=[
             'updatelist'=> $updatelist,
             'comparelist'=>$comparelist,
-            'directorieslist'=>$directorieslist
+            'directorieslist'=>$directorieslist,
+            'alternotelist'=>$alternotelist
         ];
 
 	}

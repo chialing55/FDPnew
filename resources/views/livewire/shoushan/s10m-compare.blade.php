@@ -53,6 +53,13 @@
                     <button wire:click.prevent="entryFinish(2)" style="margin-left: 20px;" >第二次輸入檢查</button></div>
                     @endif
             </div>
+
+        <div style="margin: 10px 0;">
+            <span wire:loading>
+                     檢查中....
+            </span>
+        </div>
+
             @if($finishEntry!='')
             <div>
                 <h6>{{$finishEntry}} 檢查結果</h6>
@@ -68,14 +75,21 @@
         <h2>資料比對</h2>
         <hr>
         <p>兩次輸入皆通過檢查後，即可進行資料比對。</p>
-        @if($entry2done=='1' && $entry1done=='1')
+        
         <button wire:click.prevent="compare()">資料比對</button>
+
+        <div style="margin: 10px 0;">
+            <span wire:loading>
+                     檢查中....
+            </span>
+        </div>
+
             @if($comnote!='')
             <div style='margin-top:20px;'>
                 {!!$comnote!!}
             </div>
             @endif
-        @endif
+       
     </div>
     
     {{-- Care about people's approval and you will be their prisoner. --}}

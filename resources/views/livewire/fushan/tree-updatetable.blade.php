@@ -28,11 +28,20 @@
                 </select>
                 <button type="submit" style='margin-left: 20px;'>匯入大表</button>
             </form>
-           
+
+
  
     @if($importnote!='')
         <p >{{$importnote}}</p>
-        <p >{!$importnote2!}</p>
+
+        <p >{!!$importnote2!!}</p>
     @endif
-    </div>    
+    </div>  
+
+      {{-- <button type="button" style='margin-left: 20px;' wire:click='R'>整理R</button> --}}
+
+        <span wire:loading>
+                 匯入中....
+        </span>
+
 </div>

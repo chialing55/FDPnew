@@ -57,7 +57,7 @@
             <li>新增資料</li>
           </div> --}}
       
-      <div class='list list7 ' type='map'>樹位置圖輸入<hr></div>
+      <div class='list list7 listlink' type='map'>植株位置輸入<hr></div>
   </div>
 
 @endsection

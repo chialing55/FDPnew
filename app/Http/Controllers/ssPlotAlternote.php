@@ -29,7 +29,7 @@ class SsPlotAlternote extends Controller
             } else {
                 $table= new Ss10mTreeRecord2;
             }
-            $alterdata=['stemid'=>$stemid, 'plot'=>'', 'sqx'=>'', 'sqy' => '', 'tag'=>'', 'b'=>'', 'csp'=>'', 'other'=>''];
+            $alterdata=['stemid'=>$stemid, 'plot'=>'', 'sqx'=>'', 'sqy' => '', 'tag'=>'', 'b'=>'', 'csp'=>'', 'other'=>'', '原POM' =>''];
         } else {
 
             if ($entry == '1') {
@@ -37,7 +37,7 @@ class SsPlotAlternote extends Controller
             } else {
                 $table= new Ss1haRecord2;
             }
-            $alterdata=['stemid'=>$stemid, 'qx'=>'','qy'=>'',  'sqx'=>'', 'sqy' => '', 'tag'=>'', 'b'=>'', 'csp'=>'', 'other'=>''];
+            $alterdata=['stemid'=>$stemid, 'qx'=>'','qy'=>'',  'sqx'=>'', 'sqy' => '', 'tag'=>'', 'b'=>'', 'csp'=>'', 'other'=>'', '原POM' =>''];
         }
 
         $user = $request->session()->get('user', function () {
