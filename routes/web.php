@@ -165,6 +165,10 @@ Route::get('/shoushan/{project}/{type}', function($project, $type){
                     return App::call('App\Http\Controllers\SsPlotController@dataviewer10m', ['site' => $site]);
                 case '1ha_dataviewer':
                     return App::call('App\Http\Controllers\SsPlotController@dataviewer1ha', ['site' => $site]);
+                case '1ha_update':
+                    return App::call('App\Http\Controllers\SsPlotController@update1ha', ['site' => $site]);
+                case '10m_update':
+                    return App::call('App\Http\Controllers\SsPlotController@update10m', ['site' => $site]);
 
                 // // Add more cases if needed
                 // default:
@@ -226,8 +230,8 @@ Route::get('/ssPlotdeletealter/{stemid}/{entry}/{plotType}/{thispage}', [App\Htt
 Route::post('/ss10msaveaddcov', [App\Http\Controllers\SsPlotSaveController::class, 'saveaddcov']);
 Route::get('/ss10mdeletecov/{id}/{entry}', [App\Http\Controllers\SsPlotSaveController::class, 'deletecov']);
 Route::post('/ss10msavecov', [App\Http\Controllers\SsPlotSaveController::class, 'savecov']);
-
-
+Route::post('/ssplotupdate', [App\Http\Controllers\SsPlotSaveController::class, 'saveupdate']);
+Route::post('/ssplotdeletecensusdata', [App\Http\Controllers\SsPlotSaveController::class, 'deleteCensusData']);
 
 //檔案最新更新日期
 Route::get('/latest-updates', 'App\Http\Controllers\UpdateController@latestUpdates');

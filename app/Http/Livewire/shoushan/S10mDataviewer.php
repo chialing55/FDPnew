@@ -23,7 +23,7 @@ class S10mDataviewer extends Component
     public $downloadtable=[];
 
     public $plots = array('B-F-01', 'B-F-04', 'B-F-06', 'B-F-13', 'B-F-14', 'B-F-19', 'G-F-01', 'G-F-02', 'G-F-03', 'G-F-06', 'Q-F-03', 'S-F-01', 'S-F-02', 'S-F-04', 'S-F-06', 'S-F-07', 'S-F-09', 'S-F-11', 'S-F-14', 'S-F-15', 'S-F-16', 'S-F-17', 'S-F-21', 'S-F-38'); 
-
+    public $censusyear=array('','2014', '2015','2024');
 
     public $selectPlot='0';
 

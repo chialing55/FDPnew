@@ -146,14 +146,21 @@ function cellfunction(tableType, container, row, col, prop){
           }
          return cellProperties;
       } else if (tableType=='updateData1'){
-      	  if (container.handsontable('getData')[row][5]!='0'){
+      	  if (container.handsontable('getData')[row][5]!='0' & container.handsontable('getData')[row][7]!='y'){
           	cellProperties.readOnly = true; 
 	          	if (col==5 || col==4){
 	          		cellProperties.readOnly = false; 
 	          	}
+          } else if (container.handsontable('getData')[row][7]=='y'){
+            cellProperties.readOnly = false; 
+              if (col==6){
+                cellProperties.readOnly = true; 
+              }
           }
           return cellProperties;
       } else if (tableType=='updateData2'){
+        if (container.handsontable('getData')[row][1]!=''){
+
           if (container.handsontable('getData')[row][10][0]!='G'){
               if (col==5){
                 cellProperties.readOnly = true; 
@@ -164,15 +171,23 @@ function cellfunction(tableType, container, row, col, prop){
               }
           }
           if (container.handsontable('getData')[row][0]=='census1'){
-              if (col==2 || col ==3){
+              if (col==2 || col ==3 || col ==8){
                 cellProperties.readOnly = true; 
               }
           }
-
+          if (container.handsontable('getData')[row][0]!='census5'){
+              if (col==9){
+                cellProperties.readOnly = true; 
+              }
+          }
           if (col == 7 || col==9){
           	cellProperties.className = 'fs08'; 
           }
+        } else {
+          cellProperties.readOnly = true; 
+        }
          return cellProperties;
+        
       }
 }
 
@@ -502,13 +517,15 @@ function fstreeupdatatable(stemid, stemdata, csplist, from){
       {data: "tag",},
       {data: "branch", type: 'numeric'},
       {data: "csp", type: 'autocomplete', source: csplist, strict: true, visibleRows: 10, allowInvalid: false,},
-
+      {data: "r"}
     ];
 
   var colWidths1=[25,25,25,25,80, 40, 120];
   var colHeaders1=["20x","20y","5x","5y", "tag", "b", "csp"];
 
-  var hiddenColumns1 =[];
+  var hiddenColumns1 ={
+    columns: [7],
+  }
 
   var handsontable1=createHandsontable(container1, columns1, stemdata[0], saveButtonName, "/fstreeupdate", tabletype1, colWidths1, hiddenColumns1, colHeaders1, 1 );
 

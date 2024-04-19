@@ -54,6 +54,7 @@
           <li class='innerlist list42 listlink' type='1ha_entry1' >第一次輸入<hr></li>
           <li class='innerlist list43 listlink' type='1ha_entry2' >第二次輸入<hr></li>
           <li class='innerlist list44 listlink' type='1ha_compare'>資料檢查/比對<hr></li>
+          <li class='innerlist list46 listlink' type='1ha_update'>資料修改<hr></li>
           <li class='innerlist list45 listlink' type='1ha_dataviewer'>資料檢視<hr></li>
       </div>
 
@@ -62,6 +63,7 @@
           <li class='innerlist list62 listlink' type='10m_entry1' >第一次輸入<hr></li>
           <li class='innerlist list63 listlink' type='10m_entry2' >第二次輸入<hr></li>
           <li class='innerlist list64 listlink' type='10m_compare'>資料檢查/比對<hr></li>
+          <li class='innerlist list66 listlink' type='10m_update'>資料修改<hr></li>
           <li class='innerlist list65 listlink' type='10m_dataviewer'>資料檢視<hr></li>
 
       </div>

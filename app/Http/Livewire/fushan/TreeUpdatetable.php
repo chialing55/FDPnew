@@ -209,6 +209,8 @@ class TreeUpdatetable extends Component
 
     }
 
+
+//base_r表製作未完善，故以此法更新，暫保留
     public function R(){
 
         $importdatas=FsTreeRecord1::where('qx', 'like', '18')->orWhere('qx', 'like', '19')->orWhere('qx', 'like', '20')->orWhere('qx', 'like', '21')->orWhere('qx', 'like', '22')->orWhere('qx', 'like', '23')->orWhere('qx', 'like', '24')->where('code', 'like', '%R%')->get()->toArray();

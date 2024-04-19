@@ -35,6 +35,8 @@ class S1haDataviewer extends Component
     public $map='1';
     public $downloadtable=[];
 
+    public $censusyear=array('','2015','2024');
+
     public function mount(Request $request){
 
 

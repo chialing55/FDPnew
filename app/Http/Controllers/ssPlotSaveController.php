@@ -10,6 +10,7 @@ use Illuminate\Support\Facades\Schema;
 use App\Models\Ss10mQuad2014;
 use App\Models\Ss10mTree2014;
 use App\Models\Ss10mTree2015;
+use App\Models\Ss10mTree2024;
 use App\Models\Ss10mTreeEnviR1;
 use App\Models\Ss10mTreeEnviR2;
 use App\Models\Ss10mTreeCovR1;
@@ -17,16 +18,22 @@ use App\Models\Ss10mTreeCovR2;
 use App\Models\Ss10mTreeRecord1;
 use App\Models\Ss10mTreeRecord2;
 use App\Models\Ss1haData2015;
+use App\Models\Ss1haData2024;
+use App\Models\Ss1haBase2024;
+use App\Models\Ss1haBaseR2024;
 use App\Models\Ss1haRecord1;
 use App\Models\Ss1haRecord2;
 use App\Models\Ss1haEnviR1;
 use App\Models\Ss1haEnviR2;
 use App\Models\SsEntrycom;
+use App\Models\SsFixlog;
+use App\Models\SsSplist;
 
 use App\Jobs\SsPlotDataCheck;
 use App\Jobs\SsPlotRecruitCheck;
 use App\Jobs\FsTreeAddButton;
-
+use App\Jobs\TreeUpdateBase;
+use App\Jobs\TreeUpdateCensusData;
 
 
 class SsPlotSaveController extends Controller
@@ -885,138 +892,240 @@ class SsPlotSaveController extends Controller
     }
 
 
+//後端資料更正
 
-//     public function finishnote(Request $request, $qx, $qy, $entry){
+    public function saveupdate (Request $request){
 
-//         $user = $request->session()->get('user', function () {
-//             return view('login1', [
-//             'check' => 'no'
-//             ]);
-//         });
+        $data_all = request()->all();
+        $splist=[];
 
-//         $splist = $request->session()->get('splist');
+        $splists=SsSplist::select('spcode', 'index')->get()->toArray();
+        foreach($splists as $splist1){
+            $splist[$splist1['spcode']]=$splist1['index'];
+        }
 
-//         $table = $this->getTableInstance($entry);
-//         $pass='1';
-//         $finishnote='';
-//         $data = $table::where('qx', 'like', $qx)->where('qy', 'like', $qy)->get()->toArray();
+        $user=$data_all['user'];
+        $from=$data_all['from'];
+        $plotType=$data_all['plotType'];
+        $base=$data_all['data1'][0];  
 
-//         //如果沒有csp，先補上
-//         for($i=0;$i<count($data);$i++){
-//             if ($data[$i]['csp']==''){
-//                 $uplist['csp']=$splist[$data[$i]['spcode']];
-//                 $uplist['update_id']=$user;
-//                 $table::where('stemid', 'like', $data[$i]['stemid'])->update($uplist);
-//             }
-//         }
-
-//         //是否有date=0000-00-00，show=1
-//         $data = $table::where('qx', 'like', $qx)->where('qy', 'like', $qy)->where('date', 'like', '0000-00-00')->where('show', 'like', '1')->get();
-
-//         if (!$data->isEmpty()){
-//             $finishnote='有資料未輸入完成 [('.$data[0]['sqx'].', '.$data[0]['sqy'].') '.$data[0]['stemid'].']';
-//             $pass='0';
-//         }
-
-//         //同tag是否status相同，csp相同，小區相同, show=1
-
-//         if ($pass=='1'){
-//             $data = $table::select('tag')->where('qx', 'like', $qx)->where('qy', 'like', $qy)->where('show', 'like', '1')->groupBy('tag')->get()->toArray();
-
-//             // print_r($data);
-//             for($i=0;$i<count($data);$i++){
-//                 $com1s=[];
-//                 $com2s=[];
-//                 $com1s2=[];
-//                 $com3s=[];
-//                 $data1=$table::where('tag', 'like', $data[$i]['tag'])->where('show', 'like', '1')->orderBy('branch', 'asc')->get()->toArray();
-//                 if (count($data1)>1){   //有分支
-//                     foreach($data1 as $data0){
-//                         $com1=$data0['qx'].$data0['qy'].$data0['sqx'].$data0['sqy'];
-//                         $codes[]=$data0['code'];
-//                         $com1s[]=$com1;
-//                         $com2s[]=$data0['status'];
-//                         $com3s[]=$data0['spcode'];
-                        
-//                     }
-
-//                     $com1s=array_unique($com1s);
-//                     $com2s=array_unique($com2s);
-//                     $com3s=array_unique($com3s);
-//                     if ($data1[0]['branch']!='0'){
-//                         $pass='0';
-//                         $finishnote=$data1[0]['tag'].' 缺少主幹資料，請新增主幹並勾選漏資料，主幹若死亡，status = -3。';
-//                         break;
-//                     }
+        if ($plotType=='ss1ha'){
+            $tablebase = new Ss1haBase2024;
+            $tablebaser = new Ss1haBaseR2024;
+            $tablecensus = new Ss1haData2024;
+            $tablefixlog = new SsFixlog;
+        } 
 
 
-//                     if (count($com1s)>1){
-//                         if (!in_array("R", $codes)){
-//                             $pass='0';
-//                             $finishnote='[('.$com1s[0][3].', '.$com1s[0][4].') ('.$com1s[1][3].', '.$com1s[1][4].')'.$data1[0]['tag'].'] 同編號應有相同小區';
-//                             break;
-//                         } else {  //重新篩選非R的資料
-//                             $data2=$table::where('tag', 'like', $data[$i]['tag'])->where('show', 'like', '1')->where('code', 'not like', '%R%')->get()->toArray();
-//                             if (count($data2)>1){
-//                                 foreach($data1 as $data0){
-//                                     $com1=$data0['qx'].$data0['qy'].$data0['sqx'].$data0['sqy'];
-//                                     $com1s2[]=$com1;
-//                                 }
-//                             }
-//                             $com1s2=array_unique($com1s2);
-//                             if (count($com1s2)>1){
-//                                 $finishnote='[('.$com1s2[0][3].', '.$com1s2[0][4].') ('.$com1s2[1][3].', '.$com1s2[1][4].') '.$data2[0]['tag'].'] 同編號應有相同小區';
-//                                 break;
-//                             }
+//         $test='';
+        $datasavenote='';
+
+//base
+        $ob_updateBase = new TreeUpdateBase;
+        $result=$ob_updateBase->up($plotType, $data_all, $splist);
+        $datasavenote=$result['datasavenote'];
+        $thisstemid=$result['thisstemid'];
+        $ostemid=$result['ostemid'];
+        $newstemid=$result['newstemid'];
+        $pass=$result['pass'];
+// $thisstemid='';
+// $pass=0;
+        if ($pass=='1'){
+
+            $stemidlist=[];
+            
+// //census
+            for ($i = 1; $i <= 2; $i++) {
+                $lastcensus=2;
+                ${"census$i"} = $data_all['data2'][$i-1];
+                if ($newstemid!=$ostemid){
+                    ${"census$i"}['stemid']=$newstemid;
+                    ${"census$i"}['tag']=$base['tag'];
+                    ${"census$i"}['branch']=$base['branch'];
+                }
 
 
-//                         }
-//                     }
+                switch ($i) {
+                    case 1:$table= new Ss1haData2015; break;
+                    case 2:$table= new Ss1haData2024; break;
+                }
 
-//                     if (count($com2s)>1){
-//                         //-9
-//                         if (in_array('0', $com2s) || in_array('-1', $com2s) || in_array('-2', $com2s)){
-//                             // print_r($com2s);
-//                             $pass='0';
-//                             $finishnote='[('.$data1[0]['sqx'].', '.$data1[0]['sqy'].') '.$data1[0]['tag'].'] 同編號應有相同status';
-//                             break;
-//                         }
+                
+                $temp= $table::where('stemid','like',$ostemid)->get()->toArray();
+                if (count($temp)>0){
+                    ${"ocensus$i"}=$temp[0];
+                } else {
+                    ${"ocensus$i"}=[];
+                }
 
-//                     }
+        $ob_updateData = new TreeUpdateCensusData;
+        $result2=$ob_updateData->up($plotType, $i, $lastcensus, ${"census$i"}, ${"ocensus$i"}, $table, $data_all, $ostemid);
+        if ($result2['datasavenote']!=''){
+            $datasavenote=$result2['datasavenote'];
+        }
+        $keylist=$result2['keylist'];
 
-//                     if (count($com3s)>1){
-//                         $pass='0';
-                        
-//                         $finishnote='[('.$data1[0]['sqx'].', '.$data1[0]['sqy'].') '.$data1[0]['tag'].'] 同編號應有相同csp';
-//                         break;
-                        
-//                     }
-//                 }
+            }
+        }
 
-//             }
-
-
-//         }
-
-//         if ($pass==1){
-//             $finishnote="輸入完成";
-//             $thisentry='entry'.$entry;
-//             $uplist[$thisentry]='1';
-//             $uplist['update_id'.$entry]=$user;
-//             $uplist['update_date'.$entry]=date("Y-m-d H:i:s");
-//             FsTreeEntrycom::where('qx', 'like', $qx)->where('qy', 'like', $qy)->update($uplist);            
-//         }
+        
 
 
-//         return [
-//             'result' => 'ok',
-//             'pass' => $pass,
-//             // 'test'=> $splist,
+            return [
+                'result' => 'ok',
+                'thisstemid' => $thisstemid,
+                'baser_insert'=>$result,
+                // 'codetemp' => $ocensus1,
+                'from'=> $from,
+                // 'keylist' => $keylist,
+                'datasavenote' => $datasavenote
 
-//             'finishnote' => $finishnote
-//         ];
+            ];
+    }
 
-//     }
+
+    public function deleteCensusData(Request $request){
+
+        $data_all = request()->all();
+
+        $user=$data_all['user'];
+        $from=$data_all['from'];
+        $stemid=$data_all['stemid'];
+        $plotType=$data_all['plotType'];
+
+        if ($plotType=='ss1ha'){
+            $tablebase = new Ss1haBase2024;
+            $tablebaser = new Ss1haBaseR2024;
+            $tablecensus = new Ss1haData2024;
+            $tablefixlog = new SsFixlog;
+
+            $baseSheet='1ha_base_2024';
+            $baseRSheet='1ha_base_r_2024';
+
+        } 
+
+        $thisstemid='';
+        $fixlog=[];
+        $fixall=[];
+        $datasavenote='';
+        $uplist=[];
+
+        //如果是分支，之前調查判斷錯誤，直接刪除資料
+        //如果是主幹，物種鑑定錯誤，非需要做的種類，則全株包含分支皆軟刪除，保留以避免牌號誤用
+
+        $stemidtemp=explode('.', $stemid);
+        $tag=$stemidtemp[0];
+        $b=$stemidtemp[1]; 
+
+        if ($b!='0'){  //分支
+
+            for ($j = 1; $j <= 2; $j++) {
+
+                $temp=[];
+                if ($plotType=='ss1ha'){
+                    switch ($j) {
+                        case '1':$table= new Ss1haData2015; $censusSheet='1ha_data_2015'; break;
+                        case '2':$table= new Ss1haData2024; $censusSheet='1ha_data_2024'; break;
+                    }
+                }
+                
+                $temp = $table::where('stemid', 'like', $stemid)->get()->toArray();
+
+                if (count($temp)>0){
+
+                    $table::where('stemid','like', $stemid)->delete();
+                    $datasavenote='已刪除 '.$stemid.' 資料';
+                    $fixlog['id']='0';
+                    $fixlog['from']=$from;
+                    $fixlog['type']='delete';
+                    $fixlog['sheet']=$censusSheet;
+                    $fixlog['qx']=substr($stemid, 0, 2);
+                    $fixlog['stemid']=$stemid;
+                    $fixlog['descript']='刪除此編號資料';
+                    $fixlog['update_id']=$user;
+                    $fixlog['updated_at']=date("Y-m-d H:i:s");
+                    $tablefixlog::insert($fixlog);
+                    $thisstemid=$stemid;
+                } 
+
+            }
+        } else {
+
+            $uplist['deleted_at']=date("Y-m-d H:i:s");
+            $uplist['update_id']=$user;
+
+            $tablebase::where('tag', 'like', $tag)->update($uplist);
+                    $fixlog['id']='0';
+                    $fixlog['from']=$from;
+                    $fixlog['type']='delete';
+                    $fixlog['sheet']=$baseSheet;
+                    $fixlog['qx']=substr($stemid, 0, 2);
+                    $fixlog['stemid']=$tag;
+                    $fixlog['descript']='軟刪除此編號base資料';
+                    $fixlog['update_id']=$user;
+                    $fixlog['updated_at']=date("Y-m-d H:i:s");
+                    $tablefixlog::insert($fixlog);
+                    // $fixall[]=$fixlog;
+            $baser=$tablebaser::where('stemid', 'like', $stemid)->get()->toArray();
+            if (count($baser)>0){
+                $tablebaser::where('stemid', 'like', $stemid)->update($uplist);
+                    $fixlog['sheet']=$baseSheetR;
+                    $tablefixlog::insert($fixlog);
+            }
+
+            
+                    
+
+            for ($j = 1; $j <= 2; $j++) {
+
+                $temp=[];
+                $fixlog=[];
+                if ($plotType=='ss1ha'){
+                    switch ($j) {
+                        case '1':$table= new Ss1haData2015; $censusSheet='1ha_data_2015'; break;
+                        case '2':$table= new Ss1haData2024; $censusSheet='1ha_data_2024'; break;
+                    }
+                }
+                
+                $temp = $table::where('tag', 'like', $tag)->get()->toArray();
+
+                if (count($temp)>0){
+
+                    $table::where('tag', 'like', $tag)->update($uplist);
+                    $datasavenote='已刪除 '.$tag.' 所有資料';
+                    $fixlog['id']='0';
+                    $fixlog['from']=$from;
+                    $fixlog['type']='delete';
+                    $fixlog['sheet']=$censusSheet;
+                    $fixlog['qx']=substr($stemid, 0, 2);
+                    $fixlog['stemid']=$tag;
+                    $fixlog['descript']='軟刪除此編號所有植株資料';
+                    $fixlog['update_id']=$user;
+                    $fixlog['updated_at']=date("Y-m-d H:i:s");
+                    // $fixall[]=$fixlog;
+                    $tablefixlog::insert($fixlog);
+                } 
+
+            }
+
+        }
+
+       
+
+
+            return [
+                'result' => 'ok',
+                'thisstemid' => $thisstemid,
+                'from'=>$from,
+                // 'uplist' => $base_uplist,
+                // 'tag' => $census1['stemid'],
+                'datasavenote' => $datasavenote
+
+            ];
+
+
+    }
+
 
 }
 

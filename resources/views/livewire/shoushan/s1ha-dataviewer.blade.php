@@ -20,7 +20,7 @@
                     <tbody>
                         @for($i=1;$i<2;$i++)
                         <tr>
-                            <td style='font-weight: 800'>第 {{$i}} 次調查</td>
+                            <td style='font-weight: 800'>{{$censusyear[$i]}}</td>
                             <td>{!!$downloadtable[$i][0]!!}</td>
                             <td>{!!$downloadtable[$i][1]!!}</td>
 

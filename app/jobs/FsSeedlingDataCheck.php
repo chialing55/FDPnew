@@ -150,7 +150,7 @@ class FsSeedlingDataCheck
         }
 
 
-        $result=['pass'=>$pass, 'datasavenote'=>$datasavenote, 'data'=>$data];
+        $result=['pass'=>$pass, 'datasavenote'=>$datasavenote, 'data'=>$data[0]];
 
 		return $result;
 

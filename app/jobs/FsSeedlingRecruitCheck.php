@@ -153,7 +153,7 @@ class FsSeedlingRecruitCheck
         }
 
 
-        $result=['pass'=>$pass, 'datasavenote'=>$recruitsavenote, 'data'=>$recruit];
+        $result=['pass'=>$pass, 'datasavenote'=>$recruitsavenote, 'data'=>$recruit[0]];
 
 		return $result;
 

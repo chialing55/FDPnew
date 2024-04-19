@@ -38,6 +38,7 @@ class S10mCompare extends Component
 
     public $entry1done;
     public $entry2done;
+    public $comparedone;
 
 
     public function mount(){
@@ -57,7 +58,9 @@ class S10mCompare extends Component
         if ($entryFinish[0]['entry2com']!=''){
             $this->entry2done='1';
         }
-
+        if ($entryFinish[0]['compareOK']!=''){
+            $this->comparedone='1';
+        }
     }
 
 

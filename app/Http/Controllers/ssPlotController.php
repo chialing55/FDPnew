@@ -242,7 +242,7 @@ class SsPlotController extends Controller
 
                 DB::connection('mysql5')->statement("ALTER TABLE  `10m_tree_envi_r1` ADD  (`sqx` int(2) not null,`sqy` int(2) not null, `note` varchar(255) not Null,  `date` CHAR(10) NOT NULL default '0000-00-00'), `update_id` CHAR(20) NOT NULL,`updated_at` varchar(255) CHARACTER SET utf8 COLLATE utf8_general_ci NOT NULL");
                 //刪除欄位
-                DB::connection('mysql5')->statement("ALTER TABLE `10m_tree_envi_r1` DROP COLUMN `plot_2015`, `plot_2012`, `type`, `gps_x`, `gps_y`, `altitude`, `cluster`");
+                DB::connection('mysql5')->statement("ALTER TABLE `10m_tree_envi_r1` DROP COLUMN `plot_2015`, DROP COLUMN `plot_2012`, DROP COLUMN `type`, DROP COLUMN `gps_x`, DROP COLUMN `gps_y`, `altitude`, DROP COLUMN `cluster`");
                 //改欄位名稱
                 DB::connection('mysql5')->statement("ALTER TABLE `10m_tree_envi_r1` CHANGE COLUMN `plot_2023` `plot`");
 
@@ -351,6 +351,54 @@ class SsPlotController extends Controller
 
             // print_r($user);
             return view('pages/shoushan/1ha_dataviewer', [
+                'site' => $site,
+                'project' => '樣區監測',
+                'user' => $user
+
+            ]);
+        }
+    }
+
+    public function update10m(Request $request, $site){
+
+        $user = $request->session()->get('user', function () {
+            return 'no';
+        });
+
+        if ($user=='no'){
+            return view('login1', [
+                'check' => 'no'
+            ]);
+        } else {
+            // echo "1";
+            //最近一次調
+
+            // print_r($user);
+            return view('pages/shoushan/10m_update', [
+                'site' => $site,
+                'project' => '樣區監測',
+                'user' => $user
+
+            ]);
+        }
+    }
+
+    public function update1ha(Request $request, $site){
+
+        $user = $request->session()->get('user', function () {
+            return 'no';
+        });
+
+        if ($user=='no'){
+            return view('login1', [
+                'check' => 'no'
+            ]);
+        } else {
+            // echo "1";
+            //最近一次調
+
+            // print_r($user);
+            return view('pages/shoushan/1ha_update', [
                 'site' => $site,
                 'project' => '樣區監測',
                 'user' => $user

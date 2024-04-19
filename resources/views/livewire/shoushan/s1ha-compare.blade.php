@@ -51,18 +51,19 @@
                     @if($entry1done=='1')
                         <span>第一次輸入完成</span>
                     @else
-                    <button wire:click.prevent="entryFinish(1)">第一次輸入檢查</button>
+                    <button wire:click.prevent="entryFinish(1)" wire:loading.attr="disabled">第一次輸入檢查</button>
                     @endif
                 </div>
                 <div>
                     @if($entry2done=='1')
                         <span style="margin-left: 20px;">第二次輸入完成</span>
                     @else
-                    <button wire:click.prevent="entryFinish(2)" style="margin-left: 20px;" >第二次輸入檢查</button></div>
+                    <button wire:click.prevent="entryFinish(2)" wire:loading.attr="disabled" style="margin-left: 20px;" >第二次輸入檢查</button>
                     @endif
+                </div>
             </div>
             <div style="margin-bottom: 10px;">
-                <span wire:loading>
+                <span wire:loading wire:target="entryFinish">
                      檢查中....
                 </span>
             </div>
@@ -82,9 +83,9 @@
         <hr>
         <p>兩次輸入皆通過檢查後，即可進行資料比對。</p>
         @if($entry2done=='1' && $entry1done=='1')
-        <button wire:click.prevent="compare()">資料比對</button>
+        <button wire:click.prevent="compare()" wire:loading.attr="disabled">資料比對</button>
         <div style="margin-bottom: 10px;">
-            <span wire:loading>
+            <span wire:loading wire:target="compare">
                      檢查中....
             </span>
         </div>
@@ -93,6 +94,25 @@
             {!!$comnote!!}
         </div>
         @endif
+        @endif
+    </div>
+
+    <div class="text_box"><h2>建立大表</h2>
+        <hr>
+        <p>資料比對完成後即可建立大表。並不再開放資料輸入，如需更新資料，轉往資料修改頁面。</p>
+        @if($comparedone=='1')
+        <button wire:click.prevent="createTable()" wire:loading.attr="disabled">建立大表</button>
+        <div style="margin-top: 10px;">
+            <span wire:loading wire:target="createTable">
+                     建立中....
+            </span>
+        </div>
+
+        @endif
+        @if($createTablenote!='')
+        <div style='margin-top:20px;'>
+            {!!$createTablenote!!}
+        </div>
         @endif
     </div>
     

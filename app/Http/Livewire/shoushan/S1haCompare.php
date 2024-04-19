@@ -10,6 +10,10 @@ use Livewire\WithPagination;
 use Illuminate\Support\Facades\Schema;
 
 use App\Models\Ss1haData2015;
+use App\Models\Ss1haData2024;
+use App\Models\Ss1haBase2015;
+use App\Models\Ss1haBase2024;
+use App\Models\Ss1haBaseR2024;
 use App\Models\Ss1haRecord1;
 use App\Models\Ss1haRecord2;
 use App\Models\Ss1haEnviR1;
@@ -30,9 +34,16 @@ class S1haCompare extends Component
 
     public $entry1done;
     public $entry2done;
+    public $comparedone;
+    public $user;
 
+    public function mount(Request $request){
 
-    public function mount(){
+        $this->user = $request->session()->get('user', function () {
+            return view('login1', [
+            'check' => 'no'
+            ]);
+        });
 
         $entrycom1=[];
 
@@ -63,15 +74,30 @@ class S1haCompare extends Component
         if ($entryFinish[0]['entry2com']!=''){
             $this->entry2done='1';
         }
+        if ($entryFinish[0]['compareOK']!=''){
+            $this->comparedone='1';
+        }
+
+        if (Schema::connection('mysql5')->hasTable('1ha_data_2024'))
+        {
+            $this->comparedone='0';
+            $this->createTablenote='大表已建立';
+        }
+
 
     }
 
 
     public $finishnote='';
     public $finishEntry='';
-
+    public $loadingCompare;
+    public $loadingEntryFinish;
+    public $loadingCreateTable;
 
     public function entryFinish(Request $request, $entry){
+        $this->loadingEntryFinish = true;
+        $this->loadingCompare = false;
+        $this->loadingCreateTable = false;
 
         if ($entry==1){
             $table= new Ss1haRecord1;
@@ -83,11 +109,7 @@ class S1haCompare extends Component
             $col='entry2com';
         }
 
-        $user = $request->session()->get('user', function () {
-            return view('login1', [
-            'check' => 'no'
-            ]);
-        });
+
         $pass='1';
         $finishnote='';
 
@@ -98,7 +120,7 @@ class S1haCompare extends Component
 
         if ($finishnote==''){
             $finishnote='通過檢查';
-            $entrycomUpdate=SsEntrycom::query()->where('plot', 'like', '1ha')->update([$col => '1', 'update_id'=>$user]);
+            $entrycomUpdate=SsEntrycom::query()->where('plot', 'like', '1ha')->update([$col => '1', 'update_id'=>$this->user]);
             switch ($entry) {
                 case '1':
                     $this->entry1done = 1;
@@ -123,6 +145,11 @@ class S1haCompare extends Component
     public $comnote='';
 
     public function compare(Request $request){
+
+        $this->loadingEntryFinish = false;
+        $this->loadingCompare = true;
+        $this->loadingCreateTable = false;
+
         $this->finishnote='';
         $comnote='';
         $comnote1='';
@@ -180,12 +207,9 @@ class S1haCompare extends Component
 
         if ($comnote==''){
                 $comnote='資料皆相符。恭喜比對完成。';
-                $user = $request->session()->get('user', function () {
-                    return 'no';
-                });
 
                 $uplist['compareOK']=date("Y-m-d H:i:s");
-                $uplist['update_id']=$user;
+                $uplist['update_id']=$this->user;
                 SsEntrycom::where('plot', 'like', '10m')->update($uplist);
 
         }
@@ -194,6 +218,124 @@ class S1haCompare extends Component
         $this->comnote=$comnote;
 
 
+    }
+
+
+    public $createTablenote;
+
+    public function createTable(){
+
+        $this->loadingEntryFinish = false;
+        $this->loadingCompare = false;
+        $this->loadingCreateTable = true;
+
+        if (Schema::connection('mysql5')->hasTable('1ha_data_2024'))
+        {
+              $this->createTablenote='大表已建立';
+        } else {
+            DB::connection('mysql5')->select('CREATE TABLE 1ha_data_2024 LIKE 1ha_record1');
+            DB::connection('mysql5')->statement("INSERT IGNORE INTO 1ha_data_2024 SELECT * FROM 1ha_record1");
+            //增加欄位
+            DB::connection('mysql5')->statement("ALTER TABLE `1ha_data_2024` ADD COLUMN `deleted_at` CHAR(50) CHARACTER SET utf8 COLLATE utf8_general_ci NOT NULL");
+            //刪除欄位
+            DB::connection('mysql5')->statement("ALTER TABLE `1ha_data_2024` DROP COLUMN `csp`, DROP COLUMN `qx`, DROP COLUMN `qy`, DROP COLUMN `sqx`, DROP COLUMN`sqy`");
+            Ss1haData2024::query()->update(['update_id'=>'', 'updated_at'=>'']);
+
+
+            DB::connection('mysql5')->select('CREATE TABLE 1ha_base_2024 LIKE 1ha_base_2015');
+            DB::connection('mysql5')->statement("INSERT IGNORE INTO 1ha_base_2024 SELECT * FROM 1ha_base_2015");
+//增加欄位
+            DB::connection('mysql5')->statement("ALTER TABLE  `1ha_base_2024` ADD  (`deleted_at` char(50) not null, `update_id` char(20) not null, `updated_at` char(200) CHARACTER SET utf8 COLLATE utf8_general_ci not null )");
+
+            DB::connection('mysql5')->select('CREATE TABLE 1ha_base_r_2024 LIKE 1ha_base_2024');
+            DB::connection('mysql5')->select('ALTER TABLE `1ha_base_r_2024` DROP PRIMARY KEY');
+            
+            DB::connection('mysql5')->statement("INSERT IGNORE INTO 1ha_base_r_2024 SELECT * FROM 1ha_base_2024 where tag like '10001'");  //隨便先加一筆
+
+            DB::connection('mysql5')->statement("ALTER TABLE  `1ha_base_r_2024` ADD  (`stemid` char(10) CHARACTER SET utf8 COLLATE utf8_general_ci not null )");
+            DB::connection('mysql5')->select('ALTER TABLE `1ha_base_r_2024` ADD PRIMARY KEY (`stemid`)');
+
+            $splist=[];
+
+            $splists=SsSplist::select('spcode', 'index')->get()->toArray();
+            foreach($splists as $splist1){
+                $splist[$splist1['index']]=$splist1['spcode'];
+            }
+
+            $importdatas=Ss1haRecord1::query()->get()->toArray();
+
+            $basecol=Ss1haBase2024::query()->first()->toArray();
+            $baseRcol=Ss1haBaseR2024::query()->first()->toArray();
+            //輸入資料不會更改base的資料，故只需要新增新增樹的資料
+            //但有些R會是這次才變R，需另加入
+            
+            //獲取欄位名稱的陣列
+
+            $basekeyarray = array_keys($basecol);
+            $baseRkeyarray = array_keys($baseRcol);
+
+            foreach ($importdatas as $importdata){
+                if ($importdata['status']=='-9' && $importdata['branch']=='0'){
+                     foreach ($basekeyarray as $key){
+                        if(isset($importdata[$key])){
+                            $inlist2[$key]=$importdata[$key];
+                        } else {
+                            $inlist2[$key]='0';
+                        }
+                    }
+                    if (isset($splist[$importdata['csp']])){
+                        $inlist2['spcode']=$splist[$importdata['csp']];
+                    } else {
+                        $inlist2['spcode']=$inlist2['csp'];
+                    }
+                    
+                    $inlist2['update_id']=$this->user;
+                    $inlist2['updated_at']=date("Y-m-d H:i:s");
+                    $inlist2['deleted_at']='';
+
+                    $baseRepeat=Ss1haBase2024::where('tag', 'like', $importdata['tag'])->get()->toArray();
+
+                    if (count($baseRepeat)>0){
+                        $importnote2.='<br> tag '.$importdata['tag'].' 已存在，請檢查';
+                    } else {
+                        Ss1haBase2024::insert($inlist2);
+                    }
+                }
+
+    //R/F
+                if (stripos($importdata['code'], 'R') !== false || stripos($importdata['code'], 'F') !== false) {
+                //strpos() 函數會傳回 "R/F" 在字符串中的位置，否則傳回 false。
+                     foreach ($baseRkeyarray as $key){
+                        if(isset($importdata[$key])){
+                            $inlist3[$key]=$importdata[$key];
+                        } else {
+                            $inlist3[$key]='0';
+                        }
+                    }
+                    if (isset($splist[$importdata['csp']])){
+                        $inlist3['spcode']=$splist[$importdata['csp']];
+                    } else {
+                        $inlist3['spcode']=$inlist3['csp'];
+                    }
+                    $inlist3['update_id']=$this->user;
+                    $inlist3['updated_at']=date("Y-m-d H:i:s");
+                    $inlist3['deleted_at']='';
+
+                    $baseRepeat=Ss1haBaseR2024::where('stemid', 'like', $importdata['stemid'])->get()->toArray();
+
+                    if (count($baseRepeat)>0){
+                        // $importnote2.='<br> stemid '.$importdata['stemid'].' 已存在，請檢查';
+                    } else {
+                        Ss1haBaseR2024::insert($inlist3);
+                    }
+                }
+            }
+
+            Ss1haBaseR2024::where('update_id', 'like', '')->delete();
+
+        }
+
+        $this->createTablenote='大表已建立，請手動關閉輸入功能';
     }
 
     public function render()

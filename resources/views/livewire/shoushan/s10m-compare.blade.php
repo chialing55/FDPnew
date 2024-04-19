@@ -50,8 +50,9 @@
                     @if($entry2done=='1')
                         <span style="margin-left: 20px;">第二次輸入完成</span>
                     @else
-                    <button wire:click.prevent="entryFinish(2)" style="margin-left: 20px;" >第二次輸入檢查</button></div>
+                    <button wire:click.prevent="entryFinish(2)" style="margin-left: 20px;" >第二次輸入檢查</button>
                     @endif
+                </div>
             </div>
 
         <div style="margin: 10px 0;">
@@ -91,6 +92,12 @@
             @endif
        
     </div>
-    
+    <div class="text_box"><h2>建立大表</h2>
+        <hr>
+        <p>資料比對完成後即可建立大表。並不再開放資料輸入，如需更新資料，轉往資料修改頁面。</p>
+        @if($comparedone=='1')
+        <button wire:click.prevent="createTable()">建立大表</button>
+        @endif
+    </div>
     {{-- Care about people's approval and you will be their prisoner. --}}
 </div>

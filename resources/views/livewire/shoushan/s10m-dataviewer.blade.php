@@ -14,12 +14,13 @@
                     </select>
                 </p>
             </div>
+
             <div style='margin-left: 30px;' class='dataviewerdownload'>
                 <table class='tablesorter'>
                     <tbody>
                         @for($i=1;$i<4;$i++)
                         <tr>
-                            <td style='font-weight: 800'>第 {{$i}} 次調查</td>
+                            <td style='font-weight: 800'>{{$censusyear[$i]}} </td>
                             <td>{!!$downloadtable[$i][0]!!}</td>
                             <td>{!!$downloadtable[$i][1]!!}</td>
                             <td>{!!$downloadtable[$i][2]!!}</td>

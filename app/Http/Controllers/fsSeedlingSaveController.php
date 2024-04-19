@@ -357,6 +357,8 @@ $datacheck=['pass'=>'1', 'datasavenote'=>''];
 // //補資料       
             if ($datacheck['pass']==1){
 
+                $recruit[$i]=$datacheck['data'];
+
                 $census=$table::first();
                 $recruit[$i]['status']='A';
                 $recruit[$i]['census']=$census['census'];

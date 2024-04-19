@@ -1,75 +1,43 @@
 <?php
 
-namespace App\Http\Livewire\Fushan;
+namespace App\Http\Livewire\Shoushan;
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\App;
 use Livewire\Component;
 use Livewire\WithPagination;
-use Illuminate\Support\Facades\File;
+use Illuminate\Support\Facades\Schema;
 
+use App\Models\Ss1haData2015;
+use App\Models\Ss1haData2024;
+use App\Models\Ss1haBase2015;
+use App\Models\Ss1haBase2024;
+use App\Models\Ss1haBaseR2024;
+use App\Models\Ss1haRecord1;
+use App\Models\Ss1haRecord2;
+use App\Models\Ss1haEnviR1;
+use App\Models\Ss1haEnviR2;
 
-use App\Models\FsBaseTreeSplist;
-use App\Models\FsTreeRecord1;
-use App\Models\FsTreeRecord2;
-use App\Models\FsTreeCensus4;
-use App\Models\FsTreeCensus3;
-use App\Models\FsTreeEntrycom;
-use App\Models\FsTreeCensus5;
-use App\Models\FsTreeCensus1;
-use App\Models\FsTreeCensus2;
-use App\Models\FsTreeBase;
-use App\Models\FsTreeBaseR;
-use App\Models\FsTreeFixlog;
+use App\Models\SsSplist;
+use App\Models\SsEntrycom;
 
-use App\jobs\FsTreeCensus5Progress;
+use App\Jobs\TreeCompareCheck;
+use App\Jobs\SsPlotFinishCheck;
 
-class TreeUpdatebackdata extends Component
+class S1haUpdate extends Component
 {
 
-    public $qx;
+    public $csplist=[];
+    public $splist=[];
     public $user;
-    public $alternoteqxlist;
     public $addclass1='';
     public $addclass2='';
     public $alternotedown='';
     public $from;
+    public $qx;
 
 
-    public function mount(Request $request){
-
-
-        $alternoteqxlist = FsTreeCensus5::where('alternote', '!=', '')
-            ->join('base', 'census5.tag', '=', 'base.tag')
-            ->groupBy('base.qx')
-            ->pluck('base.qx')
-            ->toArray();
-
-            // dd($alternoteqxlist);
-
-        $this->alternoteqxlist=$alternoteqxlist;
-
-        $alternotedown=FsTreeEntrycom::where('alternoteOK', '!=','')->groupBy('qx')->orderby('qx')->pluck('qx')->toArray();
-
-        if (count($alternotedown)>0){
-            foreach ($alternotedown as $value){
-                $this->alternotedown.=$value." ";
-            }
-        }
-
-        // dd($this->alternotedown);
-
-        if (empty($this->csplist)){
-            $this->fcsplist($request);
-        }
-
-    }
-
-
-    public $csplist=[];
-    public $splist=[];
-    // public $alterdata=[];
     public $stemid;
     public $tag='';
     public $branch='';
@@ -81,14 +49,19 @@ class TreeUpdatebackdata extends Component
 
     public $finishnote;
 
+    public function mount(Request $request){
+
+
+        $this->fcsplist($request);
+// dd($this->splist);
+
+    }
+
     public function alternote(Request $request){
-
-
         $qx=$this->qx;
         $this->stemidlist=[];
 
-
-        $stemidlist=FsTreeCensus5::where('base.qx', 'like', $qx)->where('census5.alternote', '!=', '')->join('base', 'census5.tag', '=', 'base.tag')->orderBy('census5.stemid')->pluck('census5.stemid')->toArray();
+        $stemidlist=Ss1haData2024::where('1ha_base_2024.qx', 'like', $qx)->where('1ha_data_2024.alternote', '!=', '')->join('1ha_base_2024', '1ha_data_2024.tag', '=', '1ha_base_2024.tag')->orderBy('1ha_data_2024.stemid')->pluck('1ha_data_2024.stemid')->toArray();
 
         // dd($stemidlist);
         if (count($stemidlist)>0){
@@ -106,9 +79,10 @@ class TreeUpdatebackdata extends Component
     public function updateStemidlist($data){
         $thisstemid = $data['thisstemid'];
         $from = $data['from'];
+        $qx=$this->qx;
 
         if ($from=='alternote'){
-            $stemidlist=FsTreeCensus5::where('base.qx', 'like', $this->qx)->where('census5.alternote', '!=', '')->join('base', 'census5.tag', '=', 'base.tag')->orderBy('census5.stemid')->pluck('census5.stemid')->toArray();
+            $stemidlist=Ss1haData2024::where('1ha_base_2024.qx', 'like', $qx)->where('1ha_data_2024.alternote', '!=', '')->join('1ha_base_2024', '1ha_data_2024.tag', '=', '1ha_base_2024.tag')->orderBy('1ha_data_2024.stemid')->pluck('1ha_data_2024.stemid')->toArray();
             if (count($stemidlist)>0){
                 $this->stemidlist=$stemidlist;
                 $stemidkey = array_search($thisstemid, $stemidlist);
@@ -122,17 +96,7 @@ class TreeUpdatebackdata extends Component
         } else {
             $this->indStemid();
         }
- 
-   
         // dd($stemidlist);
-    }
-
-    public function alternoteFinish($qx){
-        $uplist['alternoteOK']=$this->user;
-        $uplist['alternoteOK_at']=date("Y-m-d H:i:s");
-        FsTreeEntrycom::where('qx', 'like', $qx)->update($uplist);
-        $this->finishnote="已記錄特殊修改完成";
-        $this->searchStemid(0);
     }
 
 //從特殊修改來的
@@ -169,7 +133,7 @@ class TreeUpdatebackdata extends Component
             if ($b==''){$b='0';}
             $stemid=$tag.".".$b;
             //確認是否以匯入大表
-            $census5 = FsTreeCensus5::where('stemid', 'like', $stemid)->get()->toArray();
+            $census5 = Ss1haData2024::where('stemid', 'like', $stemid)->get()->toArray();
             if (count($census5)>0){
             $this->stemidlist[0]=$stemid;
             $stemiddata=$this->nowStemidData($stemid);
@@ -187,29 +151,34 @@ class TreeUpdatebackdata extends Component
             
     }
 
-    public $dataNote;
+       public $dataNote;
 
     public function nowStemidData($stemid){
         // dd($stemid);
         $tag=explode('.',$stemid);
         if(!isset($tag[1])){$tag[1]='0';}
-        $data[0]=FsTreeBase::where('tag', 'like', $tag[0])->first()->toArray();
+        $data[0]=Ss1haBase2024::where('tag', 'like', $tag[0])->first()->toArray();
         $data[0]['r']='n';
-        $baseR=FsTreeBaseR::where('stemid', 'like', $stemid)->get()->toArray();
+        $baseR=Ss1haBaseR2024::where('stemid', 'like', $stemid)->get()->toArray();
         if (count($baseR)>0){
             $data[0]=$baseR[0];
             $data[0]['r']='y';
         }
         $data[0]['branch']=$tag[1];
         $data[0]['stemid']=$stemid;
-        $data[0]['csp']=$this->splist[$data[0]['spcode']];
+        if (isset($this->splist[$data[0]['spcode']])){
+            $data[0]['csp']=$this->splist[$data[0]['spcode']];
+        } else {
+            $data[0]['csp']=$data[0]['spcode'];
+        }
+        
         if ($data[0]['deleted_at']!=''){
             $this->dataNote='此筆資料已被軟刪除';
         } else {
             $this->dataNote='';
         }
 //獲取欄位名稱的陣列
-        $census5 = FsTreeCensus5::query()->first()->toArray();
+        $census5 = Ss1haData2024::query()->first()->toArray();
         // dd($census5);
         $keyarray = array_keys($census5);
         $stemid2=$tag[0].$tag[1];
@@ -219,37 +188,37 @@ class TreeUpdatebackdata extends Component
 
 
 
-        for ($j = 1; $j <= 5; $j++) {
+        for ($j = 1; $j <= 2; $j++) {
             $temp=[];
 
             switch ($j) {
-                case '1':$table= new FsTreeCensus1; break;
-                case '2':$table= new FsTreeCensus2; break;
-                case '3':$table= new FsTreeCensus3; break;
-                case '4':$table= new FsTreeCensus4; break;
-                case '5':$table= new FsTreeCensus5; break;
+                case '1':$table= new Ss1haData2015; break;
+                case '2':$table= new Ss1haData2024; break;
             }
             
             $temp = $table::where('stemid', 'like', $stemid)->get()->toArray();
 
 
             if (count($temp)>0){
+
                 foreach ($temp as $item) {
+                    if ($j==1){
+                        $item['date']='2015';
+                    }
                     $data[$j] = [];
                     foreach ($keyarray as $key) {
                         $data[$j][$key] = $item[$key] ?? '';
                     }
                 }
-                if ($j==1){
-                    $data[$j]['h2']=$temp[0]['h'];
-                }
+
             } else {
                 
                 $data[$j] = array_fill_keys($keyarray, '');
                 $data[$j]['stemid']=$stemid;
             }
-
-            $data[$j]['census']='census'.$j;
+            $censusyear[1]='2015';
+            $censusyear[2]='2024';
+            $data[$j]['census']=$censusyear[$j];
         }
 
         // dd($data);
@@ -259,44 +228,38 @@ class TreeUpdatebackdata extends Component
 
 
     public function fcsplist(Request $request){
-        //一進tree工作頁面就會產生splist
-        $splist = $request->session()->get('splist');
-        
+    
 
-        $csplist=$request->session()->get('csplist', function () {
-            return 'no';
-        });
-        // dd($qx, $qy);
-        // 新增資料輸入種類用
-        if ($csplist=='no'){
-            $csplist=[];
+            $ss1hacsplist=[];
+            $splist=[];
+           
+            $csplist1 = Ss1haRecord1::select('csp', DB::raw('count(stemid) as count2'))->groupBy('csp')->orderByDesc('count2')->get()->toArray();
 
-            $csplist1 = FsTreeRecord1::select('spcode', DB::raw('count(stemid) as count2'))->groupBy('spcode')->orderByDesc('count2')->get()->toArray();
-
-
-            for($i=0;$i<count($csplist1);$i++){
-                $csplist[$i]=$splist[$csplist1[$i]['spcode']];
+            $splists=SsSplist::select('spcode', 'index')->get()->toArray();
+            foreach($splists as $splist1){
+                $splist[$splist1['spcode']]=$splist1['index'];
             }
 
-            foreach ($splist as $key=>$value){
-                if (!in_array($value, $csplist)){
-                    $csplist[]=$value;
+            foreach ($csplist1 as $list) {
+                $csplist2[]=$list['csp'];
+            }
+
+            foreach ($splists as $list){
+                if (!in_array($list['index'], $csplist2)){
+                    $csplist2[]=$list['index'];
                 }
             }
-
         
-            session(['csplist' => $csplist]);
-        }
+            $ss1hacsplist=$csplist2;
+            $request->session()->put('ss1hacsplist', $ss1hacsplist);
+
 
         $this->splist=$splist;
-        $this->csplist=$csplist;
+        $this->csplist=$ss1hacsplist;
     }
-
-
-
 
     public function render()
     {
-        return view('livewire.fushan.tree-updatebackdata');
+        return view('livewire.shoushan.s1ha-update');
     }
 }
