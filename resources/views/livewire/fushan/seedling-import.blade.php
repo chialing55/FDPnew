@@ -17,6 +17,9 @@
             </ol>
             <p style='margin: 10px 0 30px 0'><button class='recruitbutton' wire:click="import">匯入大表</button></p>
         </p>
+<div class="loading-container" wire:loading.class="visible">
+    <div class="loading-spinner"></div>
+</div>
         <p>
 
         <h6>後續資料表整理 (手動)</h6>

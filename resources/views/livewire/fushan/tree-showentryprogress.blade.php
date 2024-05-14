@@ -1,4 +1,7 @@
 <div class='flex text_outbox' style='flex-direction: column;' >
+<div class="loading-container" wire:loading.class="visible">
+    <div class="loading-spinner"></div>
+</div>
     <div class='text_box'>
         <h2>每日輸入進度</h2>
         <hr>

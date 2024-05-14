@@ -26,6 +26,7 @@ date_default_timezone_set("Asia/Taipei");
 </head>
 <body>
 @livewireStyles 
+
 <div class='main'>
 
 

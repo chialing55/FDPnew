@@ -27,6 +27,7 @@
 <script src="{{asset('/js/grid.locale-en.js')}}"></script> --}}
 {{-- <script src="{{asset('/js/jquery.caret-1.5.2.min.js')}}"></script> --}}
 <script src="{{asset('/js/create-handsontable.js')}}"></script>
+<script src="{{asset('/js/tree-map.js')}}"></script>
 <script src="{{asset('/js/fstree.js')}}"></script>
 
 

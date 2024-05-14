@@ -97,10 +97,10 @@ class TreeMap extends Component
     public function searchSite(Request $request, $qx, $qy, $subqx, $subqy){
             $R='N';
 
-            $data = FsTreeBase::select('base.*', 'census5.status', 'base.updated_at as update_date')->join('census5', 'census5.tag', '=', 'base.tag')->where('census5.date', '!=', '0000-00-00')->where('census5.branch', '==', '0')->where('base.qx', 'like', $qx)->where('base.qy', 'like', $qy)->where('base.subqx','like', $subqx)->where('base.subqy', 'like', $subqy)->orderBy('base.qudx')->orderBy('base.qudy')->orderBy('base.tag')->get()->toArray();
+            $data = FsTreeBase::select('base.*', 'census5.status', 'base.updated_at as update_date')->join('census5', 'census5.tag', '=', 'base.tag')->where('census5.date', '!=', '0000-00-00')->where('census5.branch', '==', '0')->where('base.deleted_at', 'like', '')->where('base.qx', 'like', $qx)->where('base.qy', 'like', $qy)->where('base.subqx','like', $subqx)->where('base.subqy', 'like', $subqy)->orderBy('base.qudx')->orderBy('base.qudy')->orderBy('base.tag')->get()->toArray();
 
             // $dataR=FsTreeBaseR::where('qx','like', $qx)->where('qy', 'like', $qy)->where('subqx','like', $subqx)->where('subqy', 'like', $subqy)->orderBy('tag')->get()->toArray();
-            $dataR = FsTreeBaseR::select('base_r.*', 'census5.status', 'base_r.updated_at as update_date')->join('census5', 'census5.stemid', '=', 'base_r.stemid')->where('census5.date', '!=', '0000-00-00')->where('base_r.qx', 'like', $qx)->where('base_r.qy', 'like', $qy)->where('base_r.subqx','like', $subqx)->where('base_r.subqy', 'like', $subqy)->orderBy('base_r.qudx')->orderBy('base_r.qudy')->orderBy('base_r.stemid')->get()->toArray();
+            $dataR = FsTreeBaseR::select('base_r.*', 'census5.status', 'base_r.updated_at as update_date')->join('census5', 'census5.stemid', '=', 'base_r.stemid')->where('census5.date', '!=', '0000-00-00')->where('base_r.deleted_at', 'like', '')->where('base_r.qx', 'like', $qx)->where('base_r.qy', 'like', $qy)->where('base_r.subqx','like', $subqx)->where('base_r.subqy', 'like', $subqy)->orderBy('base_r.qudx')->orderBy('base_r.qudy')->orderBy('base_r.stemid')->get()->toArray();
 // dd($data);
             foreach ($dataR as &$datar){   //加上&就可以更改$datar
                 $datar['tag']=$datar['stemid'];
@@ -154,7 +154,7 @@ class TreeMap extends Component
         $this->showmap();
 
 
-        $this->dispatchBrowserEvent('initTablesorter', ['plot' => $this->tablePlot, 'tablePlot'=>$this->tablePlot, 'data' => $this->result, 'mapfile'=>$this->filePath[0]]);
+        $this->dispatchBrowserEvent('initTablesorter', ['tablePlot'=>$this->tablePlot, 'data' => $this->result, 'mapfile'=>$this->filePath[0]]);
         
       //  dd($data);
 

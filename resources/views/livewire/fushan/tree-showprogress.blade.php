@@ -7,7 +7,9 @@ $personlist=['','王怡雯', '林禹彤','黃彥慈','劉筱薇','鄧永淥','�
 
 <div class='flex text_outbox' style='flex-direction: column; '>
      {{-- <h1>2023 年 每木調查 進度表</h1> --}}
-
+<div class="loading-container" wire:loading.class="visible">
+    <div class="loading-spinner"></div>
+</div>
     <div class='text_box'>     
         <h2>輸入調查進度</h2>
         <hr>

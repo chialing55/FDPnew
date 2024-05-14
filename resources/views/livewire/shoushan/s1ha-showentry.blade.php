@@ -1,4 +1,7 @@
 <div>
+<div class="loading-container" wire:loading.class="visible">
+    <div class="loading-spinner"></div>
+</div>
     <h2> 2023 年 壽山 1.05 ha 永久樣區 第 {{$entry}} 次資料輸入</h2>
     <div style='margin-top:10px'>
          <p>請先詳閱 <a href="{{--{{asset('/shoushan/plot/10m_note')}}--}}"><b>資料輸入注意事項</b></a></p>  

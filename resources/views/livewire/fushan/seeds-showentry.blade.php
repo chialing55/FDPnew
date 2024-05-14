@@ -100,6 +100,9 @@ $personlist=['','蔡佳秀'];
     </div>
 
     <div class='text_box entrytableout'>
+    <div class="loading-container" wire:loading.class="visible">
+        <div class="loading-spinner"></div>
+    </div>
         <h6>第 {{$thiscensus}} 次 ({{$census2date['date']}}) 調查輸入</h6>
        
         <div id='simplenote' class='text_box2'>

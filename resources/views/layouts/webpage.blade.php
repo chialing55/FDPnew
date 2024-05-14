@@ -27,7 +27,7 @@
 @section('css')
 <link rel="stylesheet" href="{{asset('/css/jquery-ui.css')}}">
 <link rel="stylesheet" href="{{asset('/css/ui.jqgrid.css')}}">
-{{-- <link rel="stylesheet" href="{{asset('/css/seeds.css')}}"> --}}
+
 
 
 @endsection

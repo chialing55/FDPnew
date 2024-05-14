@@ -664,6 +664,7 @@ class FsTreeSaveController extends Controller
 
         $user=$data_all['user'];
         $from=$data_all['from'];
+        $base=$data_all['data1'][0];
         $plotType='fstree';
 
         $test='';
@@ -718,11 +719,11 @@ class FsTreeSaveController extends Controller
                     ${"ocensus$i"}=[];
                 }
 
-        $ob_updateData = new TreeUpdateCensusData;
-        $result2=$ob_updateData->up($plotType, $i, $lastcensus, ${"census$i"}, ${"ocensus$i"}, $table, $data_all, $ostemid);
-        if ($result2['datasavenote']!=''){
-            $datasavenote=$result2['datasavenote'];
-        }
+                $ob_updateData = new TreeUpdateCensusData;
+                $result2=$ob_updateData->up($plotType, $i, $lastcensus, ${"census$i"}, ${"ocensus$i"}, $table, $data_all, $ostemid);
+                if ($result2['datasavenote']!=''){
+                    $datasavenote=$result2['datasavenote'];
+                }
         
 
             }
@@ -734,7 +735,7 @@ class FsTreeSaveController extends Controller
             return [
                 'result' => 'ok',
                 'thisstemid' => $thisstemid,
-                // 'baser_insert'=>$baser_insert,
+                'result2'=>$result,
                 // 'codetemp' => $codetemp,
                 'from'=> $from,
                 // 'tag' => $census1['stemid'],

@@ -1,4 +1,7 @@
 <div>
+    <div class="loading-container" wire:loading.class="visible">
+        <div class="loading-spinner"></div>
+    </div>
     <div class='text_box'>    
         <h2>新增資料</h2>
 <hr>
@@ -17,6 +20,7 @@
 
         </div>
     @if($show=='ok')
+
     <hr>
     @include('includes.str-recruit-entrytable')
     @endif

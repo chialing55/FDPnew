@@ -15,7 +15,7 @@ use App\Http\Controllers\UpdateController;
 
 class Showsplist extends Component
 {
-
+    public $user;
     public $splist;
 
     public function mount(Request $request){

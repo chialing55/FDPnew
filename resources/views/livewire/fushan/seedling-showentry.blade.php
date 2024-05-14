@@ -56,7 +56,9 @@
 
     @if($record)
 
-
+    <div class="loading-container" wire:loading.class="visible">
+        <div class="loading-spinner"></div>
+    </div>
 
 <div class='text_box'>
    

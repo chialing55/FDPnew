@@ -1,5 +1,7 @@
 <div class='flex text_outbox' style='flex-direction: column; align-items: center;'>
-
+<div class="loading-container" wire:loading.class="visible">
+    <div class="loading-spinner"></div>
+</div>
 {{--     <div class='text_box'>     
         <h2>檢視調查資料電子檔</h2>
         <hr>

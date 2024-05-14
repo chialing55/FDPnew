@@ -1,4 +1,7 @@
 <div >
+    <div class="loading-container" wire:loading.class="visible">
+        <div class="loading-spinner"></div>
+    </div>
 <h2> 2023 年 每木調查 第 {{$entry}} 次資料輸入</h2>
 <div style='margin-top:10px'>
     <p>請先詳閱 <a href="{{asset('/fushan/tree/note')}}"><b>每木輸入注意事項</b></a></p> 

@@ -1,4 +1,7 @@
 <div>
+<div class="loading-container" wire:loading.class="visible">
+    <div class="loading-spinner"></div>
+</div>
     <div class="text_box">
         <h2>輸入進度</h2>
         <hr>

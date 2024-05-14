@@ -169,7 +169,10 @@ Route::get('/shoushan/{project}/{type}', function($project, $type){
                     return App::call('App\Http\Controllers\SsPlotController@update1ha', ['site' => $site]);
                 case '10m_update':
                     return App::call('App\Http\Controllers\SsPlotController@update10m', ['site' => $site]);
-
+                case '1ha_map':
+                    return App::call('App\Http\Controllers\SsPlotController@map1ha', ['site' => $site]);
+                case '10m_map':
+                    return App::call('App\Http\Controllers\SsPlotController@map10m', ['site' => $site]);
                 // // Add more cases if needed
                 // default:
                 //     // Handle the case where $type does not match any of the above
@@ -242,16 +245,17 @@ Route::get('/latest-updates', 'App\Http\Controllers\UpdateController@latestUpdat
 
 //web
 
-Route::get("web/index", [App\Http\Controllers\WebIndexController::class, 'index']);
+// Route::get("web/index", [App\Http\Controllers\WebIndexController::class, 'index']);
 
-Route::get('web/splist', function () {
+// Route::get('web/splist', function () {
     
-    return view('pages/web/splist');
-});
+//     return view('pages/web/splist', ['user'=>]);
+// });
 
-Route::get('web/species/{spcode}', function ($spcode) {
+// Route::get('web/species/{spcode}', function ($spcode) {
     
-    return view('pages/web/species',['spcode'=>$spcode]);
-});
+//     return view('pages/web/species',['spcode'=>$spcode]);
+// });
 
-// Route::get("web/splist", [App\Http\Controllers\webIndexController::class, 'splist']);
+Route::get("web/splist", [App\Http\Controllers\webIndexController::class, 'splist']);
+Route::get("web/species/{spcode}", [App\Http\Controllers\webIndexController::class, 'species']);

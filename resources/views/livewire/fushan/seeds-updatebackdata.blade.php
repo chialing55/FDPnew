@@ -13,7 +13,9 @@
         
             </select>
     </div>
-
+    <div class="loading-container" wire:loading.class="visible">
+        <div class="loading-spinner"></div>
+    </div>
     @if($censusdata!=[])
     <div class='text_box entrytableout'>
         <h6>第 {{$selectCensus}} 次 調查資料檢視 / 更新</h6>

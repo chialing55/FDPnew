@@ -14,7 +14,8 @@
     <div style='display: flex; justify-content: space-between;'>
       {{-- <a href='/web/index'> --}}
       <div style='padding: 5px 5px 0px 5px;'>
-        <img src="{{asset('/images/web/左上標題.png')}}" height='50' alt="Fushan Forest Plot" border="0"/>
+        <img src="{{asset('/images/web/左上標題.png')}}" height='50' alt="Fushan Forest Plot" border="0"/><span>Hi, {{$user}}</span>
+
       </div>
       {{-- </a> --}}
       <div id="" class='fc-w header_list'>

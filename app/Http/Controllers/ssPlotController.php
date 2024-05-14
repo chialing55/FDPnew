@@ -407,5 +407,54 @@ class SsPlotController extends Controller
         }
     }
 
+    public function map10m(Request $request, $site){
+
+        $user = $request->session()->get('user', function () {
+            return 'no';
+        });
+
+        if ($user=='no'){
+            return view('login1', [
+                'check' => 'no'
+            ]);
+        } else {
+            // echo "1";
+            //最近一次調
+
+            // print_r($user);
+            return view('pages/shoushan/10m_map', [
+                'site' => $site,
+                'project' => '樣區監測',
+                'user' => $user
+
+            ]);
+        }
+    }
+
+    public function map1ha(Request $request, $site){
+
+        $user = $request->session()->get('user', function () {
+            return 'no';
+        });
+
+        if ($user=='no'){
+            return view('login1', [
+                'check' => 'no'
+            ]);
+        } else {
+            // echo "1";
+            //最近一次調
+
+            // print_r($user);
+            return view('pages/shoushan/1ha_map', [
+                'site' => $site,
+                'project' => '樣區監測',
+                'user' => $user
+
+            ]);
+        }
+    }
+
+
 }
 

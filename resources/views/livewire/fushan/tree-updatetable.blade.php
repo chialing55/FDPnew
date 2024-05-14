@@ -1,4 +1,7 @@
 <div>
+<div class="loading-container" wire:loading.class="visible">
+    <div class="loading-spinner"></div>
+</div>
     <h2>更新census5資料表 (only for chialing)</h2>
     <p><b>如已完成資料比對，並完成資料掃描，即可匯入大表。</b></p>
 

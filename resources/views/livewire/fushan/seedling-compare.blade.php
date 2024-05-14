@@ -1,10 +1,13 @@
+
 <div>
      <div class='text_box'>    
         <h2>資料比對</h2>
         <p style="margin: 10px 0">{{$compare}}</p>
     
         <button wire:click="compare">開始比對</button>
-
+<div class="loading-container" wire:loading.class="visible">
+    <div class="loading-spinner"></div>
+</div>
         @php
         if($cov1!=[]) {
             print_r($cov1[1][0]);

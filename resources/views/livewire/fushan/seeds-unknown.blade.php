@@ -1,5 +1,7 @@
 <div style='display: flex; align-items: center;flex-direction: column;'>
-        
+    <div class="loading-container" wire:loading.class="visible">
+        <div class="loading-spinner"></div>
+    </div>
         <h2>UNKNOWN</h2>
 
         <div style='margin-top:20px'>

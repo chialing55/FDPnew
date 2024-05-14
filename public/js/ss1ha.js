@@ -392,3 +392,23 @@ function deleteCensusData(stemid, from){
 
 }
 
+//map
+
+window.addEventListener('initTablesorter', event => {
+
+  const tablePlot=event.detail.tablePlot;
+  data=event.detail.data;
+  
+  const mapfile=event.detail.mapfile;
+  console.log(data);
+  $(`#mapTable${tablePlot}`).tablesorter();
+  $(`.tabli`).removeClass('show');
+
+  $('.plottable2').removeClass('selected');
+  $(`.plot${tablePlot}`).addClass('selected');
+
+  drawChart(data, tablePlot, mapfile);
+
+});
+
+

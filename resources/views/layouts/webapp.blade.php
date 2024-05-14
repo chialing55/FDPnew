@@ -16,6 +16,7 @@ date_default_timezone_set("Asia/Taipei");
   <link rel="stylesheet" href="{{asset('/js/handsontable/dist/handsontable.full.css')}}">
   <link rel="stylesheet" href="{{asset('/css/webstyle.css')}}">
   <link rel="stylesheet" href="{{asset('/css/webstr.css')}}">
+  <link rel="stylesheet" href="{{asset('/css/style.css')}}">
   <link rel="stylesheet" href="{{asset('/css/fancybox.css')}}">
   <link rel="stylesheet" href="{{asset('/css/theme.green.min.css')}}">
   <link href="{{ asset('/css/all.min.css') }}" rel="stylesheet">  {{--Font Awesome --}}

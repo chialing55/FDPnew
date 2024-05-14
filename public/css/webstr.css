@@ -69,15 +69,10 @@
 
 /*species*/
 
-.spcode{
-	position: absolute;
-	top:0px;
-	right:20px;
-	text-align: right;
-}
 
 .spheader{
-	position: relative;
+	display: flex;    
+	justify-content: space-between;
 }
 
 .photocombo{
@@ -129,6 +124,24 @@
 .text_box_note_out {
 	display:inline-flex;
 }
+
+
+.fig, .figshow{
+	display: none;
+	margin: 10px 0;
+}
+
+.figouter h6{
+/*	text-decoration: underline;*/
+	cursor: pointer;
+	margin-bottom: 10px;
+}
+
+.figouter {
+/*	display: flex;*/
+}
+
+
 
 
 

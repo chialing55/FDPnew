@@ -121,19 +121,21 @@ class TreeUpdateBase
                     $basetable='r';
                 }
                $fixlog['type']='update';
+               $fixlog['stemid']=$otag;
             } else if ($baseWay=='1'){  //新增
                 $exarray=['update_id', 'updated_at', 'deleted_at'];
                 foreach($obase as $key=>$value){
                     if (!in_array($key, $exarray)){
                         if(isset($base[$key])){
                             $base_uplist[$key]=$base[$key];
-                            $updatedes[$key]=$value."=>".$base[$key];
+                            $updatedes[$key]= $base[$key];
                         } else {
                             $base_uplist[$key]='0';
                         }
                     }
                 }
                 $fixlog['type']='insert';
+                $fixlog['stemid']=$base['tag'];
             } 
             // else if ($baseWay=='2'){  //不更新號碼部分
             //         $exarray=['update_id', 'updated_at', 'tag', 'deleted_at'];
@@ -171,7 +173,7 @@ class TreeUpdateBase
                 $fixlog['id']='0';
                 $fixlog['from']=$from;
                 $fixlog['qx']=$base['qx'];
-                $fixlog['stemid']=$otag;
+                
                 $fixlog['descript']=json_encode($updatedes, JSON_UNESCAPED_UNICODE);
                 $fixlog['update_id']=$user;
                 $fixlog['updated_at']=date("Y-m-d H:i:s");

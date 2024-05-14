@@ -1,4 +1,7 @@
 <div>
+    <div class="loading-container" wire:loading.class="visible">
+        <div class="loading-spinner"></div>
+    </div>
 {{--     <div class='text_box'>
         <h6>已完成資料比對、上傳檔案、匯入大表的樣線</h6>
         @include('includes.fstree-census5-progress')
@@ -42,7 +45,7 @@
         @if ($showdata =='1')
         @php
            if ($qy==0){$prevshow="prevhidden"; $nextshow='prevshow';} 
-           else if ($qy==25){$prevshow='prevshow'; $nextshow='prevhidden';}
+           else if ($qy==24){$prevshow='prevshow'; $nextshow='prevhidden';}
            else {$prevshow='prevshow'; $nextshow='prevshow';}
         @endphp
                     <span class='{{$prevshow}}'><a class='a_' wire:click.once="searchSite({{$qx}}, {{$qy-1}}, 1, 1)">上一個樣方</a></span>
@@ -52,6 +55,7 @@
     </div>
     </div>
     @if($showdata =='1')
+
     <div class='flex text_outbox'>
         <div class='text_box'>
             <div style="display: flex;">

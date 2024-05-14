@@ -210,7 +210,7 @@ class S1haCompare extends Component
 
                 $uplist['compareOK']=date("Y-m-d H:i:s");
                 $uplist['update_id']=$this->user;
-                SsEntrycom::where('plot', 'like', '10m')->update($uplist);
+                SsEntrycom::where('plot', 'like', '1ha')->update($uplist);
 
         }
 
@@ -233,6 +233,9 @@ class S1haCompare extends Component
         {
               $this->createTablenote='大表已建立';
         } else {
+            DB::connection('mysql5')->select('CREATE TABLE 1ha_envi_2024 LIKE 1ha_envi_r1');
+            DB::connection('mysql5')->statement("INSERT IGNORE INTO 1ha_envi_2024 SELECT * FROM 1ha_envi_r1");
+
             DB::connection('mysql5')->select('CREATE TABLE 1ha_data_2024 LIKE 1ha_record1');
             DB::connection('mysql5')->statement("INSERT IGNORE INTO 1ha_data_2024 SELECT * FROM 1ha_record1");
             //增加欄位

@@ -1,6 +1,9 @@
 
 
 <div>
+<div class="loading-container" wire:loading.class="visible">
+    <div class="loading-spinner"></div>
+</div>
     <h2>樣區植物名錄</h2>
     <div id='sptable'>
         <table id='spTable' class='tablesorter'>

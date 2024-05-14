@@ -53,6 +53,9 @@ class FsSeedlingController extends Controller
                 //刪除死亡的萌蘗苗(個體未死)  高度 = -7, sprout = True
                 $d_record=DB::connection('mysql3')->select("delete from slrecord where ht = '-7' and sprout ='True'");
                 //刪除-2的萌蘗苗(個體DBH>1)  高度 = -2, sprout = True
+    //             - -2
+                 // - 若為主幹，則保留，不論是否有分支，以期待有新分支出現
+                 // - 若為分支，則刪除
                 $d_record=DB::connection('mysql3')->select("delete from slrecord where ht = '-2' and sprout ='True'");
 
 

@@ -1,5 +1,8 @@
 <div>
     <div class='text_box' style='margin: 0 auto;'>
+    <div class="loading-container" wire:loading.class="visible">
+        <div class="loading-spinner"></div>
+    </div>
         <h2>歷年種子資料檢視<span style="margin-left: 20px ; font-weight: 500; font-size: 70%;"> - : 所有資料</span></h2>
         <hr>
         <table id='sptable' class='tablesorter'>
