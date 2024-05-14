@@ -27,3 +27,5 @@ composer.lock
 /public/ss_10m_census2_scanfile
 /public/ss_10m_census3_scanfile
 /public/ss_1ha_census1_scanfile
+/public/ss_1ha_census2_scanfile
+/public/splist
