@@ -8,7 +8,7 @@ use Livewire\WithPagination;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\File;
 
-use App\Models\FsTreeEntrycom;
+use App\Models\FsTreeComplete;
 use App\Models\FsBaseTreeSplist;
 use App\Models\FsTreeRecord1;
 use App\Models\FsTreeRecord2;
@@ -50,6 +50,7 @@ class TreeUpdatetable extends Component
     public $importnote;
     public $importnote2='';
 
+//將資料匯入大表，census5
     public function import(Request $request){
 
         $qx=$this->qx;
@@ -85,7 +86,7 @@ class TreeUpdatetable extends Component
                 }
             }
 
-            $inlist['update_id']=$this->user;
+            $inlist['updated_id']=$this->user;
             $inlist['updated_at']=date("Y-m-d H:i:s");
 
             FsTreeCensus5::insert($inlist);
@@ -128,7 +129,7 @@ class TreeUpdatetable extends Component
                 }
 
                 
-                $inlist2['update_id']=$this->user;
+                $inlist2['updated_id']=$this->user;
                 $inlist2['updated_at']=date("Y-m-d H:i:s");
                 $inlist2['deleted_at']='';
 
@@ -179,7 +180,7 @@ class TreeUpdatetable extends Component
                         break;
                 }
 
-                $inlist3['update_id']=$this->user;
+                $inlist3['updated_id']=$this->user;
                 $inlist3['updated_at']=date("Y-m-d H:i:s");
                 $inlist3['deleted_at']='';
 
@@ -197,10 +198,10 @@ class TreeUpdatetable extends Component
 
         
         $uplist=[];
-        $uplist['census5update']=$this->user;
-        $uplist['census5update_at']=date("Y-m-d H:i:s");
+        $uplist['addToMainTable']=$this->user;
+        $uplist['addToMainTable_at']=date("Y-m-d H:i:s");
 
-        FsTreeEntrycom::where('qx', 'like', $qx)->update($uplist);
+        FsTreeComplete::where('qx', 'like', $qx)->update($uplist);
         $this->reset();
         $this->importnote2=$importnote2;
         $this->importnote='已匯入 '.$qx." 線資料";
@@ -210,7 +211,7 @@ class TreeUpdatetable extends Component
     }
 
 
-//base_r表製作未完善，故以此法更新，暫保留
+//base_r表製作未完善，故以此法更新，暫保留，但已無用
     public function R(){
 
         $importdatas=FsTreeRecord1::where('qx', 'like', '18')->orWhere('qx', 'like', '19')->orWhere('qx', 'like', '20')->orWhere('qx', 'like', '21')->orWhere('qx', 'like', '22')->orWhere('qx', 'like', '23')->orWhere('qx', 'like', '24')->where('code', 'like', '%R%')->get()->toArray();
@@ -261,7 +262,7 @@ class TreeUpdatetable extends Component
                         break;
                 }
 
-                $inlist3['update_id']=$this->user;
+                $inlist3['updated_id']=$this->user;
                 $inlist3['updated_at']=date("Y-m-d H:i:s");
                 $inlist3['deleted_at']='';
 

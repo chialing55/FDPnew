@@ -13,6 +13,8 @@ use App\Models\FsTreeRecord2;
 use App\Models\FsTreeCensus4;
 use App\Models\FsTreeCensus3;
 
+//輸入資料檢查
+
 class FsTreeDataCheck
 {
 	public function check($data2){

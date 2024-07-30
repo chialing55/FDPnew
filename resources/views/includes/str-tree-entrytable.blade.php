@@ -1,3 +1,4 @@
+{{-- 每木資料輸入 --}}
 <div>
     <h2 style='display: inline-block;'>({{$sqx}}, {{$sqy}}) </h2>
     <div class='tablenote'>

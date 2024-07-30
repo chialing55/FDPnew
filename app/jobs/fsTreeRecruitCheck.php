@@ -14,7 +14,8 @@ use App\Models\FsTreeCensus4;
 use App\Models\FsTreeCensus5;
 use App\Models\FsTreeCensus3;
 use App\Models\FsTreeBase;
- 
+
+//每木新增樹檢查 
 class FsTreeRecruitCheck
 {
 	public function check($data2, $entry){

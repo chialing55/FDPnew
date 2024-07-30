@@ -34,7 +34,7 @@ $('.list1 hr').css('color', '#91A21C');
         <hr>
         <ol>
             <li><a href='{{asset('/fs_tree_file/09_福山種子網分布圖.pdf')}}' target="_blank">種子網分布圖</a></li>
-            <li><a href='{{asset('/fs_tree_file/種子網架設方法.pdf')}}' target="_blank">種子網架設方法</a></li>
+            <li><a href='{{asset('/fs_seeds_file/福山種子網架設方法.pdf')}}' target="_blank">種子網架設方法</a></li>
             <li><a href='{{asset('/fs_seeds_file/種子網調查操作守則_東華版.pdf')}}' target="_blank">調查操作守則</a></li>
             <li><a href='{{asset('/fs_seeds_file/trapmaps_HOBO架設位置.pdf')}}' target="_blank">HOBO架設位置</a></li>
         </ol>
@@ -43,7 +43,7 @@ $('.list1 hr').css('color', '#91A21C');
         <h2>輸入資料檢查流程</h2>
         <hr>
         <ol>
-            <li><a href='https://hospitable-nickel-b27.notion.site/e59db3a8e3364bf4817b70853af036a0?pvs=4' target="_blank">種子雨輸入檢查流程</a></li>
+            <li><a href='https://nsysu-plantecology.notion.site/476f8746d89242b2b09a78b03c50222a?pvs=4' target="_blank">種子雨輸入檢查流程</a></li>
         </ol>
         
     </div>

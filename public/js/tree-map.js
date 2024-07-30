@@ -27,7 +27,7 @@ function showFlywhere(event) {
         visibility: "visible"
     });
     console.log(x,y,dx,dy);
-
+    $(".datasavenote").html('');
 }
 
 function drawChart(data, tablePlot, mapfile){
@@ -200,10 +200,21 @@ function drawChart(data, tablePlot, mapfile){
         // console.log(scatterChart.chartArea.left);
         chartAreaInfo=scatterChart.chartArea;
 
-      $("#showForm input[name='tag']").val('');
-      $("#showForm input[name='x']").val('');
-      $("#showForm input[name='y']").val('');
-      $("#showForm input[name='rtype']").val('');
+
+
+      if (data[0].qudx!=0 && data[0].qudy !=0){
+          $("#showForm input[name='tag']").val('');
+          $("#showForm input[name='x']").val('');
+          $("#showForm input[name='y']").val('');
+          $("#showForm input[name='rtype']").val('');
+      } else {
+          $("#showForm input[name='tag']").val(data[0].tag);
+          $("#showForm input[name='x']").val(data[0].qudx);
+          $("#showForm input[name='y']").val(data[0].qudy);
+          $("#showForm input[name='rtype']").val(data[0].type);
+          $(`.maptr`).removeClass('fontred');
+          $(`.tr${data[0].tag}`).addClass('fontred');
+      }
 }
 
 

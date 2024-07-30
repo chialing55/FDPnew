@@ -82,7 +82,6 @@ function createHandsontable(container, columns, sourceData, saveButtonName, save
                 var change = element;
                 var rowIndex = change[0];
                 var columnIndex = change[1];
-                
                 var oldValue = change[2];
                 var newValue = change[3];
                 col=container.handsontable('propToCol', columnIndex);

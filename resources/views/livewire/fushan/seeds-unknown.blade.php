@@ -15,7 +15,10 @@
         </div>
     <div  style=''>
 
+@php 
+ $codelist=[ '1' => '果', '2' => '種子', '3' => '附屬物', '4' => '碎片', '5' => '未熟果', '6' => '花', ];
 
+@endphp  
         <div  style='display: flex; flex-wrap: wrap; justify-content: center;'>
             @foreach($unkdes as $unk)
             <div class='photocombo text_box' >
@@ -28,13 +31,13 @@
                 <div style='display: inline-flex;'>
                 <div class='photocombo' style=''>
                     <div class='photo'>
-                        <img src="{{ asset("/webphoto/unknown/{$photo['unkname']}/s_{$photo['filename']}") }}" width="230">
+                        <a href='{{ asset("/splist/photo/unknown/{$photo['unkname']}/{$photo['filename']}") }}' data-fancybox="gallery" data-caption="{{$unk['unkname']}}<br> 類型: {{$codelist[$photo['code']]}}<br>photo by: {{$photo['photoby']}}@if($photo['des']!='')<br>{{$photo['des']}}
+                        @endif" >
+                        <img src="{{ asset("/splist/photo/unknown/{$photo['unkname']}/s_{$photo['filename']}") }}" width="230">
+                    </a>
 
                     </div>
-@php 
- $codelist=[ '1' => '果', '2' => '種子', '3' => '附屬物', '4' => '碎片', '5' => '未熟果', '6' => '花', ];
-
-@endphp                    
+                  
                     <div class='photodes'>
                         類型: {{$codelist[$photo['code']]}} <br>
                         photo by: {{$photo['photoby']}}

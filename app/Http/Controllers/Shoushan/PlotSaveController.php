@@ -1,11 +1,12 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Http\Controllers\Shoushan;
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\App;
 use Illuminate\Support\Facades\Schema;
+use App\Http\Controllers\Controller;
 
 use App\Models\Ss10mQuad2014;
 use App\Models\Ss10mTree2014;
@@ -25,18 +26,18 @@ use App\Models\Ss1haRecord1;
 use App\Models\Ss1haRecord2;
 use App\Models\Ss1haEnviR1;
 use App\Models\Ss1haEnviR2;
-use App\Models\SsEntrycom;
+use App\Models\SsComplete;
 use App\Models\SsFixlog;
 use App\Models\SsSplist;
 
 use App\Jobs\SsPlotDataCheck;
 use App\Jobs\SsPlotRecruitCheck;
-use App\Jobs\FsTreeAddButton;
+use App\Jobs\TreeAddButton;
 use App\Jobs\TreeUpdateBase;
 use App\Jobs\TreeUpdateCensusData;
 
 
-class SsPlotSaveController extends Controller
+class PlotSaveController extends Controller
 {
 
     public function get10mEnviTableInstance($entry) {
@@ -82,22 +83,26 @@ class SsPlotSaveController extends Controller
         }
     }
 
+//重新載入10m樣區資料
+
     public function get10mRedata($entry, $plot, $sqx, $sqy, $user){
 
         $table = $this->get10mDataTableInstance($entry);
 
         $redatas=$table::where('plot', 'like', $plot)->where('sqx', 'like', $sqx)->where('sqy', 'like', $sqy)->where('show', 'like', '1')->orderBy('tag', 'asc')->orderBy('branch', 'asc')->get();
 
-        $ob_redata = new FsTreeAddButton;
+        $ob_redata = new TreeAddButton;
         $redata=$ob_redata->addbutton($redatas, $entry);
 
-        $col='entry'.$entry.'com';
+        $col='entry'.$entry.'Done';
 
-        $entrycomUpdate=SsEntrycom::query()->where('plot', 'like', '10m')->update([$col => '', 'update_id'=>$user]);
+        SsComplete::query()->where('plot', 'like', '10m')->update([$col => '', 'updated_id'=>$user]);
 
         return $redata;
 
     }
+
+//重新載入1ha樣區資料
 
     public function get1haRedata($entry, $qx, $qy, $sqx, $sqy, $user){
 
@@ -105,18 +110,18 @@ class SsPlotSaveController extends Controller
 
         $redatas=$table::where('qx', 'like', $qx)->where('qy', 'like', $qy)->where('sqx', 'like', $sqx)->where('sqy', 'like', $sqy)->where('show', 'like', '1')->orderBy('tag', 'asc')->orderBy('branch', 'asc')->get();
 
-        $ob_redata = new FsTreeAddButton;
+        $ob_redata = new TreeAddButton;
         $redata=$ob_redata->addbutton($redatas, $entry);
 
-        $col='entry'.$entry.'com';
+        $col='entry'.$entry.'Done';
 
-        $entrycomUpdate=SsEntrycom::query()->where('plot', 'like', '1ha')->update([$col => '', 'update_id'=>$user]);
+        SsComplete::query()->where('plot', 'like', '1ha')->update([$col => '', 'updated_id'=>$user]);
 
         return $redata;
 
     }
-
-    public function get10mRecovdata($entry, $plot, $sqx, $sqy, $user){
+//重新載入10m樣區地被資料
+    public function get10mReCovdata($entry, $plot, $sqx, $sqy, $user){
 
         $table = $this->get10mCovTableInstance($entry);
         $redata=[];
@@ -137,13 +142,13 @@ class SsPlotSaveController extends Controller
                 $redata=[];
             }
 
-        $col='entry'.$entry.'com';
+        $col='entry'.$entry.'Done';
 
-        $entrycomUpdate=SsEntrycom::query()->where('plot', 'like', '10m')->update([$col => '', 'update_id'=>$user]);
+        SsComplete::query()->where('plot', 'like', '10m')->update([$col => '', 'updated_id'=>$user]);
 
         return $redata;
     }
-
+//儲存環境資料
     public function saveenvi (Request $request){
         $data_all = request()->all();
         // $splist = $request->session()->get('splist');
@@ -158,7 +163,7 @@ class SsPlotSaveController extends Controller
             if ($value==null){$value='';}
             $uplist[$key]=$value;
         }
-        $uplist['update_id']=$user;
+        $uplist['updated_id']=$user;
 
         if ($plotType=='ss10m'){
             $table = $this->get10mEnviTableInstance($entry);
@@ -170,9 +175,9 @@ class SsPlotSaveController extends Controller
             $plotvalue='1ha';
         }
 
-        $col='entry'.$entry.'com';
+        $col='entry'.$entry.'Done';
 
-        $entrycomUpdate=SsEntrycom::query()->where('plot', 'like', $plotvalue)->update([$col => '', 'update_id'=>$user]);
+        SsComplete::query()->where('plot', 'like', $plotvalue)->update([$col => '', 'updated_id'=>$user]);
 
 
         $envisavenote='已儲存環境資料';
@@ -187,7 +192,7 @@ class SsPlotSaveController extends Controller
             ];
     }
 
-
+//儲存輸入資料
     public function savedata (Request $request){
 
         $data_all = request()->all();
@@ -224,7 +229,7 @@ class SsPlotSaveController extends Controller
                 $odata=$table::where('stemid', 'like', $data[$i]['stemid'])->get()->toArray();
             //更新
                 foreach($data[$i] as $key => $value){
-                    $excludedKeys=['update_id', 'updated_at', 'alternotetable'];
+                    $excludedKeys=['updated_id', 'updated_at', 'alternotetable'];
                     if (!in_array($key, $excludedKeys)){
                         if ($odata[0][$key] != $value){
                             if($value==Null){$value='';}
@@ -233,7 +238,7 @@ class SsPlotSaveController extends Controller
                     }
                 }
                 if ($uplist!=[]){
-                    $uplist['update_id']=$user;
+                    $uplist['updated_id']=$user;
                     $table::where('stemid', 'like', $data[$i]['stemid'])->update($uplist);
                     $datasavenote='資料已儲存';
                 }
@@ -263,7 +268,7 @@ class SsPlotSaveController extends Controller
             ];
     }
 
-
+//儲存新增資料
     public function saverecruit(Request $request){
         // $splist = $request->session()->get('splist');
         $data_all = request()->all();
@@ -338,7 +343,7 @@ class SsPlotSaveController extends Controller
             if ($datacheck['pass']==1){
 
 
-                $data[$i]['update_id']=$user;
+                $data[$i]['updated_id']=$user;
                 $data[$i]['updated_at']=date("Y-m-d H:i:s");
                 $data[$i]['confirm']='';
                 // $data[$i]['tocheck']='';
@@ -356,7 +361,7 @@ class SsPlotSaveController extends Controller
 
 
                     foreach($data[$i] as $key => $value){
-                        $excludedKeysall=['update_id', 'updated_at', 'alternotetable'];
+                        $excludedKeysall=['updated_id', 'updated_at', 'alternotetable'];
                         if (!in_array($key, $excludedKeysall)){
                             if ($odata[0][$key] != $value){
                                 if($value==Null){$value='';}
@@ -381,7 +386,7 @@ class SsPlotSaveController extends Controller
 
                     if ($uplist!=[]){
 
-                        $uplist['update_id']=$user;
+                        $uplist['updated_id']=$user;
 
                         $table::where('stemid', 'like', $data[$i]['stemid'])->update($uplist);
 
@@ -461,7 +466,7 @@ class SsPlotSaveController extends Controller
 
     }
 
-
+//刪除新增資料
     public function deletedata(Request $request, $stemid, $entry, $plotType, $thispage){
         $test='';
             $user = $request->session()->get('user', function () {
@@ -513,6 +518,7 @@ class SsPlotSaveController extends Controller
             ];
     }
 
+//儲存特殊修改
     public function savealternote(Request $request){
 
 
@@ -542,7 +548,7 @@ class SsPlotSaveController extends Controller
 
             if ($olddata[0]['alternote']!=$alterdata){
                 $uplist['alternote']=$alterdata;
-                $uplist['update_id']=$user;
+                $uplist['updated_id']=$user;
                 $table::where('stemid', 'like', $data['stemid'])->update($uplist);
             }
             $datasavenote='資料已儲存';
@@ -571,6 +577,7 @@ class SsPlotSaveController extends Controller
 
     }
 
+//刪除特殊修改
     public function deletealter(Request $request, $stemid, $entry, $plotType, $thispage){
 
         $user = $request->session()->get('user', function () {
@@ -624,7 +631,7 @@ class SsPlotSaveController extends Controller
 
     }
 
-
+//儲存10m樣區地被新增資料
     public function saveaddcov (Request $request){
         $data_all = request()->all();
         // $splist = $request->session()->get('splist');
@@ -704,7 +711,7 @@ class SsPlotSaveController extends Controller
             if ($pass=='1'){
 
 
-                $data[$i]['update_id']=$user;
+                $data[$i]['updated_id']=$user;
                 $data[$i]['updated_at']=date("Y-m-d H:i:s");
                 $data[$i]['id']='0';
                 if (is_null($data[$i]['note'])){$data[$i]['note']='';}
@@ -745,7 +752,7 @@ class SsPlotSaveController extends Controller
 //         //重新載入資料
         if($sqx=='0'){$sqx='1'; $sqy='1';}
 
-            $redata=$this->get10mRecovdata($entry, $data[0]['plot'], $sqx, $sqy, $user);
+            $redata=$this->get10mReCovdata($entry, $data[0]['plot'], $sqx, $sqy, $user);
 
         return [
             'result' => 'ok',
@@ -764,6 +771,8 @@ class SsPlotSaveController extends Controller
         ];
 
     }
+
+//刪除10m樣區地被資料
 
     public function deletecov(Request $request, $id, $entry){
         $test='';
@@ -790,7 +799,7 @@ class SsPlotSaveController extends Controller
 
             $covsavenote='已刪除 '.$thisdata[0]['csp'] .' 覆蓋度資料';
 
-            $redata=$this->get10mRecovdata($entry, $thisplot, $thissqx, $thissqy, $user);
+            $redata=$this->get10mReCovdata($entry, $thisplot, $thissqx, $thissqy, $user);
 
             return [
                 'result' => 'ok',
@@ -803,7 +812,7 @@ class SsPlotSaveController extends Controller
             ];
     }
 
-
+//地被資料修改儲存
     public function savecov (Request $request){
         $data_all = request()->all();
         // $splist = $request->session()->get('splist');
@@ -840,7 +849,7 @@ class SsPlotSaveController extends Controller
             //找舊資料
             $ocov=$table::query()->where('id', 'like', $data[$i]['id'])->get()->toArray();
             foreach($data[$i] as $key => $value){
-                $excludedKeys=['update_id', 'updated_at','delete'];
+                $excludedKeys=['updated_id', 'updated_at','delete'];
                 if (!in_array($key, $excludedKeys)){
                     if ($ocov[0][$key] != $value){
                         
@@ -867,7 +876,7 @@ class SsPlotSaveController extends Controller
                         $covsavenote = "第".($i+1)."筆 資料 重複種類";
                 } else {
 
-                    $uplist['update_id']=$user;
+                    $uplist['updated_id']=$user;
                     $table::where('id', 'like', $data[$i]['id'])->update($uplist);
                     $covsavenote='資料已儲存';
 
@@ -879,7 +888,7 @@ class SsPlotSaveController extends Controller
 
 // //         //重新載入資料
 
-            $redata=$this->get10mRecovdata($entry, $data[0]['plot'], $data[0]['sqx'], $data[0]['sqy'], $user);
+            $redata=$this->get10mReCovdata($entry, $data[0]['plot'], $data[0]['sqx'], $data[0]['sqy'], $user);
 
         return [
             'result' => 'ok',
@@ -892,7 +901,7 @@ class SsPlotSaveController extends Controller
     }
 
 
-//後端資料更正
+//後端資料更正//目前只做一公頃樣區的
 
     public function saveupdate (Request $request){
 
@@ -933,7 +942,7 @@ class SsPlotSaveController extends Controller
         if ($pass=='1'){
 
             $stemidlist=[];
-            
+
 // //census
             for ($i = 1; $i <= 2; $i++) {
                 $lastcensus=2;
@@ -950,7 +959,6 @@ class SsPlotSaveController extends Controller
                     case 2:$table= new Ss1haData2024; break;
                 }
 
-                
                 $temp= $table::where('stemid','like',$ostemid)->get()->toArray();
                 if (count($temp)>0){
                     ${"ocensus$i"}=$temp[0];
@@ -968,9 +976,6 @@ class SsPlotSaveController extends Controller
             }
         }
 
-        
-
-
             return [
                 'result' => 'ok',
                 'thisstemid' => $thisstemid,
@@ -983,6 +988,7 @@ class SsPlotSaveController extends Controller
             ];
     }
 
+//後端處理中刪除資料//目前只做一公頃樣區的
 
     public function deleteCensusData(Request $request){
 
@@ -1042,7 +1048,7 @@ class SsPlotSaveController extends Controller
                     $fixlog['qx']=substr($stemid, 0, 2);
                     $fixlog['stemid']=$stemid;
                     $fixlog['descript']='刪除此編號資料';
-                    $fixlog['update_id']=$user;
+                    $fixlog['updated_id']=$user;
                     $fixlog['updated_at']=date("Y-m-d H:i:s");
                     $tablefixlog::insert($fixlog);
                     $thisstemid=$stemid;
@@ -1052,7 +1058,7 @@ class SsPlotSaveController extends Controller
         } else {
 
             $uplist['deleted_at']=date("Y-m-d H:i:s");
-            $uplist['update_id']=$user;
+            $uplist['updated_id']=$user;
 
             $tablebase::where('tag', 'like', $tag)->update($uplist);
                     $fixlog['id']='0';
@@ -1062,7 +1068,7 @@ class SsPlotSaveController extends Controller
                     $fixlog['qx']=substr($stemid, 0, 2);
                     $fixlog['stemid']=$tag;
                     $fixlog['descript']='軟刪除此編號base資料';
-                    $fixlog['update_id']=$user;
+                    $fixlog['updated_id']=$user;
                     $fixlog['updated_at']=date("Y-m-d H:i:s");
                     $tablefixlog::insert($fixlog);
                     // $fixall[]=$fixlog;
@@ -1100,7 +1106,7 @@ class SsPlotSaveController extends Controller
                     $fixlog['qx']=substr($stemid, 0, 2);
                     $fixlog['stemid']=$tag;
                     $fixlog['descript']='軟刪除此編號所有植株資料';
-                    $fixlog['update_id']=$user;
+                    $fixlog['updated_id']=$user;
                     $fixlog['updated_at']=date("Y-m-d H:i:s");
                     // $fixall[]=$fixlog;
                     $tablefixlog::insert($fixlog);

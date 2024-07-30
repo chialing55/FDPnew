@@ -18,8 +18,9 @@ use App\Models\FsSeedlingSlroll1;
 use App\Models\FsSeedlingSlroll2;
 // use App\Post;
 
-use App\Jobs\FsSeedlingAddButton;
+use App\Jobs\SeedlingAddButton;
 
+//小苗輸入資料
 class SeedlingShowentry extends Component
 {
 
@@ -115,7 +116,7 @@ class SeedlingShowentry extends Component
     public $thispage;
     public $totalpage;
 
-
+//選擇輸入樣區
     public function searchtrap(Request $request, $selectTrap){
         // $selectTrap=$selectTrap3;
 // dd($selectTrap3);
@@ -144,7 +145,7 @@ class SeedlingShowentry extends Component
             // $slrecord1=='無';
             // $slrecord='無';
         } else {
-            $ob_redata = new FsSeedlingAddButton;
+            $ob_redata = new SeedlingAddButton;
             $slrecord1=$ob_redata->addbutton($slrecord, $this->entry);
         }
  

@@ -29,7 +29,8 @@ use App\Models\SsFixlog;
 // use App\Models\Ss10mBase2015;
 // use App\Models\Ss10mBase2024;
 // use App\Models\Ss10mBaseR2024;
-
+//後端資料表更新
+//每一個要更新的資料表會進這邊更新
 class TreeUpdateCensusData
 {
 	public function up($plotType, $i, $lastcensus, $ndata, $odata, $table, $data_all, $ostemid){
@@ -37,7 +38,6 @@ class TreeUpdateCensusData
         if ($plotType=='fstree'){
             $tablebase=new FsTreeBase;
             $tablebaser=new FsTreeBaseR;
-            $tablecensus=new FsTreeCensus5;
             $tablefixlog=new FsTreeFixlog;
             $censusSheet='census'.$i;
             $baseSheet='base';
@@ -45,7 +45,6 @@ class TreeUpdateCensusData
         } else if ($plotType=='ss1ha'){
             $tablebase = new Ss1haBase2024;
             $tablebaser = new Ss1haBaseR2024;
-            $tablecensus = new Ss1haData2024;
             $tablefixlog = new SsFixlog;
             if ($i==1){
                 $censusSheet='1ha_data_2015';
@@ -73,7 +72,7 @@ class TreeUpdateCensusData
             $datasavenote='';
 
                 if (count($odata)>0){
-                    $exarray=['code2','status2','update_id', 'updated_at', 'deleted_at'];
+                    $exarray=['code2','status2','updated_id', 'updated_at', 'deleted_at'];
                     foreach ($odata as $key =>$value){
                         
                         if (!in_array($key, $exarray)){
@@ -90,7 +89,7 @@ class TreeUpdateCensusData
 
                 $fixlog=[];
                 if ($census_uplist!=[]){
-                    $census_uplist['update_id']=$user;
+                    $census_uplist['updated_id']=$user;
                     $table::where('stemid', 'like', $ostemid)->update($census_uplist);
                     $fixlog['id']='0';
                     $fixlog['from']=$from;
@@ -99,7 +98,7 @@ class TreeUpdateCensusData
                     $fixlog['qx']=$base['qx'];
                     $fixlog['stemid']=$ostemid;
                     $fixlog['descript']=json_encode($updatedes, JSON_UNESCAPED_UNICODE);
-                    $fixlog['update_id']=$user;
+                    $fixlog['updated_id']=$user;
                     $fixlog['updated_at']=date("Y-m-d H:i:s");
                     $tablefixlog::insert($fixlog);
                     $datasavenote='已更新資料';
@@ -123,7 +122,7 @@ class TreeUpdateCensusData
                             $fixlog['qx']=$base['qx'];
                             $fixlog['stemid']=$ostemid;
                             $fixlog['descript']='軟刪除此編號base_r資料';
-                            $fixlog['update_id']=$user;
+                            $fixlog['updated_id']=$user;
                             $fixlog['updated_at']=date("Y-m-d H:i:s");
                             $tablefixlog::insert($fixlog);
 
@@ -142,21 +141,21 @@ class TreeUpdateCensusData
                                 $fixlog['qx']=$base['qx'];
                                 $fixlog['stemid']=$ostemid;
                                 $fixlog['descript']='恢復此編號base_r資料';
-                                $fixlog['update_id']=$user;
+                                $fixlog['updated_id']=$user;
                                 $fixlog['updated_at']=date("Y-m-d H:i:s");
                                 $tablefixlog::insert($fixlog);
                             } else {
 
                                 $baseRdata=$tablebase::where('tag', 'like', $otag)->get()->toArray();
 
-                                $exarray=['update_id', 'updated_at', 'deleted_at'];
+                                $exarray=['updated_id', 'updated_at', 'deleted_at'];
                                 foreach($baseRdata as $key=>$value){
                                     if (!in_array($key, $exarray)){
                                         $baser_insert[$key]=$baseRdata[$key];
                                     }
                                 }
                                 $baser_insert[0]['stemid']=$ostemid;
-                                $baser_insert[0]['update_id']=$user;
+                                $baser_insert[0]['updated_id']=$user;
                                 $baser_insert[0]['updated_at']=date("Y-m-d H:i:s");
                                 $baser_insert[0]['deleted_at']='';
 
@@ -169,7 +168,7 @@ class TreeUpdateCensusData
                                 $fixlog['qx']=$base['qx'];
                                 $fixlog['stemid']=$ostemid;
                                 $fixlog['descript']='新增base_r';
-                                $fixlog['update_id']=$user;
+                                $fixlog['updated_id']=$user;
                                 $fixlog['updated_at']=date("Y-m-d H:i:s");
                                 $tablefixlog::insert($fixlog);
                             }
@@ -194,7 +193,7 @@ class TreeUpdateCensusData
                                 $fixlog['qx']=$base['qx'];
                                 $fixlog['stemid']=$ostemid;
                                 $fixlog['descript']='軟刪除此編號base_r資料';
-                                $fixlog['update_id']=$user;
+                                $fixlog['updated_id']=$user;
                                 $fixlog['updated_at']=date("Y-m-d H:i:s");
                                 $tablefixlog::insert($fixlog);
 
@@ -213,21 +212,21 @@ class TreeUpdateCensusData
                                     $fixlog['qx']=$base['qx'];
                                     $fixlog['stemid']=$ostemid;
                                     $fixlog['descript']='恢復此編號base_r資料';
-                                    $fixlog['update_id']=$user;
+                                    $fixlog['updated_id']=$user;
                                     $fixlog['updated_at']=date("Y-m-d H:i:s");
                                     $tablefixlog::insert($fixlog);
                                 } else {
 
                                     $baseRdata=$tablebase::where('tag', 'like', $otag)->get()->toArray();
 
-                                    $exarray=['update_id', 'updated_at', 'deleted_at'];
+                                    $exarray=['updated_id', 'updated_at', 'deleted_at'];
                                     foreach($baseRdata as $key=>$value){
                                         if (!in_array($key, $exarray)){
                                             $baser_insert[$key]=$baseRdata[$key];
                                         }
                                     }
                                     $baser_insert[0]['stemid']=$ostemid;
-                                    $baser_insert[0]['update_id']=$user;
+                                    $baser_insert[0]['updated_id']=$user;
                                     $baser_insert[0]['updated_at']=date("Y-m-d H:i:s");
                                     $baser_insert[0]['deleted_at']='';
 
@@ -240,7 +239,7 @@ class TreeUpdateCensusData
                                     $fixlog['qx']=$base['qx'];
                                     $fixlog['stemid']=$ostemid;
                                     $fixlog['descript']='新增base_r';
-                                    $fixlog['update_id']=$user;
+                                    $fixlog['updated_id']=$user;
                                     $fixlog['updated_at']=date("Y-m-d H:i:s");
                                     $tablefixlog::insert($fixlog);
                                 }

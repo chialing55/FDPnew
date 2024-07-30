@@ -14,7 +14,7 @@ use App\Models\FsSeedsFulldata;
 use App\Models\FsWebUnk;
 use App\Models\FsWebUnkPhoto;
 
-
+//unk種子資訊
 class SeedsUnknown extends Component
 {
     public $unk='%';

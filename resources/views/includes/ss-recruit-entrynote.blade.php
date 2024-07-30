@@ -1,6 +1,7 @@
+{{-- 壽山每木輸入資料說明 --}}
 @php
 if (isset($selectPlot)){
-    $add='<li>tag 最多為三碼。</li>';
+    $add='<li>tag 最多為三碼。</li>';  //零散樣區
 
 } else {
     $add='';

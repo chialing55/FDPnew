@@ -1,12 +1,13 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Http\Controllers\Fushan;
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\App;
 use Illuminate\Support\Facades\Schema;
 // use Illuminate\Support\Facades\Input;
+use App\Http\Controllers\Controller;
 
 use App\Models\FsSeedlingData;
 use App\Models\FsSeedlingBase;
@@ -19,8 +20,10 @@ use App\Models\FsSeedlingSlrecord2;
 use App\Models\FsSeedlingSlroll1;
 use App\Models\FsSeedlingSlroll2;
 
+//產生紀錄紙資料表
+//分配網址到各個頁面
 
-class FsSeedlingController extends Controller
+class SeedlingController extends Controller
 {
 
 
@@ -78,13 +81,13 @@ class FsSeedlingController extends Controller
 
                 $c_table1=DB::connection('mysql3')->select("CREATE  TABLE  `fs_seedling`.`slrecord1` (  `id` int( 11  )  NOT  NULL AUTO_INCREMENT,  `census` int( 3  )  NOT  NULL ,  `year` int( 4  )  NOT  NULL ,  `month` int( 2  )  NOT  NULL ,  `date` char( 10  )  NOT  NULL ,  `trap` int( 3  )  NOT  NULL ,  `plot` int( 1  )  NOT  NULL ,  `tag` char( 12  )  NOT  NULL ,  `mtag` char( 12  )  NOT  NULL ,  `csp` char( 20  )  NOT  NULL ,    `ht` float ,  `cotno` int( 2  )  , `leafno` int( 2  )   ,  `ind` int( 3  )  NOT  NULL default  '1',  `note` varchar( 255  )  NOT  NULL ,`recruit` char( 2  )  NOT  NULL ,`status` char( 2  )  NOT  NULL ,`sprout` char( 5  )  NOT  NULL , `x` int( 3  )  NOT  NULL , `y` int( 3  )  NOT  NULL , `updated_at` varchar(255) ,  PRIMARY KEY (  `id` ) , index(  trap  )  ) ENGINE  =  MyISAM  DEFAULT CHARSET  = utf8");
                 $i_table1=DB::connection('mysql3')->select("INSERT INTO fs_seedling.slrecord1 SELECT * FROM fs_seedling.slrecord");
-                $a_table1=DB::connection('mysql3')->select("ALTER TABLE  `slrecord1` ADD  (`alternote` VARCHAR( 255 ) NOT NULL, `update_id` char(20) not null)");
+                $a_table1=DB::connection('mysql3')->select("ALTER TABLE  `slrecord1` ADD  (`alternote` VARCHAR( 255 ) NOT NULL, `updated_id` char(20) not null)");
 
                 $census=FsSeedlingSlrecord1::first();
 
             if ($census['census']%2==0){
-                $month='8';
-            } else { $month = '2';}
+                $month='2';
+            } else { $month = '8';}
          
 
                 $u_record=FsSeedlingSlrecord1::query()->update(['year' => date('Y'), 'month' => $month]);
@@ -97,7 +100,7 @@ class FsSeedlingController extends Controller
                 $i_table1=DB::connection('mysql3')->select("INSERT INTO fs_seedling.slrecord2 SELECT * FROM fs_seedling.slrecord1");
 
                 //cov
-                $c_cov1=DB::connection('mysql3')->select("create table `fs_seedling`.`slcov1` ( `id` int (11) NOT  NULL AUTO_INCREMENT, `year` int( 4  ) ,  `month` int( 2  ) ,  `date` char( 10  ) ,  `trap` int( 3  ),  `plot` int( 1  ) , `cov` float,`canopy` char (2) ,  `note` varchar( 255  ), `updated_at` varchar(255), `update_id` char(20), PRIMARY KEY (  `id` ) , index(  trap  ) )ENGINE  =  MyISAM  DEFAULT CHARSET  = utf8");
+                $c_cov1=DB::connection('mysql3')->select("create table `fs_seedling`.`slcov1` ( `id` int (11) NOT  NULL AUTO_INCREMENT, `year` int( 4  ) ,  `month` int( 2  ) ,  `date` char( 10  ) ,  `trap` int( 3  ),  `plot` int( 1  ) , `cov` float,`canopy` char (2) ,  `note` varchar( 255  ), `updated_at` varchar(255), `updated_id` char(20), PRIMARY KEY (  `id` ) , index(  trap  ) )ENGINE  =  MyISAM  DEFAULT CHARSET  = utf8");
 
                 for ($x=1;$x<108;$x++){ 
                     if ($x!=42){    
@@ -116,7 +119,7 @@ class FsSeedlingController extends Controller
 
                 $i_table2=DB::connection('mysql3')->select("INSERT INTO fs_seedling.slcov2 SELECT * FROM fs_seedling.slcov1");
 
-                $c_roll=DB::connection('mysql3')->select("create table `fs_seedling`.`slroll1` ( `id` int (11) NOT  NULL AUTO_INCREMENT,  `year` int( 4  )  NOT  NULL ,  `month` int( 2  )  NOT  NULL , `date` char( 10  )  NOT  NULL ,  `trap` int( 3  )  NOT  NULL ,  `plot` int( 1  )  NOT  NULL , `tag` char(12) not null,  `note` varchar( 255  ), `updated_at` varchar(255) not null, `update_id` char(20) not null,PRIMARY KEY (  `id` ) , index(  trap  ) )ENGINE  =  MyISAM  DEFAULT CHARSET  = utf8");
+                $c_roll=DB::connection('mysql3')->select("create table `fs_seedling`.`slroll1` ( `id` int (11) NOT  NULL AUTO_INCREMENT,  `year` int( 4  )  NOT  NULL ,  `month` int( 2  )  NOT  NULL , `date` char( 10  )  NOT  NULL ,  `trap` int( 3  )  NOT  NULL ,  `plot` int( 1  )  NOT  NULL , `tag` char(12) not null,  `note` varchar( 255  ), `updated_at` varchar(255) not null, `updated_id` char(20) not null,PRIMARY KEY (  `id` ) , index(  trap  ) )ENGINE  =  MyISAM  DEFAULT CHARSET  = utf8");
                 $c_roll=DB::connection('mysql3')->select("CREATE TABLE slroll2 LIKE slroll1");
 
 

@@ -1,13 +1,13 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Http\Controllers\Shoushan;
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\App;
 use Illuminate\Support\Facades\Schema;
 // use Illuminate\Support\Facades\Input;
-
+use App\Http\Controllers\Controller;
 
 
 use App\Models\Ss10mTreeRecord1;
@@ -15,9 +15,10 @@ use App\Models\Ss10mTreeRecord2;
 use App\Models\Ss1haRecord1;
 use App\Models\Ss1haRecord2;
 
+//特殊修改欄位
+//兩種類型的樣區有不同的需求
 
-
-class SsPlotAlternote extends Controller
+class PlotAlternote extends Controller
 {
 
     public function alternote(Request $request, $stemid, $entry, $plotType, $thispage){

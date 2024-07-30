@@ -1,23 +1,26 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Http\Controllers\Fushan;
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\App;
 use Illuminate\Support\Facades\Storage;
-
+use App\Http\Controllers\Controller;
 
 use Dompdf\Dompdf;
 use setasign\Fpdi\Fpdi;
 use PDF;
+
 use App\Models\FsTreeBase;
 use App\Models\FsTreeBaseR;
 use App\Models\FsTreeCensus4;
 use App\Models\FsTreeCensus3;
 use App\Models\FsBaseTreeSplist;
 
-class FsTreePDFController extends Controller
+//產生pdf紀錄紙
+
+class TreePDFController extends Controller
 {
     public function record(Request $request, $qx, $qy, $type){
         // echo '1';

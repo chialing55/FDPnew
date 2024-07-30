@@ -13,6 +13,9 @@ use App\Models\FsSeedlingSlrecord;
 use App\Models\FsSeedlingSlrecord1;
 use App\Models\FsSeedlingSlrecord2;
 
+//福山小苗資料檢查
+//可依所需調整
+
 class FsSeedlingDataCheck
 {
 	public function check($data2, $table){

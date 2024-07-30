@@ -20,7 +20,7 @@ use App\Models\Ss10mTreeRecord1;
 use App\Models\Ss10mTreeRecord2;
 use App\Models\SsSplist;
 
-use App\Jobs\FsTreeAddButton;
+use App\Jobs\TreeAddButton;
 
 class S10mShowentry extends Component
 {
@@ -28,7 +28,7 @@ class S10mShowentry extends Component
     public $user;
     public $site;
 
-    public $plots = array('B-F-01', 'B-F-04', 'B-F-06', 'B-F-13', 'B-F-14', 'B-F-19', 'G-F-01', 'G-F-02', 'G-F-03', 'G-F-06', 'Q-F-03', 'S-F-01', 'S-F-02', 'S-F-04', 'S-F-06', 'S-F-07', 'S-F-09', 'S-F-11', 'S-F-14', 'S-F-15', 'S-F-16', 'S-F-17', 'S-F-21', 'S-F-38');     
+    public $plots = array('A1', 'A2', 'A3', 'B-F-01', 'B-F-04', 'B-F-06', 'B-F-13', 'B-F-14', 'B-F-19', 'G-F-01', 'G-F-02', 'G-F-03', 'G-F-06', 'Q-F-03', 'S-F-01', 'S-F-02', 'S-F-04', 'S-F-06', 'S-F-07', 'S-F-09', 'S-F-11', 'S-F-14', 'S-F-15', 'S-F-16', 'S-F-17', 'S-F-21', 'S-F-38');     
 
 
     public $selectPlot;
@@ -59,7 +59,7 @@ class S10mShowentry extends Component
         }
 
     }
-
+//選擇輸入樣區
     public function searchSite(Request $request, $selectPlot, $sqx, $sqy){
 
         $plot=$this->plots[$selectPlot];
@@ -127,7 +127,7 @@ class S10mShowentry extends Component
         //新增樹為刪除按鍵，其他加入特殊修改按鍵
         if (count($records)>0){
 
-            $ob_redata = new FsTreeAddButton;
+            $ob_redata = new TreeAddButton;
             $result=$ob_redata->addbutton($records, $this->entry);
         } else {
             $result='無';
@@ -189,8 +189,9 @@ class S10mShowentry extends Component
 
         }
 
-        $this->dispatchBrowserEvent('data', ['covs' => $cov, 'record' => $result, 'emptytable' => $emptytable,'emptytable2' => $emptytable2, 'csplist' => $ss10mcsplist, 'covcsplist' => $ss10mcovcsplist, 'envi' => $envi]);
+        $site=$plot.$sqx.$sqy;
 
+        $this->dispatchBrowserEvent('data', ['covs' => $cov, 'record' => $result, 'emptytable' => $emptytable,'emptytable2' => $emptytable2, 'csplist' => $ss10mcsplist, 'covcsplist' => $ss10mcovcsplist, 'envi' => $envi, 'site'=> $site]);
 
     }
 
@@ -198,10 +199,6 @@ class S10mShowentry extends Component
 
         $this->searchsite($request, $this->selectPlot, $this->sqx, $this->sqy);
     }
-
-
-        // 其他程式碼...
-
 
 
     public function render()

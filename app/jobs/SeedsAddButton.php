@@ -12,7 +12,9 @@ use App\Models\FsSeedsFulldata;
 use App\Models\FsSeedsRecord1;
 use App\Models\FsSeedsSplist;
 
-class FsSeedsAddButton
+//增加每筆資料的刪除鈕
+
+class SeedsAddButton
 {
 	public function addbutton($entrytable, $type){
 

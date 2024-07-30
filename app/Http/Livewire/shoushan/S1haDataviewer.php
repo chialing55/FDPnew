@@ -12,14 +12,9 @@ use Illuminate\Support\Facades\Schema;
 
 use App\Models\Ss1haData2015;
 use App\Models\Ss1haBase2015;
-// use App\Models\Ss10mTree2014;
-// use App\Models\Ss10mTree2015;
-// use App\Models\Ss10mTreeEnviR1;
-// use App\Models\Ss10mTreeEnviR2;
-// use App\Models\Ss10mTreeCovR1;
-// use App\Models\Ss10mTreeCovR2;
-// use App\Models\Ss10mTreeRecord1;
-// use App\Models\Ss10mTreeRecord2;
+use App\Models\Ss1haData2024;
+use App\Models\Ss1haBase2024;
+
 use App\Models\SsSplist;
 
 class S1haDataviewer extends Component
@@ -62,7 +57,7 @@ class S1haDataviewer extends Component
 
     public $type;
 
-
+//檢查是否有資料電子檔
     public function processFile(Request $request){
 
         $downloadtable = [];
@@ -104,23 +99,6 @@ class S1haDataviewer extends Component
                 $downloadtable[$i][0] = '舊樹';
                 $downloadtable[$i][1] = '地圖';
 
-        // for($i=1;$i<4;$i++){
-        //     if($i<3){
-        //         $downloadtable[$i][0]='調查資料';
-        //         $downloadtable[$i][1]='地圖';
-        //         $downloadtable[$i][2]='';
-        //         $downloadtable[$i][3]='';
-        //     } else {
-        //         $downloadtable[$i][0]='舊樹';
-        //         $downloadtable[$i][1]='新樹';
-        //         $downloadtable[$i][2]='地被';
-        //         $downloadtable[$i][3]='地圖';
-        //     }
-        // }
-
-                // if ($path!=''){
-                //     $downloadtable2[$i][$j]="<a href='/".$path."' target=_blank j=".$j.">".$downloadtable[$i][$j]."</a>";
-                // } else { $downloadtable2[$i][$j]=$downloadtable[$i][$j];}
                  $downloadtable2[$i][$j] = ($path != '')
                 ? "<a href='/" . $path . "' target=_blank j=" . $j . ">" . $downloadtable[$i][$j] . "</a>"
                 : $downloadtable[$i][$j];
@@ -143,24 +121,23 @@ class S1haDataviewer extends Component
     {
         $this->serachstemid($request, $this->tag, $this->branch);
     }
-
+//依stemid尋找資料
     public function serachstemid(Request $request, $tag, $branch)
     {
 
-
-
         if ($branch==''){$branch='0';}
-
-
-        
         $stemid=$tag.".".$branch;
 
         // dd($stemid);
 
         $census1=Ss1haData2015::where('tag', 'like', $tag)->get()->toArray();
-
-        $base2015=Ss1haBase2015::where('tag', 'like', $tag)->get()->toArray();
-        $maxb=Ss1haData2015::where('tag', 'like', $tag)->max('branch');
+        $census2=Ss1haData2024::where('tag', 'like', $tag)->get()->toArray();
+        $base2024 = Ss1haBase2024::where('tag', 'like', $tag)
+            ->join('splist', '1ha_base_2024.spcode', '=', 'splist.spcode')
+            ->select('1ha_base_2024.*', 'splist.index as csp')
+            ->get()
+            ->toArray();
+        $maxb=Ss1haData2024::where('tag', 'like', $tag)->max('branch');
         // dd($maxb);
 
         // dd($census1);
@@ -169,11 +146,12 @@ class S1haDataviewer extends Component
             if (count($census1) > 0) {
 
                 $table['data'] = $census1;
+                $table['data2'] = $census2;
                 // $table[0]['census'] = '2014';
                 $table['maxb'] = $maxb;
                 $this->result = $table;
                 $this->resultnote = '';
-                $this->baseresult=$base2015[0];
+                $this->baseresult=$base2024[0];
 
             } else {
                 $table['data'] = ['qx' => '', 'qy' => '','sqx' => '', 'sqy' => '', 'csp' => '', 'status' => '', 'dbh' => '', 'height' => '', 'note' => ''];

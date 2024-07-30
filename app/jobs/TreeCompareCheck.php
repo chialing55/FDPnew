@@ -10,13 +10,16 @@ use Illuminate\Support\Facades\Schema;
 
 use App\Models\FsTreeRecord1;
 use App\Models\FsTreeRecord2;
-use App\Models\FsTreeEntrycom;
+use App\Models\FsTreeComplete;
 
 use App\Models\Ss10mTreeRecord1;
 use App\Models\Ss10mTreeRecord2;
 use App\Models\Ss1haRecord1;
 use App\Models\Ss1haRecord2;
-use App\Models\SsEntrycom;
+use App\Models\SsComplete;
+
+//每木比對檢查
+//福山壽山資料皆以此做比對檢查
 
 class TreeCompareCheck
 {
@@ -26,7 +29,7 @@ class TreeCompareCheck
             $comnote1=[];
                     // 依tag比對
             $mistake=[];
-            $arrayExculd=['update_id', 'updated_at'];
+            $arrayExculd=['updated_id', 'updated_at'];
             foreach ($allStemid as $stemid) {
                 $comnote2=[];
                 if (isset($record1[$stemid])){

@@ -13,6 +13,8 @@ use App\Models\FsSeedlingSlrecord;
 use App\Models\FsSeedlingSlrecord1;
 use App\Models\FsSeedlingSlrecord2;
 
+//福山小苗新增苗檢查
+
 class FsSeedlingRecruitCheck
 {
 	public function check($data2, $entry, $q){

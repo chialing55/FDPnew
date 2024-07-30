@@ -7,7 +7,7 @@ $('.listlink').on('click', function(){
 	}
 
 })
-
+let urlbase='/ssPlot';
 
 
 // 使用
@@ -22,7 +22,7 @@ handleHoverEvents('.list6', '.list6inner');
 // console.log(qx, qy);
     // var tempwindow1=window.open('_blank');
     if (plot!=''){
-      let url='/ssplot-10m-record-pdf/'+plot;
+      let url=`${urlbase}/10m-record-pdf/${plot}`;
       window.open(url);
     }
   });
@@ -33,7 +33,7 @@ handleHoverEvents('.list6', '.list6inner');
 // console.log(qx, qy);
     // var tempwindow1=window.open('_blank');
     if (qx!='' && qy!=''){
-      let url='/ssplot-1ha-record-pdf/'+qx+'/'+qy;
+      let url=`${urlbase}/1ha-record-pdf/${qx}/${qy}`;
       window.open(url);
     }
   });
@@ -104,22 +104,35 @@ function ssdatatableupdate(data, thispage, pps){
 }
 
 function deleteid(stemid, entry, thispage){  //刪除新增樹資料
-  var saveUrl=`/ssPlotdeletedata/${stemid}/${entry}/${plotType}/${thispage}`;
+  var saveUrl=`${urlbase}/deletedata/${stemid}/${entry}/${plotType}/${thispage}`;
   handleDeleteid(stemid,  saveUrl)
 }
 
 
 function alternote(stemid, entry, thispage, event) {
   // console.log(stemid);
-    var saveUrl=`/ssPlotalternote/${stemid}/${entry}/${plotType}/${thispage}`;
+    var saveUrl=`${urlbase}/alternote/${stemid}/${entry}/${plotType}/${thispage}`;
     handleAlternote(stemid, entry, thispage, saveUrl);
 }
 
 
 function deletealternote(stemid, plotType, thispage){
-  var saveUrl=`/ssPlotdeletealter/${stemid}/${entry}/${plotType}/${thispage}`;
+  var saveUrl=`${urlbase}/deletealter/${stemid}/${entry}/${plotType}/${thispage}`;
   handleDeleteAlternote(stemid, plotType, saveUrl)
 }
 
 
 
+//map
+
+window.addEventListener('initTablesorter', event => {
+
+  const tablePlot=event.detail.tablePlot;
+  data=event.detail.data;
+  
+  const mapfile=event.detail.mapfile;
+  console.log(data);
+  $(`#mapTable${tablePlot}`).tablesorter();
+  drawChart(data, tablePlot, mapfile);
+
+});

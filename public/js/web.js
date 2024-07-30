@@ -112,6 +112,13 @@ function drawChart1(censusA, censusR, censusD){
                     data: censusD,
                 }
                 ],
+            },
+            options :{
+                plugins :{
+                    legend: {
+                        align: "end",
+                    },
+                }
             }
             
         };
@@ -196,7 +203,7 @@ function drawChart3(census4A, group){
     var data = [];
     var scatterDataLabels =[];
 
-    var pointRadiusIncrement = 1; // 遞增的步長
+    var pointRadiusIncrement = 1; // 遞增的圓點大小
 
     Object.keys(group).forEach(function(groupName) {
         if (group[groupName].length !== 0) {
@@ -221,7 +228,7 @@ function drawChart3(census4A, group){
                 pointStyle: 'circle',
                 pointRadius: pointRadiusIncrement // 設置 pointRadius
             });
-            pointRadiusIncrement++; // 增加步長
+            pointRadiusIncrement++; // 增加圓點大小
 
         }
     });

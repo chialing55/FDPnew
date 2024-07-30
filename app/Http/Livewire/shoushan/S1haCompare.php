@@ -20,20 +20,20 @@ use App\Models\Ss1haEnviR1;
 use App\Models\Ss1haEnviR2;
 
 use App\Models\SsSplist;
-use App\Models\SsEntrycom;
+use App\Models\SsComplete;
 
 use App\Jobs\TreeCompareCheck;
 use App\Jobs\SsPlotFinishCheck;
 
-
+//1ha樣區資料比對
 class S1haCompare extends Component
 {
 
-    public $entrycom1=[];
-    public $entrycom2=[];
+    public $entrydone1=[];   //檢查第一次輸入資料表是否已完成
+    public $entrydone2=[];   //檢查第二次輸入資料表是否已完成
 
-    public $entry1done;
-    public $entry2done;
+    public $entry1done;   //輸入完成紀錄表中的紀錄
+    public $entry2done;   //輸入完成紀錄表中的紀錄
     public $comparedone;
     public $user;
 
@@ -45,36 +45,36 @@ class S1haCompare extends Component
             ]);
         });
 
-        $entrycom1=[];
+        $entrydone1=[];
 
-        $entrycom1data = Ss1haRecord1::select('qx', 'qy')->where('date', 'like', '0000-00-00')->where('show', 'like', '1')->groupBy('qx', 'qy')->get()->toArray();
-        $entrycom2data = Ss1haRecord2::select('qx', 'qy')->where('date', 'like', '0000-00-00')->where('show', 'like', '1')->groupBy('qx', 'qy')->get()->toArray();
-        if($entrycom1data!=[]){
-            foreach($entrycom1data as $item){
-                $this->entrycom1[]=$item['qx']."-".$item['qy'];
+        $entrydone1data = Ss1haRecord1::select('qx', 'qy')->where('date', 'like', '0000-00-00')->where('show', 'like', '1')->groupBy('qx', 'qy')->get()->toArray();
+        $entrydone2data = Ss1haRecord2::select('qx', 'qy')->where('date', 'like', '0000-00-00')->where('show', 'like', '1')->groupBy('qx', 'qy')->get()->toArray();
+        if($entrydone1data!=[]){
+            foreach($entrydone1data as $item){
+                $this->entrydone1[]=$item['qx']."-".$item['qy'];
             }
         }
 
-        if($entrycom2data!=[]){
-            foreach($entrycom2data as $item){
-                $this->entrycom2[]=$item['qx']."-".$item['qy'];
+        if($entrydone2data!=[]){
+            foreach($entrydone2data as $item){
+                $this->entrydone2[]=$item['qx']."-".$item['qy'];
             }
         }
 
-        // dd($this->entrycom1);
+        // dd($this->entrydone1);
 
 
         // $finishSite["'".$table['qx']."-".$table['qy']."'"]=$table['entry1'].$table['entry2'];
 
 
-        $entryFinish=SsEntrycom::query()->where('plot', 'like', '1ha')->get()->toArray();
-        if ($entryFinish[0]['entry1com']!=''){
+        $entryFinish=SsComplete::query()->where('plot', 'like', '1ha')->get()->toArray();
+        if ($entryFinish[0]['entry1Done']!=''){
             $this->entry1done='1';
         }
-        if ($entryFinish[0]['entry2com']!=''){
+        if ($entryFinish[0]['entry2Done']!=''){
             $this->entry2done='1';
         }
-        if ($entryFinish[0]['compareOK']!=''){
+        if ($entryFinish[0]['compareDone']!=''){
             $this->comparedone='1';
         }
 
@@ -102,11 +102,11 @@ class S1haCompare extends Component
         if ($entry==1){
             $table= new Ss1haRecord1;
             $tabEnvi= new Ss1haEnviR1;
-            $col='entry1com';
+            $col='entry1Done';
         } else {
             $table= new Ss1haRecord2;
             $tabEnvi= new Ss1haEnviR2;
-            $col='entry2com';
+            $col='entry2Done';
         }
 
 
@@ -120,7 +120,7 @@ class S1haCompare extends Component
 
         if ($finishnote==''){
             $finishnote='通過檢查';
-            $entrycomUpdate=SsEntrycom::query()->where('plot', 'like', '1ha')->update([$col => '1', 'update_id'=>$this->user]);
+            $entrycomUpdate=SsComplete::query()->where('plot', 'like', '1ha')->update([$col => '1', 'updated_id'=>$this->user]);
             switch ($entry) {
                 case '1':
                     $this->entry1done = 1;
@@ -164,7 +164,7 @@ class S1haCompare extends Component
         // $this->envi1=$envi11;
         // $this->envi2=$envi2;
         $pass1='1';
-        $arrayExculd=['update_id', 'updated_at'];
+        $arrayExculd=['updated_id', 'updated_at'];
 
         foreach ($envi1Keys as $i => $key) {
             foreach ($envi1[$key] as $subKey => $value) {
@@ -208,9 +208,9 @@ class S1haCompare extends Component
         if ($comnote==''){
                 $comnote='資料皆相符。恭喜比對完成。';
 
-                $uplist['compareOK']=date("Y-m-d H:i:s");
-                $uplist['update_id']=$this->user;
-                SsEntrycom::where('plot', 'like', '1ha')->update($uplist);
+                $uplist['compareDone']=date("Y-m-d H:i:s");
+                $uplist['updated_id']=$this->user;
+                SsComplete::where('plot', 'like', '1ha')->update($uplist);
 
         }
 
@@ -222,7 +222,7 @@ class S1haCompare extends Component
 
 
     public $createTablenote;
-
+//將資料整理成大表，即不再透過輸入介面更動
     public function createTable(){
 
         $this->loadingEntryFinish = false;
@@ -242,13 +242,13 @@ class S1haCompare extends Component
             DB::connection('mysql5')->statement("ALTER TABLE `1ha_data_2024` ADD COLUMN `deleted_at` CHAR(50) CHARACTER SET utf8 COLLATE utf8_general_ci NOT NULL");
             //刪除欄位
             DB::connection('mysql5')->statement("ALTER TABLE `1ha_data_2024` DROP COLUMN `csp`, DROP COLUMN `qx`, DROP COLUMN `qy`, DROP COLUMN `sqx`, DROP COLUMN`sqy`");
-            Ss1haData2024::query()->update(['update_id'=>'', 'updated_at'=>'']);
+            Ss1haData2024::query()->update(['updated_id'=>'', 'updated_at'=>'']);
 
 
             DB::connection('mysql5')->select('CREATE TABLE 1ha_base_2024 LIKE 1ha_base_2015');
             DB::connection('mysql5')->statement("INSERT IGNORE INTO 1ha_base_2024 SELECT * FROM 1ha_base_2015");
 //增加欄位
-            DB::connection('mysql5')->statement("ALTER TABLE  `1ha_base_2024` ADD  (`deleted_at` char(50) not null, `update_id` char(20) not null, `updated_at` char(200) CHARACTER SET utf8 COLLATE utf8_general_ci not null )");
+            DB::connection('mysql5')->statement("ALTER TABLE  `1ha_base_2024` ADD  (`deleted_at` char(50) not null, `updated_id` char(20) not null, `updated_at` char(200) CHARACTER SET utf8 COLLATE utf8_general_ci not null )");
 
             DB::connection('mysql5')->select('CREATE TABLE 1ha_base_r_2024 LIKE 1ha_base_2024');
             DB::connection('mysql5')->select('ALTER TABLE `1ha_base_r_2024` DROP PRIMARY KEY');
@@ -292,14 +292,14 @@ class S1haCompare extends Component
                         $inlist2['spcode']=$inlist2['csp'];
                     }
                     
-                    $inlist2['update_id']=$this->user;
+                    $inlist2['updated_id']=$this->user;
                     $inlist2['updated_at']=date("Y-m-d H:i:s");
                     $inlist2['deleted_at']='';
 
                     $baseRepeat=Ss1haBase2024::where('tag', 'like', $importdata['tag'])->get()->toArray();
 
                     if (count($baseRepeat)>0){
-                        $importnote2.='<br> tag '.$importdata['tag'].' 已存在，請檢查';
+                        $importnote2='<br> tag '.$importdata['tag'].' 已存在，請檢查';
                     } else {
                         Ss1haBase2024::insert($inlist2);
                     }
@@ -320,7 +320,7 @@ class S1haCompare extends Component
                     } else {
                         $inlist3['spcode']=$inlist3['csp'];
                     }
-                    $inlist3['update_id']=$this->user;
+                    $inlist3['updated_id']=$this->user;
                     $inlist3['updated_at']=date("Y-m-d H:i:s");
                     $inlist3['deleted_at']='';
 
@@ -334,7 +334,7 @@ class S1haCompare extends Component
                 }
             }
 
-            Ss1haBaseR2024::where('update_id', 'like', '')->delete();
+            Ss1haBaseR2024::where('updated_id', 'like', '')->delete();
 
         }
 

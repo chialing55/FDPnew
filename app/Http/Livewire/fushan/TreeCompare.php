@@ -9,9 +9,11 @@ use Illuminate\Support\Facades\DB;
 
 use App\Models\FsTreeRecord1;
 use App\Models\FsTreeRecord2;
-use App\Models\FsTreeEntrycom;
+use App\Models\FsTreeComplete;
 
 use App\Jobs\TreeCompareCheck;
+
+//每木資料比對
 
 class TreeCompare extends Component
 {
@@ -29,22 +31,22 @@ class TreeCompare extends Component
         $entrylist=[];
         $comparelist=[];
 
-        $entrycom=FsTreeEntrycom::select('qx',  DB::raw('SUM(entry1) as sum1'), DB::raw('SUM(entry2) as sum2'))->groupBy('qx')->get()->toArray();
-        $compareok=FsTreeEntrycom::select('qx',  'compareOK')->where('compareOK', '!=', '0')->groupBy('qx', 'compareOK')->get()->toArray();
+        $complete=FsTreeComplete::select('qx',  DB::raw('SUM(entry1) as sum1'), DB::raw('SUM(entry2) as sum2'))->groupBy('qx')->get()->toArray();
+        $compareDone=FsTreeComplete::select('qx',  'compareDone')->where('compareDone', '!=', '')->groupBy('qx', 'compareDone')->get()->toArray();
 
-        foreach ($entrycom as $entry){
+        foreach ($complete as $entry){
             if ($entry['sum1']==25 && $entry['sum2']==25){
                 $entrylist[]=$entry['qx'];
             }
         }
 
 
-        foreach ($compareok as $entry){
+        foreach ($compareDone as $entry){
 
                 $comparelist[]=$entry['qx'];
 
         }
-        // dd($compareok);
+        // dd($compareDone);
 
         $this->entrylist=$entrylist;
         $this->comparelist=$comparelist;
@@ -83,10 +85,10 @@ class TreeCompare extends Component
                         return 'no';
                     });
 
-                    $uplist['compareOK']=$user;
-                    $uplist['compareOK_at']=date("Y-m-d H:i:s");
+                    $uplist['compareDone']=$user;
+                    $uplist['compareDone_at']=date("Y-m-d H:i:s");
 
-                    FsTreeEntrycom::where('qx', 'like', $record1[$allStemid[0]]['qx'])->update($uplist);
+                    FsTreeComplete::where('qx', 'like', $record1[$allStemid[0]]['qx'])->update($uplist);
 
             }
 

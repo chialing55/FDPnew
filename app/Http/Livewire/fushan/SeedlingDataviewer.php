@@ -18,6 +18,7 @@ use App\Models\FsSeedlingSlcov2;
 use App\Models\FsSeedlingSlroll1;
 use App\Models\FsSeedlingSlroll2;
 
+//小苗檢視資料
 class SeedlingDataviewer extends Component
 {
     public $tag;
@@ -42,6 +43,7 @@ class SeedlingDataviewer extends Component
         $this->serachTag($request, $this->tag, $this->allB);
     }
 
+//以小苗編號尋找資料
     public function serachTag(Request $request, $tag, $allB)
     {
         // dd($tag);

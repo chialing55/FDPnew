@@ -23,6 +23,8 @@ use App\Models\Ss1haRecord2;
 use App\Models\Ss1haEnviR1;
 use App\Models\Ss1haEnviR2;
 
+//壽山樣區新增資料檢查
+
 class SsPlotRecruitCheck
 {
 	public function check($data2, $entry, $plotType){

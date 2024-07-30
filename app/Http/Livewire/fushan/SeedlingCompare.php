@@ -19,6 +19,7 @@ use App\Models\FsSeedlingSlroll2;
 class SeedlingCompare extends Component
 {
 
+//小苗輸入完成後比對
     public $comnote;
     public $compare;
     public $cov1=[];
@@ -60,6 +61,7 @@ class SeedlingCompare extends Component
 
     }
 
+//輸入完成比對
     public function compare(Request $request){
         $comnote='';
 
@@ -114,7 +116,7 @@ class SeedlingCompare extends Component
                 foreach ($s_record1 as $record){
                     $record['id']='';
                     $record['updated_at']='';
-                    $record['update_id']='';
+                    $record['updated_id']='';
                     $tag1[]=$record['tag'];
                     $record1[$record['tag']]=$record;
                 }
@@ -126,7 +128,7 @@ class SeedlingCompare extends Component
                 foreach ($s_record2 as $record){
                     $record['id']='';
                     $record['updated_at']='';
-                    $record['update_id']='';
+                    $record['updated_id']='';
                     $tag1[]=$record['tag'];
                     $record2[$record['tag']]=$record;
                 }
@@ -210,7 +212,7 @@ class SeedlingCompare extends Component
                 $s_roll1=$s_roll1->toArray();
                 foreach($s_roll1 as $roll){
                     $roll['id']='';
-                    $roll['update_id']='';
+                    $roll['updated_id']='';
                     $roll['updated_at']='';
                     $roll1[$roll['tag']]=$roll;
                     $tagroll1[]=$roll['tag'];
@@ -223,7 +225,7 @@ class SeedlingCompare extends Component
                 $s_roll2=$s_roll2->toArray();
                 foreach($s_roll2 as $roll){
                     $roll['id']='';
-                    $roll['update_id']='';
+                    $roll['updated_id']='';
                     $roll['updated_at']='';
                     $roll2[$roll['tag']]=$roll;
                     $tagroll1[]=$roll['tag'];

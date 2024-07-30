@@ -14,7 +14,7 @@ use App\Models\FsSeedsFulldata;
 use App\Models\FsSeedsRecord1;
 use App\Models\FsSeedsSplist;
 
-use App\Jobs\FsSeedsAddButton;
+use App\Jobs\SeedsAddButton;
 
 class SeedsShowentry extends Component
 {
@@ -62,6 +62,7 @@ class SeedsShowentry extends Component
     public $person3='';
     public $submitformnote='';
 
+//輸入要輸入資料的周次資訊
     public function submitForm(Request $request){
         $user = $request->session()->get('user', function () {
             return 'no';
@@ -100,7 +101,7 @@ class SeedsShowentry extends Component
                 $inlist['period']=$datecheck['period'];
                 $inlist['workers']=$datecheck['workers'];
 
-                $additionalData=['date'=>$this->date, 'census'=>$this->census,  'update_id' => $user,'note'=>$this->note ,'updated_at' => date("Y-m-d H:i:s")];
+                $additionalData=['date'=>$this->date, 'census'=>$this->census,  'updated_id' => $user,'note'=>$this->note ,'updated_at' => date("Y-m-d H:i:s")];
                 $inlist = array_merge($inlist, $additionalData);
                 FsSeedsDateinfo::insert($inlist);
 
@@ -110,7 +111,7 @@ class SeedsShowentry extends Component
         }
     }
 
-
+//處理日期欄位
     public function dateinfo($census, $date, $person1, $person2, $person3){
             $date1=explode('-', $date);
             $year=$date1[0];
@@ -192,13 +193,13 @@ class SeedsShowentry extends Component
     }
 
     public $entrytable;
-    public $identifier='蔡佳秀';
+    public $identifier='蔡佳秀';  //預設鑑定者
     
     public function createTable($census){
 
         $entrytable1=FsSeedsRecord1::query()->orderBy('trap', 'asc')->orderBy('csp', 'asc')->orderBy('code', 'asc')->get()->toArray();
 
-        $ob_table = new FsSeedsAddButton;
+        $ob_table = new SeedsAddButton;
         $entrytable=$ob_table->addbutton($entrytable1, 'record');
 
 
@@ -252,6 +253,7 @@ class SeedsShowentry extends Component
     public $note2;
     public $chcensus;
 
+//檢視調查日期資訊前五筆
     public function deleteForm(Request $request)
     {
 
@@ -259,13 +261,13 @@ class SeedsShowentry extends Component
         $d_record = FsSeedsDateinfo::where('census', 'like', $this->chcensus)->delete();
         $this->note2='已刪除 census'.$this->chcensus.' 資料';
 
-        $this->dateinfo=FsSeedsDateinfo::query()->orderBy('census', 'desc')->take(5)->get()->toArray();
+        $this->dateinfo=FsSeedsDateinfo::query()->orderBy('census', 'desc')->take(5)->get()->toArray(); //取前五筆檢視
         $this->chcensus='';
 
         $this->reset();
         $this->mount();
     }
-
+//更新調查日期資訊
     public function submitForm3(Request $request){
         $user = $request->session()->get('user', function () {
             return 'no';
@@ -286,7 +288,7 @@ class SeedsShowentry extends Component
             $inlist['period']=$datecheck['period'];
             $inlist['workers']=$datecheck['workers'];
 
-            $additionalData=['date'=>$this->date3, 'census'=>$this->census3,  'update_id' => $user,'note'=>$this->note3 ,'updated_at' => date("Y-m-d H:i:s")];
+            $additionalData=['date'=>$this->date3, 'census'=>$this->census3,  'updated_id' => $user,'note'=>$this->note3 ,'updated_at' => date("Y-m-d H:i:s")];
 
             $inlist = array_merge($inlist, $additionalData);
             // dd($inlist);

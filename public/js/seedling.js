@@ -1,13 +1,13 @@
 
 //download record
-
+let urlbase='/fsseedling';
 
 	$(".button1").click(function(){
 		var start=$("#start").val();
 		var end=$("#end").val();
 
 		// var tempwindow1=window.open('_blank');
-		location.href='/fsseedling-record-pdf/'+start+'/'+end;
+		location.href=`${urlbase}/record-pdf/${start}/${end}`;
 	});
 
 
@@ -153,7 +153,7 @@ function fscovtable(covs){
   var hiddenColumns ={
       columns: [6],
     };
-  return createHandsontable(container, columns, covs, saveButtonName, "/fsseedlingsavecov", tableType, colWidths, hiddenColumns, colHeaders, thispage );
+  return createHandsontable(container, columns, covs, saveButtonName, `${urlbase}/savecov`, tableType, colWidths, hiddenColumns, colHeaders, thispage );
 
 }
 
@@ -163,7 +163,7 @@ function fscovtable(covs){
     {
       $('.datasavenote').html('');
 
-      var saveUrl=`/fsseedlingdeletedata/${tag}/${entry}/${thispage}`;
+      var saveUrl=`${urlbase}/deletedata/${tag}/${entry}/${thispage}`;
       var ajaxData={};
       var ajaxType='get';
 
@@ -233,7 +233,7 @@ function fsseedlingtable(data, thispage, pps, maxid){
       columns: [15, 16, 17],
     };
 
-  return createHandsontable(container, columns, data2, saveButtonName, "/fsseedlingsavedata", tabletype, colWidths, hiddenColumns, colHeaders, thispage );
+  return createHandsontable(container, columns, data2, saveButtonName, `${urlbase}/savedata`, tabletype, colWidths, hiddenColumns, colHeaders, thispage );
 
 }
 
@@ -284,7 +284,7 @@ function recruittable(data, emptytable, csplist){
       {data: "cotno", type: 'numeric', allowInvalid: false},
       {data: "leafno", type: 'numeric', allowInvalid: false},
       
-      {data: "recruit", type: 'dropdown', source: ['R', 'O', 'T'], allowInvalid: false, visibleRows: 10},
+      {data: "recruit", type: 'dropdown', source: ['R', 'O', 'T', 'S'], allowInvalid: false, visibleRows: 10},
       {data: "sprout", type: 'dropdown', source: ['FALSE', 'TRUE'], allowInvalid: false, visibleRows: 10},
       {data: "x", type: 'numeric', allowInvalid: false},
       {data: "y", type: 'numeric', allowInvalid: false},
@@ -297,7 +297,7 @@ function recruittable(data, emptytable, csplist){
   var colHeaders=["Date", "Trap", "Plot", "Tag", "種類", "長度","子葉","真葉","新舊","萌櫱","X","Y", "Note", "漏資料"];
 
   var hiddenColumns =[];
-  return createHandsontable(container, columns, emptytable, saveButtonName, "/fsseedlingsaverecruit", tabletype, colWidths, hiddenColumns, colHeaders, thispage );  
+  return createHandsontable(container, columns, emptytable, saveButtonName, `${urlbase}/saverecruit`, tabletype, colWidths, hiddenColumns, colHeaders, thispage );  
 
 } 
 
@@ -307,7 +307,7 @@ function recruittable(data, emptytable, csplist){
     {
       $('.slrollsavenote').html('');
 
-      var saveUrl=`/fsseedlingdeleteslroll/${tag}/${id}/${entry}/${trap}`;
+      var saveUrl=`${urlbase}/deleteslroll/${tag}/${id}/${entry}/${trap}`;
       var ajaxData={};
       var ajaxType='get';
 
@@ -370,7 +370,7 @@ function fsslrolltable(slroll, covs){
   var hiddenColumns ={
       columns: [6, 7, 8],
     };
-  return createHandsontable(container, columns, slroll, saveButtonName, `/fsseedlingsaveslroll/${entry}/${site}`, tableType, colWidths, hiddenColumns, colHeaders, thispage );
+  return createHandsontable(container, columns, slroll, saveButtonName, `${urlbase}/saveslroll/${entry}/${site}`, tableType, colWidths, hiddenColumns, colHeaders, thispage );
 
 
 	$('.deleteroll').on('click', function(){
@@ -386,7 +386,7 @@ function fsslrolltable(slroll, covs){
 function alternote(tag, entry, thispage, envet) {
 	// console.log(tag);
 
-    var saveUrl=`/fsseedlingaddalternote/${tag}/${entry}/${thispage}`;
+    var saveUrl=`${urlbase}/addalternote/${tag}/${entry}/${thispage}`;
     handleAlternote(tag, entry, thispage, saveUrl);
 
 }
@@ -394,7 +394,7 @@ function alternote(tag, entry, thispage, envet) {
 
 function deletealternote(tag, thispage){
 
-  var saveUrl=`/fsseedlingdeletealter/${tag}/${entry}/${thispage}`;
+  var saveUrl=`${urlbase}/deletealter/${tag}/${entry}/${thispage}`;
   handleDeleteAlternote(tag, plotType, saveUrl)
 
 }
@@ -436,7 +436,7 @@ function alternotetable(alterdata, tag, entry, thispage){
   var hiddenColumns ={
       columns: [7, 8],
     };
-  return createHandsontable(container, columns, alterdata, saveButtonName, "/fsseedlingsavealternote", tableType, colWidths, hiddenColumns, colHeaders, thispage ); 
+  return createHandsontable(container, columns, alterdata, saveButtonName, `${urlbase}/savealternote`, tableType, colWidths, hiddenColumns, colHeaders, thispage ); 
 
 
 }
@@ -445,7 +445,7 @@ function alternotetable(alterdata, tag, entry, thispage){
 function finish(entry){
     console.log(entry);
 
-      var saveUrl=`/fsseedlingfinish/${entry}`;
+      var saveUrl=`${urlbase}/finish/${entry}`;
       var ajaxData={};
       var ajaxType='get';
 

@@ -12,7 +12,7 @@ use Livewire\WithPagination;
 use App\Models\FsSeedsDateinfo;
 use App\Models\FsSeedsFulldata;
 
-
+//種子資料檢視
 class SeedsDataviewer extends Component
 {
 
@@ -38,23 +38,8 @@ class SeedsDataviewer extends Component
             $this->search('all', 'all', 'each', $unkParam, 'all');
             $request->session()->forget('unk');
         }
-        
-
 
         $this->traps=FsSeedsFulldata::select('trap')->groupBy('trap')->get()->toArray();
-        // $species=FsSeedsFulldata::select('csp')->groupBy('csp')->get()->toArray();
-
-        // $this->data = FsSeedsFulldata::join('dateinfo', 'fulldata.census', '=', 'dateinfo.census')
-        //     ->select('fulldata.census', 'fulldata.trap', 'fulldata.sp', 'fulldata.csp', 'fulldata.code', 'dateinfo.year', 'dateinfo.month')
-        //     ->where('year', 'like', '%')
-        //     ->where('csp', 'like', '%')
-        //     ->where('trap', 'like', '%')
-        //     ->where('month', 'like', '2')
-        //     ->get()
-        //     ->toArray();
-
-        //     dd($this->data);
-
     }
 
     public function search($year, $month, $trap, $species, $code){
@@ -129,9 +114,6 @@ class SeedsDataviewer extends Component
 
          $this->data=$datacomb;
 
-         // $this->dispatchBrowserEvent('reProgress');
-
-        // dd($this->data);
 
     }
 

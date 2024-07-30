@@ -16,7 +16,7 @@ use App\Models\FsTreeRecord1;
 class TreeShowprogress extends Component
 {
 
-
+//樣區調查進度表
     
     public $date;
     public $new=0;
@@ -98,7 +98,7 @@ class TreeShowprogress extends Component
             return 'no';
         });
 
-        $inlist=['date'=>$this->date, 'id'=>'0', 'qx' => $this->qx, 'qy'=>$this->qy, 'new_branch'=>$this->new, 'plot_num'=>count($this->sqx), 'period' => $this->period, 'update_id' => $user, 'updated_at' => date("Y-m-d H:i:s")];
+        $inlist=['date'=>$this->date, 'id'=>'0', 'qx' => $this->qx, 'qy'=>$this->qy, 'new_branch'=>$this->new, 'plot_num'=>count($this->sqx), 'period' => $this->period, 'updated_id' => $user, 'updated_at' => date("Y-m-d H:i:s")];
         $orib=0;
         $plots='';
         $i=0;
@@ -151,7 +151,7 @@ class TreeShowprogress extends Component
         $this->dispatchBrowserEvent('reProgress', ['plots'=>$this->plots]);
 
     }
-
+//刪除調查進度資料
     public function deleteForm(Request $request){
 
         if (!is_null($this->date2) && !is_null($this->qx2)){
@@ -182,7 +182,7 @@ class TreeShowprogress extends Component
         $this->dispatchBrowserEvent('rePlots', ['plots'=>$array]);
 // dd($array);
     }
-
+//下載輸入進度
     public function downloadTxtFile() {
 
         $table1 = FsTreeProgress::orderByDesc('date')->get()->toArray();

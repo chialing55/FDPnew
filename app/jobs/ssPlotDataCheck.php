@@ -23,6 +23,8 @@ use App\Models\Ss1haRecord2;
 use App\Models\Ss1haEnviR1;
 use App\Models\Ss1haEnviR2;
 
+
+//壽山每木資料檢查
 class SsPlotDataCheck
 {
 	public function check($data2, $plotType, $entry){

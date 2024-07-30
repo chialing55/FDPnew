@@ -1,6 +1,6 @@
 // console.log(type);
 //重新選擇工作項目
-
+let urlbase='/fsseeds';
 
 $('.listlink').on('click', function(){
 	let type=$(this).attr('type');
@@ -19,7 +19,10 @@ $('.listlink').on('click', function(){
 
 $("#sptable").tablesorter();
 
-
+//unknown照片顯示
+Fancybox.bind('[data-fancybox="gallery"]', {
+  // Your custom options
+});
 
 // window.addEventListener('resptable', event => {
 
@@ -162,14 +165,14 @@ function emptyseedstable(emptytable){
   var hiddenColumns ={
       columns: [0, 1],
     };
-  var handsontable = createHandsontable(container, columns, emptytable, saveButtonName, "/fsseedssavedata1/record", tableType, colWidths, hiddenColumns, colHeaders, thispage );
+  var handsontable = createHandsontable(container, columns, emptytable, saveButtonName, `${urlbase}/savedata1/record`, tableType, colWidths, hiddenColumns, colHeaders, thispage );
 
 
 //更新大表
 	container.parent().find(`button[name=newdatasave2${site}]`).click(function () {
 		$('.seedssavenote').html('');
 
-		saveUrl2='/fsseedssavedata1/fulldata';
+		saveUrl2=`${urlbase}/savedata1/fulldata`;
     var ajaxData={
           data: handsontable.getSourceData(),
           entry: entry,
@@ -247,7 +250,7 @@ function seedstable(data, thispage, pps, emptytable){
       columns: [0, 1],
     };
 
-  var handsontable = createHandsontable(container, columns, data2, saveButtonName, "/fsseedssavedata/record", tabletype, colWidths, hiddenColumns, colHeaders, thispage );
+  var handsontable = createHandsontable(container, columns, data2, saveButtonName, `${urlbase}/savedata/record`, tabletype, colWidths, hiddenColumns, colHeaders, thispage );
 
 
 
@@ -259,7 +262,7 @@ function seedstable(data, thispage, pps, emptytable){
 
 		$('.seedssavenote').html('');
 
-		saveUrl2='/fsseedssavedata1/fulldata';
+		saveUrl2=`${urlbase}/savedata1/fulldata`;
     var ajaxData={
           data: handsontable.getSourceData(),
           entry: entry,
@@ -317,7 +320,7 @@ function fsseedstableupdate(data, thispage, pps){
     {
       $('.seedssavenote').html('');
 
-      var saveUrl=`/fsseedsdeletedata/${id}/${info}/${thispage}/${type}`;
+      var saveUrl=`${urlbase}/deletedata/${id}/${info}/${thispage}/${type}`;
       var ajaxData={};
       var ajaxType='get';
 
@@ -342,7 +345,7 @@ function fsseedstableupdate(data, thispage, pps){
 function finish(){
     // console.log(entry);
 
-      var saveUrl=`/fsseedsfinish`;
+      var saveUrl=`${urlbase}/finish`;
       var ajaxData={};
       var ajaxType='get';
 

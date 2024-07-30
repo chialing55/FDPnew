@@ -7,11 +7,11 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\App;
 use Illuminate\Support\Facades\Schema;
 
-use App\Models\FsBaseTreeSplist;
-use App\Models\FsTreeCensus4;
-use App\Models\FsTreeCensus3;
 
-class FsTreeAddButton
+//每木輸入資料表用
+//判斷每筆資料是要產生特殊修改按鈕或是刪除鈕
+
+class TreeAddButton
 {
 	public function addbutton($records, $entry){
 

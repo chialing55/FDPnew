@@ -146,7 +146,7 @@ class Showspecies extends Component
             ];
         } else if ($this->maxDBH >10){
             $groupConditions = [
-                '<5' => [0.5, 5],
+                '<2' => [0.5, 2],
                 '2-5' => [2, 5],
                 '5-10' => [5, 10],
                 '>10' => 10,

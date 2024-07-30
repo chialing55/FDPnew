@@ -22,11 +22,11 @@
                 @foreach ($plots1[$plots1Array[$i]] as $plot)
                 @php 
                     $finishSiteClass='';
-                    if (!in_array($plot, $entrycom1) && !in_array($plot, $entrycom2)) {
+                    if (!in_array($plot, $entrydone1) && !in_array($plot, $entrydone2)) {
                     $finishSiteClass = 'entryallfin ';
-                    } elseif (!in_array($plot, $entrycom1)) {
+                    } elseif (!in_array($plot, $entrydone1)) {
                     $finishSiteClass = 'entry1fin ';
-                    } elseif (!in_array($plot, $entrycom2)) {
+                    } elseif (!in_array($plot, $entrydone2)) {
                     $finishSiteClass = 'entry2fin ';
                     }
 
@@ -59,7 +59,7 @@
             </div>
 
         <div style="margin: 10px 0;">
-            <span wire:loading>
+            <span wire:loading wire:target="entryFinish">
                      檢查中....
             </span>
         </div>
@@ -83,7 +83,7 @@
         <button wire:click.prevent="compare()">資料比對</button>
 
         <div style="margin: 10px 0;">
-            <span wire:loading>
+            <span wire:loading wire:target="compare">
                      檢查中....
             </span>
         </div>
@@ -100,6 +100,16 @@
         <p>資料比對完成後即可建立大表。並不再開放資料輸入，如需更新資料，轉往資料修改頁面。</p>
         @if($comparedone=='1')
         <button wire:click.prevent="createTable()">建立大表</button>
+        <div style="margin-top: 10px;">
+            <span wire:loading wire:target="createTable">
+                     建立中....
+            </span>
+        </div>
+        @endif
+        @if($createTablenote!='')
+        <div style='margin-top:20px;'>
+            {!!$createTablenote!!}
+        </div>
         @endif
     </div>
     {{-- Care about people's approval and you will be their prisoner. --}}

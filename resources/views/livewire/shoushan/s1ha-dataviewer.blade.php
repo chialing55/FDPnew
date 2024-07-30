@@ -83,6 +83,7 @@
                             <td>{{$baseresult['csp']}}</td>
                             <td>{{$result['maxb']}}</td>
                         </tr>
+
                     </tbody>
                    
                 </table>
@@ -90,7 +91,9 @@
             <div class='fstreeStemidtable'>
                 <table id='StemidTable' class='tablesorter'>
                     <thead>
+                        
                         <tr style="text-align: center;">
+                            <th style='background-color: lightsalmon;'>2015</th>
                             <th>branch</th>
                             <th>status</th>
                             <th>dbh</th>
@@ -100,13 +103,34 @@
                     </thead>
                     @if(!empty($result))
                     <tbody>
+
                     @foreach($result['data'] as $pre)
                         <tr style="text-align: center;">
+                            <td></td>
                             <td>{{$pre['branch']}}</td>
                             <td>{{$pre['status']}}</td>
                             <td>{{$pre['dbh']}}</td>
                             <td>{{$pre['note']}}</td>
-                          
+                        </tr>
+                    @endforeach
+                    <thead>
+         
+                        <tr style="text-align: center;">
+                            <th style='background-color: lightsalmon;'>2024</th>
+                            <th>branch</th>
+                            <th>status</th>
+                            <th>dbh</th>
+                            <th>note</th>
+                            
+                        </tr>
+                    </thead>
+                    @foreach($result['data2'] as $pre)
+                        <tr style="text-align: center;">
+                            <td></td>
+                            <td>{{$pre['branch']}}</td>
+                            <td>{{$pre['status']}}</td>
+                            <td>{{$pre['dbh']}}</td>
+                            <td>{{$pre['note']}}</td>
                         </tr>
                     @endforeach
                     </tbody>

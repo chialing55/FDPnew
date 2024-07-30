@@ -8,9 +8,9 @@ use Livewire\WithPagination;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\File;
 
-use App\Models\FsTreeEntrycom;
+use App\Models\FsTreeComplete;
 
-
+//Census5資料整理進度
 class FsTreeCensus5Progress
 {
 	public function showProgress(){
@@ -19,23 +19,23 @@ class FsTreeCensus5Progress
         $updatelist=[];
         $directorieslist=[];
 
-        $compareok=FsTreeEntrycom::select('qx',  'compareOK')->where('compareOK', '!=', '0')->groupBy('qx', 'compareOK')->get()->toArray();
-        $updateok=FsTreeEntrycom::select('qx',  'census5update')->where('census5update', '!=', '0')->groupBy('qx', 'census5update')->get()->toArray();
-        $alternoteOK=FsTreeEntrycom::select('qx',  'alternoteOK')->where('alternoteOK', '!=', '')->groupBy('qx', 'alternoteOK')->get()->toArray();
+        $compareDone=FsTreeComplete::select('qx',  'compareDone')->where('compareDone', '!=', '')->groupBy('qx', 'compareDone')->get()->toArray();
+        $updateDone=FsTreeComplete::select('qx',  'addToMainTable')->where('addToMainTable', '!=', '')->groupBy('qx', 'addToMainTable')->get()->toArray();
+        $alternoteDone=FsTreeComplete::select('qx',  'alternoteDone')->where('alternoteDone', '!=', '')->groupBy('qx', 'alternoteDone')->get()->toArray();
 
 
-        foreach ($compareok as $entry){
+        foreach ($compareDone as $entry){
                 $comparelist[]=$entry['qx'];
         }
 
-        foreach ($updateok as $entry){
+        foreach ($updateDone as $entry){
                 $updatelist[]=$entry['qx'];
         }
-
-        foreach ($updateok as $entry){
+//上傳完成輸進大表就可以點圖
+        foreach ($updateDone as $entry){
                 $alternotelist[]=$entry['qx'];
         }        
-        // dd($compareok);
+        // dd($compareDone);
 
         $filecensus='fs_census5_scanfile';
         $directoryPath = public_path($filecensus);

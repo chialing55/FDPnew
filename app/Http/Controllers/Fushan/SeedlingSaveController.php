@@ -1,12 +1,13 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Http\Controllers\Fushan;
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\App;
 use Illuminate\Support\Facades\Schema;
 // use Illuminate\Support\Facades\Input;
+use App\Http\Controllers\Controller;
 
 use App\Models\FsSeedlingData;
 use App\Models\FsSeedlingBase;
@@ -22,9 +23,11 @@ use App\Models\FsSeedlingSlroll2;
 use App\Jobs\FsSeedlingDataCheck;
 use App\Jobs\FsSeedlingRecruitCheck;
 
-use App\Jobs\FsSeedlingAddButton;
+use App\Jobs\SeedlingAddButton;
 
-class FsSeedlingSaveController extends Controller
+//小苗資料輸入後的所有儲存與刪除
+
+class SeedlingSaveController extends Controller
 {
 
      public function getTableInstance($entry) {
@@ -52,20 +55,20 @@ class FsSeedlingSaveController extends Controller
     }
 
     public function getRedata($entry, $trap){
-
+//存檔後都需重新產生資料
         $table = $this->getTableInstance($entry);
 
         $redata=$table::where('trap', 'like', $trap)->orderBy('plot', 'asc')->orderBy('tag', 'asc')->get();
     
 
-        $ob_redata = new FsSeedlingAddButton;
+        $ob_redata = new SeedlingAddButton;
         $redata=$ob_redata->addbutton($redata, $entry);
 
         return $redata; 
 
     }
 
-
+//輸入完成後檢查
     public function finishnote(Request $request, $entry){
         $user = $request->session()->get('user', function () {
             return view('login1', [
@@ -115,7 +118,7 @@ class FsSeedlingSaveController extends Controller
         ];
 
     }
-
+//地被資料儲存
     public function savecov(Request $request){
 
         $data_all = request()->all();
@@ -135,7 +138,7 @@ class FsSeedlingSaveController extends Controller
         for($i=0; $i<count($savecov);$i++){
 
             if ($savecov[$i]['date']==''){$savecov[$i]['date']='0000-00-00';}
-
+//地被資料基本檢查
             if ($savecov[$i]['date']=='0000-00-00'){
                 $covsavenote='需有日期資料';
                 break;
@@ -153,7 +156,7 @@ class FsSeedlingSaveController extends Controller
             } else {
 
                
-                $tablecov::where('id', $savecov[$i]['id'])->update(['cov'=>$savecov[$i]['cov'], 'date'=>$savecov[$i]['date'], 'canopy'=>$savecov[$i]['canopy'], 'note'=>$savecov[$i]['note'], 'update_id'=>$user]);
+                $tablecov::where('id', $savecov[$i]['id'])->update(['cov'=>$savecov[$i]['cov'], 'date'=>$savecov[$i]['date'], 'canopy'=>$savecov[$i]['canopy'], 'note'=>$savecov[$i]['note'], 'updated_id'=>$user]);
                     //重新下載資料
 
 
@@ -171,7 +174,7 @@ class FsSeedlingSaveController extends Controller
         
     }
 
-
+//小苗資料儲存
  public function savedata(Request $request){
 
         $data_all = request()->all();
@@ -194,9 +197,10 @@ class FsSeedlingSaveController extends Controller
             $uplist=[];
 //需有資料  
             $datacheck=['pass'=>'1', 'datasavenote'=>''];
-
+//舊苗檢查
             $check = new FsSeedlingDataCheck;
             $datacheck=$check->check($data[$i], $table);
+            $data[$i]=$datacheck['data'];
 
 //修改tag  //如果是修改新增小苗的號碼，則mtag也要一起修改
             $alterdata=[];
@@ -207,23 +211,27 @@ class FsSeedlingSaveController extends Controller
                 $mtag=explode('.',trim($data[$i]['tag']));
                 $data[$i]['mtag'] = $mtag[0];
             }
-//如果原本的status是N，後來不是N (A, G, D)，更新alternote
+//如果原本的status是N，後來不是N (A, G, D)，新增alternote說明
         //echo 'recruit: '.$data[$i]['recruit'];
             if ($slrecord[0]['recruit'] == 'N' && $data[$i]['status'] !='N'){
 
                 if ($data[$i]['alternote']!=''){
                     $alterdata = json_decode($data[$i]['alternote'], true);  //把json轉array
                 }
-                $alterdata['狀態']=$data[$i]['status'];
+                $alterdata['other']='原消失已被找到';
 
                 $data[$i]['alternote'] = json_encode($alterdata, JSON_UNESCAPED_UNICODE);  //把array轉json
+            }
+
+            if ($data[$i]['ht'] !='-2' && $slrecord[0]['ht']!='-2'){
+                $data[$i]['recruit'] ='S';
             }
 
             if ($datacheck['pass']==1){
 // ['year' => date('Y'), 'month' => $month, 'date' => '0000-00-00']
                 foreach($data[$i] as $key => $value){
                     // dd($key);
-                    if (!in_array($key, ['user', 'entry', 'updated_at', 'update_id', 'alternotetable'])){
+                    if (!in_array($key, ['user', 'entry', 'updated_at', 'updated_id', 'alternotetable'])){
                         if ($slrecord[0][$key]!=$value){
                             $uplist[$key]=trim($value);
 
@@ -231,10 +239,10 @@ class FsSeedlingSaveController extends Controller
                     }
                 }
                 // dd($uplist);
-                // $uplist2="['update_id' => 'test']";
+                // $uplist2="['updated_id' => 'test']";
                 if ($uplist!=[]){  //有資料要存
                     $list=$data[$i]['tag'];
-                    $uplist['update_id'] =$user;
+                    $uplist['updated_id'] =$user;
 
                     $table::where('id', 'like', $data[$i]['id'])->update($uplist); 
 
@@ -261,7 +269,7 @@ class FsSeedlingSaveController extends Controller
             ];
         
     }
-
+//新增苗儲存
 
     public function saverecruit(Request $request){
 
@@ -311,7 +319,7 @@ class FsSeedlingSaveController extends Controller
 
 $datacheck=['pass'=>'1', 'datasavenote'=>''];
 
-                if ($recruit[$i]['tofix']=='1'){  //漏資料
+                if ($recruit[$i]['tofix']=='1'){  //勾選為漏資料
                     //找舊資料
                     $seedling=FsSeedlingData::where('tag', 'like', $recruit[$i]['tag'])->orderBy('census', 'DESC')->get();
                     if ($seedling->isEmpty()){
@@ -341,20 +349,21 @@ $datacheck=['pass'=>'1', 'datasavenote'=>''];
                                 } 
                             }
                         }
+                        //漏資料的舊苗走舊苗的檢查
                     $check = new FsSeedlingDataCheck;
                     $datacheck=$check->check($recruit[$i], $table);
 
                     }
 
                 } else {
-                    
+                    //新增苗檢查
                     $check = new FsSeedlingRecruitCheck;
                     $datacheck=$check->check($recruit[$i], $entry, $i);
                 }
 
 
 
-// //補資料       
+// //補上資料庫其他欄位的資料       
             if ($datacheck['pass']==1){
 
                 $recruit[$i]=$datacheck['data'];
@@ -376,7 +385,7 @@ $datacheck=['pass'=>'1', 'datasavenote'=>''];
                 }
                 unset($recruit[$i]['tofix']);
                 
-                $recruit[$i]['update_id']=$user;
+                $recruit[$i]['updated_id']=$user;
                 $recruit[$i]['updated_at']=date("Y-m-d H:i:s");
 
                 //存檔
@@ -388,6 +397,7 @@ $datacheck=['pass'=>'1', 'datasavenote'=>''];
                         // $insertvalue=$insertvalue."'".trim($value)."',";
 
                 }
+                //產生空白表
                 $nonsavelist[$i]['date']='';
                 $nonsavelist[$i]['trap']=$recruit[$i]['trap'];
                 $nonsavelist[$i]['recruit']='R';
@@ -429,7 +439,7 @@ $datacheck=['pass'=>'1', 'datasavenote'=>''];
         foreach ($redata as $key => $value) {
             if ($value['tag'] == $recruit[0]['tag']) {
                 $thispage=ceil(($key+1)/20);
-                break; // 找到目标后立即退出循环
+                break; 
             }
         }        
 
@@ -450,7 +460,7 @@ $datacheck=['pass'=>'1', 'datasavenote'=>''];
         
     }
 
-//可以增加thispage了，不用重算
+//刪除新增苗資料
 
     public function deletedata(Request $request, $tag, $entry, $thispage){
         $test='';
@@ -473,11 +483,6 @@ $datacheck=['pass'=>'1', 'datasavenote'=>''];
             $datasavenote='已刪除 '.$tag.' 新增小苗資料';
             $maxid=FsSeedlingSlrecord::count();
 
-            // 重新載入資料
-
-
-
-
             $redata=$this->getRedata($entry, $thistrap);
 
 
@@ -491,7 +496,7 @@ $datacheck=['pass'=>'1', 'datasavenote'=>''];
             ];
     }
 
-
+//撿到環儲存
     public function saveslroll(Request $request, $entry, $trap){
         // $test='';
             $user = $request->session()->get('user', function () {
@@ -524,7 +529,7 @@ $datacheck=['pass'=>'1', 'datasavenote'=>''];
                     $olddata=$tableroll::where('id', 'like', $slrollnew[$i]['id'])->get();
 
                foreach($slrollnew[$i] as $key => $value){
-                    if ($key!='update_id' && $key !='updated_at' && $key!='delete'){
+                    if ($key!='updated_id' && $key !='updated_at' && $key!='delete'){
                         if ($olddata[0][$key]!=$value){
                             $uplist[$key]=trim($value);
                         }
@@ -534,7 +539,7 @@ $datacheck=['pass'=>'1', 'datasavenote'=>''];
 
                 if ($uplist!=[]){  //有資料要存
                     // $list=$data[$i]['tag'];
-                    $uplist['update_id'] =$user;
+                    $uplist['updated_id'] =$user;
 
                     $tableroll::where('id', 'like', $slrollnew[$i]['id'])->update($uplist); 
 
@@ -553,7 +558,7 @@ $datacheck=['pass'=>'1', 'datasavenote'=>''];
                 $slrollnew[$i]['id']='0';
                
                 foreach ($slrollnew[$i] as $key => $value){
-                    if ($key != 'delete' && $key !='update_id'){
+                    if ($key != 'delete' && $key !='updated_id'){
                         $insertkey=$insertkey.$key.",";
                         $insertvalue=$insertvalue."'".trim($value)."',";
                         $insert2[$key]=$value;
@@ -561,9 +566,9 @@ $datacheck=['pass'=>'1', 'datasavenote'=>''];
                 }
 
 
-                $insertkey=$insertkey.'update_id';
+                $insertkey=$insertkey.'updated_id';
                 $insertvalue=$insertvalue."'".$user."'";
-                $insert2['update_id']=$user;
+                $insert2['updated_id']=$user;
 
 
                 $tableroll::insert($insert2);
@@ -592,18 +597,7 @@ $datacheck=['pass'=>'1', 'datasavenote'=>''];
                 $slroll=[];
             }
 
-        // $y=count($slroll);
-        // for($q=$y;$q<($y+10);$q++){
-        //     $slroll[$q]['date']='0000-00-00';
-        //     $slroll[$q]['trap']='';
-        //     $slroll[$q]['plot']='';
-        //     $slroll[$q]['tag']='';
-        //     $slroll[$q]['year']=$slrollnew[0]['year'];
-        //     $slroll[$q]['month']=$slrollnew[0]['month'];
 
-        // }
-
-        // $slroll[4]['trap']='';
         return [
             'result' => 'ok',
             'entry' => $entry,
@@ -615,7 +609,7 @@ $datacheck=['pass'=>'1', 'datasavenote'=>''];
         ];
 
     }
-
+//刪除撿到環資料
 
     public function deleteslroll($tag, $id, $entry, $trap){
       
@@ -644,16 +638,6 @@ $datacheck=['pass'=>'1', 'datasavenote'=>''];
                 $slroll[0]['month']='';
             }
 
-        // $y=count($slroll);
-        // for($q=$y;$q<($y+10);$q++){
-        //     $slroll[$q]['date']='0000-00-00';
-        //     $slroll[$q]['trap']='';
-        //     $slroll[$q]['plot']='';
-        //     $slroll[$q]['tag']='';
-        //     $slroll[$q]['year']=$slroll[0]['year'];
-        //     $slroll[$q]['month']=$slroll[0]['month'];
-
-        // }
 
             return [
             'result' => 'ok',
@@ -665,7 +649,7 @@ $datacheck=['pass'=>'1', 'datasavenote'=>''];
 
 
 
-
+//儲存特殊修改
 
     public function savealternote(Request $request){
 
@@ -692,7 +676,7 @@ $datacheck=['pass'=>'1', 'datasavenote'=>''];
 
             if ($olddata[0]['alternote']!=$alterdata){
                 $uplist['alternote']=$alterdata;
-                $uplist['update_id']=$user;
+                $uplist['updated_id']=$user;
                 $table::where('id', 'like', $data['id'])->update($uplist);
             }
             $datasavenote='資料已儲存';
@@ -700,13 +684,6 @@ $datacheck=['pass'=>'1', 'datasavenote'=>''];
  
 //重新載入資料
             $maxid=FsSeedlingSlrecord::count();
-        
-            // $redata=$table::where('trap', 'like', $olddata[0]['trap'])->orderBy('plot', 'asc')->orderBy('tag', 'asc')->get();
-            //     // $redata='1';
-
-
-            // $ob_redata = new fsSeedlingAddButton;
-            // $redata=$ob_redata->addbutton($redata, $entry);        
 
         $redata=$this->getRedata($entry, $olddata[0]['trap']);
 
@@ -723,6 +700,7 @@ $datacheck=['pass'=>'1', 'datasavenote'=>''];
 
     }
 
+//刪除特殊修改
     public function deletealter(Request $request, $tag, $entry, $thispage){
 
         $user = $request->session()->get('user', function () {

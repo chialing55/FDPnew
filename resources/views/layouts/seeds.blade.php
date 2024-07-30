@@ -22,9 +22,13 @@
 {{-- <script src="{{asset('/js/jquery-ui.min.js')}}"></script> --}}
 {{-- <script src="{{asset('/js/jquery.jqGrid.min.js')}}"></script>
 <script src="{{asset('/js/grid.locale-en.js')}}"></script> --}}
+
 {{-- <script src="{{asset('/js/jquery.caret-1.5.2.min.js')}}"></script> --}}
+<script src="{{asset('/js/fancybox.umd.js')}}"></script>
 <script src="{{asset('/js/create-handsontable.js')}}"></script>
 <script src="{{asset('/js/seeds.js')}}"></script>
+ 
+
 
  @yield('pagejs')
 
@@ -33,7 +37,7 @@
  
 @section('css')
 <link rel="stylesheet" href="{{asset('/css/seeds.css')}}">
-
+ <link rel="stylesheet" href="{{asset('/css/fancybox.css')}}">
 
 @endsection
 

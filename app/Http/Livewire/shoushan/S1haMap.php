@@ -16,6 +16,8 @@ use App\Models\Ss1haBase2024;
 use App\Models\Ss1haBaseR2024;
 use App\Models\SsFixlog;
 
+
+//1ha樹位置圖輸入
 class S1haMap extends Component
 {
 
@@ -40,7 +42,7 @@ class S1haMap extends Component
         if ($this->qx!=''){
             $this->searchSite($request, $this->qx, $this->qy);
         }
-
+        $this->datasavenote='';
     }
 
 
@@ -204,7 +206,10 @@ class S1haMap extends Component
         $plotx=$stemdata[0]['qx']*10+$qudx;
         $ploty=$stemdata[0]['qy']*10+$qudy;
 
-        $uplist=['qudx' =>$qudx, 'qudy' => $qudy, 'plotx'=>$plotx, 'ploty'=>$ploty, 'update_id' =>$this->user];
+        $sqx=intval(ceil($qudx/5));
+        $sqy=intval(ceil($qudy/5));
+
+        $uplist=['qudx' =>$qudx, 'qudy' => $qudy, 'plotx'=>$plotx, 'ploty'=>$ploty, 'updated_id' =>$this->user];
 
         $fixlog['type']='update';
         $fixlog['id']='0';
@@ -213,7 +218,7 @@ class S1haMap extends Component
         $fixlog['qx']=$stemdata[0]['qx'];
         $fixlog['stemid']=$tag;
         $fixlog['descript']=json_encode($uplist, JSON_UNESCAPED_UNICODE);
-        $fixlog['update_id']=$this->user;
+        $fixlog['updated_id']=$this->user;
         $fixlog['updated_at']=date("Y-m-d H:i:s");
 
         if ($rtype=='R'){
@@ -225,7 +230,12 @@ class S1haMap extends Component
         }
         SsFixlog::insert($fixlog);
 
-        $this->datasavenote='已更新資料';
+        $datasavenote='已更新資料';
+        if ($sqx!=$stemdata[0]['sqx'] || $sqy!=$stemdata[0]['sqy']){
+            $datasavenote.='。但('.$tag.')小區不符，請確認。';
+        }
+
+        $this->datasavenote=$datasavenote;
         $this->searchSite($request, $this->qx, $this->qy);
 
         // dd($uplist);

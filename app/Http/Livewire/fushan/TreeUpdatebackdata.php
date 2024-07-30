@@ -15,7 +15,7 @@ use App\Models\FsTreeRecord1;
 use App\Models\FsTreeRecord2;
 use App\Models\FsTreeCensus4;
 use App\Models\FsTreeCensus3;
-use App\Models\FsTreeEntrycom;
+use App\Models\FsTreeComplete;
 use App\Models\FsTreeCensus5;
 use App\Models\FsTreeCensus1;
 use App\Models\FsTreeCensus2;
@@ -25,6 +25,7 @@ use App\Models\FsTreeFixlog;
 
 use App\jobs\FsTreeCensus5Progress;
 
+//後端資料處理進度
 class TreeUpdatebackdata extends Component
 {
 
@@ -33,7 +34,7 @@ class TreeUpdatebackdata extends Component
     public $alternoteqxlist;
     public $addclass1='';
     public $addclass2='';
-    public $alternotedown='';
+    public $alternotedone='';
     public $from;
 
 
@@ -50,15 +51,15 @@ class TreeUpdatebackdata extends Component
 
         $this->alternoteqxlist=$alternoteqxlist;
 
-        $alternotedown=FsTreeEntrycom::where('alternoteOK', '!=','')->groupBy('qx')->orderby('qx')->pluck('qx')->toArray();
+        $alternotedone=FsTreeComplete::where('alternoteDone', '!=','')->groupBy('qx')->orderby('qx')->pluck('qx')->toArray();
 
-        if (count($alternotedown)>0){
-            foreach ($alternotedown as $value){
-                $this->alternotedown.=$value." ";
+        if (count($alternotedone)>0){
+            foreach ($alternotedone as $value){
+                $this->alternotedone.=$value." ";
             }
         }
 
-        // dd($this->alternotedown);
+        // dd($this->alternotedone);
 
         if (empty($this->csplist)){
             $this->fcsplist($request);
@@ -81,6 +82,7 @@ class TreeUpdatebackdata extends Component
 
     public $finishnote;
 
+//尋找需特殊修改的資料，依樣線
     public function alternote(Request $request){
 
 
@@ -102,7 +104,7 @@ class TreeUpdatebackdata extends Component
     }
 
     protected $listeners = ['updateStemidlist' => 'updateStemidlist'];
-
+//依stemid尋找資料
     public function updateStemidlist($data){
         $thisstemid = $data['thisstemid'];
         $from = $data['from'];
@@ -128,9 +130,9 @@ class TreeUpdatebackdata extends Component
     }
 
     public function alternoteFinish($qx){
-        $uplist['alternoteOK']=$this->user;
-        $uplist['alternoteOK_at']=date("Y-m-d H:i:s");
-        FsTreeEntrycom::where('qx', 'like', $qx)->update($uplist);
+        $uplist['alternoteDone']=$this->user;
+        $uplist['alternoteDone_at']=date("Y-m-d H:i:s");
+        FsTreeComplete::where('qx', 'like', $qx)->update($uplist);
         $this->finishnote="已記錄特殊修改完成";
         $this->searchStemid(0);
     }
@@ -189,6 +191,7 @@ class TreeUpdatebackdata extends Component
 
     public $dataNote;
 
+//以stemid顯示所有資料表的該編號資料
     public function nowStemidData($stemid){
         // dd($stemid);
         $tag=explode('.',$stemid);

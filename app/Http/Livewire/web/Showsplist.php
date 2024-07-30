@@ -12,7 +12,7 @@ use Livewire\WithPagination;
 use App\Models\FsBaseSpinfo;
 use App\Http\Controllers\UpdateController;
 
-
+//網頁物種清單
 class Showsplist extends Component
 {
     public $user;

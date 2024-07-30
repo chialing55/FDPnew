@@ -1,4 +1,7 @@
 <div>
+        <div class="loading-container" wire:loading.class="visible">
+        <div class="loading-spinner"></div>
+    </div>
     <h2>{{$year}} 年 {{$month}} 月 第 {{$census}} 次調查 - 第 {{$entry}} 次資料輸入</h2>
     <div style='margin-top:10px'>
         <p>請先詳閱<a href="{{asset('/fushan/seedling/note')}}">小苗輸入注意事項</a></p> 
@@ -55,10 +58,6 @@
 <div>
 
     @if($record)
-
-    <div class="loading-container" wire:loading.class="visible">
-        <div class="loading-spinner"></div>
-    </div>
 
 <div class='text_box'>
    

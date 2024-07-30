@@ -33,9 +33,9 @@ if($type==2){$addclass2='thistype'; $addclass1='';}
             </div>
 
         </div>
-            @if($alternotedown!=[])
+            @if($alternotedone!=[])
             <div style="background-color: antiquewhite; margin:10px 0; padding: 5px;">
-                * 已完成特殊修改的樣線: {{$alternotedown}}
+                * 已完成特殊修改的樣線: {{$alternotedone}}
 
             </div>
             @endif
@@ -71,6 +71,7 @@ if($type==2){$addclass2='thistype'; $addclass1='';}
         <li>若為換號，會因另一號碼尚未更新而出現重號的錯誤。可先給予另一位使用之編號，然後更新互相換號的另一個號碼後，再重新更新為正確的。如：200600.2與200600.3更換分支號，先將200600.2更新為200600.99，然後將200600.3更新為200600.2後，再將原本的200600.2更新為200600.3。</li>
         <li>如為分支改為新個體，換號且換物種，請先更新為主幹後再改物種名稱。</li>
         <li>如有需助理確認的資料，請填寫 <a href='https://docs.google.com/spreadsheets/d/1ayYozB7dCBKcZFM0PRZs1aLAsgEqFFPZ0i1mULnfAhQ/edit#gid=0' target="_blank">每木調查除錯進度統整表</a></li>
+        <li><b>若植株復活，<span class='line'>不修改</span>之前的資料。</b></li>
         @if($type=='1')
         <li>完成一線的特殊修改後，請按<button class='datasavebutton' style='width: auto;'>特殊修改完成</button>。</li>
         @endif

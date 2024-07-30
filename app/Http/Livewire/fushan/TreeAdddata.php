@@ -15,7 +15,7 @@ use App\Models\FsTreeRecord1;
 use App\Models\FsTreeRecord2;
 use App\Models\FsTreeCensus4;
 use App\Models\FsTreeCensus3;
-use App\Models\FsTreeEntrycom;
+use App\Models\FsTreeComplete;
 use App\Models\FsTreeCensus5;
 
 use App\Jobs\FsTreeCensus5Progress;

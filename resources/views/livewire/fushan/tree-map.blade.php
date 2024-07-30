@@ -16,6 +16,7 @@
  
         </ul>
     </div>
+    <div style='display: flex; align-items: flex-start;'>
     <div class='text_box'>
         <div style='display: inline-flex;'>
             <span style='margin-right: 20px;'>選擇要輸入的樣方</span>
@@ -41,7 +42,7 @@
             </form>
 
         </div>
-        <div style='margin-top: 20px; margin-left: 10px; display: inline-flex;'>
+        <div style='margin-left: 10px; display: inline-flex;'>
         @if ($showdata =='1')
         @php
            if ($qy==0){$prevshow="prevhidden"; $nextshow='prevshow';} 
@@ -52,6 +53,46 @@
                     <span class='{{$nextshow}}'><a class='a_' wire:click.once="searchSite({{$qx}}, {{$qy+1}}, 1, 1)">下一個樣方</a></span>
 
         @endif
+    </div>
+    </div>
+    <div class='text_box'>
+        <h6 style="cursor: pointer;" onclick="$('.mapProgress').toggle();$('.mapProgressArrayDown').toggle();$('.mapProgressArrayright').toggle();"> <i class="fa-solid fa-caret-down mapProgressArrayDown"  style='display: none;'></i><i class="fa-solid fa-caret-right mapProgressArrayright"></i> 植株位置輸入進度</h6>
+        
+        <div class='mapProgress' style='display: none;'>
+            <div style='margin:0 0 20px 0; display:flex;'>
+                <div style='display:inline-flex; margin-right:30px;'>已匯入地圖資料 <div class='entry1fin entryfinshow' ></div></div>
+                <div style='display:inline-flex; margin-right:30px;'>點圖完成 <div class='entry2fin entryfinshow'></div></div>
+            </div>
+            <table class='finishtable'border="1" cellpadding="1" cellspacing="0" style=''>
+
+                @for ($i=24;$i>-1;$i--)
+                <tr>
+                    <td style='width:25px'>{{$i}}</td>
+                    @for($j=0;$j<25;$j++)
+                    @php 
+                    if($finishMap["'".$j."-".$i."'"]=='1'){
+                        $finishMapClass='entry1fin';
+                    } else if ($finishMap["'".$j."-".$i."'"]=='2'){
+                        $finishMapClass='entry2fin';
+                    } else {
+                        $finishMapClass='';
+                    }
+                    @endphp
+
+                    <td class='{{$j}}-{{$i}}  {{$finishMapClass}}'></td>
+
+                    @endfor
+                </tr>
+                @endfor
+                                <tr>
+                    <td></td>
+                    @for($i=0;$i<25;$i++)
+                    <td style='width:25px'>{{$i}}</td>
+                    @endfor
+                </tr>
+            </table>
+
+        </div>
     </div>
     </div>
     @if($showdata =='1')
@@ -167,7 +208,7 @@
             <div style='display: flex;'>
                 <div >
                     <form id="showForm">
-                        現在要輸入的編號是 <input name='tag' id='tag' class='fs100' placeholder="tag" style="width: 80px;">，選擇的點位坐標(<input name="x" id='x' size='3'/> , <input type="text" name="y" id='y' size='3'/> )
+                        現在要輸入的編號是<input name='tag' id='tag' class='fs100' placeholder="tag" style="width: 80px;">，選擇的點位坐標(<input name="x" id='x' size='3'/> , <input type="text" name="y" id='y' size='3'/> )
                             <input type="hidden" name="rtype" id='rtype' size='3'/>
                             <button type="button" style='margin-left: 20px;' onclick="saveData()">儲存</button>
                     </form>

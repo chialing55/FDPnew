@@ -14,8 +14,10 @@ use App\Models\FsSeedsFulldata;
 use App\Models\FsSeedsRecord1;
 use App\Models\FsSeedsSplist;
 
-use App\Jobs\FsSeedsAddButton;
+use App\Jobs\SeedsAddButton;
 
+
+//檢視修改種子大表
 class SeedsUpdatebackdata extends Component
 {
 
@@ -45,15 +47,16 @@ class SeedsUpdatebackdata extends Component
     }
 
     public $censusdata=[];
-    public $identifier='蔡佳秀';
+    public $identifier='蔡佳秀';  //預設鑑定者
 
+//建立檢視表單
     public function createTable($census){
 
         // $entrytable1=FsSeedsRecord1::query()->orderBy('trap', 'asc')->orderBy('csp', 'asc')->orderBy('code', 'asc')->get()->toArray();
 
         $censusdata1=FsSeedsFulldata::where('census', 'like', $census)->get()->toArray();
 
-        $ob_table = new FsSeedsAddButton;
+        $ob_table = new SeedsAddButton;
         $censusdata=$this->censusdata=$ob_table->addbutton($censusdata1, 'fulldata');
 
 

@@ -9,15 +9,16 @@ use Livewire\Component;
 use Livewire\WithPagination;
 use Illuminate\Support\Facades\Schema;
 
-use App\Models\Ss10mBase2015;
+use App\Models\Ss10mTreeBase2024;
 use App\Models\Ss10mTree2014;
 use App\Models\Ss10mTree2015;
+use App\Models\Ss10mTreeRecord1;
 
 use App\Models\SsSplist;
 
 class S10mDataviewer extends Component
 {
-
+//10m樣區資料檢視
     public $user;
     public $site;
     public $downloadtable=[];
@@ -57,6 +58,7 @@ class S10mDataviewer extends Component
     public $type;
     public $census='1';
 
+//確認是否有資料電子檔
     public function processFile(Request $request){
 
         $downloadtable = [];
@@ -111,23 +113,6 @@ class S10mDataviewer extends Component
                 $downloadtable[$i][2] = ($i == 3) ? '地被' : '';
                 $downloadtable[$i][3] = '地圖';
 
-        // for($i=1;$i<4;$i++){
-        //     if($i<3){
-        //         $downloadtable[$i][0]='調查資料';
-        //         $downloadtable[$i][1]='地圖';
-        //         $downloadtable[$i][2]='';
-        //         $downloadtable[$i][3]='';
-        //     } else {
-        //         $downloadtable[$i][0]='舊樹';
-        //         $downloadtable[$i][1]='新樹';
-        //         $downloadtable[$i][2]='地被';
-        //         $downloadtable[$i][3]='地圖';
-        //     }
-        // }
-
-                // if ($path!=''){
-                //     $downloadtable2[$i][$j]="<a href='/".$path."' target=_blank j=".$j.">".$downloadtable[$i][$j]."</a>";
-                // } else { $downloadtable2[$i][$j]=$downloadtable[$i][$j];}
                  $downloadtable2[$i][$j] = ($path != '')
                 ? "<a href='/" . $path . "' target=_blank j=" . $j . ">" . $downloadtable[$i][$j] . "</a>"
                 : $downloadtable[$i][$j];
@@ -150,6 +135,7 @@ class S10mDataviewer extends Component
         $this->serachstemid($request, $this->tag, $this->branch, $this->stemidplot);
     }
 
+//依stemid檢視資料
     public function serachstemid(Request $request, $tag, $branch, $stemidplot)
     {
 
@@ -163,8 +149,14 @@ class S10mDataviewer extends Component
 
         $census1=Ss10mTree2014::where('stemid', 'like', $stemid)->get()->toArray();
         $census2=Ss10mTree2015::where('stemid', 'like', $stemid)->get()->toArray();
-        $base2015=Ss10mBase2015::where('tagid', 'like', $tagid)->get()->toArray();
-        $maxb=Ss10mTree2015::where('plot', 'like', $this->plots[$stemidplot])->where('tag', 'like', $tag)->max('branch');
+        $census3=Ss10mTreeRecord1::where('stemid', 'like', $stemid)->get()->toArray();
+       
+        $base2024 = Ss10mTreeBase2024::where('tagid', 'like', $tagid)
+            ->join('splist', '10m_tree_base_2024.spcode', '=', 'splist.spcode')
+            ->select('10m_tree_base_2024.*', 'splist.index as csp')
+            ->get()
+            ->toArray();
+        $maxb=Ss10mTreeRecord1::where('plot', 'like', $this->plots[$stemidplot])->where('tag', 'like', $tag)->max('branch');
         // dd($maxb);
 
         // dd($census1);
@@ -186,12 +178,20 @@ class S10mDataviewer extends Component
             } else {
                 $table[1] = ['census' => '2015', 'sqx' => '', 'sqy' => '', 'csp' => '', 'status' => '', 'dbh' => '', 'pom' => '', 'note' => '', 'confirm' => '', 'maxb' =>''];
             }
+            if (count($census3) > 0) {
+                $table[2] = $census3[0];
+                $table[2]['census'] = '2024';
+                $table[2]['maxb'] = $maxb;
+            } else {
+                $table[2] = ['census' => '2024', 'sqx' => '', 'sqy' => '', 'csp' => '', 'status' => '', 'dbh' => '', 'pom' => '', 'note' => '', 'confirm' => '', 'maxb' =>''];
+            }
 
-            if (count($census1) > 0 || count($census2) > 0) {
+
+            if (count($census1) > 0 || count($census2) > 0 || count($census3) > 0) {
                 $this->result = $table;
                 $this->resultnote = '';
 
-                $this->baseresult=$base2015[0];
+                $this->baseresult=$base2024[0];
 
             } else {
                 $this->result ='';

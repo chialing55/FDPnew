@@ -91,6 +91,7 @@
                    
                 </table>
             </div>
+
             <div class='fstreeStemidtable'>
                 <table id='StemidTable' class='tablesorter'>
                     <thead>
@@ -118,6 +119,7 @@
                     </tbody>
                     @endif
                 </table>
+                <span style="font-size: 80%;">* 2024 資料若為0，表尚未輸入。</span>
             </div>
 
         @endif        

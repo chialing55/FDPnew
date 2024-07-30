@@ -25,7 +25,7 @@
 
         {!!$comnote!!}</p>
        
-        <a href='/fsseedling-compare-pdf' target='_blank'><button>將比對結果輸出成 pdf 檔</button></a>
+        <a href='/fsseedling/compare-pdf' target='_blank'><button>將比對結果輸出成 pdf 檔</button></a>
         
            
     </div>

@@ -24,11 +24,11 @@
                     $finishSiteClass='';
                     $plot=$j.'-'.$i;
                     // echo $plot."<br>";
-                    if (!in_array($plot, $entrycom1) && !in_array($plot, $entrycom2)) {
+                    if (!in_array($plot, $entrydone1) && !in_array($plot, $entrydone2)) {
                     $finishSiteClass = 'entryallfin ';
-                    } elseif (!in_array($plot, $entrycom1)) {
+                    } elseif (!in_array($plot, $entrydone1)) {
                     $finishSiteClass = 'entry1fin ';
-                    } elseif (!in_array($plot, $entrycom2)) {
+                    } elseif (!in_array($plot, $entrydone2)) {
                     $finishSiteClass = 'entry2fin ';
                     }
                     @endphp

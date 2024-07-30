@@ -1,3 +1,4 @@
+{{-- index, choice 用 --}}
 
   <div id='header' >
 {{--   @if (isset($id))

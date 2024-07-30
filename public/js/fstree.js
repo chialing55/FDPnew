@@ -19,7 +19,7 @@ $('.listlink').on('click', function(){
 handleHoverEvents('.list4', '.list4inner');
 handleHoverEvents('.list6', '.list6inner');
 
-
+let urlbase='/fstree';
 //download record
 	$(".button1").click(function(){
 		let qx = $("select[name='qx']").val();
@@ -27,12 +27,12 @@ handleHoverEvents('.list6', '.list6inner');
 // console.log(qx, qy);
 		// var tempwindow1=window.open('_blank');
 		if (qx!='' && qy!=''){
-			let url='/fstree-record-pdf/'+qx+'/'+qy+'/1';
+			let url=`${urlbase}/record-pdf/${qx}/${qy}/1`;
 			window.open(url);
 		}
 	});
 
-	
+
 
 //download record 全線
 $(".button2").click(function(){
@@ -45,7 +45,7 @@ let completedRequests = 0;  // 已完成的請求數量
 for (let i = 0; i < totalRequests; i++) {
   let qx = $("select[name='qx2']").val();
   let qy = i;
-  let url = `/fstree-record-pdf/${qx}/${qy}/2`;
+  let url = `${urlbase}/record-pdf/${qx}/${qy}/2`;
 	$("#downloadMessage2").text("載入中...").show();
   $.ajax({
     url: url,
@@ -194,14 +194,14 @@ function cellfunction(tableType, container, row, col, prop){
 
 function alternote(stemid, entry, thispage, event) {
 	// console.log(stemid);
-    var saveUrl=`/fstreeaddalternote/${stemid}/${entry}/${thispage}`;
+    var saveUrl=`${urlbase}/addalternote/${stemid}/${entry}/${thispage}`;
     handleAlternote(stemid, entry, thispage, saveUrl);
 
 }
 
 function deletealternote(stemid, thispage){
 
-  var saveUrl=`/fstreedeletealter/${stemid}/${entry}/${thispage}`;
+  var saveUrl=`${urlbase}/deletealter/${stemid}/${entry}/${thispage}`;
   handleDeleteAlternote(stemid, plotType, saveUrl)
 
 }
@@ -239,13 +239,13 @@ function alternotetable(alterdata, stemid, entry, thispage){
   var hiddenColumns ={
       columns: [10],
     };
-  return createHandsontable(container, columns, alterdata, saveButtonName, "/fstreesavealternote", tableType, colWidths, hiddenColumns, colHeaders, thispage );  
+  return createHandsontable(container, columns, alterdata, saveButtonName, `${urlbase}/savealternote`, tableType, colWidths, hiddenColumns, colHeaders, thispage );  
 
 }
 
 
 function deleteid(stemid, entry, thispage){  //刪除新增樹資料
-  var saveUrl=`/fstreedeletedata/${stemid}/${entry}/${thispage}`;
+  var saveUrl=`${urlbase}/deletedata/${stemid}/${entry}/${thispage}`;
   handleDeleteid(stemid,  saveUrl)
 }
 
@@ -292,7 +292,7 @@ function fstreetable(data, thispage, pps){
       columns: [15],
     };
 
-  return createHandsontable(container, columns, data2, saveButtonName, "/fstreesavedata", tabletype, colWidths, hiddenColumns, colHeaders, thispage );
+  return createHandsontable(container, columns, data2, saveButtonName, `${urlbase}/savedata`, tabletype, colWidths, hiddenColumns, colHeaders, thispage );
 }
 
 
@@ -341,7 +341,7 @@ function recruittable(data, emptytable, csplist){
   var colHeaders=["Date","20x","20y","5x","5y", "tag", "b", "csp", "code","dbh/h高","POM/h低","note","漏資料"];
 
   var hiddenColumns =[];
-  return createHandsontable(container, columns, emptytable, saveButtonName, "/fstreesaverecruit", tableType, colWidths, hiddenColumns, colHeaders, thispage );
+  return createHandsontable(container, columns, emptytable, saveButtonName, `${urlbase}/saverecruit`, tableType, colWidths, hiddenColumns, colHeaders, thispage );
 
 }
 
@@ -350,7 +350,7 @@ function recruittable(data, emptytable, csplist){
 
   	console.log(qx, qy, entry);
 
-    var saveUrl=`/fstreefinish/${qx}/${qy}/${entry}`;
+    var saveUrl=`${urlbase}/finish/${qx}/${qy}/${entry}`;
     var ajaxData={};
     var ajaxType='get';
 
@@ -527,7 +527,7 @@ function fstreeupdatatable(stemid, stemdata, csplist, from){
     columns: [7],
   }
 
-  var handsontable1=createHandsontable(container1, columns1, stemdata[0], saveButtonName, "/fstreeupdate", tabletype1, colWidths1, hiddenColumns1, colHeaders1, 1 );
+  var handsontable1=createHandsontable(container1, columns1, stemdata[0], saveButtonName, `${urlbase}/update`, tabletype1, colWidths1, hiddenColumns1, colHeaders1, 1 );
 
 	var stemdata2=stemdata.slice(1, 6);
 
@@ -560,7 +560,7 @@ function fstreeupdatatable(stemid, stemdata, csplist, from){
   }
 
 
-  var handsontable2=createHandsontable(container2, columns2, stemdata2, saveButtonName, "/fstreeupdate", tabletype2, colWidths2, hiddenColumns2, colHeaders2, 1 );
+  var handsontable2=createHandsontable(container2, columns2, stemdata2, saveButtonName, `${urlbase}/update`, tabletype2, colWidths2, hiddenColumns2, colHeaders2, 1 );
 
 
   var handsontable1 = container1.data('handsontable');
@@ -572,7 +572,7 @@ function fstreeupdatatable(stemid, stemdata, csplist, from){
 		  var data1 = handsontable1.getSourceData();
   		var data2 = handsontable2.getSourceData();
 
-      var saveUrl=`/fstreeupdate`;
+      var saveUrl=`${urlbase}/update`;
       var ajaxData={
 		    	data1: data1,
 		    	data2: data2,
@@ -609,7 +609,7 @@ function deleteCensusData(stemid, from){
     {
       $('.altersavenote').html('');
 
-      var saveUrl=`/fstreedeletecensusdata`;
+      var saveUrl=`${urlbase}/deletecensusdata`;
       var ajaxData={
       			stemid: stemid,
 		    		from: from,
@@ -689,7 +689,7 @@ function addDataTable(emptytable, csplist){
   var colHeaders=["Date","20x","20y","5x","5y", "tag", "b", "csp", "code","dbh/h高","POM/h低","note"];
 
   var hiddenColumns =[];
-  return createHandsontable(container, columns, emptytable, saveButtonName, "/fstreeadddata", tableType, colWidths, hiddenColumns, colHeaders, thispage );
+  return createHandsontable(container, columns, emptytable, saveButtonName, `${urlbase}/adddata`, tableType, colWidths, hiddenColumns, colHeaders, thispage );
 
 }
 
@@ -700,6 +700,7 @@ window.addEventListener('initTablesorter', event => {
 
   const tablePlot=event.detail.tablePlot;
   data=event.detail.data;
+  const tag=event.detail.tag;
   
   const mapfile=event.detail.mapfile;
   console.log(data);
@@ -709,7 +710,7 @@ window.addEventListener('initTablesorter', event => {
   $('.plottable2').removeClass('selected');
   $(`.plot${tablePlot}`).addClass('selected');
 
-  drawChart(data, tablePlot, mapfile);
+  drawChart(data, tablePlot, mapfile, tag);
 
 });
 

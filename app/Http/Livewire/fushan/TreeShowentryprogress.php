@@ -8,11 +8,11 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\App;
 use Livewire\WithPagination;
 
-use App\Models\FsTreeEntrycom;
+use App\Models\FsTreeComplete;
 use App\Models\FsTreeRecord1;
 use App\Models\FsTreeRecord2;
 use App\Models\FsBaseLogin;
-
+//顯示輸入進度
 
 class TreeShowentryprogress extends Component
 {
@@ -23,10 +23,11 @@ class TreeShowentryprogress extends Component
     public $countFinishSiteall=0;
     public $entrytable;
 
+
     public function mount(){
 
 //輸入完成表
-        $tables=FsTreeEntrycom::get()->toArray();
+        $tables=FsTreeComplete::get()->toArray();
         $countFinishSite1=0;
         $countFinishSite2=0;
         $countFinishSiteall=0;
@@ -52,45 +53,36 @@ class TreeShowentryprogress extends Component
             $userid[$names[$i]['id2']]=$names[$i]['name'];
         }
 
-//助理進度表
-
-//一開始因為搞不定主機的紀錄時間，所以更改顯示時間，需加8小時
-//但10-21後日期變成正確的，所以直接把之前的時間更新
-
-// UPDATE `record1`
-// SET `updated_at` = DATE_FORMAT(DATE_ADD(`updated_at`, INTERVAL 8 HOUR), '%Y-%m-%d %H:%i:%s')
-// WHERE `updated_at` < '2023-10-20';
+//各助理輸入進度表
 
 
-//$table1s=FsTreeRecord1::select('update_id', DB::raw('LEFT(DATE_ADD(updated_at, INTERVAL 8 HOUR), 10) AS date1'), DB::raw('count(stemid) as pps'))->where('date', 'not like', '0000-00-00')->groupBy('update_id', 'date1')->orderByDesc('date1')->get()->toArray();
-
-        $table1s=FsTreeRecord1::select('update_id', DB::raw('LEFT(updated_at, 10) AS date1'), DB::raw('count(stemid) as pps'))->where('date', 'not like', '0000-00-00')->groupBy('update_id', 'date1')->orderByDesc('date1')->get()->toArray();
+        $table1s=FsTreeRecord1::select('updated_id', DB::raw('LEFT(updated_at, 10) AS date1'), DB::raw('count(stemid) as pps'))->where('date', 'not like', '0000-00-00')->groupBy('updated_id', 'date1')->orderByDesc('date1')->get()->toArray();
         for($i=0;$i<count($table1s); $i++){
             
-            if (isset($userid[$table1s[$i]['update_id']])){
-                $table1s[$i]['name']=$userid[$table1s[$i]['update_id']];
+            if (isset($userid[$table1s[$i]['updated_id']])){
+                $table1s[$i]['name']=$userid[$table1s[$i]['updated_id']];
             } else {
                 $table1s[$i]['name']='';
             }
-            $tableall[$table1s[$i]['date1']][$table1s[$i]['update_id']]=$table1s[$i];
+            $tableall[$table1s[$i]['date1']][$table1s[$i]['updated_id']]=$table1s[$i];
         }
 
         // dd($tableall);
-        $table2s=FsTreeRecord2::select('update_id', DB::raw('LEFT(updated_at, 10) AS date1'), DB::raw('count(stemid) as pps'))->where('date', 'not like', '0000-00-00')->groupBy('update_id', 'date1')->get()->toArray();
+        $table2s=FsTreeRecord2::select('updated_id', DB::raw('LEFT(updated_at, 10) AS date1'), DB::raw('count(stemid) as pps'))->where('date', 'not like', '0000-00-00')->groupBy('updated_id', 'date1')->get()->toArray();
 
         if (count($table2s)>0){
             for($i=0;$i<count($table2s); $i++){
                 
-                if (isset($userid[$table2s[$i]['update_id']])){
-                    $table2s[$i]['name']=$userid[$table2s[$i]['update_id']];
+                if (isset($userid[$table2s[$i]['updated_id']])){
+                    $table2s[$i]['name']=$userid[$table2s[$i]['updated_id']];
                 } else {
                     $table2s[$i]['name']='';
                 }
 
-                if (isset($tableall[$table2s[$i]['date1']][$table2s[$i]['update_id']])){
-                    $tableall[$table2s[$i]['date1']][$table2s[$i]['update_id']]['pps']=$table2s[$i]['pps']+$tableall[$table2s[$i]['date1']][$table2s[$i]['update_id']]['pps'];
+                if (isset($tableall[$table2s[$i]['date1']][$table2s[$i]['updated_id']])){
+                    $tableall[$table2s[$i]['date1']][$table2s[$i]['updated_id']]['pps']=$table2s[$i]['pps']+$tableall[$table2s[$i]['date1']][$table2s[$i]['updated_id']]['pps'];
                 } else {
-                    $tableall[$table2s[$i]['date1']][$table2s[$i]['update_id']]=$table2s[$i];
+                    $tableall[$table2s[$i]['date1']][$table2s[$i]['updated_id']]=$table2s[$i];
                 }
                 
             }

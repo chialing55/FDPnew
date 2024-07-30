@@ -5,9 +5,9 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-class FsTreeRecord1Alter extends Model
+class FsTreeComplete extends Model
 {
     use HasFactory;
-    protected $table = "record1_alter";
+    protected $table = "complete";
     protected $connection = 'mysql';
 }

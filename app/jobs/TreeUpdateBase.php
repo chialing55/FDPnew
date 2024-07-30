@@ -99,8 +99,13 @@ class TreeUpdateBase
                 $thisstemid=$newstemid;
             }  
 
-        $obase=$tablebase::where('tag','like',$otag)->first()->toArray();
-        
+        if ($base['r']=='y'){
+            $obase=$tablebaser::where('stemid','like',$base['stemid'])->first()->toArray();
+        } else {
+            $obase=$tablebase::where('tag','like',$otag)->first()->toArray();
+        }
+
+
         $updatedes=[];
         $basetable='';
         $base_uplist=[];
@@ -108,7 +113,40 @@ class TreeUpdateBase
         //如果改號碼，多是換號，直接改掉base的資料
             if ($baseWay=='0'){  //修改base
                 //base
-                $exarray=['update_id', 'updated_at', 'deleted_at'];
+                    switch ($base['sqx']) {
+                        case '1':
+                        case '2':
+                            $base['subqx'] = '1';
+                            break;
+                        case '3':
+                        case '4':
+                            $base['subqx'] = '2';
+                            break;
+                        default:
+                            $base['subqx']; // 保留原始值
+                            break;
+                    }
+
+                    switch ($base['sqy']) {
+                        case '1':
+                        case '2':
+                            $base['subqy'] = '1';
+                            break;
+                        case '3':
+                        case '4':
+                            $base['subqy'] = '2';
+                            break;
+                        default:
+                            $base['subqy']; // 保留原始值
+                            break;
+                    }
+
+                //修改base_r
+                if ($base['r']=='y'){
+                    $basetable='r';
+                }
+
+                $exarray=['updated_id', 'updated_at', 'deleted_at'];
                 foreach($obase as $key=>$value){
                     if (!in_array($key, $exarray)){
                         if ($value != $base[$key]){
@@ -117,13 +155,10 @@ class TreeUpdateBase
                         }
                     }
                 }
-                if ($obase['qx'].$obase['qy'].$obase['sqx'].$obase['sqy']!=$base['qx'].$base['qy'].$base['sqx'].$base['sqy'] && $base['r']=='y'){
-                    $basetable='r';
-                }
                $fixlog['type']='update';
                $fixlog['stemid']=$otag;
             } else if ($baseWay=='1'){  //新增
-                $exarray=['update_id', 'updated_at', 'deleted_at'];
+                $exarray=['updated_id', 'updated_at', 'deleted_at'];
                 foreach($obase as $key=>$value){
                     if (!in_array($key, $exarray)){
                         if(isset($base[$key])){
@@ -138,7 +173,7 @@ class TreeUpdateBase
                 $fixlog['stemid']=$base['tag'];
             } 
             // else if ($baseWay=='2'){  //不更新號碼部分
-            //         $exarray=['update_id', 'updated_at', 'tag', 'deleted_at'];
+            //         $exarray=['updated_id', 'updated_at', 'tag', 'deleted_at'];
             //         foreach($obase as $key=>$value){
             //             if (!in_array($key, $exarray)){
             //                 if ($value != $base[$key]){
@@ -152,7 +187,7 @@ class TreeUpdateBase
             // }
 
             if ($base_uplist!=[]){
-                $base_uplist['update_id']=$user;
+                $base_uplist['updated_id']=$user;
                 if ($baseWay=='0'){
                     if ($basetable==''){
                         $tablebase::where('tag', 'like', $otag)->update($base_uplist);
@@ -175,7 +210,7 @@ class TreeUpdateBase
                 $fixlog['qx']=$base['qx'];
                 
                 $fixlog['descript']=json_encode($updatedes, JSON_UNESCAPED_UNICODE);
-                $fixlog['update_id']=$user;
+                $fixlog['updated_id']=$user;
                 $fixlog['updated_at']=date("Y-m-d H:i:s");
                 $tablefixlog::insert($fixlog);
 

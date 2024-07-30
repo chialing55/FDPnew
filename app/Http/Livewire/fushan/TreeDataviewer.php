@@ -66,7 +66,7 @@ class TreeDataviewer extends Component
 
 
 
-
+//檢查是否有原始資料電子檔
 
     public function processFile2(Request $request){
 
@@ -152,7 +152,7 @@ class TreeDataviewer extends Component
     {
         $this->serachstemid($request, $this->tag, $this->branch);
     }
-
+//依據stemid尋找資料
     public function serachstemid(Request $request, $tag, $branch)
     {
 
@@ -264,8 +264,10 @@ class TreeDataviewer extends Component
 
             if (count($census5)>0){
                 $census5Table=$census5;
+                $temp='';
             } else {
                 $census5Table = count($census5_1) > 0 ? $census5_1 : $census5_2;
+                $temp='(record)';
             }
 
             if (count($census5Table) > 0) {
@@ -287,7 +289,7 @@ class TreeDataviewer extends Component
                     $census5Table[0]['dbh'] = $census5Table[0]['h2'];
                 }
                 $table[4] = [
-                    'census' => 'census5 (record)',
+                    'census' => 'census5'.$temp,
                     'status' => $census5Table[0]['status'],
                     'code' => $census5Table[0]['code'],
                     'dbh' => $census5Table[0]['dbh'],

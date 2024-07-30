@@ -10,6 +10,7 @@ use Illuminate\Support\Facades\App;
 use App\Models\FsBaseLogin;
 use App\Http\Controllers\UpdateController;
 
+//登入處理
 class LoginController extends Controller
 {
 

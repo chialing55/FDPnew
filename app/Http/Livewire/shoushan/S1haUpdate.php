@@ -20,11 +20,11 @@ use App\Models\Ss1haEnviR1;
 use App\Models\Ss1haEnviR2;
 
 use App\Models\SsSplist;
-use App\Models\SsEntrycom;
+
 
 use App\Jobs\TreeCompareCheck;
 use App\Jobs\SsPlotFinishCheck;
-
+//1ha樣區後端資料修改
 class S1haUpdate extends Component
 {
 

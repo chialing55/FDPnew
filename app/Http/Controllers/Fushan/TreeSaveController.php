@@ -1,11 +1,12 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Http\Controllers\Fushan;
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\App;
 use Illuminate\Support\Facades\Schema;
+use App\Http\Controllers\Controller;
 
 use App\Models\FsBaseTreeSplist;
 use App\Models\FsTreeRecord1;
@@ -18,17 +19,20 @@ use App\Models\FsTreeCensus5;
 use App\Models\FsTreeBase;
 use App\Models\FsTreeBaseR;
 use App\Models\FsTreeFixlog;
-use App\Models\FsTreeEntrycom;
+use App\Models\FsTreeComplete;
 
 use App\Jobs\FsTreeDataCheck;
 use App\Jobs\FsTreeRecruitCheck;
-use App\Jobs\FsTreeAddButton;
+
+use App\Jobs\TreeAddButton;
 use App\Jobs\TreeUpdateBase;
 use App\Jobs\TreeUpdateCensusData;
-use FsTreeAlternote;
 
 
-class FsTreeSaveController extends Controller
+
+//每木資料輸入後的所有儲存與刪除
+
+class TreeSaveController extends Controller
 {
 
     public function getTableInstance($entry) {
@@ -39,6 +43,9 @@ class FsTreeSaveController extends Controller
         }
     }
 
+//重新載入資料
+//因有修改資料才需要重新載入資料，故表示輸入未完成，需將輸入完成註記刪除
+//修改資料後需重新按輸入完成鈕
 
     public function getRedata($entry, $qx, $qy, $sqx, $sqy, $user){
 
@@ -46,24 +53,24 @@ class FsTreeSaveController extends Controller
 
         $redatas=$table::where('qx', 'like', $qx)->where('qy', 'like', $qy)->where('sqx', 'like', $sqx)->where('sqy', 'like', $sqy)->where('show', 'like', '1')->orderBy('tag', 'asc')->orderBy('branch', 'asc')->get();
 
-        $ob_redata = new FsTreeAddButton;
+        $ob_redata = new TreeAddButton;
         $redata=$ob_redata->addbutton($redatas, $entry);
 
         $thisentry='entry'.$entry;
         $uplist[$thisentry]='0';
-        $uplist['update_id'.$entry]=$user;
-        $uplist['update_date'.$entry]=date("Y-m-d H:i:s");
-        FsTreeEntrycom::where('qx', 'like', $qx)->where('qy', 'like', $qy)->update($uplist);
-        $uplist2['compareOK']='0';
-        $uplist2['compareOK_at']='';
+        $uplist[$thisentry.'Done']=$user;
+        $uplist[$thisentry.'Done_at']=date("Y-m-d H:i:s");
+        FsTreeComplete::where('qx', 'like', $qx)->where('qy', 'like', $qy)->update($uplist);
+        $uplist2['compareDone']='';
+        $uplist2['compareDone_at']='';
 
-        FsTreeEntrycom::where('qx', 'like', $qx)->update($uplist2);
+        FsTreeComplete::where('qx', 'like', $qx)->update($uplist2);
 
         return $redata; 
 
     }
 
-
+//儲存輸入資料
     public function savedata (Request $request){
 
         $data_all = request()->all();
@@ -106,7 +113,7 @@ class FsTreeSaveController extends Controller
 
             //更新
                 foreach($data[$i] as $key => $value){
-                    $excludedKeys=['update_id', 'updated_at', 'alternotetable'];
+                    $excludedKeys=['updated_id', 'updated_at', 'alternotetable'];
                     if (!in_array($key, $excludedKeys)){
                         if ($odata[0][$key] != $value){
                             if($value==Null){$value='';}
@@ -116,7 +123,7 @@ class FsTreeSaveController extends Controller
                 }
                 if ($uplist!=[]){
 
-                    $uplist['update_id']=$user;
+                    $uplist['updated_id']=$user;
 
                     $table::where('stemid', 'like', $data[$i]['stemid'])->update($uplist);
 
@@ -132,11 +139,7 @@ class FsTreeSaveController extends Controller
         }//最外層
 
 //         //重新載入資料
-        // $redatas=$table::where('qx', 'like', $data[0]['qx'])->where('qy', 'like', $data[0]['qy'])->where('sqx', 'like', $data[0]['sqx'])->where('sqy', 'like', $data[0]['sqy'])->where('show', 'like', '1')->orderBy('tag', 'asc')->orderBy('branch', 'asc')->get();
 
-
-        // $ob_redata = new FsTreeAddButton;
-        // $redata=$ob_redata->addbutton($redatas, $entry);
 
         $redata=$this->getRedata($entry, $data[0]['qx'], $data[0]['qy'], $data[0]['sqx'], $data[0]['sqy'], $user);
 
@@ -150,7 +153,7 @@ class FsTreeSaveController extends Controller
             ];
     }
 
-
+//新增資料儲存
     public function saverecruit(Request $request){
         $splist = $request->session()->get('splist');
         $data_all = request()->all();
@@ -218,7 +221,7 @@ class FsTreeSaveController extends Controller
                     $data[$i]['h2']='0';
                     $data[$i]['h1']='0';
                 }
-                $data[$i]['update_id']=$user;
+                $data[$i]['updated_id']=$user;
                 $data[$i]['updated_at']=date("Y-m-d H:i:s");
                 $data[$i]['confirm']='';
                 // $data[$i]['tocheck']='';
@@ -236,7 +239,7 @@ class FsTreeSaveController extends Controller
 
 
                     foreach($data[$i] as $key => $value){
-                        $excludedKeysall=['update_id', 'updated_at', 'alternotetable'];
+                        $excludedKeysall=['updated_id', 'updated_at', 'alternotetable'];
                         if (!in_array($key, $excludedKeysall)){
                             if ($odata[0][$key] != $value){
                                 if($value==Null){$value='';}
@@ -263,7 +266,7 @@ class FsTreeSaveController extends Controller
 
                     if ($uplist!=[]){
 
-                        $uplist['update_id']=$user;
+                        $uplist['updated_id']=$user;
 
                         $table::where('stemid', 'like', $data[$i]['stemid'])->update($uplist);
 
@@ -311,11 +314,6 @@ class FsTreeSaveController extends Controller
 
 //         //重新載入資料
         if($sqx!=''){
-            // $redatas=$table::where('qx', 'like', $data[0]['qx'])->where('qy', 'like', $data[0]['qy'])->where('sqx', 'like', $sqx)->where('sqy', 'like', $sqy)->where('show', 'like', '1')->orderBy('tag', 'asc')->orderBy('branch', 'asc')->get();
-
-
-            // $ob_redata = new FsTreeAddButton;
-            // $redata=$ob_redata->addbutton($redatas, $entry);
 
             $redata=$this->getRedata($entry, $data[0]['qx'], $data[0]['qy'], $sqx, $sqy, $user);
 
@@ -328,18 +326,13 @@ class FsTreeSaveController extends Controller
             'data' => $redata,
             'odata' => $data,
             'nonsavelist' => $nonsavelist,
-            // 'q'=>$q,
-            // 'uplistalter' => $uplistalter,
-            // 'pass' => $inlist2,
-            // 'entry' => $entry,
-            // 'test' => $arr3,
             'recruitsavenote' => $recruitsavenote
 
         ];
 
     }
 
-
+//刪除新增資料
     public function deletedata(Request $request, $stemid, $entry, $thispage){
         $test='';
             $user = $request->session()->get('user', function () {
@@ -352,7 +345,6 @@ class FsTreeSaveController extends Controller
 
         $table = $this->getTableInstance($entry);
 
-          
             $thisdata=$table::where('stemid','like', $stemid)->get();
             $thisqx=$thisdata[0]['qx'];
             $thisqy=$thisdata[0]['qy'];
@@ -366,12 +358,8 @@ class FsTreeSaveController extends Controller
 
             $datasavenote='已刪除 '.$stemid.' 新增樹資料';
 
-
             // 重新載入資料
-            // $redatas=$table::where('qx', 'like', $thisqx)->where('qy', 'like', $thisqy)->where('sqx', 'like', $thissqx)->where('sqy', 'like', $thissqy)->where('show', 'like', '1')->orderBy('tag', 'asc')->orderBy('branch', 'asc')->get();
 
-            // $ob_redata = new FsTreeAddButton;
-            // $redata=$ob_redata->addbutton($redatas, $entry);
             $redata=$this->getRedata($entry, $thisqx, $thisqy, $thissqx, $thissqy, $user);
 
             return [
@@ -379,11 +367,10 @@ class FsTreeSaveController extends Controller
                 // 'test'=> $test,
                 'thispage' => $thispage,
                 'recruit' => $redata,
-
                 'datasavenote' => $datasavenote
             ];
     }
-
+//儲存特殊修改
     public function savealternote(Request $request){
 
         $user = $request->session()->get('user', function () {
@@ -431,7 +418,7 @@ class FsTreeSaveController extends Controller
 
                 if ($olddata[0]['alternote']!=$alterdata){
                     $uplist['alternote']=$alterdata;
-                    $uplist['update_id']=$user;
+                    $uplist['updated_id']=$user;
                     $table::where('stemid', 'like', $data['stemid'])->update($uplist);
                     $datasavenote=$datasavenote.'資料已儲存';
                 }
@@ -443,12 +430,6 @@ class FsTreeSaveController extends Controller
     // 重新載入資料
 
         $site=$table::where('stemid', 'like', $data['stemid'])->get();
-        // $redatas=$table::where('qx', 'like', $site[0]['qx'])->where('qy', 'like', $site[0]['qy'])->where('sqx', 'like', $site[0]['sqx'])->where('sqy', 'like', $site[0]['sqy'])->where('show', 'like', '1')->orderBy('tag', 'asc')->orderBy('branch', 'asc')->get();
-        // // $redata='1';
-
-
-        // $ob_redata = new FsTreeAddButton;
-        // $redata=$ob_redata->addbutton($redatas, $entry);
 
         $redata=$this->getRedata($entry, $site[0]['qx'], $site[0]['qy'], $site[0]['sqx'], $site[0]['sqy'], $user);
 
@@ -462,6 +443,8 @@ class FsTreeSaveController extends Controller
         ];        
 
     }
+
+//刪除特殊修改
 
     public function deletealter(Request $request, $stemid, $entry, $thispage){
 
@@ -484,10 +467,7 @@ class FsTreeSaveController extends Controller
         // 重新載入資料
 
         $site=$table::where('stemid', 'like', $stemid)->get();
-        // $redatas=$table::where('qx', 'like', $site[0]['qx'])->where('qy', 'like', $site[0]['qy'])->where('sqx', 'like', $site[0]['sqx'])->where('sqy', 'like', $site[0]['sqy'])->where('show', 'like', '1')->orderBy('tag', 'asc')->orderBy('branch', 'asc')->get();
 
-        // $ob_redata = new FsTreeAddButton;
-        // $redata=$ob_redata->addbutton($redatas, $entry);
 
         $redata=$this->getRedata($entry, $site[0]['qx'], $site[0]['qy'], $site[0]['sqx'], $site[0]['sqy'], $user);
 
@@ -508,7 +488,7 @@ class FsTreeSaveController extends Controller
 
     }
 
-
+//輸入完成
     public function finishnote(Request $request, $qx, $qy, $entry){
 
         $user = $request->session()->get('user', function () {
@@ -528,7 +508,7 @@ class FsTreeSaveController extends Controller
         for($i=0;$i<count($data);$i++){
             if ($data[$i]['csp']==''){
                 $uplist['csp']=$splist[$data[$i]['spcode']];
-                $uplist['update_id']=$user;
+                $uplist['updated_id']=$user;
                 $table::where('stemid', 'like', $data[$i]['stemid'])->update($uplist);
             }
         }
@@ -541,20 +521,7 @@ class FsTreeSaveController extends Controller
             $pass='0';
         }
         
-        // $data2 = $table::where('qx', 'like', $qx)->where('qy', 'like', $qy)->where('show', 'like', '1')->get();
 
-        // for($i=0;$i<count($data2);$i++){
-        //                 //全部檢查一次
-        //         $check = new FsTreeDataCheck;
-        //         $datacheck=$check->check($data2[$i]);
-
-        //         if ($datacheck['pass']=='0'){
-        //             $finishnote="(".$data2[$i]['sqx'].",".$data2[$i]['sqy'].") ".$datacheck['datasavenote'];
-        //             $pass='0';
-        //             break;
-        //         }
-        // }
-        //同tag是否status相同，csp相同，小區相同, show=1
                 
         if ($pass=='1'){
             $data = $table::select('tag')->where('qx', 'like', $qx)->where('qy', 'like', $qy)->where('show', 'like', '1')->groupBy('tag')->get()->toArray();
@@ -579,9 +546,10 @@ class FsTreeSaveController extends Controller
                         
                     }
 
-                    $com1s=array_unique($com1s);
-                    $com2s=array_unique($com2s);
-                    $com3s=array_unique($com3s);
+                    $com1s=array_values(array_unique($com1s));
+
+                    $com2s=array_values(array_unique($com2s));
+                    $com3s=array_values(array_unique($com3s));
                     if ($data1[0]['branch']!='0'){
                         $pass='0';
                         $finishnote=$data1[0]['tag'].' 缺少主幹資料，請新增主幹並勾選漏資料，主幹若死亡，status = -3。';
@@ -597,13 +565,15 @@ class FsTreeSaveController extends Controller
                         } else {  //重新篩選非R的資料
                             $data2=$table::where('tag', 'like', $data[$i]['tag'])->where('show', 'like', '1')->where('code', 'not like', '%R%')->get()->toArray();
                             if (count($data2)>1){
-                                foreach($data1 as $data0){
+                                foreach($data2 as $data0){
                                     $com1=$data0['qx'].$data0['qy'].$data0['sqx'].$data0['sqy'];
                                     $com1s2[]=$com1;
                                 }
                             }
-                            $com1s2=array_unique($com1s2);
+                            $com1s2=array_values(array_unique($com1s2));
                             if (count($com1s2)>1){
+                                // print_r($com1s2); 
+                                $pass='0';
                                 $finishnote='[('.$com1s2[0][3].', '.$com1s2[0][4].') ('.$com1s2[1][3].', '.$com1s2[1][4].') '.$data2[0]['tag'].'] 同編號應有相同小區';
                                 break;
                             }
@@ -641,9 +611,9 @@ class FsTreeSaveController extends Controller
             $finishnote="輸入完成";
             $thisentry='entry'.$entry;
             $uplist[$thisentry]='1';
-            $uplist['update_id'.$entry]=$user;
-            $uplist['update_date'.$entry]=date("Y-m-d H:i:s");
-            FsTreeEntrycom::where('qx', 'like', $qx)->where('qy', 'like', $qy)->update($uplist);            
+            $uplist[$thisentry.'Done']=$user;
+            $uplist[$thisentry.'Done_at']=date("Y-m-d H:i:s");
+            FsTreeComplete::where('qx', 'like', $qx)->where('qy', 'like', $qy)->update($uplist);            
         }
 
 
@@ -744,7 +714,9 @@ class FsTreeSaveController extends Controller
             ];
     }
 
-
+//後端資料處理時刪除資料
+//如果是分支，直接刪除
+//如果是主幹，軟刪除
     public function deleteCensusData(Request $request){
 
         $data_all = request()->all();
@@ -793,7 +765,7 @@ class FsTreeSaveController extends Controller
                     $fixlog['qx']=substr($stemid, 0, 2);
                     $fixlog['stemid']=$stemid;
                     $fixlog['descript']='刪除此編號資料';
-                    $fixlog['update_id']=$user;
+                    $fixlog['updated_id']=$user;
                     $fixlog['updated_at']=date("Y-m-d H:i:s");
                     FsTreeFixlog::insert($fixlog);
                     $thisstemid=$stemid;
@@ -803,7 +775,7 @@ class FsTreeSaveController extends Controller
         } else {
 
             $uplist['deleted_at']=date("Y-m-d H:i:s");
-            $uplist['update_id']=$user;
+            $uplist['updated_id']=$user;
 
             FsTreeBase::where('tag', 'like', $tag)->update($uplist);
                     $fixlog['id']='0';
@@ -813,7 +785,7 @@ class FsTreeSaveController extends Controller
                     $fixlog['qx']=substr($stemid, 0, 2);
                     $fixlog['stemid']=$tag;
                     $fixlog['descript']='軟刪除此編號base資料';
-                    $fixlog['update_id']=$user;
+                    $fixlog['updated_id']=$user;
                     $fixlog['updated_at']=date("Y-m-d H:i:s");
                     FsTreeFixlog::insert($fixlog);
                     // $fixall[]=$fixlog;
@@ -851,7 +823,7 @@ class FsTreeSaveController extends Controller
                     $fixlog['qx']=substr($stemid, 0, 2);
                     $fixlog['stemid']=$tag;
                     $fixlog['descript']='軟刪除此編號所有植株資料';
-                    $fixlog['update_id']=$user;
+                    $fixlog['updated_id']=$user;
                     $fixlog['updated_at']=date("Y-m-d H:i:s");
                     // $fixall[]=$fixlog;
                     FsTreeFixlog::insert($fixlog);
@@ -876,7 +848,10 @@ class FsTreeSaveController extends Controller
 
 
     }
-
+//後端處理時新增資料
+//可能是在調查完後進樣區查資料時發現的漏新增樹
+//直接新增在census5大表
+    
     public function addData(Request $request){
         $splist = $request->session()->get('splist');
         $data_all = request()->all();
@@ -947,7 +922,7 @@ class FsTreeSaveController extends Controller
                     $data[$i]['h2']='0';
                     $data[$i]['h1']='0';
                 }
-                $data[$i]['update_id']=$user;
+                $data[$i]['updated_id']=$user;
                 $data[$i]['updated_at']=date("Y-m-d H:i:s");
 
                 if ($data[$i]['note']==Null){$data[$i]['note']='';}
@@ -1015,7 +990,7 @@ class FsTreeSaveController extends Controller
                     $fixlog1['qx']=$data[$i]['qx'];
                     $fixlog1['stemid']=$data[$i]['stemid'];
                     $fixlog1['descript']=json_encode($inlist, JSON_UNESCAPED_UNICODE);
-                    $fixlog1['update_id']=$user;
+                    $fixlog1['updated_id']=$user;
                     $fixlog1['updated_at']=date("Y-m-d H:i:s");
                     FsTreeFixlog::insert($fixlog1);
 
@@ -1026,7 +1001,7 @@ class FsTreeSaveController extends Controller
                     $fixlog2['qx']=$data[$i]['qx'];
                     $fixlog2['stemid']=$data[$i]['stemid'];
                     $fixlog2['descript']=json_encode($inlist2, JSON_UNESCAPED_UNICODE);
-                    $fixlog2['update_id']=$user;
+                    $fixlog2['updated_id']=$user;
                     $fixlog2['updated_at']=date("Y-m-d H:i:s");
                     FsTreeFixlog::insert($fixlog2);
 

@@ -7,16 +7,17 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\App;
 use Illuminate\Support\Facades\Schema;
 
-use App\Models\FsSeedlingData;
+
 use App\Models\FsSeedlingSlrecord;
 use App\Models\FsSeedlingSlrecord1;
 use App\Models\FsSeedlingSlrecord2;
-use App\Models\FsSeedlingSlcov1;
-use App\Models\FsSeedlingSlcov2;
-use App\Models\FsSeedlingSlroll1;
-use App\Models\FsSeedlingSlroll2;
 
-class FsSeedlingAddButton
+
+//小苗輸入資料表用
+//判斷每筆資料是要產生特殊修改按鈕或是刪除鈕
+//刪除鈕->新苗//id比紀錄紙最大id多的即為新苗//包含為了萌櫱而新增的大樹
+
+class SeedlingAddButton
 {
 	public function addbutton($records, $entry){
 

@@ -15,15 +15,16 @@ use App\Models\FsTreeRecord1;
 use App\Models\FsTreeRecord2;
 use App\Models\FsTreeCensus4;
 use App\Models\FsTreeCensus3;
-use App\Models\FsTreeEntrycom;
 use App\Models\FsTreeCensus5;
 
 use App\Models\FsTreeBase;
 use App\Models\FsTreeBaseR;
 use App\Models\FsTreeFixlog;
 
-use App\Jobs\FsTreeAddButton;
+
 use App\Jobs\FsTreeCensus5Progress;
+
+//樹位置圖輸入
 
 class TreeMap extends Component
 {
@@ -38,15 +39,35 @@ class TreeMap extends Component
     public $sqx;
     public $sqy;
     public $record;
-
+    public $datasavenote='';
     public $alternotelist=[];
     public $showdata;
+
+    public $finishMap=[];
 
     public function mount(){
 
         $ob_result = new FsTreeCensus5Progress;
         $result=$ob_result->showProgress();
 
+        $nomap=FsTreeBase::select(DB::raw('CONCAT(qx, "-", qy) AS qxqy'))->where('plotx', 'like', '0')->where('ploty', 'like', '0')->groupby('qxqy')->pluck('qxqy')->toArray();
+
+        for($i=0;$i<25;$i++){
+            for($j=0;$j<25;$j++){
+                if (in_array($i, $result['alternotelist'])){
+                    $q=$i.'-'.$j;
+                    if (in_array($q, $nomap)){
+                        $table["'".$i.'-'.$j."'"]='1';
+                    } else {
+                        $table["'".$i.'-'.$j."'"]='2';
+                    }
+                } else {
+                    $table["'".$i.'-'.$j."'"]='0';
+                }
+            }
+        }
+        $this->finishMap=$table;
+        $this->datasavenote='';
         // Extract only the directory names
         $this->alternotelist = $result['alternotelist'];
         // dd($this->directories);
@@ -54,6 +75,7 @@ class TreeMap extends Component
 
 
     public function submitForm(Request $request){
+        $this->datasavenote='';
         if ($this->qx!=''){
             $this->searchSite($request, $this->qx, $this->qy, 1, 1);
         }
@@ -61,6 +83,7 @@ class TreeMap extends Component
     }
 
     public function submitsqxForm(Request $request, $subqx, $subqy){
+        $this->datasavenote='';
 
         $this->searchSite($request, $this->qx, $this->qy, $subqx, $subqy);
 
@@ -71,6 +94,9 @@ class TreeMap extends Component
     public $dataR;
     public $datanote;
     public $filePath;
+    public $tag;
+    public $x;
+    public $y;
 
 //排序資料，把空白資料放前面
     public function customSort($a, $b) {
@@ -93,7 +119,7 @@ class TreeMap extends Component
         }
     }
 
-
+//選擇點圖樣區
     public function searchSite(Request $request, $qx, $qy, $subqx, $subqy){
             $R='N';
 
@@ -152,11 +178,11 @@ class TreeMap extends Component
         $this->x='';
         $this->y='';
         $this->showmap();
-
+        // $this->datasavenote='';
 
         $this->dispatchBrowserEvent('initTablesorter', ['tablePlot'=>$this->tablePlot, 'data' => $this->result, 'mapfile'=>$this->filePath[0]]);
         
-      //  dd($data);
+       // dd($result);
 
     }
 
@@ -164,7 +190,7 @@ class TreeMap extends Component
 
     
     public $error;
-
+//顯示地圖以及原始資料電子檔
     public function showmap(){
 
         $fileqx=str_pad($this->qx, 2, '0', STR_PAD_LEFT);
@@ -212,8 +238,8 @@ class TreeMap extends Component
 
     protected $listeners = ['updateCoordinates' => 'updateCoordinates'];
 
-    public $datasavenote='';
 
+//儲存點圖結果
     public function updateCoordinates(Request $request, $data)
     {
 
@@ -223,7 +249,7 @@ class TreeMap extends Component
         $qudy = $data['y'];
         $tag = $data['tag'];
         $rtype = $data['rtype'];
-
+// dd($rtype);
         if ($rtype=='R'){
             $stemdata=FsTreeBaseR::where('stemid', 'like', $tag)->get()->toArray();
             // if (count($stemdata)==0){
@@ -237,7 +263,12 @@ class TreeMap extends Component
         $plotx=$stemdata[0]['qx']*20+($stemdata[0]['subqx']-1)*10+$qudx;
         $ploty=$stemdata[0]['qy']*20+($stemdata[0]['subqy']-1)*10+$qudy;
 
-        $uplist=['qudx' =>$qudx, 'qudy' => $qudy, 'plotx'=>$plotx, 'ploty'=>$ploty, 'update_id' =>$this->user];
+        $sqx=intval(ceil(($qudx+($stemdata[0]['subqx']-1)*10)/5));
+        $sqy=intval(ceil(($qudy+($stemdata[0]['subqy']-1)*10)/5));
+        // dd($stemdata[0]['sqy']);
+
+
+        $uplist=['qudx' =>$qudx, 'qudy' => $qudy, 'plotx'=>$plotx, 'ploty'=>$ploty, 'updated_id' =>$this->user];
 
         $fixlog['type']='update';
         $fixlog['id']='0';
@@ -246,7 +277,7 @@ class TreeMap extends Component
         $fixlog['qx']=$stemdata[0]['qx'];
         $fixlog['stemid']=$tag;
         $fixlog['descript']=json_encode($uplist, JSON_UNESCAPED_UNICODE);
-        $fixlog['update_id']=$this->user;
+        $fixlog['updated_id']=$this->user;
         $fixlog['updated_at']=date("Y-m-d H:i:s");
 
         if ($rtype=='R'){
@@ -256,9 +287,15 @@ class TreeMap extends Component
             FsTreeBase::where('tag', 'like', $tag)->update($uplist);
             $fixlog['sheet']='base';
         }
-        FsTreeFixlog::insert($fixlog);
+        if($stemdata[0]['qudx']!='0' && $stemdata[0]['qudy']!='0'){
+            FsTreeFixlog::insert($fixlog);
+        }
+        $datasavenote='已更新資料';
+        if ($sqx!=$stemdata[0]['sqx'] || $sqy!=$stemdata[0]['sqy']){
+            $datasavenote.='。但('.$tag.')小區不符，請確認。';
+        }
 
-        $this->datasavenote='已更新資料';
+        $this->datasavenote=$datasavenote;
         $this->searchSite($request, $this->qx, $this->qy, $this->subqx, $this->subqy);
 
         // dd($uplist);

@@ -1,13 +1,13 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Http\Controllers\Fushan;
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\App;
 use Illuminate\Support\Facades\Schema;
 // use Illuminate\Support\Facades\Input;
-
+use App\Http\Controllers\Controller;
 
 use App\Models\FsBaseSpinfo;
 use App\Models\FsTreeRecord1;
@@ -15,7 +15,9 @@ use App\Models\FsTreeRecord2;
 use App\Models\FsTreeCensus4;
 use App\Models\FsTreeCensus3;
 
-class FsTreeController extends Controller
+
+//分配網址到各個頁面
+class TreeController extends Controller
 {
 
     public function tree(Request $request, $site){
@@ -57,11 +59,11 @@ class FsTreeController extends Controller
             //選擇輸入樣區時再把csp填入
         //刪除欄位
             DB::connection('mysql')->statement("ALTER TABLE `record1` DROP COLUMN `deleted_at`");
-            //status=0, status=-3&branch=0
+            //status=0, status=-3&branch=0   =>show=0
             FsTreeRecord1::where('branch','!=', '0')->where('status', 'like', '-3')->update(['show'=>'0']);
             FsTreeRecord1::where('status', 'like', '0')->update(['show'=>'0']);
 
-            //分支status=-1, -2 show=0
+            //分支status=-1, -2 => show=0
             FsTreeRecord1::where('status', 'like', '-1')->where('branch', '!=', '0')->update(['show'=>'0']);
             FsTreeRecord1::where('status', 'like', '-2')->where('branch', '!=', '0')->update(['show'=>'0']);
 
@@ -69,9 +71,9 @@ class FsTreeController extends Controller
             FsTreeRecord1::where('date', 'like', '0000-00-00')->update(['show'=>'0']);
 
             //選擇輸入樣區時再把census3=-1的show改為0
-
+            //前兩次調查已為 -1 的植株，show=0
             
-            FsTreeRecord1::query()->update(['dbh'=>'0', 'h2'=>'0', 'date'=>'0000-00-00', 'code'=>'', 'update_id' =>'', 'tocheck' =>'', 'tofix' =>'', 'confirm' =>'', 'alternote' => '']);
+            FsTreeRecord1::query()->update(['dbh'=>'0', 'h2'=>'0', 'date'=>'0000-00-00', 'code'=>'', 'updated_id' =>'', 'tocheck' =>'', 'tofix' =>'', 'confirm' =>'', 'alternote' => '']);
             FsTreeRecord1::where('status', 'like', '-9')->update(['status'=>'']);
 
             //產生record2

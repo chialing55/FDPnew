@@ -17,6 +17,8 @@ use App\Models\FsSeedlingSlcov2;
 use App\Models\FsSeedlingSlroll1;
 use App\Models\FsSeedlingSlroll2;
 
+//將資料匯入小苗大表
+
 class SeedlingImport extends Component
 {
     public $slmaxcensus;
@@ -87,7 +89,7 @@ class SeedlingImport extends Component
                 // dd($s_base[0]);
                 foreach ($s_base[0] as $key => $value){
                     // dd($key, $value);
-                    if ($key !='id' && $key !='updated_at' && $key !='update_id'){
+                    if ($key !='id' && $key !='updated_at' && $key !='updated_id'){
                         // dd($key, $value);
                         if ($value!=$slbase[$key]){
                             $updatelist[$key]=$value;
@@ -103,7 +105,7 @@ class SeedlingImport extends Component
                     $insertlist[$key]=$value;
                 }
                 $insertlist['id']='0';
-                $insertlist['update_id']=$this->user;
+                $insertlist['updated_id']=$this->user;
                 $insertlist['updated_at']=date("Y-m-d H:i:s");
                 $insert=FsSeedlingBase::insert($insertlist);
             }

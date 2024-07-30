@@ -15,11 +15,10 @@ use App\Models\FsTreeRecord1;
 use App\Models\FsTreeRecord2;
 use App\Models\FsTreeCensus4;
 use App\Models\FsTreeCensus3;
-use App\Models\FsTreeEntrycom;
 use App\Models\FsTreeCensus5;
 
 
-use App\Jobs\FsTreeAddButton;
+use App\Jobs\TreeAddButton;
 use App\Jobs\FsTreeCensus5Progress;
 
 class TreeShowentry extends Component
@@ -53,7 +52,7 @@ class TreeShowentry extends Component
 
 
 
-    
+//選擇要輸入資料的樣區    
 
     public function searchSite(Request $request, $qx, $qy, $sqx, $sqy){
         $this->entrynote='';
@@ -109,7 +108,8 @@ class TreeShowentry extends Component
                     if ($record['date']=='0000-00-00'){ //還未輸入
                         if ($record['status']=='-1'){
                         
-                        // 把census3=-1的show改為0 
+                        // 把census3=-1的show改為0
+                        // 前兩次調查已為 -1 的植株，show=0 
                             $census3=FsTreeCensus3::where('stemid', 'like', $record['stemid'])->get();
                             if ($census3[0]['status']=='-1'){
                                 $update['show']='0';
@@ -135,19 +135,6 @@ class TreeShowentry extends Component
 
             $records1=$table::where('qx', 'like', $qx)->where('qy', 'like', $qy)->where('sqx', 'like', $sqx)->where('sqy', 'like', $sqy)->where('show', 'like', '1')->orderBy('tag', 'asc')->orderBy('branch', 'asc')->get()->toArray();
 
-
-
-            // dd($records1);
-            // for($i=0;$i<count($records);$i++){
-            //     if ($records[$i]['alternote']!=''){
-            //         $alterdata=['qx'=>'', 'qy' => '', 'sqx'=>'', 'sqy' => '', 'tag'=>'', 'b'=>'', 'csp'=>'', 'pom'=>''];
-            //         $alterdata1 = json_decode($records[$i]['alternote'], true);
-            //         $mergedArray = array_merge($alterdata, $alterdata1);
-            //         $records[$i]['alterdata']=$mergedArray;
-            //     }
-            // }
-            // $result=$records;
-
             //新增樹為刪除按鍵，其他加入特殊修改按鍵
             if (count($records1)>0){
 
@@ -157,7 +144,7 @@ class TreeShowentry extends Component
                     }
                 }
 
-                $ob_redata = new FsTreeAddButton;
+                $ob_redata = new TreeAddButton;
                 $result=$ob_redata->addbutton($records1, $this->entry);
             } else {
                 $result='無';

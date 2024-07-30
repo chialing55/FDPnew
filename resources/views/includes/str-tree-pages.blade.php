@@ -1,3 +1,5 @@
+{{-- 選擇前後樣區 --}}
+
 @php
 
     $prevshow = (($sqx.$sqy) == $plot2list[0]) ? 'prevhidden' : 'prevshow';

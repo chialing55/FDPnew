@@ -11,7 +11,8 @@ use App\Models\FsSeedsDateinfo;
 use App\Models\FsSeedsFulldata;
 use App\Models\FsSeedsRecord1;
 use App\Models\FsSeedsSplist;
- 
+
+//種子資料檢查
 class FsSeedsCheck
 {
 	public function check($record, $spinfo, $type, $type2){

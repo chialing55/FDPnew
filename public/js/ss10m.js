@@ -3,6 +3,7 @@ var realemptytable;
 var realemptytable2;
 var plotType='ss10m';
 
+
 window.addEventListener('data', event => {
 
   covs=event.detail.covs;
@@ -14,33 +15,33 @@ window.addEventListener('data', event => {
   envi=event.detail.envi;
   csplist=event.detail.csplist;
   covcsplist=event.detail.covcsplist;
+  site=event.detail.site;
 
-  // console.log(emptytable);
+  // console.log(data);
 
     $(".save2").unbind();
     $('.finishnote').html();
-    sscovtable(covs, data, covcsplist);
-    ssaddcovtable(covs, data, emptytable2, covcsplist); 
+    sscovtable(covs, site, covcsplist);
+    ssaddcovtable(covs, site, emptytable2, covcsplist); 
     if (covs.length!=0){
       
       $('.covtable').show();
       $('.nocovdata').hide();
  
     } else {
-      // $('.addcovtableout').show();
-      // ssaddcovtable(covs, data, emptytable2);
+
       $('.covtable').hide();
       $('.nocovdata').show();
     }
-    
+    console.log(data);
     //一開始,thispage=1
-    ssenvitable(envi, data[0].sqx, data[0].sqy);
+    ssenvitable(envi, site);
 
-    if (data[0].tag!='無'){
-    ssdatatable(data, 1, 20);
+    if (data!='無'){
+    ssdatatable(data, 1, 20, site);
 
-    ssrecruittable(data, emptytable, csplist);
-  }
+    }
+    ssrecruittable(data, emptytable, csplist, site);
 });
 
   const aspectValidator = (value, callback) => {
@@ -78,11 +79,12 @@ function cellfunction(tableType, container, row, col, prop){
       }
 }
 
-function ssenvitable(envi, sqx, sqy){
+function ssenvitable(envi, site){
 
-  var container = $(`#envitable${envi[0].plot}${sqx}${sqy}`);
-  var saveButtonName=`envisave${envi[0].plot}${sqx}${sqy}`;
+  var container = $(`#envitable${site}`);
+  var saveButtonName=`envisave${site}`;
   var tabletype='envi';
+  console.log(envi);
 
   var columns = [
       {data: "plot", readOnly:true},
@@ -111,16 +113,16 @@ function ssenvitable(envi, sqx, sqy){
 
   var hiddenColumns =[];
 
-  return createHandsontable(container, columns, envi, saveButtonName, "/ssPlotsaveenvi", tabletype, colWidths, hiddenColumns, colHeaders, 1 );
+  return createHandsontable(container, columns, envi, saveButtonName, `${urlbase}/saveenvi`, tabletype, colWidths, hiddenColumns, colHeaders, 1 );
 
 }
 
-function ssdatatable(data, thispage, pps){
+function ssdatatable(data, thispage, pps, site){
 
   $('.envisavenote').html('');
   $('.finishnote').html();
   $('.totalnum').html(`共有 ${data.length} 筆資料。`);
-  var site=`${data[0].plot}${data[0].sqx}${data[0].sqy}`;
+ 
   var container = $(`#datatable${site}`);
   $(`button[name=datasave${site}]`).off();
   var saveButtonName=`datasave${site}`;
@@ -156,7 +158,7 @@ function ssdatatable(data, thispage, pps){
       columns: [16],
     };
 
-  return createHandsontable(container, columns, data2, saveButtonName, "/ssPlotsavedata", tabletype, colWidths, hiddenColumns, colHeaders, thispage );
+  return createHandsontable(container, columns, data2, saveButtonName, `${urlbase}/savedata`, tabletype, colWidths, hiddenColumns, colHeaders, thispage );
 }
 
   const tagValidator = (value, callback) => {
@@ -167,10 +169,10 @@ function ssdatatable(data, thispage, pps){
   }
   };
 
-function ssrecruittable(data, emptytable, csplist){
+function ssrecruittable(data, emptytable, csplist, site){
 // console.log(csplist);
 // console.log(emptytable);
-   var site=`${data[0].plot}${data[0].sqx}${data[0].sqy}`;
+   
    var thispage=Math.ceil(data.length/20);  //指定新增後前往最後一頁
  
 $(`button[name=recruitsave${site}]`).off();
@@ -200,7 +202,7 @@ $(`button[name=recruitsave${site}]`).off();
   var colHeaders=["Date","plot","5x","5y", "tag", "b", "csp", "code","dbh","ill","leave","pom","note","漏資料"];
 
   var hiddenColumns =[];
-  return createHandsontable(container, columns, emptytable, saveButtonName, "/ssPlotsaverecruit", tabletype, colWidths, hiddenColumns, colHeaders, thispage );
+  return createHandsontable(container, columns, emptytable, saveButtonName, `${urlbase}/saverecruit`, tabletype, colWidths, hiddenColumns, colHeaders, thispage );
 
 }
 
@@ -217,7 +219,7 @@ function alternotetable(alterdata, stemid, entry, thispage){
   var saveButtonName='alternotesave';
   var tableType='alternote';
 
-  var plotList=['B-F-01', 'B-F-04', 'B-F-06', 'B-F-13', 'B-F-14', 'B-F-19', 'G-F-01', 'G-F-02', 'G-F-03', 'G-F-06', 'Q-F-03', 'S-F-01', 'S-F-02', 'S-F-04', 'S-F-06', 'S-F-07', 'S-F-09', 'S-F-11', 'S-F-14', 'S-F-15', 'S-F-16', 'S-F-17', 'S-F-21', 'S-F-38'];
+  var plotList=['A1', 'A2', 'A3', 'B-F-01', 'B-F-04', 'B-F-06', 'B-F-13', 'B-F-14', 'B-F-19', 'G-F-01', 'G-F-02', 'G-F-03', 'G-F-06', 'Q-F-03', 'S-F-01', 'S-F-02', 'S-F-04', 'S-F-06', 'S-F-07', 'S-F-09', 'S-F-11', 'S-F-14', 'S-F-15', 'S-F-16', 'S-F-17', 'S-F-21', 'S-F-38'];
 
   var columns = [
       {data: "plot", type: 'autocomplete', source: plotList, strict: true, visibleRows: 10, allowInvalid: false,},
@@ -239,14 +241,14 @@ function alternotetable(alterdata, stemid, entry, thispage){
   var hiddenColumns ={
       columns: [9],
     };
-  return createHandsontable(container, columns, alterdata, saveButtonName, "/ssPlotsavealternote", tableType, colWidths, hiddenColumns, colHeaders, thispage );  
+  return createHandsontable(container, columns, alterdata, saveButtonName, `${urlbase}/savealternote`, tableType, colWidths, hiddenColumns, colHeaders, thispage );  
 
 }
 
 
-function ssaddcovtable(covs, data, emptytable2, covcsplist){
+function ssaddcovtable(covs, site, emptytable2, covcsplist){
 
-  var site=`${data[0].plot}${data[0].sqx}${data[0].sqy}`;
+  
     $(`button[name=addcovsave${site}]`).off();  
 // console.log(emptytable2);
   var container = $(`#addcovtable${site}`);
@@ -275,13 +277,13 @@ function ssaddcovtable(covs, data, emptytable2, covcsplist){
   var hiddenColumns ={
       columns: [9],
     };
-  return createHandsontable(container, columns, emptytable2, saveButtonName, "/ss10msaveaddcov", tableType, colWidths, hiddenColumns, colHeaders, thispage );  
+  return createHandsontable(container, columns, emptytable2, saveButtonName, `${urlbase}/10msaveaddcov`, tableType, colWidths, hiddenColumns, colHeaders, thispage );  
 
 }
 
 
-function sscovtable(covs, data, covcsplist){
-  var site=`${data[0].plot}${data[0].sqx}${data[0].sqy}`;
+function sscovtable(covs, site, covcsplist){
+
 $(`button[name=covsave${site}]`).off();
   var container = $(`#covtable${site}`);
 
@@ -310,7 +312,7 @@ $(`button[name=covsave${site}]`).off();
   var hiddenColumns ={
       columns: [10],
     };
-  return createHandsontable(container, columns, covs, saveButtonName, "/ss10msavecov", tableType, colWidths, hiddenColumns, colHeaders, thispage );  
+  return createHandsontable(container, columns, covs, saveButtonName, `${urlbase}/10msavecov`, tableType, colWidths, hiddenColumns, colHeaders, thispage );  
 
 }
 
@@ -322,7 +324,7 @@ $(`button[name=covsave${site}]`).off();
     {
       $('.covsavenote').html('');
 
-      var saveUrl=`/ss10mdeletecov/${id}/${entry}`;
+      var saveUrl=`${urlbase}/10mdeletecov/${id}/${entry}`;
       var ajaxData={};
       var ajaxType='get';
 
@@ -342,8 +344,9 @@ $(`button[name=covsave${site}]`).off();
 
 function sscovtableupdate(covs){
   // $('.addcovsavenote').html('');
-  var site=`${data[0].plot}${data[0].sqx}${data[0].sqy}`;
+
   // console.log(site);
+  console.log(covs);
   if (covs.length>0){
       $('.covtable').show();
       $('.nocovdata').hide();

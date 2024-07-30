@@ -1,3 +1,4 @@
+{{-- 資料輸入主要的表格部分 /每木、小苗--}}
 <div style='display: inline-flex; flex-direction: column; margin-top: 20px;'>
     <div class='pages' style='margin-bottom: 5px'>
         <div class='totalnum'></div>

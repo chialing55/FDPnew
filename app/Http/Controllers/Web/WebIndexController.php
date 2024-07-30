@@ -1,14 +1,17 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Http\Controllers\Web;
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\App;
 // use Illuminate\Support\Facades\Input;
-
+use App\Http\Controllers\Controller;
 // use App\Models\FsBaseLogin;
 use App\Http\Controllers\UpdateController;
+
+//依據網址導向各個頁面
+
 
 class WebIndexController extends Controller
 {

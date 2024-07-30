@@ -1,10 +1,11 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Http\Controllers\Fushan;
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\App;
+use App\Http\Controllers\Controller;
 
 use Dompdf\Dompdf;
 use setasign\Fpdi\Fpdi;
@@ -12,7 +13,10 @@ use PDF;
 use App\Models\FsSeedlingSlrecord;
 use App\Models\FsSeedlingData;
 
-class FsSeedlingPDFController extends Controller
+//產生pdf紀錄紙的內容
+//小苗比對之後，產生比對結果的資料表
+
+class SeedlingPDFController extends Controller
 {
     public function record($start, $end){
         // echo '1';
