@@ -63,6 +63,7 @@ window.addEventListener('data', event => {
   };
 
 function cellfunction(tableType, container, row, col, prop){
+ var cellProperties = {}; 
       if (tableType=='data'){
           var cellProperties = {};
           if (container.handsontable('getData')[row][7]=='-9'){
@@ -76,6 +77,37 @@ function cellfunction(tableType, container, row, col, prop){
             cellProperties.className = 'fs08'; 
           }
          return cellProperties;
+      } else if (tableType=='updateData1'){
+
+          if (container.handsontable('getData')[row][4]!='0' & container.handsontable('getData')[row][6]!='y'){
+            cellProperties.readOnly = true; 
+              if (col==4 || col==3){
+                cellProperties.readOnly = false; 
+              }
+          } else if (container.handsontable('getData')[row][6]=='y'){
+            cellProperties.readOnly = false; 
+              if (col==5){
+                cellProperties.readOnly = true; 
+              }
+          }
+          return cellProperties;
+      } else if (tableType=='updateData2'){
+        if (container.handsontable('getData')[row][1]!=''){ 
+          if (container.handsontable('getData')[row][0]=='2014'){
+            cellProperties.readOnly = true; 
+              if (col==4 || col ==7 || col==8 ){
+                cellProperties.readOnly = false; 
+              }
+          }
+
+          if (col == 8 || col==10){
+            cellProperties.className = 'fs08'; 
+          }
+        } else {
+          cellProperties.readOnly = true; 
+        }
+         return cellProperties;
+        
       }
 }
 
@@ -85,7 +117,7 @@ function ssenvitable(envi, site){
   var saveButtonName=`envisave${site}`;
   var tabletype='envi';
   console.log(envi);
-
+ 
   var columns = [
       {data: "plot", readOnly:true},
       {data: "slope1", type: 'numeric', allowInvalid: false, validator: slopeValidator, placeholder: "(1,1)"},
@@ -362,3 +394,162 @@ function sscovtableupdate(covs){
   handsontable.updateData(covs);
 }
 
+
+
+//進行個別修改 //資料處理，後端資料更正
+
+window.addEventListener('stemiddata', event => {
+
+  stemid=event.detail.stemid;
+  stemdata=event.detail.stemdata;
+  csplist=event.detail.csplist;
+  from=event.detail.from;
+  console.log(stemid);
+    ss10mupdatatable(stemid, stemdata, csplist, from);
+
+});
+
+Livewire.on('updateStemidlist', function(data) {
+    // 更新 Livewire 组件中的数组
+    Livewire.emit('updateStemidList', data);
+});
+
+//後端資料更正
+
+function ss10mupdatatable(stemid, stemdata, csplist, from){
+
+//basetable
+  stemid = stemid.replace('.', ''); // Remove the period
+console.log(stemid);
+  var container1 = $(`#basetable${stemid}`);
+  var saveButtonName=`basetable${stemid}`;
+  var tabletype1='updateData1';
+
+
+  var columns1 = [
+      {data: "plot"},
+      {data: "sqx", type: 'numeric'},
+      {data: "sqy", type: 'numeric'},
+      {data: "tag",},
+      {data: "branch", type: 'numeric'},
+      {data: "csp", type: 'autocomplete', source: csplist, strict: true, visibleRows: 10, allowInvalid: false,},
+      {data: 'r'}
+
+    ];
+
+  var colWidths1=[80,25,25,80, 40, 120];
+  var colHeaders1=["plot","5x","5y", "tag", "b", "csp"];
+
+  var hiddenColumns1 ={
+    columns: [6],
+  };
+
+  var handsontable1=createHandsontable(container1, columns1, stemdata[0], saveButtonName, "/ss10mupdate", tabletype1, colWidths1, hiddenColumns1, colHeaders1, 1 );
+
+  var stemdata2=stemdata.slice(1, 6);
+
+  var container2 = $(`#datatable${stemid}`);
+  var saveButtonName=`basetable${stemid}`;
+  var tabletype2='updateData2';
+
+
+  var columns2 = [
+      {data: "census", readOnly:true},
+      {data: "date", dateFormat: 'YYYY-MM-DD', type: 'date', allowInvalid: false},
+      {data: "status", type: 'dropdown', source: ['', '0', '-1', '-2', '-3'], allowInvalid: false},
+      {data: "code"},
+      {data: "dbh", type: 'numeric', allowInvalid: false },
+      {data: "ill", type: 'numeric', allowInvalid: false, validator: numericValidator5},
+      {data: "leave", type: 'numeric', allowInvalid: false, validator: numericValidator100 },
+      {data: "pom"},
+      {data: "note"},
+      {data: "confirm", type: 'checkbox', checkedTemplate: '1', uncheckedTemplate: ''},
+      {data: "alternote"},
+      {data: "stemid"}
+
+    ];
+
+  var colWidths2=[80,120, 50,50,50,50,50,50,170,50, 170];
+  var colHeaders2=["census","date",'status', "code","dbh","ill", "leave", "POM","note","縮水","特殊修改"];
+
+  var hiddenColumns2 ={
+    columns: [11],
+  }
+
+
+  var handsontable2=createHandsontable(container2, columns2, stemdata2, saveButtonName, "/ss10mupdate", tabletype2, colWidths2, hiddenColumns2, colHeaders2, 1 );
+
+
+  var handsontable1 = container1.data('handsontable');
+  var handsontable2 = container2.data('handsontable');
+
+  container2.parent().find(`button[name=datasave${stemid}]`).click(function () {
+    $('.datasavenote').html('');
+
+      var data1 = handsontable1.getSourceData();
+      var data2 = handsontable2.getSourceData();
+
+      var saveUrl=`${urlbase}/update`;
+      var ajaxData={
+          data1: data1,
+          data2: data2,
+          from: from,
+          user: user,
+          plotType: plotType,
+      };
+      var ajaxType='POST';
+
+      function handleSuccess(res) {
+            if (res.datasavenote !=''){
+              $('.datasavenote').html(res.datasavenote);
+            } 
+            if (res.thisstemid !=''){
+              Livewire.emit('updateStemidlist', {thisstemid: res.thisstemid, from: res.from});
+            }
+      }
+      makeAjaxRequest(
+        saveUrl, ajaxData, ajaxType,
+        handleSuccess,
+        function () {}
+      );
+  });
+}
+
+function deleteCensusDataButtonClick(button){
+  const stemid = $(button).attr('stemid');
+  const from = $(button).attr('from');
+  deleteCensusData(stemid, from); 
+}
+
+
+function deleteCensusData(stemid, from){
+    if(confirm('確定刪除 '+stemid+' 的所有資料??')) 
+    {
+      $('.altersavenote').html('');
+
+      var saveUrl=`${urlbase}/deletecensusdata`;
+      var ajaxData={
+            stemid: stemid,
+            from: from,
+            // stemid: stemid,
+            user: user,
+            plotType: plotType
+          };
+      var ajaxType='post';
+
+      function handleSuccess(res) {
+            if (res.datasavenote !=''){
+              $('.datasavenote').html(res.datasavenote);
+            } 
+            if (res.thisstemid !=''){
+              Livewire.emit('updateStemidlist', {thisstemid: res.thisstemid, from: res.from});
+            }
+      }
+      makeAjaxRequest(
+        saveUrl, ajaxData, ajaxType,
+        handleSuccess,
+        function () {}
+      );
+    }
+
+}

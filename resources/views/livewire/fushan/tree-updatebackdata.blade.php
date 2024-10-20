@@ -129,13 +129,18 @@ if($type==2){$addclass2='thistype'; $addclass1='';}
 
         <span class='datasavenote savenote' style='margin: 0 30px'>{{$dataNote}}</span>
         </div>
-        
+
         <div id='basetable{{$stemid2}}' style='margin-top: 20px;' class='fs100' > </div>
         <div id='datatable{{$stemid2}}' style='margin-top: 20px;' class='fs100' ></div>
 
 
         <p style='margin-top:5px; text-align: center;'><button name='datasave{{$stemid2}}' class='datasavebutton'>儲存</button></p>
-
+            <div style="margin-top: 20px;">
+                <p>
+                <span><a href='/{{$filePath[0]}}' target=_blank>舊樹紙本資料</a></span>
+                <span style='margin-left:30px'><a href='/{{$filePath[1]}}' target=_blank>新樹紙本資料</a></span>
+                </p>
+            </div>
         <div id='note{{$stemid2}}' class='simplenote' style='max-width: 800px; padding: 20px; margin-top: 20px;'>
             <p><b>如需刪除此筆資料，請注意</b>:
                 <ol>

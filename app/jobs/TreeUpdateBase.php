@@ -79,7 +79,7 @@ class TreeUpdateBase
                         $baseWay='0';  //換號
                     }
                 } else{  //變成別人的分支  //先確定是否有主幹
-                    $baseWay='2';  //不更動base資料
+                    $baseWay='2';  //將該編號軟刪除
                     $check2=$tablebase::where('tag', 'like', $base['tag'])->count();
                     if ($check2==0){
                         $datasavenote='沒有主幹，不予更新。';
@@ -93,7 +93,7 @@ class TreeUpdateBase
         $thisstemid='';
 
         if ($pass=='1'){
-        
+ 
        //沒有重號再改$thisstemid
             if ($from=='alternote' && $newstemid!=$ostemid){
                 $thisstemid=$newstemid;
@@ -171,20 +171,14 @@ class TreeUpdateBase
                 }
                 $fixlog['type']='insert';
                 $fixlog['stemid']=$base['tag'];
-            } 
-            // else if ($baseWay=='2'){  //不更新號碼部分
-            //         $exarray=['updated_id', 'updated_at', 'tag', 'deleted_at'];
-            //         foreach($obase as $key=>$value){
-            //             if (!in_array($key, $exarray)){
-            //                 if ($value != $base[$key]){
-            //                     $base_uplist[$key]=$base[$key];
-            //                     $updatedes[$key]=$value."=>".$base[$key];
-            //                 }
-            //             }
-            //         }
-            //         $fixlog['type']='update';
-
-            // }
+            } else if ($baseWay=='2'){  //主幹變別人分支，該號碼需被軟刪除  //但分支變成別人的分支不用
+                if ($obranch=='0'){
+                    $base_uplist['deleted_at']=date("Y-m-d H:i:s");
+                    $updatedes['deleted_at']=$base_uplist['deleted_at'];
+                    $fixlog['type']='delete';
+                    $fixlog['stemid']=$otag;
+                }
+            }
 
             if ($base_uplist!=[]){
                 $base_uplist['updated_id']=$user;
@@ -202,7 +196,11 @@ class TreeUpdateBase
                     $base_uplist['deleted_at']='';
                     $tablebase::insert($base_uplist);
                     $fixlog['sheet']=$baseSheet;
-                } 
+                } else if ($baseWay=='2'){ 
+                    $base_uplist['updated_at']=date("Y-m-d H:i:s");
+                    $tablebase::where('tag', 'like', $otag)->update($base_uplist);
+                    $fixlog['sheet']=$baseSheet;
+                }
 
 
                 $fixlog['id']='0';

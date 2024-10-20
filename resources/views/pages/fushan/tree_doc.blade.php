@@ -64,7 +64,7 @@ $(function() {
               <li lass='text_note_li '><a href='https://bit.ly/3YcMFY4' target="_blank">每木調查除錯進度統整表</a></li>
               <li lass='text_note_li '><a href='https://bit.ly/3QnjkYM' target="_blank">標本鑑定清單</a></li>
               <li lass='text_note_li '><a href='https://forms.gle/FKDWx2rmLRyE8ED1A' target="_blank">輸入系統錯誤表單</a></li>
-
+              <li><a href="https://docs.google.com/spreadsheets/d/1PILnqnKb08RxlBilYkM8SKXneXa6YLj4SyV4Cp6P300/edit?usp=sharing">錯誤率資料表單</a></li>
               {{-- 連結google表單 --}}
             </ol>
     </div>
@@ -89,6 +89,7 @@ $(function() {
                         <li><a href='https://docs.google.com/document/d/1z1voCrgPnnkPb9qvoaPk6taaYdtHiriH/edit?usp=sharing&ouid=104328473015955473420&rtpof=true&sd=true' target="_blank">福山每木調查資料掃描辦法</a></li>
                     </ul>
                 </li>
+                
 
             </ol>
     </div>
@@ -96,9 +97,9 @@ $(function() {
         <h2>輸入資料檢查流程</h2>
         <hr>
             <ol>
-                <li><a href='https://hospitable-nickel-b27.notion.site/bf51d6d898b1447084281d6ab59eac65?pvs=4' target="_blank">舊樹輸入檢查流程</a></li>
-                <li><a href='https://hospitable-nickel-b27.notion.site/ccf4cae425b64b8cba75da865baaf631?pvs=4' target="_blank">新樹輸入檢查流程</a></li>
-                <li><a href='https://hospitable-nickel-b27.notion.site/2917288ef57e403bb4a3299725b40365?pvs=4' target="_blank">輸入完成檢查流程</a></li>
+                <li><a href='https://nsysu-plantecology.notion.site/9bf6aa3ad5914bfca473f7442043e495' target="_blank">舊樹輸入檢查流程</a></li>
+                <li><a href='https://nsysu-plantecology.notion.site/0f0f5f2cfb71478ba08583954cb6b968' target="_blank">新樹輸入檢查流程</a></li>
+                <li><a href='https://nsysu-plantecology.notion.site/52760b64db264444afb684ef47ab4d50' target="_blank">輸入完成檢查流程</a></li>
             </ol>
     </div>
 </div>

@@ -59,6 +59,7 @@ class TreeUpdateCensusData
         $from=$data_all['from'];
 
         $base=$data_all['data1'][0];  
+        $otag = explode('.', $ostemid)[0] ?? $ostemid;;
 
                 $updatedes=[];
                 $census_uplist=[];
@@ -113,22 +114,20 @@ class TreeUpdateCensusData
                         $codetemp=[$odata['code'], $ndata['code']];
                         if (stripos($odata['code'], 'R') !== false && stripos($ndata['code'], 'R') == false){
                             //原有R，後來刪除
-                            $tablebaser::where('stemid', 'like', $ostemid)->update(['deleted_at' => date("Y-m-d H:i:s")]);
+                            $tablebaser::where('stemid', 'like', $ostemid)->delete();
 
                             $fixlog['id']='0';
                             $fixlog['from']=$from;
-                            $fixlog['type']='update';
+                            $fixlog['type']='delete';
                             $fixlog['sheet']=$baseRSheet;
                             $fixlog['qx']=$base['qx'];
                             $fixlog['stemid']=$ostemid;
-                            $fixlog['descript']='軟刪除此編號base_r資料';
+                            $fixlog['descript']='刪除此編號base_r資料';
                             $fixlog['updated_id']=$user;
                             $fixlog['updated_at']=date("Y-m-d H:i:s");
                             $tablefixlog::insert($fixlog);
 
-                        }
-
-                        else if (stripos($odata['code'], 'R') == false && stripos($ndata['code'], 'R') !== false){
+                        } else if (stripos($odata['code'], 'R') == false && stripos($ndata['code'], 'R') !== false){
                         //     //原沒有R，後來新增
 
                             $baserO=$tablebaser::where('stemid', 'like', $ostemid)->get()->toArray();
@@ -146,20 +145,25 @@ class TreeUpdateCensusData
                                 $tablefixlog::insert($fixlog);
                             } else {
 
-                                $baseRdata=$tablebase::where('tag', 'like', $otag)->get()->toArray();
-
+                                $baseRdata=$tablebase::where('tag', 'like', $otag)->first()->toArray();
+                                $baser_insert=[];
                                 $exarray=['updated_id', 'updated_at', 'deleted_at'];
+
                                 foreach($baseRdata as $key=>$value){
                                     if (!in_array($key, $exarray)){
-                                        $baser_insert[$key]=$baseRdata[$key];
+                                        $baser_insert[$key]=$value;
                                     }
                                 }
-                                $baser_insert[0]['stemid']=$ostemid;
-                                $baser_insert[0]['updated_id']=$user;
-                                $baser_insert[0]['updated_at']=date("Y-m-d H:i:s");
-                                $baser_insert[0]['deleted_at']='';
+                                $baser_insert['qudx']=0;
+                                $baser_insert['qudy']=0;
+                                $baser_insert['plotx']=0;
+                                $baser_insert['ploty']=0;
+                                $baser_insert['stemid']=$ostemid;
+                                $baser_insert['updated_id']=$user;
+                                $baser_insert['updated_at']=date("Y-m-d H:i:s");
+                                $baser_insert['deleted_at']='';
 
-                                $tablebaser::insert($baser_insert[0]);
+                                $tablebaser::insert($baser_insert);
 
                                 $fixlog['id']='0';
                                 $fixlog['from']=$from;
@@ -184,15 +188,15 @@ class TreeUpdateCensusData
                             $codetemp=[$odata['code'], $ndata['code']];
                             if (stripos($odata['code'], 'F') !== false && stripos($ndata['code'], 'F') == false){
                                 //原有F，後來刪除
-                                $tablebaser::where('stemid', 'like', $ostemid)->update(['deleted_at' => date("Y-m-d H:i:s")]);
+                                $tablebaser::where('stemid', 'like', $ostemid)->delete();
 
                                 $fixlog['id']='0';
                                 $fixlog['from']=$from;
-                                $fixlog['type']='update';
+                                $fixlog['type']='delete';
                                 $fixlog['sheet']=$baseRSheet;
                                 $fixlog['qx']=$base['qx'];
                                 $fixlog['stemid']=$ostemid;
-                                $fixlog['descript']='軟刪除此編號base_r資料';
+                                $fixlog['descript']='刪除此編號base_r資料';
                                 $fixlog['updated_id']=$user;
                                 $fixlog['updated_at']=date("Y-m-d H:i:s");
                                 $tablefixlog::insert($fixlog);
@@ -217,20 +221,26 @@ class TreeUpdateCensusData
                                     $tablefixlog::insert($fixlog);
                                 } else {
 
-                                    $baseRdata=$tablebase::where('tag', 'like', $otag)->get()->toArray();
-
+ 
+                                    $baseRdata=$tablebase::where('tag', 'like', $otag)->first()->toArray();
+                                    $baser_insert=[];
                                     $exarray=['updated_id', 'updated_at', 'deleted_at'];
+
                                     foreach($baseRdata as $key=>$value){
                                         if (!in_array($key, $exarray)){
-                                            $baser_insert[$key]=$baseRdata[$key];
+                                            $baser_insert[$key]=$value;
                                         }
                                     }
-                                    $baser_insert[0]['stemid']=$ostemid;
-                                    $baser_insert[0]['updated_id']=$user;
-                                    $baser_insert[0]['updated_at']=date("Y-m-d H:i:s");
-                                    $baser_insert[0]['deleted_at']='';
+                                    $baser_insert['qudx']=0;
+                                    $baser_insert['qudy']=0;
+                                    $baser_insert['plotx']=0;
+                                    $baser_insert['ploty']=0;                                    
+                                    $baser_insert['stemid']=$ostemid;
+                                    $baser_insert['updated_id']=$user;
+                                    $baser_insert['updated_at']=date("Y-m-d H:i:s");
+                                    $baser_insert['deleted_at']='';
 
-                                    $tablebaser::insert($baser_insert[0]);
+                                    $tablebaser::insert($baser_insert);
 
                                     $fixlog['id']='0';
                                     $fixlog['from']=$from;

@@ -284,7 +284,7 @@ function recruittable(data, emptytable, csplist){
       {data: "cotno", type: 'numeric', allowInvalid: false},
       {data: "leafno", type: 'numeric', allowInvalid: false},
       
-      {data: "recruit", type: 'dropdown', source: ['R', 'O', 'T', 'S'], allowInvalid: false, visibleRows: 10},
+      {data: "recruit", type: 'dropdown', source: ['R', 'O', 'T'], allowInvalid: false, visibleRows: 10},
       {data: "sprout", type: 'dropdown', source: ['FALSE', 'TRUE'], allowInvalid: false, visibleRows: 10},
       {data: "x", type: 'numeric', allowInvalid: false},
       {data: "y", type: 'numeric', allowInvalid: false},

@@ -32,7 +32,6 @@ Fancybox.bind('[data-fancybox="gallery"]', {
 
 
 
-
 // 使用 //上方表單
 handleHoverEvents('.list4', '.list4inner');
 handleHoverEvents('.list6', '.list6inner');
@@ -40,6 +39,20 @@ handleHoverEvents('.list6', '.list6inner');
 var plotType='fsseeds';
 var thispage=1;
 var entry=1;
+
+$(document).on('click', 'button[name=creattable]', function () {
+  $('#seedstableout').hide();
+  $('#seedstableout_empty').show();
+  $('.seedssavenote').html('');
+});
+
+$(document).on('click', 'button[name=show_seedstable]', function () {
+
+    $('#seedstableout').show();
+    $('#seedstableout_empty').hide();
+    seedstable(fdata, 1, 29, emptytable);
+  });
+
 
 window.addEventListener('data', event => {
 
@@ -195,17 +208,6 @@ function emptyseedstable(emptytable){
 }
 
 
-  $('button[name=creattable]').click(function () {
-    $('#seedstableout').hide();
-    $('#seedstableout_empty').show();
-    $('.seedssavenote').html('');
-
-  });
-  $('button[name=show_seedstable]').click(function () {
-    $('#seedstableout').show();
-    $('#seedstableout_empty').hide();
-    seedstable(fdata, 1, 29, emptytable);
-  });
 
 
 function seedstable(data, thispage, pps, emptytable){
@@ -220,7 +222,7 @@ function seedstable(data, thispage, pps, emptytable){
   var container = $(`#datatable${site}`);
 
   var saveButtonName=`datasave${site}`;
-  var tabletype='data';
+  var tableType='data';
   ppsall=pps;
   var data2 = processDataTable(data, thispage, pps, site, plotType);
 
@@ -250,7 +252,7 @@ function seedstable(data, thispage, pps, emptytable){
       columns: [0, 1],
     };
 
-  var handsontable = createHandsontable(container, columns, data2, saveButtonName, `${urlbase}/savedata/record`, tabletype, colWidths, hiddenColumns, colHeaders, thispage );
+  var handsontable = createHandsontable(container, columns, data2, saveButtonName, `${urlbase}/savedata/record`, tableType, colWidths, hiddenColumns, colHeaders, thispage );
 
 
 
@@ -262,7 +264,7 @@ function seedstable(data, thispage, pps, emptytable){
 
 		$('.seedssavenote').html('');
 
-		saveUrl2=`${urlbase}/savedata1/fulldata`;
+		saveUrl2=`${urlbase}/savedata/fulldata`;
     var ajaxData={
           data: handsontable.getSourceData(),
           entry: entry,
@@ -361,4 +363,13 @@ function finish(){
         handleSuccess,
         function () {}
       );
+}
+
+
+var userlist=['chialing'];
+
+if (userlist.includes(user)) {
+  console.log(user);
+  $(".editunkDesShow").show();
+  $(".editDesShow").show();
 }

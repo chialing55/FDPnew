@@ -75,7 +75,7 @@ class TreeDataviewer extends Component
         $filesqx=$fileqx.$fileqy;
         $temp=['old', 'new', 'map', 'map', 'map', 'map'];
 
-        for($i=1;$i<5;$i++){
+        for($i=1;$i<6;$i++){
             $filecensus='fs_census'.$i.'_scanfile';
 
             for($j=0;$j<count($temp);$j++){
@@ -147,6 +147,7 @@ class TreeDataviewer extends Component
     public $result;
     public $basedata;
     public $resultnote='';
+    public $deleteNote='';
 
     public function submitStemidForm(Request $request)
     {
@@ -188,6 +189,7 @@ class TreeDataviewer extends Component
             //舊樹資料
 
             $this->basedata=['stemid'=> $stemid, 'qx'=>$base[0]['qx'], 'qy'=>$base[0]['qy'], 'sqx'=>$base[0]['sqx'], 'sqy'=>$base[0]['sqy'], 'csp'=>$splist[$base[0]['spcode']], 'tag'=>$tag, 'b' => $branch, 'bs'=>max($maxb1, $maxb2)];
+            $this->deleteNote=$base[0]['deleted_at'];
 
 
             $censusTables = ['census1', 'census2', 'census3', 'census4', 'census5'];
@@ -211,6 +213,7 @@ class TreeDataviewer extends Component
                     }
                     $table[$index] = [
                         'census' => $censusTable,
+                        'date' => $$censusTable[0]['date'],
                         'status' => $$censusTable[0]['status'],
                         'code' => $$censusTable[0]['code'],
                         'dbh' => $$censusTable[0]['dbh'],
@@ -225,6 +228,7 @@ class TreeDataviewer extends Component
                 } else {
                     $table[$index] = [
                         'census' => $censusTable,
+                        'date' => '',
                         'status' => '',
                         'code' => '',
                         'dbh' => '',
@@ -248,9 +252,10 @@ class TreeDataviewer extends Component
 
                 } else {
 
-                    $table[4]=['census' => 'census5', 'status' => '', 'code'=>'', 'dbh'=>'', 'pom' => '', 'note' => '', 'confirm' =>''];
+                    $table[4]=['census' => 'census5','date'=>'', 'status' => '', 'code'=>'', 'dbh'=>'', 'pom' => '', 'note' => '', 'confirm' =>''];
                 }
-            }
+            } 
+
 
             $this->result=$table;
             $this->resultnote='';
@@ -274,7 +279,7 @@ class TreeDataviewer extends Component
                 $table = [];
 
                 for ($i = 1; $i <= 4; $i++) {
-                    $table[$i - 1] = ['census' => 'census'.$i, 'status' => '', 'code' => '', 'dbh' => '', 'pom' => '', 'note' => '',  'confirm' => '',
+                    $table[$i - 1] = ['census' => 'census'.$i, 'date'=>'','status' => '', 'code' => '', 'dbh' => '', 'pom' => '', 'note' => '',  'confirm' => '',
                     ];
                 }
 
@@ -290,6 +295,7 @@ class TreeDataviewer extends Component
                 }
                 $table[4] = [
                     'census' => 'census5'.$temp,
+                    'date' => $census5Table[0]['date'],
                     'status' => $census5Table[0]['status'],
                     'code' => $census5Table[0]['code'],
                     'dbh' => $census5Table[0]['dbh'],
@@ -307,7 +313,7 @@ class TreeDataviewer extends Component
                 if (count($census5alter) > 0){
 
                     for ($i = 1; $i <= 4; $i++) {
-                        $table[$i - 1] = ['census' => 'census'.$i, 'status' => '', 'code' => '', 'dbh' => '', 'pom' => '', 'note' => '',  'confirm' => '',
+                        $table[$i - 1] = ['census' => 'census'.$i, 'date'=>'','status' => '', 'code' => '', 'dbh' => '', 'pom' => '', 'note' => '',  'confirm' => '',
                         ];
                     }
 
@@ -319,6 +325,7 @@ class TreeDataviewer extends Component
                     }
                     $table[4] = [
                         'census' => 'census5 (record)',
+                        'date' => $census5alter[0]['date'],
                         'status' => $census5alter[0]['status'],
                         'code' => $census5alter[0]['code'],
                         'dbh' => $census5alter[0]['dbh'],

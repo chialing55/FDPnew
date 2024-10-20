@@ -18,6 +18,7 @@ class FsTreeCensus5Progress
         $comparelist=[];
         $updatelist=[];
         $directorieslist=[];
+        $alternotelist=[];
 
         $compareDone=FsTreeComplete::select('qx',  'compareDone')->where('compareDone', '!=', '')->groupBy('qx', 'compareDone')->get()->toArray();
         $updateDone=FsTreeComplete::select('qx',  'addToMainTable')->where('addToMainTable', '!=', '')->groupBy('qx', 'addToMainTable')->get()->toArray();

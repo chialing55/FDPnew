@@ -56,6 +56,8 @@ class TreeController extends Controller
             DB::connection('mysql')->statement("ALTER TABLE `record1` CHANGE `update_date` `updated_at` varchar(255) CHARACTER SET utf8 COLLATE utf8_general_ci NOT NULL;");
             //join base表單，更新樣區及種類
             DB::connection('mysql')->table('record1')->join('base', 'record1.tag', '=', 'base.tag')->update(['record1.qx'=>DB::raw('base.qx'), 'record1.qy'=>DB::raw('base.qy'),'record1.sqx'=>DB::raw('base.sqx'),'record1.sqy'=>DB::raw('base.sqy'),'record1.spcode'=>DB::raw('base.spcode')]);
+            //如果在base_r資料表有資料 ->改位置資訊
+            DB::connection('mysql')->table('record1')->join('base_r', 'record1.stemid', '=', 'base_r.stemid')->update(['record1.qx'=>DB::raw('base_r.qx'), 'record1.qy'=>DB::raw('base_r.qy'),'record1.sqx'=>DB::raw('base_r.sqx'),'record1.sqy'=>DB::raw('base_r.sqy')]);
             //選擇輸入樣區時再把csp填入
         //刪除欄位
             DB::connection('mysql')->statement("ALTER TABLE `record1` DROP COLUMN `deleted_at`");
@@ -71,8 +73,7 @@ class TreeController extends Controller
             FsTreeRecord1::where('date', 'like', '0000-00-00')->update(['show'=>'0']);
 
             //選擇輸入樣區時再把census3=-1的show改為0
-            //前兩次調查已為 -1 的植株，show=0
-            
+ 
             FsTreeRecord1::query()->update(['dbh'=>'0', 'h2'=>'0', 'date'=>'0000-00-00', 'code'=>'', 'updated_id' =>'', 'tocheck' =>'', 'tofix' =>'', 'confirm' =>'', 'alternote' => '']);
             FsTreeRecord1::where('status', 'like', '-9')->update(['status'=>'']);
 

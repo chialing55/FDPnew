@@ -32,7 +32,7 @@ class FsTreeDataCheck
             $census4=FsTreeCensus4::where('stemid', 'like', $data[$i]['stemid'])->get()->toArray();
 
             //將code拆開
-            $data[$i]['code']=strtoupper($data[$i]['code']);  //轉為皆大寫
+            
             $codea=str_split($data[$i]['code']);
           //2. status 若不為空值，dbh須為0
             if ($data[$i]['status']!=''){
@@ -49,6 +49,15 @@ class FsTreeDataCheck
                         break;
                     }
                 }
+
+                // if ($data[$i]['status']=='-2' && $data[$i]['branch']=='0'){
+                //     if (strpos($note, 'TAB=') === false && strpos($note, '牌留') === false) {
+                //         $datasavenote=$data[$i]['stemid'].' status為-2，note須註明牌留位置。';
+                //         $pass='0';
+                //         break;
+                //     }
+                // }
+
             }  else {
             //3. status 為空值，dbh不得為0
                 if ($data[$i]['dbh']=='0'){

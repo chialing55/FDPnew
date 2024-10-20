@@ -57,7 +57,7 @@ class SeedsSaveController extends Controller
 //重新載入資料2
     public function getRedata2($census){
 
-        $data1=FsSeedsFulldata::where('census', 'like', $census)->get()->toArray();
+        $data1=FsSeedsFulldata::where('census', 'like', $census)->orderby('trap')->get()->toArray();
         $ob_table = new SeedsAddButton;
         $redata=$ob_table->addbutton($data1, 'fulldata');
 
@@ -156,7 +156,7 @@ class SeedsSaveController extends Controller
 
             return [
                 'result' => 'ok',
-                'uplist' => $uplist,
+                // 'uplist' => $uplist,
                 'data' => $redata,
                 'thispage' => $thispage,
                 // 'type2' => $result,
@@ -229,6 +229,18 @@ class SeedsSaveController extends Controller
                             $inlist['identified']='N';
                         }
 
+                        $nothing = FsSeedsFulldata::where('trap', 'like', $inlist['trap'])
+                                                  ->where('csp', 'like', 'nothing')
+                                                  ->where('census', 'like', $inlist['census'])
+                                                  ->get();
+
+                        if ($nothing->isNotEmpty()) {
+                            FsSeedsFulldata::where('trap', 'like', $inlist['trap'])
+                                           ->where('csp', 'like', 'nothing')
+                                           ->where('census', 'like', $inlist['census'])
+                                           ->delete();
+                        }
+
                 }
 
                 $table::insert($inlist);
@@ -282,7 +294,7 @@ class SeedsSaveController extends Controller
 
             return [
                 'result' => 'ok',
-                'inlist' => $inlist,
+                // 'inlist' => $inlist,
                 'data' => $redata,
                 'emptytable' => $emptytable,
                 'seedssavenote' => '已新增資料'
@@ -323,6 +335,32 @@ class SeedsSaveController extends Controller
                 $upfixlog['updated_at']=date("Y-m-d H:i:s");
 
                 FsSeedsFixlog::insert($upfixlog);
+
+//如刪除資料後，使得該網子沒有資料，即增加nothing
+                $nothing = FsSeedsFulldata::where('trap', 'like', $census['trap'])->where('census', 'like', $census['census'])->get();
+                if ($nothing->isEmpty()) {
+
+                    $inlist['id']='0';
+                    $inlist['census']=$census['census'];
+                    $inlist['trap']=$census['trap'];
+                    $inlist['csp']='nothing';
+                    $inlist['sp']='NOTHING';
+                    $inlist['identified']='Y';
+                    $inlist['code']='0';
+                    $inlist['count']='0';
+                    $inlist['seeds']='0';
+                    $inlist['viability']='0';
+                    $inlist['fragments']='0';
+                    $inlist['sex']='';
+                    $inlist['identifier']=$this->identifier;
+                    $inlist['note']='';
+                    $inlist['checknote']='';
+                    $inlist['updated_id']=$user;
+                    $inlist['updated_at']=date("Y-m-d H:i:s");
+                    // print_r($inlist);
+                    // echo "<br>";
+                    FsSeedsFulldata::insert($inlist);
+                }
 
             }
 

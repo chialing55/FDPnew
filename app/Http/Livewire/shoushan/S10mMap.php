@@ -155,9 +155,9 @@ class S10mMap extends Component
 
         $filePath=[];
         $filePath[0]=$filecensus.'/map/'.$filesqx.'.png';
-        $filePath[1]=$filecensus.'/orimap/'.$filesqx.'.png';
-        $filePath[2]=$filecensus.'/old/'.$filesqx.'_old.pdf';
-        $filePath[3]=$filecensus.'/new/'.$filesqx.'_new.pdf';
+        $filePath[1]=$filecensus.'/orimap/'.$filesqx.'.jpg';
+        $filePath[2]=$filecensus.'/data/'.$filesqx.'_old.pdf';
+        $filePath[3]=$filecensus.'/data/'.$filesqx.'_new.pdf';
 //確定是否有檔案
         $error=[];
 

@@ -83,7 +83,7 @@ class FsTreeRecruitCheck
 				if (count($tagab)!='6'){
 					$datasavenote=$data[$i]['stemid'].' 牌號錯誤，請檢查。';
 					$pass="0";break;
-				} else if ($tagab[0].$tagab[1]!=$qx1){
+				} else if ($tagab[0].$tagab[1]!=$qx1 && strpos($data[$i]['code'], 'R') == false){
 					$datasavenote=$data[$i]['stemid'].' 牌號錯誤，請檢查。';
 					$pass="0";break;
 				}
@@ -102,14 +102,20 @@ class FsTreeRecruitCheck
 
 	// 8. 如果只有分支沒有主幹，不予新增
 			if ($data[$i]['branch']!='0'){
-				
-				$stemid3=$table::where('tag', 'like', $data[$i]['tag'])->where('branch', 'like', '0')->get();
+
+					$stemid3=$table::where('tag', 'like', $data[$i]['tag'])->where('branch', 'like', '0')->get();
 
 				if ($stemid3->isEmpty()){
 					$datasavenote=$data[$i]['stemid'].' 此分支沒有主幹。';
 					$pass="0";break;
 				} else {
-					$site1=$stemid3[0]['qx'].$stemid3[0]['qy'].$stemid3[0]['sqx'].$stemid3[0]['sqy'];
+					if ($entry == '3') {
+					    $basedata=FsTreeBase::where('tag', 'like', $data[$i]['tag'])->get();
+					} else {
+						$basedata=$table::where('tag', 'like', $data[$i]['tag'])->get();
+					}
+
+					$site1=$basedata[0]['qx'].$basedata[0]['qy'].$basedata[0]['sqx'].$basedata[0]['sqy'];
 					$site2=$data[$i]['qx'].$data[$i]['qy'].$data[$i]['sqx'].$data[$i]['sqy'];
 					if ($site1 != $site2){
 

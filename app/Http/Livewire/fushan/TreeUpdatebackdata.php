@@ -79,6 +79,7 @@ class TreeUpdatebackdata extends Component
     public $go;
     public $goto;
     public $type;
+    public $filePath;
 
     public $finishnote;
 
@@ -153,6 +154,7 @@ class TreeUpdatebackdata extends Component
             $this->goto='1';
         }
             $stemiddata=$this->nowStemidData($stemid);
+            $this->filePath=$stemiddata[0]['filePath'];
             $this->dispatchBrowserEvent('stemiddata', ['stemid'=>$this->stemid,'stemdata' => $stemiddata,  'csplist' => $this->csplist, 'from' => 'alternote']);
     }
 
@@ -175,6 +177,7 @@ class TreeUpdatebackdata extends Component
             if (count($census5)>0){
             $this->stemidlist[0]=$stemid;
             $stemiddata=$this->nowStemidData($stemid);
+            $this->filePath=$stemiddata[0]['filePath'];
 
             $this->dispatchBrowserEvent('stemiddata', ['stemid'=>$this->stemid,'stemdata' => $stemiddata,  'csplist' => $this->csplist, 'from' => 'indStemid']);
             } else {
@@ -200,7 +203,9 @@ class TreeUpdatebackdata extends Component
         $data[0]['r']='n';
         $baseR=FsTreeBaseR::where('stemid', 'like', $stemid)->get()->toArray();
         if (count($baseR)>0){
-            $data[0]=$baseR[0];
+            $datatemp[0]=$baseR[0];
+            $datatemp[0]['spcode']=$data[0]['spcode'];
+            $data[0]=$datatemp[0];
             $data[0]['r']='y';
         }
         $data[0]['branch']=$tag[1];
@@ -254,6 +259,17 @@ class TreeUpdatebackdata extends Component
 
             $data[$j]['census']='census'.$j;
         }
+
+        $filecensus='fs_census5_scanfile';
+        $fileqx=str_pad($data[0]['qx'], 2, '0', STR_PAD_LEFT);
+        $fileqy=str_pad($data[0]['qy'], 2, '0', STR_PAD_LEFT);
+        $filesqx=$fileqx.$fileqy;
+
+        $filePath=[];
+
+        $filePath[0]=$filecensus."/".$fileqx.'/old/'.$filesqx.'_old.pdf';
+        $filePath[1]=$filecensus."/".$fileqx.'/new/'.$filesqx.'_new.pdf';
+        $data[0]['filePath']=$filePath;
 
         // dd($data);
         return $data;

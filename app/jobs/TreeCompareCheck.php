@@ -64,7 +64,7 @@ class TreeCompareCheck
                                 $comnote2['note'].='['.$add21.']';
                                 $mistake[]=$add21;
                             }
-                                $comnote2['note'].=' 資料不和';
+                                $comnote2['note'].=' 資料不合';
                                 $comnote1[]=$comnote2;
                             // dd($mistake['steimid']);
                         }

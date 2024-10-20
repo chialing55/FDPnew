@@ -112,10 +112,6 @@ class S10mShowentry extends Component
             $request->session()->put('ss10mcovcsplist', $ss10mcovcsplist);
 
         } 
-        
-
-          
-        
 
 // dd($ss10mcsplist);
 

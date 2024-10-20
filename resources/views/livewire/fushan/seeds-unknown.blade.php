@@ -26,7 +26,17 @@
                     <span wire:click="openData('/fushan/seeds/showdata', '{{$unk['unkname']}}')" style="cursor: pointer; margin-left: 20px; font-size: 80%;">檢視資料</span>
                 </h6>
                 <hr>
-                <p>{{$unk['des']}}</p>
+                <div class='unkDes{{$unk['unkname']}}'>{{$unk['des']}}
+                    <button name='editunkDesShow'  onclick="$('.unkDes{{$unk['unkname']}}').hide();$('.editUnkDes{{$unk['unkname']}}').show();"><i class='fa-solid fa-pen-to-square'></i></button>
+                </div>
+                <div class='editUnkDes{{$unk['unkname']}}' style='display: none;'>
+                    <form wire:submit.prevent="submitUnkEditForm" method="POST">
+                        物種描述: <input type='text' id=='editUnkDes' value='{{$unk['des']}}'>
+
+                        <button type='submit' style='margin-left:20px'>輸入</button>
+
+                    </form>
+                </div>
                 @foreach($unkphoto[$unk['unkname']] as $photo)
                 <div style='display: inline-flex;'>
                 <div class='photocombo' style=''>
@@ -38,12 +48,31 @@
 
                     </div>
                   
-                    <div class='photodes'>
+                    <div class='photodes{{$photo['id']}}'>
                         類型: {{$codelist[$photo['code']]}} <br>
                         photo by: {{$photo['photoby']}}
                         @if($photo['des']!='')
                             <br>{{$photo['des']}}
                         @endif
+                        <button name='editShow' onclick="$('.photodes{{$photo['id']}}').hide();$('.editDes{{$photo['id']}}').show();"><i class='fa-solid fa-pen-to-square'></i></button>
+                    </div>
+                    <div class='editDes{{$photo['id']}}' style='display: none;'>
+                        <form wire:submit.prevent="submitEditForm" method="POST">
+
+                            類型: 
+                            <select id="editType">
+                                @foreach($codelist as $key => $value)
+                                    <option value="{{ $key }}" {{ $photo['code'] == $key ? 'selected' : '' }}>{{ $value }}</option>
+                                @endforeach
+                            </select><br>
+                            photo by: <input type='text' id=='editPhotoBy' value='{{$photo['photoby']}}'><br>
+                            相片描述: <input type='text' id=='editPhotoDes' value='{{$photo['des']}}'>
+                            <input type='hidden' id=='editPhotoId'><br>
+
+                            <button type='submit'>輸入</button>
+
+                        </form>
+                        
                     </div>
                 </div>
                 </div>

@@ -49,8 +49,10 @@ class TreeMap extends Component
 
         $ob_result = new FsTreeCensus5Progress;
         $result=$ob_result->showProgress();
-
-        $nomap=FsTreeBase::select(DB::raw('CONCAT(qx, "-", qy) AS qxqy'))->where('plotx', 'like', '0')->where('ploty', 'like', '0')->groupby('qxqy')->pluck('qxqy')->toArray();
+//點圖進度
+        $nomap1=FsTreeBase::select(DB::raw('CONCAT(qx, "-", qy) AS qxqy'))->where('plotx', 'like', '0')->where('ploty', 'like', '0')->groupby('qxqy')->pluck('qxqy')->toArray();
+        $nomap2=FsTreeBaseR::select(DB::raw('CONCAT(qx, "-", qy) AS qxqy'))->where('plotx', 'like', '0')->where('ploty', 'like', '0')->groupby('qxqy')->pluck('qxqy')->toArray();
+        $nomap = array_unique(array_merge($nomap1, $nomap2));
 
         for($i=0;$i<25;$i++){
             for($j=0;$j<25;$j++){
@@ -99,25 +101,24 @@ class TreeMap extends Component
     public $y;
 
 //排序資料，把空白資料放前面
+
     public function customSort($a, $b) {
-        // 检查 $a 是否满足条件
-        $aCondition = $a['qudx'] == '0';
-        // 检查 $b 是否满足条件
-        $bCondition = $b['qudx'] == '0';
+        // 检查 $a 和 $b 是否满足条件
+        $aCondition = $a['qudx'] == '0' && $a['qudy'] == '0';
+        $bCondition = $b['qudx'] == '0' && $b['qudy'] == '0';
 
         // 如果 $a 满足条件而 $b 不满足条件，将 $a 放在前面
         if ($aCondition && !$bCondition) {
-            return -1;
+            return -1;  // $a 在前面
         }
         // 如果 $b 满足条件而 $a 不满足条件，将 $b 放在前面
         elseif (!$aCondition && $bCondition) {
-            return 1;
+            return 1;  // $b 在前面
         }
         // 如果都满足条件或都不满足条件，则按照 'tag' 键排序
-        else {
-            return $a['tag'] <=> $b['tag'];
-        }
+        return $a['tag'] <=> $b['tag'];
     }
+
 
 //選擇點圖樣區
     public function searchSite(Request $request, $qx, $qy, $subqx, $subqy){
@@ -173,13 +174,13 @@ class TreeMap extends Component
         $this->subqy=$subqy;
         $this->showdata='1';
         $this->tablePlot=$qx.$qy.$subqx.$subqy;
-
+        // $this->datasavenote='';
         $this->tag='';
         $this->x='';
         $this->y='';
         $this->showmap();
         // $this->datasavenote='';
-
+        $this->errorList=[];
         $this->dispatchBrowserEvent('initTablesorter', ['tablePlot'=>$this->tablePlot, 'data' => $this->result, 'mapfile'=>$this->filePath[0]]);
         
        // dd($result);
@@ -243,58 +244,74 @@ class TreeMap extends Component
     public function updateCoordinates(Request $request, $data)
     {
 
-        // dd($data);
+       // dd($this->result);
 
         $qudx = $data['x'];
         $qudy = $data['y'];
         $tag = $data['tag'];
         $rtype = $data['rtype'];
+
+
+        if ($data['tag']==''){
+            $datasavenote='未輸入編號。';
+        } else {
 // dd($rtype);
-        if ($rtype=='R'){
-            $stemdata=FsTreeBaseR::where('stemid', 'like', $tag)->get()->toArray();
-            // if (count($stemdata)==0){
-            //     $tag=$tag.'0';
-            //     $stemdata=FsTreeBaseR::where('stemid', 'like', $tag)->get()->toArray();
-            // }
-        } else {
-            $stemdata=FsTreeBase::where('tag', 'like', $tag)->get()->toArray();
+
+
+            $stemdata = array_filter($this->result, function ($item) use ($tag) {
+                return $item['tag'] == $tag;
+            });
+            $stemdata = reset($stemdata);
+            // dd($stemdata);
+            if (empty($stemdata)){
+                $datasavenote='本區查無此樹('.$tag.')資料。';
+
+            } else {
+                $plotx=$stemdata['qx']*20+($stemdata['subqx']-1)*10+$qudx;
+                $ploty=$stemdata['qy']*20+($stemdata['subqy']-1)*10+$qudy;
+
+                $sqx=intval(ceil(($qudx+($stemdata['subqx']-1)*10)/5));
+                $sqy=intval(ceil(($qudy+($stemdata['subqy']-1)*10)/5));
+
+                if ($qudx=='0' && $qudy!='0'){
+                    $sqy=1;
+                } 
+
+                if ($qudy=='0' && $qudx!='0'){
+                    $sqx=1;
+                } 
+                // dd($stemdata['sqy']);
+                if ($sqx!=$stemdata['sqx'] || $sqy!=$stemdata['sqy']){
+                    $datasavenote='('.$tag.')小區不符，請確認。';
+                } else {
+
+                    $uplist=['qudx' =>$qudx, 'qudy' => $qudy, 'plotx'=>$plotx, 'ploty'=>$ploty, 'updated_id' =>$this->user];
+
+                    $fixlog['type']='update';
+                    $fixlog['id']='0';
+                    $fixlog['from']='map';
+                    
+                    $fixlog['qx']=$stemdata['qx'];
+                    $fixlog['stemid']=$tag;
+                    $fixlog['descript']=json_encode($uplist, JSON_UNESCAPED_UNICODE);
+                    $fixlog['updated_id']=$this->user;
+                    $fixlog['updated_at']=date("Y-m-d H:i:s");
+
+                    if ($rtype=='R'){
+                        FsTreeBaseR::where('stemid', 'like', $tag)->update($uplist);
+                        $fixlog['sheet']='base_r';
+                    } else {
+                        FsTreeBase::where('tag', 'like', $tag)->update($uplist);
+                        $fixlog['sheet']='base';
+                    }
+                    if($stemdata['qudx']!='0' && $stemdata['qudy']!='0'){
+                        FsTreeFixlog::insert($fixlog);
+                    }
+                    $datasavenote='已更新資料';
+                }
+
+            }
         }
-
-        $plotx=$stemdata[0]['qx']*20+($stemdata[0]['subqx']-1)*10+$qudx;
-        $ploty=$stemdata[0]['qy']*20+($stemdata[0]['subqy']-1)*10+$qudy;
-
-        $sqx=intval(ceil(($qudx+($stemdata[0]['subqx']-1)*10)/5));
-        $sqy=intval(ceil(($qudy+($stemdata[0]['subqy']-1)*10)/5));
-        // dd($stemdata[0]['sqy']);
-
-
-        $uplist=['qudx' =>$qudx, 'qudy' => $qudy, 'plotx'=>$plotx, 'ploty'=>$ploty, 'updated_id' =>$this->user];
-
-        $fixlog['type']='update';
-        $fixlog['id']='0';
-        $fixlog['from']='map';
-        
-        $fixlog['qx']=$stemdata[0]['qx'];
-        $fixlog['stemid']=$tag;
-        $fixlog['descript']=json_encode($uplist, JSON_UNESCAPED_UNICODE);
-        $fixlog['updated_id']=$this->user;
-        $fixlog['updated_at']=date("Y-m-d H:i:s");
-
-        if ($rtype=='R'){
-            FsTreeBaseR::where('stemid', 'like', $tag)->update($uplist);
-            $fixlog['sheet']='base_r';
-        } else {
-            FsTreeBase::where('tag', 'like', $tag)->update($uplist);
-            $fixlog['sheet']='base';
-        }
-        if($stemdata[0]['qudx']!='0' && $stemdata[0]['qudy']!='0'){
-            FsTreeFixlog::insert($fixlog);
-        }
-        $datasavenote='已更新資料';
-        if ($sqx!=$stemdata[0]['sqx'] || $sqy!=$stemdata[0]['sqy']){
-            $datasavenote.='。但('.$tag.')小區不符，請確認。';
-        }
-
         $this->datasavenote=$datasavenote;
         $this->searchSite($request, $this->qx, $this->qy, $this->subqx, $this->subqy);
 
@@ -308,6 +325,64 @@ class TreeMap extends Component
 
     public function updateSavenote(){
         $this->datasavenote='';
+    }
+
+    public $errorList=[];
+    public function searchError(){
+
+        $data = FsTreeBase::select('base.*', 'census5.status', 'base.updated_at as update_date')
+            ->join('census5', 'census5.tag', '=', 'base.tag')
+            ->where('census5.date', '!=', '0000-00-00')
+            ->where('census5.branch', '=', '0')
+            ->where('base.deleted_at','like', '')
+            ->where(function($query) {
+                // 使用括號組合 whereRaw 條件，確保任意一條 whereRaw 被滿足
+                $query->whereRaw('CAST(FLOOR(base.plotx / 20) AS SIGNED) != base.qx')
+                      ->orWhereRaw('CAST(FLOOR(base.ploty / 20) AS SIGNED) != base.qy')
+                      ->orWhereRaw('CAST(CEIL(MOD(base.plotx / 20, 1)*2) AS SIGNED) != base.subqx')
+                      ->orWhereRaw('CAST(CEIL(MOD(base.ploty / 20, 1)*2) AS SIGNED) != base.subqy');
+            })
+            // 確保 qudx 和 qudy 都不為 0
+            ->where('base.qudx', '!=', '0')
+            ->where('base.qudy', '!=', '0')
+            // ->where('base.tag','236630')
+            ->orderBy('base.tag')
+            ->get()
+            ->toArray();
+
+        $datar = FsTreeBaseR::select('base_r.*', 'census5.status', 'base_r.updated_at as update_date', 'base_r.stemid as tag')
+            ->join('census5', 'census5.tag', '=', 'base_r.tag')
+            ->where('census5.date', '!=', '0000-00-00')
+            ->where('census5.branch', '=', '0')
+            ->where('base_r.deleted_at','like', '')
+            ->where(function($query) {
+                // 使用括號組合 whereRaw 條件，確保任意一條 whereRaw 被滿足
+                $query->whereRaw('CAST(FLOOR(base_r.plotx / 20) AS SIGNED) != base_r.qx')
+                      ->orWhereRaw('CAST(FLOOR(base_r.ploty / 20) AS SIGNED) != base_r.qy')
+                      ->orWhereRaw('CAST(CEIL(MOD(base_r.plotx / 20, 1)*2) AS SIGNED) != base_r.subqx')
+                      ->orWhereRaw('CAST(CEIL(MOD(base_r.ploty / 20, 1)*2) AS SIGNED) != base_r.subqy');
+            })
+            // 確保 qudx 和 qudy 都不為 0
+            ->where('base_r.qudx', '!=', '0')
+            ->where('base_r.qudy', '!=', '0')
+            // ->where('base_r.tag','236630')
+            ->orderBy('base_r.tag')
+            ->get()
+            ->toArray();
+
+            $data = is_array($data) ? $data : [];
+            $datar = is_array($datar) ? $datar : [];
+
+            // 合并两个数组
+            $datacom = array_merge($data, $datar);
+
+            // dd($data);
+
+            if ($datacom==[]){
+                $this->errorList='樹位置與小區皆相符';
+            }
+
+        $this->errorList=$datacom;
     }
 
 

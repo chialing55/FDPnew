@@ -250,7 +250,6 @@ function deleteid(stemid, entry, thispage){  //刪除新增樹資料
 }
 
 
-
 function fstreetable(data, thispage, pps){
 
   $('.finishnote').html();
@@ -672,7 +671,7 @@ function addDataTable(emptytable, csplist){
   var columns = [
       {data: "date", dateFormat: 'YYYY-MM-DD', type: 'date', allowInvalid: false},
       {data: "qx", type: 'numeric', validator: qxValidator},
-      {data: "qy", type: 'numeric', validator: qxValidator},
+      {data: "qy", type: 'numeric'},
       {data: "sqx", type: 'numeric', allowInvalid: false, validator: qqValidator4},
       {data: "sqy", type: 'numeric', allowInvalid: false, validator: qqValidator4},
       {data: "tag"},

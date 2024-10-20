@@ -112,6 +112,13 @@ border-bottom:1px solid #dedede;
   text-align:right ;
 
 }
+.td5_1{
+  font-size:0.8em;
+  border-bottom:1px solid black;
+  border-left:1px solid #dedede;
+  text-align:right ;
+  color:#b3b3b3;
+}
 
 </style>
 
@@ -205,7 +212,7 @@ $list=0;
    <td @if($data['status']=='-1') class="td3" @else class='td2' @endif>{{$data['dbh']}}</td>{{--如果列h1+h2，class=td4 --}}
    @endif
    <td width="6%" class='td5' style='font-size:10px'>{{$data['status']}}</td>
-   <td width="7%" class='td5' style='font-size:10px'>{{$data['code']}}</td>
+   <td @if($data['status']=='-1') class="td5_1" @else class='td5' @endif width="7%" style='font-size:10px'>{{$data['code']}}</td>
    <td class='td5'></td>
    
    <td width="30%" class="td1" style='font-size:10px; text-align: right;'>{{$data['note']}}</td>

@@ -117,6 +117,7 @@ class SeedlingCompare extends Component
                     $record['id']='';
                     $record['updated_at']='';
                     $record['updated_id']='';
+                    $record['recruit']='';
                     $tag1[]=$record['tag'];
                     $record1[$record['tag']]=$record;
                 }
@@ -129,6 +130,7 @@ class SeedlingCompare extends Component
                     $record['id']='';
                     $record['updated_at']='';
                     $record['updated_id']='';
+                    $record['recruit']='';
                     $tag1[]=$record['tag'];
                     $record2[$record['tag']]=$record;
                 }

@@ -89,6 +89,7 @@ class TreeSaveController extends Controller
             $uplist=[];
             // $datacheck=['pass'=>'1', 'datasavenote'=>''];
             if ($data[$i]['date']==''){$data[$i]['date']='0000-00-00';}
+            $data[$i]['code']=strtoupper($data[$i]['code']);  //轉為皆大寫
 
             $check = new FsTreeDataCheck;
             $datacheck=$check->check($data[$i]);
@@ -386,7 +387,9 @@ class TreeSaveController extends Controller
         $inlist=[];
         $datasavenote='';
 
-        $data2 = array_filter($data);
+        $data2 = array_filter($data, function($value) {
+            return $value !== null && $value !== '';
+        });
         unset($data2['stemid']);
 
         if (!empty($data2)){
@@ -530,9 +533,9 @@ class TreeSaveController extends Controller
             for($i=0;$i<count($data);$i++){
                 $com1s=[];
                 $com2s=[];
-                $com1s2=[];
+                // $com1s2=[];
                 $com3s=[];
-
+                $notes=[];
 
 
                 $data1=$table::where('tag', 'like', $data[$i]['tag'])->where('show', 'like', '1')->orderBy('branch', 'asc')->get()->toArray();
@@ -543,38 +546,69 @@ class TreeSaveController extends Controller
                         $com1s[]=$com1;
                         $com2s[]=$data0['status'];
                         $com3s[]=$data0['spcode'];
+                        $notes[$data0['branch']]=$data0['note'];
                         
                     }
 
                     $com1s=array_values(array_unique($com1s));
-
                     $com2s=array_values(array_unique($com2s));
                     $com3s=array_values(array_unique($com3s));
                     if ($data1[0]['branch']!='0'){
                         $pass='0';
                         $finishnote=$data1[0]['tag'].' 缺少主幹資料，請新增主幹並勾選漏資料，主幹若死亡，status = -3。';
                         break;
-                    }
+                    } 
+                    // else if ($data1[0]['branch']=='0' && $data1[0]['status']=='-3'){
+                    //     $found = false;
+                    //     foreach ($notes as $key => $note) {
+                    //         // 檢查是否包含 'TAB=' 或 '牌留'
+                    //         if (strpos($note, 'TAB=') !== false || strpos($note, '牌留') !== false) {
+                    //             $found = true;
+
+                    //             // 檢查 TAB= 後的數字是否與 key 相符
+                    //             if (preg_match('/TAB=(\d+)/', $note, $matches)) {
+                    //                 $tabNumber = $matches[1]; // 取得 TAB 後面的數字
+                    //                 if ($tabNumber == $key) {
+
+                    //                 } else {
+                    //                     $pass='0';
+                    //                     $finishnote=$data1[0]['tag']. "- {$key} 和 TAB= 的數字不相符\n";
+                    //                     break 2;
+                    //                 }
+                    //             }
+                    //             break; // 找到一個匹配就結束檢查
+                    //         }
+                    //     }
+
+                    //     if (!$found) {
+                    //         $pass='0';
+                    //         $finishnote= $data1[0]['tag']."沒有找到包含 'TAB=' 或 '牌留' 的值\n";
+                    //         break;
+                    //     }
+
+                    // }
 
 
                     if (count($com1s)>1){
                         if (!in_array("R", $codes)){
                             $pass='0';
-                            $finishnote='[('.$com1s[0][3].', '.$com1s[0][4].') ('.$com1s[1][3].', '.$com1s[1][4].')'.$data1[0]['tag'].'] 同編號應有相同小區';
+                            $finishnote='[('.$com1s[0][2].', '.$com1s[0][3].') ('.$com1s[1][2].', '.$com1s[1][3].')'.$data1[0]['tag'].'] 同編號應有相同小區';
                             break;
                         } else {  //重新篩選非R的資料
                             $data2=$table::where('tag', 'like', $data[$i]['tag'])->where('show', 'like', '1')->where('code', 'not like', '%R%')->get()->toArray();
+                            $com1s2=[];
                             if (count($data2)>1){
-                                foreach($data2 as $data0){
-                                    $com1=$data0['qx'].$data0['qy'].$data0['sqx'].$data0['sqy'];
-                                    $com1s2[]=$com1;
+                                foreach($data2 as $data01){
+                                    $com11=$data01['qx'].$data01['qy'].$data01['sqx'].$data01['sqy'];
+                                    $com1s2[]=$com11;
                                 }
                             }
+                            //該號碼非R的其他植株需在同一小區
                             $com1s2=array_values(array_unique($com1s2));
                             if (count($com1s2)>1){
                                 // print_r($com1s2); 
                                 $pass='0';
-                                $finishnote='[('.$com1s2[0][3].', '.$com1s2[0][4].') ('.$com1s2[1][3].', '.$com1s2[1][4].') '.$data2[0]['tag'].'] 同編號應有相同小區';
+                                $finishnote='[('.$com1s2[0][2].', '.$com1s2[0][3].') ('.$com1s2[1][2].', '.$com1s2[1][3].') '.$data2[0]['tag'].'] 同編號應有相同小區';
                                 break;
                             }
 
@@ -590,21 +624,27 @@ class TreeSaveController extends Controller
                             $finishnote='[('.$data1[0]['sqx'].', '.$data1[0]['sqy'].') '.$data1[0]['tag'].'] 同編號應有相同status';
                             break;
                         }
-
+                    } else if (in_array('-3', $com2s)){
+                        //不能全是-3
+                        $pass='0';
+                        $finishnote='[('.$data1[0]['sqx'].', '.$data1[0]['sqy'].') '.$data1[0]['tag'].'] 同編號的status不能全為-3';
+                        break;
                     }
+                    
+
+                    
 
                     if (count($com3s)>1){
                         $pass='0';
-                        
                         $finishnote='[('.$data1[0]['sqx'].', '.$data1[0]['sqy'].') '.$data1[0]['tag'].'] 同編號應有相同csp';
                         break;
-                        
                     }
+
                 }
 
+
+
             }
-
-
         }
 
         if ($pass==1){
@@ -613,14 +653,15 @@ class TreeSaveController extends Controller
             $uplist[$thisentry]='1';
             $uplist[$thisentry.'Done']=$user;
             $uplist[$thisentry.'Done_at']=date("Y-m-d H:i:s");
-            FsTreeComplete::where('qx', 'like', $qx)->where('qy', 'like', $qy)->update($uplist);            
+            FsTreeComplete::where('qx', 'like', $qx)->where('qy', 'like', $qy)->update($uplist);
         }
 
 
         return [
             'result' => 'ok',
+            // 'result2' => 'test11',
             'pass' => $pass,
-            // 'data'=> $datacheck,
+            // 'data'=> $com1s2,
 
             'finishnote' => $finishnote
         ];
@@ -713,7 +754,7 @@ class TreeSaveController extends Controller
 
             ];
     }
-
+ 
 //後端資料處理時刪除資料
 //如果是分支，直接刪除
 //如果是主幹，軟刪除
@@ -901,7 +942,7 @@ class TreeSaveController extends Controller
             $data[$i]['tag']=strtoupper($data[$i]['tag']);
             $data[$i]['code']=strtoupper($data[$i]['code']);
             $data[$i]['stemid']=$data[$i]['tag'].".".$data[$i]['branch'];
-            
+             
             
             $datacheck=['pass'=>'1', 'datasavenote'=>''];
 
@@ -935,9 +976,6 @@ class TreeSaveController extends Controller
                     // $data2=$data[$i];
                 //新增
 //獲得census5 key
-             
-
-              
 
                     $census5key=FsTreeCensus5::first()->toArray();
                     foreach ($census5key as $key5 =>$value5){
@@ -947,29 +985,25 @@ class TreeSaveController extends Controller
                         } else {
                             $inlist[$key5]='';
                         }
-                        
                     }
 
                     $inlist['alternote']="{\"other\":\"由後端新增資料\"}";
 
-                    $basekey=FsTreeBase::first()->toArray();
-                    foreach ($basekey as $keybase =>$valuebase){
-                        if (isset($data[$i][$keybase])){
-                            $inlist2[$keybase]=$data[$i][$keybase];
-                        } else {
-                            $inlist2[$keybase]='0';
-                        }
-                        
-                    }
-                    $inlist2['deleted_at']='';
-
-
-
                     FsTreeCensus5::insert($inlist);
-                    FsTreeBase::insert($inlist2);
-                
+//主幹才需新增base資料
+                    if($data[$i]['branch']=='0'){
+                        $basekey=FsTreeBase::first()->toArray();
+                        foreach ($basekey as $keybase =>$valuebase){
+                            if (isset($data[$i][$keybase])){
+                                $inlist2[$keybase]=$data[$i][$keybase];
+                            } else {
+                                $inlist2[$keybase]='0';
+                            }
+                        }
+                        $inlist2['deleted_at']='';
+                        FsTreeBase::insert($inlist2);
+                    }
 
-                $recruitsavenote=$recruitsavenote."<br>第".($i+1).'筆資料已儲存';
                     $nonsavelist[$i]['qx']='';
                     $nonsavelist[$i]['qy']='';
                     $nonsavelist[$i]['branch']='0';
@@ -983,6 +1017,7 @@ class TreeSaveController extends Controller
                     $nonsavelist[$i]['dbh']='';
                     $nonsavelist[$i]['note']='';
 //fixlog
+                    
                     $fixlog1['id']='0';
                     $fixlog1['from']='addData';
                     $fixlog1['type']='insert';
@@ -994,16 +1029,21 @@ class TreeSaveController extends Controller
                     $fixlog1['updated_at']=date("Y-m-d H:i:s");
                     FsTreeFixlog::insert($fixlog1);
 
-                    $fixlog2['id']='0';
-                    $fixlog2['from']='addData';
-                    $fixlog2['type']='insert';
-                    $fixlog2['sheet']="base";
-                    $fixlog2['qx']=$data[$i]['qx'];
-                    $fixlog2['stemid']=$data[$i]['stemid'];
-                    $fixlog2['descript']=json_encode($inlist2, JSON_UNESCAPED_UNICODE);
-                    $fixlog2['updated_id']=$user;
-                    $fixlog2['updated_at']=date("Y-m-d H:i:s");
-                    FsTreeFixlog::insert($fixlog2);
+
+                    if ($inlist2!=[]){
+                        $fixlog2['id']='0';
+                        $fixlog2['from']='addData';
+                        $fixlog2['type']='insert';
+                        $fixlog2['sheet']="base";
+                        $fixlog2['qx']=$data[$i]['qx'];
+                        $fixlog2['stemid']=$data[$i]['stemid'];
+                        $fixlog2['descript']=json_encode($inlist2, JSON_UNESCAPED_UNICODE);
+                        $fixlog2['updated_id']=$user;
+                        $fixlog2['updated_at']=date("Y-m-d H:i:s");
+                        FsTreeFixlog::insert($fixlog2);
+                    }
+
+                    $recruitsavenote.="<br>第".($i+1).'筆資料 ('.$data[$i]['stemid'].') 已儲存 ';
 
             } else {  // $datacheck['pass']!=1
                 $recruitsavenote=$recruitsavenote."<br>".$datacheck['datasavenote'];
@@ -1017,7 +1057,7 @@ class TreeSaveController extends Controller
 
         return [
             'result' => 'ok',
- 
+
             'odata' => $data,
             'nonsavelist' => $nonsavelist,
             // 'q'=>$q,

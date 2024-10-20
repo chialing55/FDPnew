@@ -75,7 +75,7 @@
             <div style='margin-left: 30px;' class='dataviewerdownload'>
                 <table class='tablesorter'>
                     <tbody>
-                        @for($i=1;$i<5;$i++)
+                        @for($i=1;$i<6;$i++)
                         <tr>
                             <td style='font-weight: 800'>第 {{$i}} 次調查</td>
                             <td>{!!$downloadtable[$i][0]!!}</td>
@@ -112,6 +112,9 @@
             <p class='savenote'>{{$resultnote}}</p>
             @elseif(!empty($basedata))
             <p style='font-size: 80%;'>* [census5] 為此次調查，若未輸入資料則保留空白。</p>
+            @if($deleteNote!='')
+            <p style='font-size: 80%; color: red;'>* 此編號已被軟刪除。</p>
+            @endif
             <div class='fstreeStemidtable'>
             <table class='tablesorter'>
                 
@@ -149,6 +152,7 @@
                     <thead>
                         <tr style="text-align: center;">
                             <th>census</th>
+                            <th>date</th>
                             <th>status</th>
                             <th>code</th>
                             <th>dbh/h高</th>
@@ -170,6 +174,7 @@
                     @endphp
                         <tr {{$trstyle}}>
                             <td>{{$pre['census']}}</td>
+                            <td>{{$pre['date']}}</td>
                             <td>{{$pre['status']}}</td>
                             <td>{{$pre['code']}}</td>
                             <td>{{$pre['dbh']}}</td>

@@ -21,6 +21,7 @@ class SeedsUnknown extends Component
     public $unkdes;
     public $unkphoto;
     public $unklist=[];
+    public $user;
 
     public function mount(Request $request){
 
@@ -59,6 +60,11 @@ class SeedsUnknown extends Component
 
     public function search(Request $request){
         $this->mount($request);
+    }
+
+
+    public function submitEditForm(Request $request){
+
     }
 
     public function render()

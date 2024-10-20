@@ -206,14 +206,14 @@ class S10mCompare extends Component
 
         $cov1 = Ss10mTreeCovR1::query()->get()->map(function ($item) {
             // 將 plot、sqx、sqy 和 csp 欄位合併成一個新的 stemid 欄位
-            $item['stemid'] = $item['plot'] . '-' . $item['sqx'] . '-' . $item['sqy'] . '-' . $item['csp'];
+            $item['stemid'] = $item['plot'] . '-' . $item['sqx'] . '-' . $item['sqy'] . '-' . $item['csp'].'-'.$item['layer'];
             unset($item['id']);
             return $item;
         })->keyBy('stemid')->toArray();
 
         $cov2 = Ss10mTreeCovR2::query()->get()->map(function ($item) {
             // 將 plot、sqx、sqy 和 csp 欄位合併成一個新的 stemid 欄位
-            $item['stemid'] = $item['plot'] . '-' . $item['sqx'] . '-' . $item['sqy'] . '-' . $item['csp'];
+            $item['stemid'] = $item['plot'] . '-' . $item['sqx'] . '-' . $item['sqy'] . '-' . $item['csp'].'-'.$item['layer'];
             unset($item['id']);
             return $item;
         })->keyBy('stemid')->toArray();
@@ -291,7 +291,7 @@ class S10mCompare extends Component
             
             DB::connection('mysql5')->statement("INSERT IGNORE INTO 10m_tree_base_r_2024 SELECT * FROM 10m_tree_base_2024 where tagid like 'B-F-01-001'");  //隨便先加一筆
 
-            DB::connection('mysql5')->statement("ALTER TABLE  `10m_tree_base_r_2024` ADD  (`stemid` char(10) CHARACTER SET utf8 COLLATE utf8_general_ci not null )");
+            DB::connection('mysql5')->statement("ALTER TABLE  `10m_tree_base_r_2024` ADD  (`stemid` char(15) CHARACTER SET utf8 COLLATE utf8_general_ci not null )");
             DB::connection('mysql5')->select('ALTER TABLE `10m_tree_base_r_2024` ADD PRIMARY KEY (`stemid`)');
 
             $splist=[];

@@ -20,13 +20,13 @@ class ChoiceController extends Controller
             // $value = $request->session()->get('check');
             // $value = Session::get('check', function() { return 'no'; });
         // echo '1';
-            $value = $request->session()->get('user', function () {
+            $user = $request->session()->get('user', function () {
                 return 'no';
             });
 
-            if ($value!='no'){
+            if ($user!='no'){
                 return view('choice',[
-                  'user' => $value
+                  'user' => $user
                 ]);               
             } else {
                 return view('login1', [

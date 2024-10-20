@@ -2,7 +2,10 @@
 @section('pagejs')
 @php 
 
+echo "<script>
 
+const user = '".$user."';
+</script>";
 @endphp
 
 <script>

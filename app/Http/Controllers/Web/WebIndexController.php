@@ -84,4 +84,16 @@ class WebIndexController extends Controller
 
     }
 
+    public function taitest(Request $request){
+
+
+
+             return view('pages/web/taitest',[
+
+                'user' => 'chialing'
+             ]);
+        
+
+    }
+
 }

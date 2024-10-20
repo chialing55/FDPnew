@@ -93,8 +93,6 @@ class SeedlingShowentry extends Component
             }
 
 
-
-
         // print_r($slrecord1);
         if ($firsttrap!=''){
 

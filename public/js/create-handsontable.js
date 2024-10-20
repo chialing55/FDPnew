@@ -40,7 +40,7 @@ function makeAjaxRequest(url, requestData, requstType, successCallback, errorCal
       }
     },
     error: function (xhr, status, error) {
-      console.log('Save error.');
+      console.log('Save error. '+url);
       if (errorCallback) {
         errorCallback({ error: 'Save error', xhr: xhr, status: status, error: error });
       }

@@ -25,6 +25,7 @@ Route::get('/login1', function () {
 });
 
 
+
 Route::post("/login2", [App\Http\Controllers\LoginController::class, 'login'])->name('login');
 
 Route::get('/choice', [App\Http\Controllers\ChoiceController::class, 'check'])->name('choice');
@@ -242,4 +243,5 @@ Route::get('/latest-updates', 'App\Http\Controllers\UpdateController@latestUpdat
 Route::prefix('web')->group(function () {
     Route::get('/splist', [App\Http\Controllers\Web\WebIndexController::class, 'splist']);
     Route::get('/species/{spcode}', [App\Http\Controllers\Web\WebIndexController::class, 'species']);
+    Route::get('/taitest', [App\Http\Controllers\Web\WebIndexController::class, 'taitest']);
 });

@@ -106,18 +106,8 @@ class TreeShowentry extends Component
                     // $records[$i]['csp']=$splist[$record['spcode']];
                     $update['csp']=$splist[$record['spcode']];
                     if ($record['date']=='0000-00-00'){ //還未輸入
-                        if ($record['status']=='-1'){
-                        
-                        // 把census3=-1的show改為0
-                        // 前兩次調查已為 -1 的植株，show=0 
-                            $census3=FsTreeCensus3::where('stemid', 'like', $record['stemid'])->get();
-                            if ($census3[0]['status']=='-1'){
-                                $update['show']='0';
-                                // $records[$i]['show']='0';
-                            }
-                        }
 
-                        //把依據census4把code填入
+                        //依據census4把code填入
                         $census4=FsTreeCensus4::where('stemid', 'like', $record['stemid'])->get();
                         if (count($census4)>0){
                             if ($census4[0]['code']!=''){
@@ -126,6 +116,19 @@ class TreeShowentry extends Component
                             }                    
 
                         }
+
+                        if ($record['status']=='-1'){
+                        
+                        // 把census3=-1的show改為0
+                        // 前兩次調查已為 -1 的植株，show=0 
+          
+                            $census3=FsTreeCensus3::where('stemid', 'like', $record['stemid'])->get();
+                            if ($census3[0]['status']=='-1'){
+                                $update['show']='0';
+                                // $records[$i]['show']='0';
+                            } 
+                        }
+
                     }
                     $table::where('stemid', 'like', $record['stemid'])->update($update);
                 }

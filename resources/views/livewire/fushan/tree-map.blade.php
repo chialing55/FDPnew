@@ -13,6 +13,7 @@
             <li>在地圖上，紫色點為舊樹，粉色點為新樹。</li>
             <li>待更新的資料會以<span style='color:blue'>藍字</span>表示；正要輸入的資料會以<span style='color:red'>紅字</span>表示；已更新的資料會以<b>粗體</b>表示。</li>
             <li>新增樹資料以<span class='bgcolorRecrutMap'>粉色底</span>表示；R 資料以<span class='bgcolorRMap'>黃色底</span>表示。</li>
+            <li>如有R分支未改小區位置，及其他問題，請填<a href="https://docs.google.com/spreadsheets/d/1IgDnfHWqh25urP9AwYRPkxtP4DBLebXLt_a8KkmZZbc/edit?gid=0#gid=0" target="_blank">點圖問題回報</a></li>
  
         </ul>
     </div>
@@ -241,4 +242,20 @@
         </div>
     </div>
     @endif
+    <div class="text_box">
+        <button type="button" wire:click="searchError" >位置與小區不符的樹</button>
+        @if($errorList!=[])
+        <div style='margin-top: 10px;'>
+           @if(is_array($errorList))
+            @foreach($errorList as $item)
+                @if ($item['qudx']!=0 && $item['qudy']!=0 && $item['qudx']!=10 && $item['qudy']!=10)
+                tag: {{$item['tag']}} ({{$item['qx']}}, {{$item['qy']}})({{$item['sqx']}}, {{$item['sqy']}})<br>
+                @endif
+            @endforeach
+            @else
+                {{$errorList}}
+            @endif
+        </div>
+        @endif
+    </div>
 </div>

@@ -153,9 +153,9 @@ class S1haMap extends Component
 
         $filePath=[];
         $filePath[0]=$filecensus."/".$fileqx.'/map/'.$filesqx.'.png';
-        $filePath[1]=$filecensus."/".$fileqx.'/orimap/'.$filesqx.'.png';
-        $filePath[2]=$filecensus."/".$fileqx.'/old/'.$filesqx.'_old.pdf';
-        $filePath[3]=$filecensus."/".$fileqx.'/new/'.$filesqx.'_new.pdf';
+        $filePath[1]=$filecensus."/".$fileqx.'/orimap/'.$filesqx.'.jpg';
+        $filePath[2]=$filecensus."/".$fileqx.'/data/'.$filesqx.'_old.pdf';
+        $filePath[3]=$filecensus."/".$fileqx.'/data/'.$filesqx.'_new.pdf';
 //確定是否有檔案
         $error=[];
 
