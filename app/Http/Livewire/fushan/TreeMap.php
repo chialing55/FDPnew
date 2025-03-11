@@ -327,6 +327,7 @@ class TreeMap extends Component
         $this->datasavenote='';
     }
 
+//找位置與小區不合的樹
     public $errorList=[];
     public function searchError(){
 
@@ -334,14 +335,19 @@ class TreeMap extends Component
             ->join('census5', 'census5.tag', '=', 'base.tag')
             ->where('census5.date', '!=', '0000-00-00')
             ->where('census5.branch', '=', '0')
-            ->where('base.deleted_at','like', '')
-            ->where(function($query) {
+            ->where('census5.status','!=','0')
+            ->where('base.deleted_at', '')
+            ->where(function ($query) {
                 // 使用括號組合 whereRaw 條件，確保任意一條 whereRaw 被滿足
-                $query->whereRaw('CAST(FLOOR(base.plotx / 20) AS SIGNED) != base.qx')
-                      ->orWhereRaw('CAST(FLOOR(base.ploty / 20) AS SIGNED) != base.qy')
-                      ->orWhereRaw('CAST(CEIL(MOD(base.plotx / 20, 1)*2) AS SIGNED) != base.subqx')
-                      ->orWhereRaw('CAST(CEIL(MOD(base.ploty / 20, 1)*2) AS SIGNED) != base.subqy');
+            $query->whereRaw('CAST(IF(base.plotx % 20 = 0,(base.plotx / 20) - 1, FLOOR(base.plotx / 20) ) AS SIGNED) != base.qx')
+                  ->orWhereRaw('CAST(IF(base.ploty % 20 = 0,(base.ploty / 20) - 1, FLOOR(base.ploty / 20) ) AS SIGNED) != base.qy')
+                  ->orWhereRaw('CAST(IF((base.plotx - (base.qx * 20)) % 10 = 0, (base.plotx - (base.qx * 20)) / 10, CEIL((base.plotx - (base.qx * 20)) / 10)) AS SIGNED) != base.subqx')
+                  ->orWhereRaw('CAST(IF((base.ploty - (base.qy * 20)) % 10 = 0, (base.ploty - (base.qy * 20)) / 10, CEIL((base.ploty - (base.qy * 20)) / 10)) AS SIGNED) != base.subqy')
+                  ->orWhereRaw('CAST(IF((base.plotx - (base.qx * 20)) % 5 = 0, (base.plotx - (base.qx * 20)) / 5, CEIL((base.plotx - (base.qx * 20)) / 5)) AS SIGNED) != base.sqx' )
+                  ->orWhereRaw('CAST(IF((base.ploty - (base.qy * 20)) % 5 = 0, (base.ploty - (base.qy * 20)) / 5, CEIL((base.ploty - (base.qy * 20)) / 5)) AS SIGNED) != base.sqy');
+
             })
+
             // 確保 qudx 和 qudy 都不為 0
             ->where('base.qudx', '!=', '0')
             ->where('base.qudy', '!=', '0')
@@ -354,13 +360,17 @@ class TreeMap extends Component
             ->join('census5', 'census5.tag', '=', 'base_r.tag')
             ->where('census5.date', '!=', '0000-00-00')
             ->where('census5.branch', '=', '0')
-            ->where('base_r.deleted_at','like', '')
-            ->where(function($query) {
+            ->where('census5.status','!=','0')
+            ->where('base_r.deleted_at', '')
+            ->where(function ($query) {
                 // 使用括號組合 whereRaw 條件，確保任意一條 whereRaw 被滿足
-                $query->whereRaw('CAST(FLOOR(base_r.plotx / 20) AS SIGNED) != base_r.qx')
-                      ->orWhereRaw('CAST(FLOOR(base_r.ploty / 20) AS SIGNED) != base_r.qy')
-                      ->orWhereRaw('CAST(CEIL(MOD(base_r.plotx / 20, 1)*2) AS SIGNED) != base_r.subqx')
-                      ->orWhereRaw('CAST(CEIL(MOD(base_r.ploty / 20, 1)*2) AS SIGNED) != base_r.subqy');
+            $query->whereRaw('CAST(IF(base_r.plotx % 20 = 0,(base_r.plotx / 20) - 1, FLOOR(base_r.plotx / 20) ) AS SIGNED) != base_r.qx')
+                  ->orWhereRaw('CAST(IF(base_r.ploty % 20 = 0,(base_r.ploty / 20) - 1, FLOOR(base_r.ploty / 20) ) AS SIGNED) != base_r.qy')
+                  ->orWhereRaw('CAST(IF((base_r.plotx - (base_r.qx * 20)) % 10 = 0, (base_r.plotx - (base_r.qx * 20)) / 10, CEIL((base_r.plotx - (base_r.qx * 20)) / 10)) AS SIGNED) != base_r.subqx')
+                  ->orWhereRaw('CAST(IF((base_r.ploty - (base_r.qy * 20)) % 10 = 0, (base_r.ploty - (base_r.qy * 20)) / 10, CEIL((base_r.ploty - (base_r.qy * 20)) / 10)) AS SIGNED) != base_r.subqy')
+                  ->orWhereRaw('CAST(IF((base_r.plotx - (base_r.qx * 20)) % 5 = 0, (base_r.plotx - (base_r.qx * 20)) / 5, CEIL((base_r.plotx - (base_r.qx * 20)) / 5)) AS SIGNED) != base_r.sqx' )
+                  ->orWhereRaw('CAST(IF((base_r.ploty - (base_r.qy * 20)) % 5 = 0, (base_r.ploty - (base_r.qy * 20)) / 5, CEIL((base_r.ploty - (base_r.qy * 20)) / 5)) AS SIGNED) != base_r.sqy');
+
             })
             // 確保 qudx 和 qudy 都不為 0
             ->where('base_r.qudx', '!=', '0')
@@ -376,13 +386,15 @@ class TreeMap extends Component
             // 合并两个数组
             $datacom = array_merge($data, $datar);
 
-            // dd($data);
+            // dd($datacom);
 
             if ($datacom==[]){
                 $this->errorList='樹位置與小區皆相符';
+            } else {
+                $this->errorList=$datacom;
             }
 
-        $this->errorList=$datacom;
+        
     }
 
 

@@ -65,6 +65,7 @@ $(function() {
               <li lass='text_note_li '><a href='https://bit.ly/3QnjkYM' target="_blank">標本鑑定清單</a></li>
               <li lass='text_note_li '><a href='https://forms.gle/FKDWx2rmLRyE8ED1A' target="_blank">輸入系統錯誤表單</a></li>
               <li><a href="https://docs.google.com/spreadsheets/d/1PILnqnKb08RxlBilYkM8SKXneXa6YLj4SyV4Cp6P300/edit?usp=sharing">錯誤率資料表單</a></li>
+             
               {{-- 連結google表單 --}}
             </ol>
     </div>

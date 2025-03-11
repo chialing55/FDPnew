@@ -141,7 +141,6 @@ class TreeSaveController extends Controller
 
 //         //重新載入資料
 
-
         $redata=$this->getRedata($entry, $data[0]['qx'], $data[0]['qy'], $data[0]['sqx'], $data[0]['sqy'], $user);
 
             return [
@@ -942,7 +941,7 @@ class TreeSaveController extends Controller
             $data[$i]['tag']=strtoupper($data[$i]['tag']);
             $data[$i]['code']=strtoupper($data[$i]['code']);
             $data[$i]['stemid']=$data[$i]['tag'].".".$data[$i]['branch'];
-             
+              
             
             $datacheck=['pass'=>'1', 'datasavenote'=>''];
 
@@ -992,6 +991,34 @@ class TreeSaveController extends Controller
                     FsTreeCensus5::insert($inlist);
 //主幹才需新增base資料
                     if($data[$i]['branch']=='0'){
+						
+                            switch ($data[$i]['sqx']) {
+                                case '1':
+                                case '2':
+                                    $data[$i]['subqx'] = '1';
+                                    break;
+                                case '3':
+                                case '4':
+                                    $data[$i]['subqx'] = '2';
+                                    break;
+                                default:
+                                    $data[$i]['subqx']; // 保留原始值
+                                    break;
+                            }
+
+                            switch ($data[$i]['sqy']) {
+                                case '1':
+                                case '2':
+                                    $data[$i]['subqy'] = '1';
+                                    break;
+                                case '3':
+                                case '4':
+                                    $data[$i]['subqy'] = '2';
+                                    break;
+                                default:
+                                    $data[$i]['subqy']; // 保留原始值
+                                    break;
+                            }						
                         $basekey=FsTreeBase::first()->toArray();
                         foreach ($basekey as $keybase =>$valuebase){
                             if (isset($data[$i][$keybase])){

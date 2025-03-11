@@ -180,6 +180,4 @@ class SeedsController extends Controller
             ]);
         }
     }
-
-
 }

@@ -175,7 +175,7 @@ class TreeDataviewer extends Component
         $census5=FsTreeCensus5::where('stemid', 'like', $stemid)->get()->toArray();
         $base=FsTreeBase::where('tag', 'like', $tag)->get()->toArray();
         $maxb1=FsTreeRecord1::where('tag', 'like', $tag)->max('branch');
-        $maxb2=FsTreeRecord1::where('tag', 'like', $tag)->max('branch');
+        $maxb2=FsTreeCensus5::where('tag', 'like', $tag)->max('branch');
 
 
         $census5_1=FsTreeRecord1::where('stemid', 'like', $stemid)->where('date', 'not like', '0000-00-00')->get()->toArray();

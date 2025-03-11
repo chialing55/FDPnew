@@ -60,7 +60,7 @@ class TreeUpdateBase
             $obranch='0';
             $ostemid=$ostemid.".0";
         }
-        //新編號
+        //新編號 
         $newstemid=$base['tag'].".".$base['branch'];
         $baseWay='0';
         $pass='1';
@@ -140,6 +140,7 @@ class TreeUpdateBase
                             $base['subqy']; // 保留原始值
                             break;
                     }
+
 
                 //修改base_r
                 if ($base['r']=='y'){
