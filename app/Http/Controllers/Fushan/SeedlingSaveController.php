@@ -223,9 +223,9 @@ class SeedlingSaveController extends Controller
                 $data[$i]['alternote'] = json_encode($alterdata, JSON_UNESCAPED_UNICODE);  //把array轉json
             }
 
-            if ($data[$i]['ht'] !='-2' && $slrecord[0]['ht']!='-2'){
-                $data[$i]['recruit'] ='S';
-            }
+            // if ($data[$i]['ht'] !='-2' && $slrecord[0]['ht']!='-2'){
+            //     $data[$i]['recruit'] ='S';
+            // }
 
             if ($datacheck['pass']==1){
 // ['year' => date('Y'), 'month' => $month, 'date' => '0000-00-00']
