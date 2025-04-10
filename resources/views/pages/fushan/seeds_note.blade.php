@@ -114,6 +114,8 @@ $(function() {
         <h6>特殊情況說明</h6>
         <ol>
             <li><span class='line'>栲屬</span>或<span class='line'>薹屬</span>的花，可不需分類至種。</li>
+            <li><span class='line'>雞屎樹、菝契</span>僅鑑定至屬</li>
+            <li><span class='line'>香楠、霧社楨楠</span>兩變種合併，僅鑑定為<span class='line'>香楠</span></li>
         </ol>
     </div>
 
