@@ -1,5 +1,5 @@
 @php
-$personlist=['','蔡佳秀'];
+$personlist=['','蔡佳秀','黃小俊'];
 
 
 @endphp
