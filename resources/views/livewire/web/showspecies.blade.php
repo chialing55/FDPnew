@@ -18,8 +18,8 @@
                @if($speciesinfo['seedling'] !=0)<span style='margin-right: 20px'><i class="fa-solid fa-seedling"></i></span>@endif
            </p>
            @if($leafphoto=='yes')
-            <p class='text_box' style='padding: 0px;'><a href='{{ asset("/splist/leafphoto/{$speciesinfo['csp']}.jpg") }}'>
-                <img src="{{ asset("/splist/leafphoto/{$speciesinfo['csp']}.jpg") }}" width="230"></a>
+            <p class='text_box' style='padding: 0px;'><a href='{{ asset("/FDPfiles/splist/leafphoto/{$speciesinfo['csp']}.jpg") }}'>
+                <img src="{{ asset("/FDPfiles/splist/leafphoto/{$speciesinfo['csp']}.jpg") }}" width="230"></a>
             </p>
             @endif
         </div>
@@ -60,9 +60,9 @@
             @for($i=0;$i<count($photoinfo);$i++)
                 <div class='photocombo photoimgbox' data-key='{{$i}}'>
                     <div class='photo'>
-                        <a href='{{ asset("/splist/photo/{$photoinfo[$i]['spcode']}/{$photoinfo[$i]['filename']}") }}' data-fancybox="gallery" data-caption="類型: {{$photoinfo[$i]['type']}} / {{$photoinfo[$i]['fresh']}} / {{$photoinfo[$i]['status']}}<br>photo by: {{$photoinfo[$i]['photoby']}}@if($photoinfo[$i]['des']!='')<br>{{$photoinfo[$i]['des']}}
+                        <a href='{{ asset("/FDPfiles/splist/photo/{$photoinfo[$i]['spcode']}/{$photoinfo[$i]['filename']}") }}' data-fancybox="gallery" data-caption="類型: {{$photoinfo[$i]['type']}} / {{$photoinfo[$i]['fresh']}} / {{$photoinfo[$i]['status']}}<br>photo by: {{$photoinfo[$i]['photoby']}}@if($photoinfo[$i]['des']!='')<br>{{$photoinfo[$i]['des']}}
                         @endif" >
-                        <img src="{{ asset("/splist/photo/{$photoinfo[$i]['spcode']}/s_{$photoinfo[$i]['filename']}") }}" width="250">
+                        <img src="{{ asset("/FDPfiles/splist/photo/{$photoinfo[$i]['spcode']}/s_{$photoinfo[$i]['filename']}") }}" width="250">
                         </a>
 
                     </div>

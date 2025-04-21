@@ -75,7 +75,7 @@ class Showspecies extends Component
 
         // dd($this->treeinfo);
         // $this->showdata($spcode);
-        $leafphotoPath='splist/leafphoto/'.$this->speciesinfo['csp'].'.jpg';
+        $leafphotoPath='FDPfiles/splist/leafphoto/'.$this->speciesinfo['csp'].'.jpg';
 
         if (file_exists(public_path($leafphotoPath))){
             $this->leafphoto='yes';

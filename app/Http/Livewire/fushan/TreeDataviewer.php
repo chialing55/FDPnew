@@ -76,7 +76,7 @@ class TreeDataviewer extends Component
         $temp=['old', 'new', 'map', 'map', 'map', 'map'];
 
         for($i=1;$i<6;$i++){
-            $filecensus='fs_census'.$i.'_scanfile';
+            $filecensus='FDPfiles/fs_census'.$i.'_scanfile';
 
             for($j=0;$j<count($temp);$j++){
                 $filePath=$filecensus."/".$fileqx.'/'.$temp[$j].'/'.$filesqx.'_'.$temp[$j].'';

@@ -67,7 +67,7 @@ class S10mDataviewer extends Component
         $plot=$this->plots[$this->selectPlot];
 
         for($i=1;$i<4;$i++){
-            $filecensus='ss_10m_census'.$i.'_scanfile';
+            $filecensus='SSPfiles/ss_10m_census'.$i.'_scanfile';
             $filePath = '';
 
             for($j=0;$j<4;$j++){

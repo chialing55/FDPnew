@@ -68,7 +68,7 @@ class S1haDataviewer extends Component
         $plot=$fileqx.$fileqy;
 
         for($i=1;$i<2;$i++){
-            $filecensus='ss_1ha_census'.$i.'_scanfile';
+            $filecensus='SSPfiles/ss_1ha_census'.$i.'_scanfile';
             $filePath = '';
             
 

@@ -1,0 +1,51 @@
+services:
+  app:
+    build:
+      context: .
+      dockerfile: ./docker/php/Dockerfile
+    container_name: fdp_app
+    volumes:
+      - .:/app
+      - ../FDPfiles:/app/public/FDPfiles
+      - ../SSPfiles:/app/public/SSPfiles
+
+    ports:
+      - "8080:80"
+    depends_on:
+      - mysql
+    networks:
+      - laravel
+
+  mysql:
+    image: mysql:8.0
+    container_name: fdp_mysql
+    environment:
+      MYSQL_ROOT_PASSWORD: rootpassword
+      MYSQL_DATABASE: fs_tree
+      # MYSQL_USER: fushan
+      # MYSQL_PASSWORD: FS@8633340ab
+    volumes:
+      - mysql_data:/var/lib/mysql
+      - ./initdb:/docker-entrypoint-initdb.d
+    networks:
+      - laravel
+
+  phpmyadmin:
+    image: phpmyadmin/phpmyadmin
+    container_name: fdp_phpmyadmin
+    environment:
+      PMA_HOST: mysql
+      PMA_PORT: 3306
+    ports:
+      - "8081:80"
+    depends_on:
+      - mysql
+    networks:
+      - laravel
+
+volumes:
+  mysql_data:
+
+networks:
+  laravel:
+    driver: bridge
