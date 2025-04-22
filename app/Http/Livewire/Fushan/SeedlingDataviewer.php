@@ -21,8 +21,6 @@ use App\Models\FsSeedlingSlroll2;
 //小苗檢視資料
 class SeedlingDataviewer extends Component
 {
-
-
     public $tag;
     public $allB= false;
     public $resultnote;
