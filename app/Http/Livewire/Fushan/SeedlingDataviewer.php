@@ -22,7 +22,6 @@ use App\Models\FsSeedlingSlroll2;
 class SeedlingDataviewer extends Component
 {
 
-    
     public $tag;
     public $allB= false;
     public $resultnote;
