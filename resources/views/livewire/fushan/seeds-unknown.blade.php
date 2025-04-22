@@ -41,9 +41,9 @@
                 <div style='display: inline-flex;'>
                 <div class='photocombo' style=''>
                     <div class='photo'>
-                        <a href='{{ asset("/splist/photo/unknown/{$photo['unkname']}/{$photo['filename']}") }}' data-fancybox="gallery" data-caption="{{$unk['unkname']}}<br> 類型: {{$codelist[$photo['code']]}}<br>photo by: {{$photo['photoby']}}@if($photo['des']!='')<br>{{$photo['des']}}
+                        <a href='{{ asset("FDPfiles/splist/photo/unknown/{$photo['unkname']}/{$photo['filename']}") }}' data-fancybox="gallery" data-caption="{{$unk['unkname']}}<br> 類型: {{$codelist[$photo['code']]}}<br>photo by: {{$photo['photoby']}}@if($photo['des']!='')<br>{{$photo['des']}}
                         @endif" >
-                        <img src="{{ asset("/splist/photo/unknown/{$photo['unkname']}/s_{$photo['filename']}") }}" width="230">
+                        <img src="{{ asset("FDPfiles/splist/photo/unknown/{$photo['unkname']}/s_{$photo['filename']}") }}" width="230">
                     </a>
 
                     </div>
