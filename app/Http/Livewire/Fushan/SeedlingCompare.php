@@ -19,7 +19,6 @@ use App\Models\FsSeedlingSlroll2;
 class SeedlingCompare extends Component
 {
 
-
 //小苗輸入完成後比對
     public $comnote;
     public $compare;
