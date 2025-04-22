@@ -5,6 +5,7 @@
 /public/storage
 /storage/*.key
 /vendor
+.env
 .env.backup
 .env.production
 .phpunit.result.cache
@@ -31,3 +32,4 @@ composer.lock
 /public/splist
 /initdb
 "initdb/*.sql" 
+
