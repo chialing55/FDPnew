@@ -151,7 +151,7 @@ class S10mMap extends Component
     public function showmap(){
         $plot=$this->plots[$this->selectPlot];
         $filesqx=$plot;
-        $filecensus='ss_10m_census3_scanfile';
+        $filecensus='SSPfiles/ss_10m_census3_scanfile';
 
         $filePath=[];
         $filePath[0]=$filecensus.'/map/'.$filesqx.'.png';

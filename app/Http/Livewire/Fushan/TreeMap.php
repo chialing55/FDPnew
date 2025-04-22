@@ -197,7 +197,7 @@ class TreeMap extends Component
         $fileqx=str_pad($this->qx, 2, '0', STR_PAD_LEFT);
         $fileqy=str_pad($this->qy, 2, '0', STR_PAD_LEFT);
         $filesqx=$fileqx.$fileqy;
-        $filecensus='fs_census5_scanfile';
+        $filecensus='FDPfiles/fs_census5_scanfile';
         $filemap='';
 
         if ($this->subqx==1 && $this->subqy==1){

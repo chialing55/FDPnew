@@ -149,7 +149,7 @@ class S1haMap extends Component
         $fileqx=str_pad($this->qx, 2, '0', STR_PAD_LEFT);
         $fileqy=str_pad($this->qy, 2, '0', STR_PAD_LEFT);
         $filesqx=$fileqx.$fileqy;
-        $filecensus='ss_1ha_census2_scanfile';
+        $filecensus='SSPfiles/ss_1ha_census2_scanfile';
 
         $filePath=[];
         $filePath[0]=$filecensus."/".$fileqx.'/map/'.$filesqx.'.png';
