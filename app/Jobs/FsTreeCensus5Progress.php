@@ -38,7 +38,7 @@ class FsTreeCensus5Progress
         }        
         // dd($compareDone);
 
-        $filecensus='fs_census5_scanfile';
+        $filecensus='FDPfiles/fs_census5_scanfile';
         $directoryPath = public_path($filecensus);
         // Get all subdirectories in the specified path
         $directories = File::directories($directoryPath);
