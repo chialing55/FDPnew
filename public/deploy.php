@@ -24,13 +24,14 @@ if (!hash_equals($hash, $signature)) {
 
 // ======= 安全標記 git safe.directory（防止權限錯）=======
 $repoDir = realpath(__DIR__ . '/..');
-exec("git config --global --add safe.directory {$repoDir}", $outSafe, $returnSafe);
-logWrite("🛡️ Marked as safe.directory: {$repoDir}");
 
-// ======= 執行 git pull =======
 logWrite("📁 Pulling from: {$repoDir}");
-exec("cd {$repoDir} && git pull 2>&1", $gitOutput, $gitReturn);
+logWrite("🔧 Using CLI git -c safe.directory=... to bypass dubious ownership");
+
+exec("cd {$repoDir} && git -c safe.directory={$repoDir} pull 2>&1", $gitOutput, $gitReturn);
 logWrite("🔄 GIT PULL:\n" . implode("\n", $gitOutput));
+
+
 
 
 // ======= composer install（只在 composer.lock 更新時執行）=======
