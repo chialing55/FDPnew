@@ -2,50 +2,59 @@ services:
   app:
     build:
       context: .
-      dockerfile: ./docker/php/Dockerfile
+      dockerfile: Dockerfile
     container_name: fdp_app
+    working_dir: /app
     volumes:
       - .:/app
       - ../FDPfiles:/app/public/FDPfiles
       - ../SSPfiles:/app/public/SSPfiles
+    depends_on:
+      - db
+    expose:
+      - "9000"
+    environment:
+      - MODE=development # ✅ 可切換成 production 進行部署
 
+  nginx:
+    image: nginx:latest
+    container_name: fdp_nginx
     ports:
       - "8080:80"
+    volumes:
+      - .:/app
+      - ./nginx/default.conf:/etc/nginx/conf.d/default.conf
     depends_on:
-      - mysql
-    networks:
-      - laravel
+      - app
 
-  mysql:
+  db:
     image: mysql:8.0
     container_name: fdp_mysql
+    restart: always
+    ports:
+      - "3307:3306"
     environment:
-      MYSQL_ROOT_PASSWORD: rootpassword
-      MYSQL_DATABASE: fs_tree
-      # MYSQL_USER: fushan
-      # MYSQL_PASSWORD: FS@8633340ab
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: laravel
+      MYSQL_USER: laravel
+      MYSQL_PASSWORD: laravel
     volumes:
-      - mysql_data:/var/lib/mysql
+      - db_data:/var/lib/mysql
       - ./initdb:/docker-entrypoint-initdb.d
-    networks:
-      - laravel
 
   phpmyadmin:
     image: phpmyadmin/phpmyadmin
-    container_name: fdp_phpmyadmin
-    environment:
-      PMA_HOST: mysql
-      PMA_PORT: 3306
+    container_name: fdp_pma
+    # environment:
+    #   PMA_HOST: mysql
+    #   PMA_PORT: 3306
+    #   # PMA_ABSOLUTE_URI: http://localhost:8081/
     ports:
       - "8081:80"
     depends_on:
-      - mysql
-    networks:
-      - laravel
+      - db
 
 volumes:
-  mysql_data:
+  db_data:
 
-networks:
-  laravel:
-    driver: bridge
+

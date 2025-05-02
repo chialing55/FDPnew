@@ -32,4 +32,6 @@ composer.lock
 /public/splist
 /initdb
 "initdb/*.sql" 
+/nginx
+
 

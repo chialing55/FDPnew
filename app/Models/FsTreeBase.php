@@ -11,6 +11,6 @@ class FsTreeBase extends Model
     use HasFactory;
 
     protected $table = "base";
-    protected $connection = 'mysql';
+    protected $connection = 'mysql1';
 
 }

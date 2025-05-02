@@ -9,5 +9,5 @@ class FsTreeProgress extends Model
 {
     use HasFactory;
     protected $table = "progress";
-    protected $connection = 'mysql';
+    protected $connection = 'mysql1';
 }

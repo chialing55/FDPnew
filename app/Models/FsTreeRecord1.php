@@ -9,5 +9,5 @@ class FsTreeRecord1 extends Model
 {
     use HasFactory;
     protected $table = "record1";
-    protected $connection = 'mysql';
+    protected $connection = 'mysql1';
 }

@@ -10,5 +10,5 @@ class FsTreeCensus5 extends Model
     use HasFactory;
 
     protected $table = "census5";
-    protected $connection = 'mysql';
+    protected $connection = 'mysql1';
 }

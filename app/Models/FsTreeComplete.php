@@ -9,5 +9,5 @@ class FsTreeComplete extends Model
 {
     use HasFactory;
     protected $table = "complete";
-    protected $connection = 'mysql';
+    protected $connection = 'mysql1';
 }

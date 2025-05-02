@@ -9,5 +9,5 @@ class FsTreeFixlog extends Model
 {
     use HasFactory;
     protected $table = "fixlog";
-    protected $connection = 'mysql';
+    protected $connection = 'mysql1';
 }

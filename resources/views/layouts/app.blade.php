@@ -14,7 +14,7 @@ date_default_timezone_set("Asia/Taipei");
   @yield('meta')
 
   <link rel="stylesheet" href="{{asset('/js/handsontable/dist/handsontable.full.css')}}">
-  <link rel="stylesheet" href="{{asset('/css/index.css')}}">
+  {{-- <link rel="stylesheet" href="{{asset('/css/index.css')}}"> --}}
   <link rel="stylesheet" href="{{asset('/css/style.css')}}">
   <link rel="stylesheet" href="{{asset('/css/theme.green.min.css')}}">
   <link href="{{ asset('/css/all.min.css') }}" rel="stylesheet">  {{--Font Awesome --}}
