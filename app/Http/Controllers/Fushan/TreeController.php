@@ -40,27 +40,27 @@ class TreeController extends Controller
         
 
 //產生record1，record2 
-        if (Schema::connection('mysql')->hasTable('record1')){
+        if (Schema::connection('mysql1')->hasTable('record1')){
         //     //有輸入表單
         } else {
-            DB::connection('mysql')->select('CREATE TABLE record1 LIKE census4');
+            DB::connection('mysql1')->select('CREATE TABLE record1 LIKE census4');
        
-            DB::connection('mysql')->statement("INSERT IGNORE INTO record1 SELECT * FROM census4 where census4.deleted_at like ''");
+            DB::connection('mysql1')->statement("INSERT IGNORE INTO record1 SELECT * FROM census4 where census4.deleted_at like ''");
 
-            DB::connection('mysql')->statement("ALTER TABLE `record1` CHANGE `date` `date` CHAR(10) NOT NULL");
-            DB::connection('mysql')->statement("ALTER TABLE `record1` CHANGE `alternote` `alternote` VARCHAR(255) NOT NULL");
+            DB::connection('mysql1')->statement("ALTER TABLE `record1` CHANGE `date` `date` CHAR(10) NOT NULL");
+            DB::connection('mysql1')->statement("ALTER TABLE `record1` CHANGE `alternote` `alternote` VARCHAR(255) NOT NULL");
 
-            DB::connection('mysql')->statement("ALTER TABLE  `record1` ADD  ( `spcode` char(6) not null, `csp` char(50) not null, `qx` char(2) not null, `qy` char(2), `sqx` int(1) not null, `sqy` int(1), `show` char(1) not null default '1',index(qx),index(qy), index(sqx), index(sqy), index(spcode))");
+            DB::connection('mysql1')->statement("ALTER TABLE  `record1` ADD  ( `spcode` char(6) not null, `csp` char(50) not null, `qx` char(2) not null, `qy` char(2), `sqx` int(1) not null, `sqy` int(1), `show` char(1) not null default '1',index(qx),index(qy), index(sqx), index(sqy), index(spcode))");
 
 
-            DB::connection('mysql')->statement("ALTER TABLE `record1` CHANGE `update_date` `updated_at` varchar(255) CHARACTER SET utf8 COLLATE utf8_general_ci NOT NULL;");
+            DB::connection('mysql1')->statement("ALTER TABLE `record1` CHANGE `update_date` `updated_at` varchar(255) CHARACTER SET utf8 COLLATE utf8_general_ci NOT NULL;");
             //join base表單，更新樣區及種類
-            DB::connection('mysql')->table('record1')->join('base', 'record1.tag', '=', 'base.tag')->update(['record1.qx'=>DB::raw('base.qx'), 'record1.qy'=>DB::raw('base.qy'),'record1.sqx'=>DB::raw('base.sqx'),'record1.sqy'=>DB::raw('base.sqy'),'record1.spcode'=>DB::raw('base.spcode')]);
+            DB::connection('mysql1')->table('record1')->join('base', 'record1.tag', '=', 'base.tag')->update(['record1.qx'=>DB::raw('base.qx'), 'record1.qy'=>DB::raw('base.qy'),'record1.sqx'=>DB::raw('base.sqx'),'record1.sqy'=>DB::raw('base.sqy'),'record1.spcode'=>DB::raw('base.spcode')]);
             //如果在base_r資料表有資料 ->改位置資訊
-            DB::connection('mysql')->table('record1')->join('base_r', 'record1.stemid', '=', 'base_r.stemid')->update(['record1.qx'=>DB::raw('base_r.qx'), 'record1.qy'=>DB::raw('base_r.qy'),'record1.sqx'=>DB::raw('base_r.sqx'),'record1.sqy'=>DB::raw('base_r.sqy')]);
+            DB::connection('mysql1')->table('record1')->join('base_r', 'record1.stemid', '=', 'base_r.stemid')->update(['record1.qx'=>DB::raw('base_r.qx'), 'record1.qy'=>DB::raw('base_r.qy'),'record1.sqx'=>DB::raw('base_r.sqx'),'record1.sqy'=>DB::raw('base_r.sqy')]);
             //選擇輸入樣區時再把csp填入
         //刪除欄位
-            DB::connection('mysql')->statement("ALTER TABLE `record1` DROP COLUMN `deleted_at`");
+            DB::connection('mysql1')->statement("ALTER TABLE `record1` DROP COLUMN `deleted_at`");
             //status=0, status=-3&branch=0   =>show=0
             FsTreeRecord1::where('branch','!=', '0')->where('status', 'like', '-3')->update(['show'=>'0']);
             FsTreeRecord1::where('status', 'like', '0')->update(['show'=>'0']);
@@ -78,9 +78,9 @@ class TreeController extends Controller
             FsTreeRecord1::where('status', 'like', '-9')->update(['status'=>'']);
 
             //產生record2
-            DB::connection('mysql')->select('CREATE TABLE record2 LIKE record1');
+            DB::connection('mysql1')->select('CREATE TABLE record2 LIKE record1');
        
-            DB::connection('mysql')->select("INSERT INTO record2 SELECT * FROM record1");
+            DB::connection('mysql1')->select("INSERT INTO record2 SELECT * FROM record1");
 
          }
 
