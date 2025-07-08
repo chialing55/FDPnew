@@ -62,7 +62,15 @@ date_default_timezone_set("Asia/Taipei");
         $('.now hr').css('color', '#91A21C');
       });
     }
-    
+
+$(document).ajaxStart(function() {
+  $('.loading-container').addClass('visible');
+});
+$(document).ajaxStop(function() {
+  $('.loading-container').removeClass('visible');
+});
+
+
 </script>
 @livewireScripts
 

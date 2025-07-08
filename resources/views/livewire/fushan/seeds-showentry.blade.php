@@ -1,10 +1,12 @@
 @php
-$personlist=['','蔡佳秀','黃小俊'];
+$personlist=['','黃小俊'];
 
 
 @endphp
 
 <div>
+            <div class="loading-container" wire:loading.class="visible">
+        <div class="loading-spinner"></div></div>
 <h2>種子雨資料輸入</h2>
     <div style='margin-top:10px'>
         <p>請先詳閱<a href="{{asset('/fushan/seeds/note')}}">種子輸入注意事項</a></p> 
@@ -121,7 +123,7 @@ $personlist=['','蔡佳秀','黃小俊'];
 
         <div class='entrytablediv'>
             {{-- <h2>測試</h2> --}}
-            <span class='seedssavenote savenote'></span>
+
            <div id='seedstableout' class='seedstable fs100'>
                 <div class='pages'>
                     <div class='totalnum'></div>
@@ -130,22 +132,22 @@ $personlist=['','蔡佳秀','黃小俊'];
                     <div class='next'>下一頁</div>
                     <div style='margin-left: 20px;'><button name='creattable'>開啟新空白頁</button></div>
                 </div>
-
-                <div id='datatable{{$thiscensus}}' class='fs100' >
-                    <span class='datasavenote savenote'></span>
-                    <p style='margin-top:5px; text-align: center'><button name='datasave{{$thiscensus}}' class='datasavebutton' style='width:550px'>儲存</button></p>
-
-                </div>
+                <div class='seedssavenote savenote'></div>
+                <p style='margin-button:5px; text-align: center'><button name='datasave{{$thiscensus}}' class='datasavebutton' style='width:550px'>儲存</button></p>
+                <div id='datatable{{$thiscensus}}' class='fs100' ></div>
+                <div class='seedssavenote savenote'></div>
+                <p style='margin-top:5px; text-align: center'><button name='datasave{{$thiscensus}}' class='datasavebutton' style='width:550px'>儲存</button></p>
             </div>
             <div id='seedstableout_empty' class='seedstable fs100'>
                 <div class='pages'>
                     <button name='show_seedstable'>檢視輸入資料</button>
                 </div>
+                <p style='margin-top:5px; text-align: center'><button name='newdatasave{{$thiscensus}}' class='datasavebutton' style='width:550px'>儲存</button></p> 
                 <div id='seedstable_empty{{$thiscensus}}' class='fs100' >
-                     
-                    <p style='margin-top:5px; text-align: center'><button name='newdatasave{{$thiscensus}}' class='datasavebutton' style='width:550px'>儲存</button></p>
-
+                
                 </div>
+                <div class='seedssavenote savenote'></div>
+                <p style='margin-top:5px; text-align: center'><button name='newdatasave{{$thiscensus}}' class='datasavebutton' style='width:550px'>儲存</button></p>
             </div>
 
         </div>

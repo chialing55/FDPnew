@@ -589,6 +589,7 @@ button:-webkit-details-marker {
     justify-content: center;
     align-items: center;
     z-index: 10; /* 設置 z-index */
+    background-color: #ffffff80;
 }
 
 .loading-spinner {

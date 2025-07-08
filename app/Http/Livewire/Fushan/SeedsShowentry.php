@@ -193,7 +193,7 @@ class SeedsShowentry extends Component
     }
 
     public $entrytable;
-    public $identifier='蔡佳秀';  //預設鑑定者
+    public $identifier='黃小俊';  //預設鑑定者
     
     public function createTable($census){
 

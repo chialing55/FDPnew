@@ -1,324 +1,196 @@
-<?php 
+<?php
 
 namespace App\Jobs;
 
-use Illuminate\Http\Request;
-use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\App;
-use Illuminate\Support\Facades\Schema;
-
-use App\Models\FsSeedsDateinfo;
 use App\Models\FsSeedsFulldata;
 use App\Models\FsSeedsRecord1;
-use App\Models\FsSeedsSplist;
 
-//種子資料檢查
 class FsSeedsCheck
 {
-	public function check($record, $spinfo, $type, $type2){
+    protected array $specialCSP = ['九芎', '凹葉越橘', '五節芒', 'UNKCOM1', 'UNKCOM2', 'UNKCOM3'];
 
+    public function check($record, $spinfo, $existingSigns = [])
+    {
+        $trap = intval($record['trap']);
+        if ($trap < 1 || $trap > 107 || $trap == 42) return $this->fail($record, 'Trap 不正確');
+        if ($record['csp'] == 'nothing') return $this->pass($record);
+        if ($record['count'] == 0) return $this->fail($record, '數量 不得為 0。');
+        if ($record['csp'] == '') return $this->fail($record, '種類 不得為 空白。');
 
-		$checknote='';
-		// 一筆一筆檢查
-		//基本檢查
+        if (in_array($record['csp'], ['栲屬', '薹屬']) && $record['code'] != '6') {
+            return $this->fail($record, '該種類之類別欄位應為 6。');
+        }
 
-		$trap=intval($record['trap']);
+        switch ($record['code']) {
+            case '0': return $this->fail($record, '類別 不得為 0。');
+            case '1': return $this->checkCode1($record, $spinfo);
+            case '2': return $this->checkCode2($record);
+            case '3': return $this->checkCode3($record);
+            case '4': return $this->checkCode4($record);
+            case '5': return $this->checkCode5($record);
+            case '6': return $this->checkCode6($record);
+            default: return $this->fail($record, '未知的類別。');
+        }
+        $checksign = $record['census'] . $record['trap'] . $record['csp'] . $record['code'];
+        if (in_array($checksign, $existingSigns)) {
+            return $this->fail($record, '重複。');
+        }
+        return $this->pass($record);
+    }
 
-		if ($trap>107 || $trap<1 || $trap==42){
-			$checknote='Trap 不正確';
+    protected function checkCode1(&$r, $spinfo)
+    {
+        $size = $spinfo[$r['csp']]['size'] ?? 'B';
 
-		} else if ($record['count']==0){
+        if ($size == 'B') {
+            if ($this->isZeroOrEmpty($r['seeds'])) return $this->fail($r, '種子數 不得為 0。');
+            if ($r['seeds'] < $r['count']) return $this->fail($r, '種子數不應小於數量。');
 
-		//1. if count = 0
-		
-			$checknote='數量 不得為 0。';			
-		} else {
-		//2 csp=''
-			if ($record['csp']==''){
-			$checknote='種類 不得為 空白。';		
-			} else {
-			//3 code = 0
-				if ($record['code']=='0'){
-					$checknote='類別 不得為 0。';	 
-				} else if ($record['code']=='1') {
-				// 3 code = 1
-				// a seeds = 0
-					if ($spinfo[$record['csp']]['size']=='B'){
-						if ($record['seeds']=='0'){
-						$checknote='種子數 不得為 0。';						
-						} else if ($record['seeds'] < $record['count']) {
-					// a seeds < count
-							$checknote='種子數不應小於數量。';	
-						} else {
-					// b viability = ''
-							if ($record['viability'] == '' ){
-								$checknote='活性 不得為 空白。';							
-							} else {
-								if ($record['csp'] == '九芎' or $record['csp'] == '凹葉越橘' or $record['csp'] == '五節芒' or $record['csp'] == 'UNKCOM1' or $record['csp'] == 'UNKCOM2' or $record['csp'] == 'UNKCOM3'){
-										if ($record['viability'] != 'NA' ){
-										$checknote='活性應為 NA。';		
-										}	
-										if ($record['seeds'] == 'NA' ){
-										$checknote='種子數不應為 NA。';		
-										}
-									
-								} else {
-									
-									if ($record['viability'] == 'NA' ){
-									$checknote='活性不應為 NA。';		
-									}
-									if ($record['seeds'] == 'NA' ){
-									$checknote='種子數不應為 NA。';		
-									}
-									if ($record['viability'] > $record['seeds'] ){
-									$checknote='活性數不應大於種子數。';		
-									}
-								}
+            if (in_array($r['csp'], $this->specialCSP)) {
+                if ($r['viability'] !== 'NA') return $this->fail($r, '活性應為 NA。');
+                if ($r['seeds'] === 'NA') return $this->fail($r, '種子數不應為 NA。');
+            } else {
+                if ($this->isEmpty($r['viability'])) return $this->fail($r, '活性 不得為 空白。');
+                if ($r['viability'] === 'NA') return $this->fail($r, '活性不應為 NA。');
+                if ($r['seeds'] === 'NA') return $this->fail($r, '種子數不應為 NA。');
+                if ($r['viability'] > $r['seeds']) return $this->fail($r, '活性數不應大於種子數。');
+            }
+        } else {
+            if ($r['viability'] !== 'NA') return $this->fail($r, '活性應為 NA。');
+            if ($r['seeds'] !== 'NA') return $this->fail($r, '種子數應為 NA。');
+        }
 
-							}
-						}
-					} else {  //小種子
-						if ($record['viability'] != 'NA' ){
-						$checknote='活性應為 NA。';		
-						}
-						if ($record['seeds'] != 'NA' ){
-						$checknote='種子數應為 NA。';		
-						}
-					}
+        $res = $this->checkFragments($r);	if ($res) return $res;
+        $res = $this->checkSexBlank($r);	if ($res) return $res;
+        return $this->pass($r);
+    }
 
-				// f fragments = ''
+    protected function checkCode2(&$r)
+    {
+        if ($this->isZeroOrEmpty($r['seeds'])) return $this->fail($r, '種子數不得為 0。');
+        if ($r['seeds'] != $r['count']) return $this->fail($r, '種子數應等於數量。');
 
-					if ($record['fragments'] != '' && $record['fragments'] != '0'){
-							$checknote='碎片3數量應為 空白/0。';
-						} else {
-							$record['fragments']='0';
-					}
-				//g sex l!= ''	
-					if ($record['sex'] != ''){
-						$checknote='性別欄位應為 空白。';
-					}	
-				} else if ($record['code']=='2') {
-				// 3 code = 2
-				// a seeds = 0		
-					if ($record['seeds']=='0'){
-						$checknote='種子數不得為 0。';						
-					} else if ($record['seeds'] != $record['count']) {
-				// a seeds != count
-						$checknote='種子數應等於數量。';	
-					} else {
-						// c  size =B, viability !=NA	
-						if ($record['viability'] == '' ){
-							$checknote='活性 不得為 空白。';							
-						} else {   //會收到種子的應皆為大種子的種類
+        if (in_array($r['csp'], $this->specialCSP)) {
+            if ($r['viability'] !== 'NA') return $this->fail($r, '活性應為 NA。');
+            if ($r['seeds'] === 'NA') return $this->fail($r, '種子數不應為 NA。');
+        } else {
+            if ($this->isEmpty($r['viability'])) return $this->fail($r, '活性 不得為 空白。');
+            if ($r['viability'] === 'NA') return $this->fail($r, '活性不應為 NA。');
+            if ($r['seeds'] === 'NA') return $this->fail($r, '種子數不應為 NA。');
+            if ($r['viability'] > $r['seeds']) return $this->fail($r, '活性數不應大於種子數。');
+        }
 
-							if ($record['csp'] == '九芎' or $record['csp'] == '凹葉越橘' or $record['csp'] == '五節芒' or $record['csp'] == 'UNKCOM1' or $record['csp'] == 'UNKCOM2' or $record['csp'] == 'UNKCOM3'){
-								if ($record['viability'] != 'NA' ){
-								$checknote='活性應為 NA。';		
-								}	
-								if ($record['seeds'] == 'NA' ){
-								$checknote='種子數不應為 NA。';		
-								}
+        $res = $this->checkFragments($r);	if ($res) return $res;
+        $res = $this->checkSexBlank($r);	if ($res) return $res;
+        return $this->pass($r);
+    }
 
-							} else {
+    protected function checkCode3(&$r)
+    {
+		$res = $this->checkSeeds($r);	if ($res) return $res;
+		$res = $this->checkViability($r);	if ($res) return $res;
 
-								if ($record['viability'] == 'NA' ){
-								$checknote='活性不應為 NA。';		
-								}
-								if ($record['seeds'] == 'NA' ){
-								$checknote='種子數不應為 NA。';		
-								}
-								if ($record['viability'] > $record['seeds'] ){
-								$checknote='活性數不應大於種子數。';		
-								}
-							}
+        if ($this->isEmpty($r['fragments'])) return $this->fail($r, '碎片3數量不得為空白。');
+        if ($r['fragments'] > $r['count']) return $this->fail($r, '碎片3數量不應大於數量。');
 
-						}
-					// f fragments = ''
-						if ($record['fragments'] != '' && $record['fragments'] != '0'){
-							$checknote='碎片3數量應為 空白/0。';
-						} else {
-							$record['fragments']='0';
-						}	
-					//g sex l!= ''	
-						if ($record['sex'] != ''){
-							$checknote='性別欄位應為 空白。';
-						}
-					}	
-				} else if ($record['code']=='3') {
-				// 3 code = 3
-				// a seeds != 0	
-					// if ($record['seeds']==''){
-					// 	$record['seeds']='0';
-					// }
-					if ($record['seeds']!='' && $record['seeds'] != '0'){
-						$checknote='種子數應為 空白/0。';						
-					} else {
-						$record['seeds'] = '0';
-					}
-				// b viability != ''		
-					if ($record['viability']!='' && $record['viability'] != '0'){
-						$checknote='活性應為 空白/0。';						
-					} else {
-						$record['viability'] = '0';
-					}
-				// f fragments = 0
-					if ($record['fragments'] == ''){
-						$checknote='碎片3數量不得為空白。';
-					}	else if ($record['fragments'] > $record['count']){
-					// 	f fragments > count
-						$checknote='碎片3數量不應大於數量。';
-					}
-				//g sex l!= ''	
-					if ($record['sex'] != ''){
-						$checknote='性別欄位應為 空白。';
-					}	
-				} else if ($record['code']=='4') {
-				// 3 code = 4
-				// a seeds != 0	
-					// if ($record['seeds']==''){
-					// 	$record['seeds']='0';
-					// }
-					if ($record['seeds']!='' && $record['seeds'] != '0'){
-						$checknote='種子數應為 空白/0。';						
-					} else {
-						$record['seeds'] = '0';
-					} 
-				// b viability != ''		
-					if ($record['viability']!='' && $record['viability'] != '0'){
-						$checknote='活性應為 空白/0。';						
-					} else {
-						$record['viability'] = '0';
-					} 
-				// c count != '1'		
-					if ($record['count']!='1'){
-						$checknote='數量應為 1。';						
-					} 	
-				// f fragments = ''
-					if ($record['fragments'] != '' && $record['fragments'] != '0'){
-							$checknote='碎片3數量應為 空白/0。';
-						} else {
-							$record['fragments']='0';
-					}	
-				//g sex l!= ''	
-					if ($record['sex'] != ''){
-						$checknote='性別欄位應為 空白。';
-					}	
-				} else if ($record['code']=='5') {
-				// 3 code = 5
-				// a seeds != 0		
-					// if ($record['seeds']==''){
-					// 	$record['seeds']='0';
-					// }
-					if ($record['seeds']!='' && $record['seeds'] != '0'){
-						$checknote='種子數應為 空白/0。';						
-					} else {
-						$record['seeds'] = '0';
-					} 
-				// b viability != ''		
-					if ($record['viability']!='' && $record['viability'] != '0'){
-						$checknote='活性應為 空白/0。';						
-					} else {
-						$record['viability'] = '0';
-					} 	
-				// f fragments = ''
-					if ($record['fragments'] != '' && $record['fragments'] != '0'){
-							$checknote='碎片3數量應為 空白/0。';
-						} else {
-							$record['fragments']='0';
-					}	
-				//g sex l!= ''	
-					if ($record['sex'] != ''){
-						$checknote='性別欄位應為 空白。';
-					}	
-				} else if ($record['code']=='6') {
-				// 3 code = 6
-				// a seeds != 0	
-					// if ($record['seeds']==''){
-					// 	$record['seeds']='0';
-					// }
-					if ($record['seeds']!='' && $record['seeds'] != '0'){
-						$checknote='種子數應為 空白/0。';						
-					} else {
-						$record['seeds'] = '0';
-					} 
-				// b viability != ''		
-					if ($record['viability']!='' && $record['viability'] != '0'){
-						$checknote='活性應為 空白/0。';						
-					} else {
-						$record['viability'] = '0';
-					} 	
-				// c count != '1'		
-					if ($record['count']!='1'){
-						$checknote='數量應為 1。';						
-					} 
-					// f fragments = ''
-					if ($record['fragments'] != '' && $record['fragments'] != '0'){
-							$checknote='碎片3數量應為 空白/0。';
-						} else {
-							$record['fragments']='0';
-					}	
-				//d csp 
+        $res = $this->checkSexBlank($r);	if ($res) return $res;
+        return $this->pass($r);
+    }
 
+    protected function checkCode4(&$r)
+    {
+		$res = $this->checkSeeds($r);	if ($res) return $res;
+		$res = $this->checkViability($r);	if ($res) return $res;
 
-					if ($record['csp']=='長葉木薑子'){
-						if ($record['sex'] == ''){
-						$checknote='種類為長葉木薑子，性別欄位不得為 空白。';
-						}
-					} else {
-						if ($record['sex'] != ''){
-						$checknote='性別欄位應為 空白。';
-						}
-					}
-				} 
-			}
-		}
+        if ($r['count'] != '1') return $this->fail($r, '數量應為 1。');
 
-	// 特殊檢查	
-	//  csp = 烏+長
-			if ($record['csp'] == '栲屬' || $record['csp'] == '薹屬'){
-				if ($record['code'] != '6'){
-					$checknote='類別欄位應為 6。';
-				}
-			}
-	// trap+種類+類別 不能一樣	
-			$checksign=$record['census'].$record['trap'].$record['csp'].$record['code'];
-			$checkarray=[];
-			if ($type2=='record'){
-				if ($type=='n'){
-					$dataexit=FsSeedsRecord1::query()->get()->toArray();
-				} else {
-					$dataexit=FsSeedsRecord1::where('id', 'not like', $record['id'])->get()->toArray();
-				}
-			} else {
-				if ($type=='n'){
-					$dataexit=FsSeedsFulldata::where('census', 'like', $record['census'])->get()->toArray();
-				} else {
-					$dataexit=FsSeedsFulldata::where('census', 'like', $record['census'])->where('id', 'not like', $record['id'])->get()->toArray();
-				}				
-			}
+        $res = $this->checkFragments($r);	if ($res) return $res;
+        $res = $this->checkSexBlank($r);	if ($res) return $res;
+        return $this->pass($r);
+    }
 
-			if (count($dataexit)>0){
-				foreach ($dataexit as $data){
-					$checkarray[]=$data['census'].$data['trap'].$data['csp'].$data['code'];
-				}
+    protected function checkCode5(&$r)
+    {
+		$res = $this->checkSeeds($r);  	if ($res) return $res;
+		$res = $this->checkViability($r);	if ($res) return $res;
+        $res = $this->checkFragments($r);	if ($res) return $res;
+        $res = $this->checkSexBlank($r);	if ($res) return $res;
+        return $this->pass($r);
+    }
 
-				if (in_array($checksign, $checkarray)){
-					$checknote='重複。';
-				} 
-			}
+    protected function checkCode6(&$r)
+    {
+		$res = $this->checkSeeds($r);  	if ($res) return $res;
+		$res = $this->checkViability($r);	if ($res) return $res;
 
-			// if ($checknote ==''){$checknote='確 。';}
+        if ($r['count'] != '1') return $this->fail($r, '數量應為 1。');
 
-		// return $checknote;
+        $res = $this->checkFragments($r);	if ($res) return $res;
 
-            return [
-                'result' => $record,
-                'checknote' => $checknote,
-                // 'type2' => $type2
+        if ($r['csp'] == '長葉木薑子') {
+            if ($this->isEmpty($r['sex'])) return $this->fail($r, '種類為長葉木薑子，性別欄位不得為 空白。');
+        } else {
+            $res = $this->checkSexBlank($r);	if ($res) return $res;
+        }
 
-            ];
+        return $this->pass($r);
+    }
 
-	}
+    // ========== 共用檢查工具函式 ==========
+
+    protected function checkSeeds(&$r)
+    {
+        if (!$this->isZeroOrEmpty($r['seeds'])) {
+            return $this->fail($r, '種子數應為 空白/0。');
+        }
+        $r['seeds'] = '0';
+		return null;
+    }
+
+    protected function checkViability(&$r)
+    {
+        if (!$this->isZeroOrEmpty($r['viability'])) {
+            return $this->fail($r, '活性應為 空白/0。');
+        }
+        $r['viability'] = '0';
+		return null;
+    }
+
+    protected function checkFragments(&$r)
+    {
+        if (!$this->isZeroOrEmpty($r['fragments'])) {
+            return $this->fail($r, '碎片3數量 應為 空白/0。');
+      
+        }
+        $r['fragments'] = '0';
+		return null;
+    }
+
+    protected function checkSexBlank(&$r)
+    {
+        if (isset($r['sex']) && trim((string)$r['sex']) !== '') {
+			return $this->fail($r, '性別欄位應為 空白。');
+        }
+		return null;
+    }
+
+    protected function isEmpty($v)
+    {
+        return trim((string)$v) === '';
+    }
+
+    protected function isZeroOrEmpty($v)
+    {
+        return $this->isEmpty($v) || trim((string)$v) === '0';
+    }
+
+    protected function fail($record, $note)
+    {
+        return ['result' => $record, 'checknote' => $note];
+    }
+
+    protected function pass($record)
+    {
+        return ['result' => $record, 'checknote' => ''];
+    }
 }
-
-

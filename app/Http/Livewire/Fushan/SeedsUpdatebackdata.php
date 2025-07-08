@@ -47,7 +47,7 @@ class SeedsUpdatebackdata extends Component
     }
 
     public $censusdata=[];
-    public $identifier='蔡佳秀';  //預設鑑定者
+    public $identifier='黃小俊';  //預設鑑定者
 
 //建立檢視表單
     public function createTable($census){

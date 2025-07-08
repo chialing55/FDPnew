@@ -1,4 +1,6 @@
 <div>
+            <div class="loading-container" wire:loading.class="visible">
+        <div class="loading-spinner"></div></div> 
     <h2>檢視 / 更新資料</h2>
     <div class='text_box'>
         選擇要檢視 / 更新的 census： <select name="census" class="fs100"  wire:model='selectCensus' wire:change="searchCensus($event.target.value)">
