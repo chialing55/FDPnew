@@ -57,7 +57,7 @@ class SeedlingPDFController extends Controller
                 $maxb[$maxbtable[$i]['mtag']]=$maxbtable[$i]['max_b'];
             }
         }
-
+// dd($slrecord);
         if ($length>750){
             return redirect()->back() ->with('alert', '資料過多，請重新選擇範圍');
 
@@ -104,7 +104,7 @@ class SeedlingPDFController extends Controller
 
     public function compare(Request $request){
         $comnote = $request->session()->get('comnote');
-        $html="<p style='font-family: msjh'>".$comnote."</p>";
+        $html="<style>body { font-family: msjh; }</style><p style='font-family: msjh'>".$comnote."</p>";
 
 
         
