@@ -281,7 +281,7 @@ return array(
         'custom_font_dir' => storage_path('fonts/'),
         'custom_font_data' => [
             'msjh' => [
-                'R' => '微軟正黑體.ttf', // 注意：這裡要和檔名完全一致（區分大小寫）
+                'R' => 'msjh.ttf', // 注意：這裡要和檔名完全一致（區分大小寫）
             ],
         ],
     ),
