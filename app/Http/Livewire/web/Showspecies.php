@@ -38,6 +38,8 @@ class Showspecies extends Component
     public $countFlower;
     public $countSeedlings;
     public $leafphoto='no';
+    public $treeinfo;
+    public $groupConditions;
 
     public function mount($spcode){
         $this->treeinfo='';
@@ -230,7 +232,11 @@ class Showspecies extends Component
             // 將過濾後的記錄附加到統計結果陣列中
             $group[$groupName] = array_values($filteredData);
         }
+dd($group);
 
+        // 現在 $group 就包含了每個分群的記錄
+
+        // 將結果傳遞給前端
     $this->dispatchBrowserEvent('fig3', ['census4A'=>$census4A, 'group'=>$group]);
 
     }
