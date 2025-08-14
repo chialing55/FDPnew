@@ -232,7 +232,7 @@ class Showspecies extends Component
             // 將過濾後的記錄附加到統計結果陣列中
             $group[$groupName] = array_values($filteredData);
         }
-dd($group);
+// dd($group);
 
         // 現在 $group 就包含了每個分群的記錄
 

@@ -289,7 +289,7 @@ function drawChart3(census4A, group) {
                         label: function (ctx) {
                             if (ctx.dataset?.data?.[ctx.dataIndex]) {
                                 const point = ctx.dataset.data[ctx.dataIndex];
-                                return `${point.tag} | DBH: ${point.dbh}`;
+                                return `(${point.qx},${point.qy})(${point.sqx},${point.sqy}) | ${point.tag} | DBH: ${point.dbh}`;
                             }
                             return "";
                         },
