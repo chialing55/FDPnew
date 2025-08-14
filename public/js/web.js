@@ -189,6 +189,10 @@ function drawChart3(census4A, group) {
                     y: item.ploty / 20,
                     tag: item.tag,
                     dbh: item.dbh,
+                    qx: item.qx,
+                    qy: item.qy,
+                    sqx: item.sqx,
+                    sqy: item.sqy,
                 };
             });
 
