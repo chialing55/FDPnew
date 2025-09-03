@@ -79,6 +79,7 @@ class SeedlingDataviewer extends Component
                 $basedata=FsSeedlingSlrecord2::where('mtag','like', $mtag)->first();
             } 
         } else {
+            $q=count($result);
             $result2=FsSeedlingData::where('mtag', 'like', $mtag)->orderBy('census', 'ASC')->get()->toArray();
             $basedata=FsSeedlingBase::where('mtag','like', $mtag)->first();
 

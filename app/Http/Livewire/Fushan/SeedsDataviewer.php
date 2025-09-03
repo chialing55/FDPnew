@@ -86,8 +86,6 @@ class SeedsDataviewer extends Component
                 continue;
             } else {
 
-
-
                 $comb[]=$comb_1;
 
                 if (!in_array($comb_2, $comb1)){
