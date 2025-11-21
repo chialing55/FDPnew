@@ -1,0 +1,47 @@
+<?php
+
+use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\Web\WebIndexController;
+
+
+// Route::prefix('web')->group(function () {
+//     Route::get('/splist', [WebIndexController::class, 'splist']);
+//     Route::get('/species/{spcode}', [WebIndexController::class, 'species']);
+//     Route::get('/taitest', [WebIndexController::class, 'taitest']);
+// });
+
+
+// === 前台公開頁面 ===
+
+
+// 你也可以另外做一個 index() 畫面，先用 splist 當首頁也可以
+
+// 物種列表
+Route::get('/splist', [WebIndexController::class, 'splist'])->name('front.splist');
+
+// 單一物種頁
+Route::get('/species/{spcode}', [WebIndexController::class, 'species'])->name('front.species');
+
+// 其他測試 / 顯示頁
+Route::get('/taitest', [WebIndexController::class, 'taitest'])->name('front.taitest');
+
+//background
+
+Route::view('/background/motivation', 'pages.web.background-motivation')->name('background.motivation');
+Route::view('/background/team', 'pages.web.background-team')->name('background.team');
+Route::view('/background/partners', 'pages.web.background-partners')->name('background.partners');
+Route::view('/background/taiwanplots', 'pages.web.background-taiwanplots')->name('background.taiwanplots');
+
+//plots
+Route::view('/plots/fushan', 'pages.web.plots-fushan')->name('plots.fushan');
+Route::view('/plots/nanjenshan', 'pages.web.plots-nanjenshan')->name('plots.nanjenshan');
+Route::view('/plots/shoushan', 'pages.web.plots-shoushan')->name('plots.shoushan');
+
+//subjects
+Route::view('/subjects/tree', 'pages.web.subjects-tree')->name('subjects.tree');
+Route::view('/subjects/seedling', 'pages.web.subjects-seedling')->name('subjects.seedling');
+Route::view('/subjects/seeds', 'pages.web.subjects-seeds')->name('subjects.seeds'); 
+Route::view('/subjects/mortality', 'pages.web.subjects-mortality')->name('subjects.mortality');
+Route::view('/subjects/functionaltraits', 'pages.web.subjects-functionaltraits')->name('subjects.functionaltraits');
+Route::view('/subjects/canopy', 'pages.web.subjects-canopy')->name('subjects.canopy');
+Route::view('/subjects/epiphytes', 'pages.web.subjects-epiphytes')->name('subjects.epiphytes');
