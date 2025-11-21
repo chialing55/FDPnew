@@ -20,14 +20,14 @@ class WebIndexController extends Controller
     public function index(Request $request){
 
         $user = $request->session()->get('user', function () {
-            return 'no';
+            return 'guest';
         });
 
-        if ($user=='no'){
-            return view('login1', [
-                'check' => 'no'
-            ]);
-        } else {
+        // if ($user=='no'){
+        //     return view('login1', [
+        //         'check' => 'no'
+        //     ]);
+        // } else {
 
         // Session::start();
         // $input = Request::all();
@@ -38,28 +38,22 @@ class WebIndexController extends Controller
         $request->session()->put('latest_update', $lasterUpdate);
 
 
-         return view('webindex');
-        }
+        return view('webindex');
+        // }
 
     }
 
     public function species(Request $request, $spcode){
 
         $user = $request->session()->get('user', function () {
-            return 'no';
+            return 'guest';
         });
-
-        if ($user=='no'){
-            return view('login1', [
-                'check' => 'no'
-            ]);
-        } else {
 
              return view('pages/web/species',[
                 'spcode' => $spcode,
                 'user' => $user
              ]);
-        }
+        
 
     }
 
@@ -67,19 +61,14 @@ class WebIndexController extends Controller
     public function splist(Request $request){
 
         $user = $request->session()->get('user', function () {
-            return 'no';
+            return 'guest';
         });
 
-        if ($user=='no'){
-            return view('login1', [
-                'check' => 'no'
-            ]);
-        } else {
 
              return view('pages/web/splist',[
                 'user' => $user
              ]);
-        }
+        
 
 
     }
