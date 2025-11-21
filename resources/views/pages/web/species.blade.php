@@ -1,19 +1,18 @@
-@extends('layouts/webpage') 
+@extends('layouts/webpage')
+
+@section('title', '樣區植物名錄-福山森林動態樣區')
+
 @section('pagejs')
-<script>
-  // var element = document.getElementById("#list1");
-  // element.classList.add("now");
+    <script>
+        // var element = document.getElementById("#list1");
+        // element.classList.add("now");
+    </script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
-
-</script>
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-
-<script>
-
-</script>
+    <script></script>
 @endsection
 @section('rightbox')
 
-@livewire('web.showspecies', ['spcode' =>$spcode])
+    @livewire('web.showspecies', ['spcode' => $spcode])
 
 @endsection
