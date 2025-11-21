@@ -10,7 +10,7 @@ use App\Http\Controllers\Controller;
 
 use Dompdf\Dompdf;
 use setasign\Fpdi\Fpdi;
-use PDF;
+use Barryvdh\DomPDF\Facade\Pdf;
 use App\Models\Ss10mQuad2014;
 use App\Models\Ss10mTree2014;
 use App\Models\Ss10mTree2015;
