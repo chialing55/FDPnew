@@ -10,6 +10,8 @@ RUN apt-get update && apt-get install -y \
     curl \
     unzip \
     zip \
+    nodejs \
+    npm \
     libpng-dev \
     libjpeg-dev \
     libfreetype6-dev \
@@ -25,6 +27,7 @@ RUN apt-get update && apt-get install -y \
     mbstring \
     xml \
     && apt-get clean && rm -rf /var/lib/apt/lists/*
+
 
 # 設定工作目錄
 WORKDIR /app

@@ -13,8 +13,12 @@ services:
       - db
     expose:
       - "9000"
+    ports:
+      - "3000:3000"
     environment:
-      - MODE=development # ✅ 可切換成 production 進行部署
+      APP_ENV: local
+      # MODE: development
+      TAILWIND_WATCH: "1"
 
   nginx:
     image: nginx:latest

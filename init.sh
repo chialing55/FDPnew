@@ -1,6 +1,29 @@
 #!/bin/sh
 set -e
 
+# 統一把 log 寫到這裡
+LOG_FILE=/tmp/init.log
+
+echo "==== init.sh start at $(date) ====" >> "$LOG_FILE"
+
+# 移到專案目錄
+cd /app || {
+  echo "cd /app failed" >> "$LOG_FILE"
+  exit 0
+}
+
+echo "APP_ENV=$APP_ENV" >> "$LOG_FILE"
+echo "TAILWIND_WATCH=$TAILWIND_WATCH" >> "$LOG_FILE"
+
+# 只在非 production，且設定有啟用時才開 watch
+if [ "$APP_ENV" = "local" ] && [ "$TAILWIND_WATCH" = "1" ]; then
+  echo "Starting Tailwind watcher..." >> /tmp/init.log
+  nohup npm run watch:css >> /tmp/tailwind-watch.log 2>&1 &
+else
+  echo "Tailwind watcher disabled." >> /tmp/init.log
+fi
+
+
 # 1. 建立 .env 檔案（若不存在）
 if [ ! -f .env ]; then
   echo "📄 建立 .env 檔案..."
