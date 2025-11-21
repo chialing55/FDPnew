@@ -1,26 +1,4 @@
 ﻿
-.footer_text, .header_list{
-	background-color: #3D4E17;
-/*	font-size: 1.5em;*/
-	padding: 10px 10px;
-/*	font-family: 'cwTeXFangSong', serif;*/
-}
-
-.footer_text a, .header_list a {
-	color: inherit;
-	text-decoration: underline;
-}
-
-
-.footer_text {
-	background-color: #3D4E17;
-}
-
-.header_list{
-	border-radius: 0 0px 0 20px;
-	border:  1px solid #3D4E17;
-}
-
 /* index */
 .index {
 /*	background-image: url(../images/fushan.jpg);*/
@@ -32,12 +10,6 @@
 	align-items: center;
 }
 
-
-.header_listinner{
-	display: inline-flex; 
-	padding: 0px 0 0 20px; 
-
-}
 
 /*content*/
 .content {

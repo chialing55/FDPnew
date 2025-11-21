@@ -1,112 +1,14 @@
 @charset "utf-8";
 @import url(https://fonts.googleapis.com/earlyaccess/cwtexfangsong.css);
-div, span, applet, object, iframe, h1, h2, h3, h4, h5, h6, p, blockquote, pre, a, abbr, acronym, address, big, cite, code, del, dfn, em, font,  ins, kbd, q, s, samp, small, strike, strong, sub, sup, tt, var, b, u, i, center, dl, dt, dd, fieldset, form, label, legend, caption, tbody, tfoot, thead, img {
-  margin: 0;
-  padding: 0;
-  font-size: 100%;
-  vertical-align: baseline;
-  border: 0;
-  outline: 0;
-  font-family: "微軟正黑體", "Microsoft JhengHei", "新細明體", "PMingLiU", AppleGothic, Dotum, Lucida Grande, Verdana Sans-serif;
-}
+
 
 textarea {
   font-size: 100%;
   vertical-align: bottom;
 }
 
-/********連結相關**********/
-a:link {
-  text-decoration: underline;
-  color: #333333;
-}
-a:visited {
-  text-decoration: none;
-  color: #333333;
-}
-a:hover {
-  text-decoration: underline;
-  color: #F7931E;
-}
-a:active {
-  text-decoration: none;
-  color: #F15A24;
-}
-
-.a_ {
-  text-decoration: underline;
-  cursor: pointer;
-}
-
-#header a {
-  text-decoration: none;
-  color: inherit;
-}
-
-
-
 
 /*******一致性的格式*******/
-
-body, html {
-  margin: 0px;
-  padding: 0px;
-  width: 100%;
-  min-width: 1140px;
-  color: #222;
-  box-sizing: border-box;
-  height: 100%;
-  background-color: #fafafa;
-/*  max-width: 1000px;*/
-
-}
-
-.main {
-  height: 100%;
-  width: 100%;
-  display: flex;
-  flex-direction: column;
-  min-width: 900px;
-}
-
-
-p {
-  line-height: 1.8em;
-  font-style: normal;
-/*  font-weight: normal;*/
-  margin:5px 0;
-}
-
-h1, h4, h5{
-  margin: 20px 20px 10px  0;
-  font-size: 1.5em;
-}
-
-h2 {
-  font-size: 1.2em;
-  font-weight: bold;
-}
-
-h3 {
-  font-size:2em;
-  text-decoration: underline;
-  font-family: serif;
-  text-transform: capitalize;
-  font-variant: small-caps;
-  margin: 20px 20px 20px  0;
-}
-
-h4{
-  margin: 0px 20px 10px  0;
-}
-
-h5{
-  margin: 10px 0px;
-}
-
-h6 {
-  margin-bottom: 10px;
-}
 
 
 input, select {
@@ -206,12 +108,6 @@ select {
   flex-wrap: wrap;
 /*  flex-grow: 1;*/
 
-}
-
-
-.flex {
-  display: flex;
-  justify-content: center;
 }
 
 .mar-5-10{

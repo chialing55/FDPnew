@@ -1,0 +1,228 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+    body {
+        @apply font-sans text-forest bg-white text-base leading-normal box-border
+    }
+
+    input,
+    textarea,
+    select {
+        @apply text-forest bg-white border border-forest-mist placeholder-forest-moss focus:ring-forest-fern focus:border-forest-fern rounded-md px-3 py-2;
+    }
+
+    p {
+        @apply text-base leading-relaxed mb-2;
+    }
+
+    h1 {
+        @apply text-2xl font-bold text-forest mt-4 mb-4;
+    }
+
+    h2 {
+        @apply text-xl font-semibold mt-4 mb-4 text-forest-canopy;
+    }
+
+    h3 {
+        @apply text-lg font-semibold mb-2 text-forest-leaf;
+    }
+    
+    h4 {
+        @apply text-base font-semibold mb-2 text-forest-soil;
+    }
+    a {
+        @apply underline underline-offset-2 decoration-[1px];
+    }
+
+    a:hover {
+        @apply text-forest-canopy underline font-bold; 
+    }
+
+
+    /* Chrome, Safari, Edge, Opera */
+    input[type=number]::-webkit-inner-spin-button,
+    input[type=number]::-webkit-outer-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+
+    }
+
+    /* Firefox */
+    input[type=number] {
+      -moz-appearance: textfield;
+      border-color: orange !important;
+    }
+
+    /* Tailwind 原始樣式之外，自訂 placeholder 樣式 */
+    input::placeholder {
+    @apply italic text-lime-700 opacity-50 text-sm;
+    }
+
+    input[type='checkbox']:checked {
+        background-color: theme('colors.lime.800');
+    }
+}
+
+@layer components {
+    .web-nav a {
+        @apply no-underline;
+    }
+
+    .web-nav a:hover {
+        @apply no-underline font-bold text-inherit;
+        text-shadow: 2px 2px 4px rgba(0,0,0,0.35);
+    }
+
+    .web-nav a.active {
+        @apply font-bold;   /* 可選 */
+    }
+
+    .default-text {
+        @apply font-sans text-base leading-relaxed text-garden-soil;
+    }
+
+    /* 各類按紐 */
+    .btn-primary {
+        @apply bg-forest text-white font-semibold px-4 py-2 rounded hover:bg-forest-bark;
+    }
+
+    .btn-secondary {
+        @apply bg-white text-forest-canopy font-semibold px-4 py-1 rounded hover:bg-gray-200;
+    }
+
+    .btn-add {
+        @apply bg-forest-soil text-white font-semibold px-4 py-1 rounded hover:bg-forest-bark;
+    }
+
+    .btn-submit {
+        @apply bg-forest-canopy text-white font-semibold px-4 py-1 rounded hover:bg-forest-leaf;
+    }
+
+    .btn-outline {
+        @apply border border-forest-mist text-forest text-sm px-4 py-2 rounded hover:bg-forest-mist;
+    }
+
+    .btn-delete {
+        @apply text-sm px-1.5 py-0.5 rounded;
+    }
+
+    /* 導覽按鈕（btn-navigation + 子選單） */
+    /* 共用樣式 */
+
+    .web-btn-navigation-2 {
+        @apply absolute bg-white/90 text-black shadow-lg rounded z-10 min-w-[10rem] -left-4;
+    }
+
+    .web-btn-navigation-2 a {
+        @apply block px-4 py-2 rounded hover:bg-gray-300/70 hover:text-gray-800 hover:font-bold no-underline;
+    }
+
+    .web-nav-active {
+        @apply text-black font-bold;
+    }
+
+    .hanb a {
+        @apply block px-2 py-[2px] rounded hover:bg-white hover:text-forest hover:font-bold no-underline;
+    }
+
+    .hero-title-stroke {
+        color: #ffffff; /* 主體還是白字 */
+        -webkit-text-stroke: 1.5px rgba(255, 255, 255, 0.9); /* 微白描邊 */
+        text-shadow:
+            0 0 8px rgba(0, 0, 0, 0.65),
+            0 2px 12px rgba(0, 0, 0, 0.8); /* 讓字從背景浮出來 */
+    }
+
+    /* 卡片 */
+    .base-card {
+        @apply bg-[#fffbe6]  rounded-lg p-6 shadow-sm w-fit;
+    }
+
+    .green-card {
+        @apply bg-forest-mist border border-forest-soil rounded-lg p-6 shadow-sm w-fit;
+    }
+
+    .white-card {
+        @apply bg-white border border-gray-200 rounded-lg p-6 shadow-sm w-fit;
+    }
+
+    .gray-card {
+        @apply bg-gray-50 border border-gray-200 rounded-lg p-6 shadow-sm w-fit;
+    }
+
+    /* 警告提示框 */
+    .alert-info {
+        @apply bg-forest-mist text-forest border border-forest-soil p-4 rounded;
+    }
+
+    .alert-warning {
+        @apply bg-yellow-100 text-yellow-800 border border-yellow-300 p-4 rounded;
+    }
+
+    .alert-error {
+        @apply bg-red-100 text-red-800 border border-red-300 p-4 rounded;
+    }
+
+    [x-cloak] {
+        display: none !important;
+    }
+
+    /* hr */
+    .hr-bark {
+        @apply border-t border-forest-bark my-8;
+    }
+
+    .hr-forest {
+        @apply border-t border-forest my-8;
+    }
+
+    .hr-mist {
+        @apply border-t border-forest-mist my-8;
+    }
+
+    .hr-dashed {
+        @apply border-t-2 border-dashed border-forest-soil my-6;
+    }
+
+    /* 表格 */
+    .non-editable-row {
+        @apply bg-gray-100 text-gray-800 cursor-not-allowed;
+    }
+
+    .non-editable-row td {
+        @apply pointer-events-none;
+    }
+
+    .text-shadow {
+        text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+    }
+
+    .tabulator-cell.toggled-red { color: #dc2626; /* Tailwind red-600 */ }
+    /* 單元格：灰底 + 淺字 */
+    .tabulator-cell.col-old {
+        background-color: #f3f4f6; /* gray-100 */
+        color: #6b7280;            /* gray-500 */
+    }
+
+    /* 表頭：灰底 + 淺字（只套指定欄位） */
+    .tabulator .tabulator-col[tabulator-field="flower_bud_o"] .tabulator-col-content,
+    .tabulator .tabulator-col[tabulator-field="flower_o"] .tabulator-col-content,
+    .tabulator .tabulator-col[tabulator-field="immature_fruit_o"] .tabulator-col-content,
+    .tabulator .tabulator-col[tabulator-field="fruit_o"] .tabulator-col-content {
+        background-color: #f9fafb; /* gray-50/100 */
+        color: #6b7280;            /* gray-500 */
+    }
+
+    /* 單格有改動：紅字 */
+    .tabulator-cell.cell-changed { color: #dc2626; }        /* red-600 */
+    /* 整列有改動：淡橘底 */
+    .tabulator-row.row-changed { background-color: #fff7ed; } /* amber-50 */
+
+    /* 有變更的整列：覆蓋斑馬線 */
+    .tabulator .tabulator-row.row-changed,
+    .tabulator .tabulator-row.row-changed .tabulator-cell {
+    background-color: #fff7ed !important; /* 淡橘底 */
+    }    
+}
