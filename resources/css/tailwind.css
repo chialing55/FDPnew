@@ -3,8 +3,11 @@
 @tailwind utilities;
 
 @layer base {
+    html {
+        font-size: 18px; /* 由原本的16px加大 */
+    }
     body {
-        @apply font-sans text-forest bg-white text-base leading-normal box-border
+        @apply font-sans text-gray-900 bg-white text-lg leading-normal box-border;
     }
 
     input,
@@ -14,7 +17,7 @@
     }
 
     p {
-        @apply text-base leading-relaxed mb-2;
+        @apply leading-relaxed mb-2;
     }
 
     h1 {
@@ -66,7 +69,7 @@
 }
 
 @layer components {
-    .web-nav a {
+    .web-nav a, .breadcrumb-separator a{
         @apply no-underline;
     }
 
@@ -78,6 +81,17 @@
     .web-nav a.active {
         @apply font-bold;   /* 可選 */
     }
+
+
+    .breadcrumb-separator {
+        @apply text-gray-600;
+    }
+
+    .breadcrumb-separator a:hover{
+        @apply no-underline font-bold text-inherit;
+        text-decoration: none !important;
+    }
+
 
     .default-text {
         @apply font-sans text-base leading-relaxed text-garden-soil;

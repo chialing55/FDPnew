@@ -37,7 +37,7 @@
         {{-- </a> --}}
 
         {{-- 桌機版 nav (md 以上顯示) --}}
-        <nav class="text-white bg-forest-dark hidden lg:flex p-2 rounded-l-[15px] border border-forest-dark relative">
+        <nav class="text-white bg-forest-dark hidden lg:flex p-2 rounded-l-[15px] border border-forest-dark relative text-sm lg:text-base">
             <div class="inline-flex pl-8 space-x-5 my-1">
                 {{-- 首頁：單一連結 --}}
                 <div class='web-nav'>
@@ -83,12 +83,18 @@
                         {{ __('web.nav_plants') }}
                     </a>
                 </div>
-                {{-- 聯絡我們 --}}
+                {{-- 最新消息 --}}
                 <div class='web-nav'>
+                    <a href="{{ route('news.index') }}">
+                        {{ __('web.nav_news') }}
+                    </a>
+                </div>
+                {{-- 聯絡我們 --}}
+                {{-- <div class='web-nav'>
                     <a href="">
                         {{ __('web.nav_contact') }}
                     </a>
-                </div>
+                </div> --}}
                 {{-- 語言切換 --}}
                 <div class='web-nav'>
                     @if (app()->getLocale() === 'zh-TW')
@@ -106,10 +112,10 @@
 
         {{-- 手機版：收合式導覽列 --}}
         <nav x-show="open" x-transition x-cloak
-            class="lg:hidden absolute right-2 top-full mt-2 border shadow-lg rounded-lg text-right py-3 px-4 space-y-2 bg-gray-100 text-gray-800 web-nav">
+            class="lg:hidden absolute right-2 top-full mt-2 border shadow-lg rounded-lg text-right py-3 px-4 space-y-2 bg-gray-100 text-gray-800 web-nav text-sm ">
             <div><a href="/">{{ __('web.nav_home') }}</a></div>
             <div>{{ __('web.nav_background') }} - {{ __('web.nav_background_motivation') }}</div>
-            <div>{{ __('web.nav_site') }}</div>
+            <div>{{ __('web.nav_plots') }}</div>
             <div>{{ __('web.nav_subjects') }}</div>
             <div><a href="/splist">{{ __('web.nav_plants') }}</a></div>
             <div>{{ __('web.nav_contact') }}</div>

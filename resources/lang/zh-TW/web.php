@@ -25,7 +25,12 @@ return [
     'nav_subjects_canopy'    => '樹冠調查',
     'nav_subjects_epiphytes'    => '附生植物',
     'nav_plants'      => '監測植物',
+    'nav_news'      => '最新消息',
     'nav_contact'     => '聯絡我們',
+
+    'index_text_1'    => '個樣區',
+    'index_text_2'    => '種植物',
+    'index_text_3'    => '棵樹',
 
     'header_title'    => '植物物候長期監測站',
     'footer_copyright'=> '版權所有',

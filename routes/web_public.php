@@ -45,3 +45,8 @@ Route::view('/subjects/mortality', 'pages.web.subjects-mortality')->name('subjec
 Route::view('/subjects/functionaltraits', 'pages.web.subjects-functionaltraits')->name('subjects.functionaltraits');
 Route::view('/subjects/canopy', 'pages.web.subjects-canopy')->name('subjects.canopy');
 Route::view('/subjects/epiphytes', 'pages.web.subjects-epiphytes')->name('subjects.epiphytes');
+
+//plants
+Route::view('/plants', 'pages.web.plants')->name('plants.index');
+//news
+Route::view('/news', 'pages.web.news')->name('news.index');

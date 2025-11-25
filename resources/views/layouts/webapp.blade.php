@@ -27,7 +27,7 @@
 
 <body class="text-gray-900 min-h-screen flex flex-col">
 
-    @include('includes.webheader')
+    @include('includes.web-navigation')
     <div>
         @yield('hero')
     </div>
@@ -37,7 +37,7 @@
         </div>
     </main>
     <footer>
-        <div class='bg-forest-dark p-2 text-white flex justify-between' style='font-size: 14px;'>
+        <div class='bg-forest-dark p-2 text-white flex justify-between text-sm'>
             <p>
                 國立東華大學 NDHU / 國立中山大學 NSYSU / 國立台灣大學 NTU<br>
                 林務局 TFB / 林業試驗所 TFRI / ForestGEO

@@ -177,6 +177,25 @@ return [
             ]) : [],
         ],
 
+        'mysql_web' => [
+            'driver' => env('DB_CONNECTION_WEB'),
+            'host' => env('DB_HOST_WEB'),
+            'port' => env('DB_PORT_WEB'),
+            'database' => env('DB_DATABASE_WEB'),
+            'username' => env('DB_USERNAME_WEB'),
+            'password' => env('DB_PASSWORD_WEB'),
+            'unix_socket' => env('DB_SOCKET', ''),
+            'charset' => 'utf8mb4',
+            'collation' => 'utf8mb4_unicode_ci',
+            'prefix' => '',
+            'prefix_indexes' => true,
+            'strict' => true,
+            'engine' => null,
+            'options' => extension_loaded('pdo_mysql') ? array_filter([
+                PDO::MYSQL_ATTR_SSL_CA => env('MYSQL_ATTR_SSL_CA'),
+            ]) : [],
+        ],
+
         'pgsql' => [
             'driver' => 'pgsql',
             'url' => env('DATABASE_URL'),

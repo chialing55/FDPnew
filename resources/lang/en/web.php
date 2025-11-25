@@ -24,7 +24,12 @@ return [
     'nav_subjects_canopy'    => 'Canopy Survey',
     'nav_subjects_epiphytes'    => 'Epiphytes',
     'nav_plants'      => 'Plants',
+    'nav_news'      => 'News',
     'nav_contact'     => 'Contact',
+
+    'index_text_1'    => 'plots',
+    'index_text_2'    => 'plant species',
+    'index_text_3'    => 'trees',    
 
     'header_title'    => 'Long-term Plant Phenology Monitoring Station',
     'footer_copyright'=> 'All rights reserved',
