@@ -37,6 +37,7 @@ class S1haShowentry extends Component
     public $sqx;
     public $sqy;
     public $cov;
+    public $datasavenote;
 
     public function mount(){
 
