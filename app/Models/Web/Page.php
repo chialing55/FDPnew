@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Models\WEb;
+namespace App\Models\Web;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -15,7 +15,7 @@ class Page extends Model
     protected $fillable = [
         'slug',
         'title_zh_tw', 'title_en',
-        'content_zh_tw', 'content_en',
+        'route_name',
     ];
 
     public function getTitleAttribute()
@@ -25,11 +25,12 @@ class Page extends Model
             : $this->title_zh_tw;
     }
 
-    public function getContentAttribute()
+    public function blocks()
     {
-        return app()->getLocale() === 'en'
-            ? $this->content_en
-            : $this->content_zh_tw;
+        return $this->hasMany(ContentBlock::class, 'owner_id')
+            ->where('owner_type', 'pages')
+            ->orderBy('sort_order');
     }
+
 }
 
