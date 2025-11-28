@@ -5,42 +5,41 @@
         <div>1000000 {{ __('web.index_text_3') }}</div>
     </div>
     <div class='z-5 mx-auto gap-4 text-center md:px-8 md:pb-4'>
-        <p class="leading-relaxed text-gray-700 text-sm md:text-base">
-            {!! $indexIntro->content ?? '' !!}
+        <p class="text-sm leading-relaxed text-gray-700 md:text-base">
+            {!! $indexIntro->body ?? '' !!}
         </p>
     </div>
     {{-- plots --}}
-    <div class='relative left-1/2 right-1/2 mb-12 ml-[-50vw] mr-[-50vw] lg:mt-8 w-screen bg-gray-200 py-6'>
+    <div class='relative left-1/2 right-1/2 mb-12 ml-[-50vw] mr-[-50vw] w-screen bg-gray-200 py-6 lg:mt-8'>
         <div class='mx-auto lg:-mt-16 lg:max-w-[70rem]'>
-@foreach($plots as $plot)
+            @foreach ($plots as $plot)
+                @php
+                    $img_postion = match ($plot) {
+                        'fushan' => 'object-top md:object-[0%_-50px]',
+                        'nanjenshan' => 'object-center',
+                        'shoushan' => 'object-top',
+                        default => 'object-center',
+                    };
 
-@php
-    $img_postion = match($plot) {
-        'fushan' => 'object-top md:object-[0%_-50px]',
-        'nanjenshan' => 'object-center',
-        'shoushan' => 'object-top',
-        default => 'object-center',
-    };
+                @endphp
 
-@endphp
+                <div
+                    class="{{ $loop->even ? 'lg:flex-row-reverse' : '' }} m-4 overflow-hidden rounded-lg border bg-white p-2 lg:flex lg:flex-row">
 
-    <div class="rounded-lg overflow-hidden border lg:flex lg:flex-row m-4 bg-white p-2 {{ $loop->even ? 'lg:flex-row-reverse' : '' }}">
-        
-        <img src='{{ asset("images/plots/{$plot}_thumb.jpg") }}'
-             alt='{{ $plot }}'
-             class='w-full lg:w-[60%] h-48 object-cover {{$img_postion}} '>
+                    <img src='{{ asset("images/plots/{$plot}_thumb.jpg") }}' alt='{{ $plot }}'
+                        class='{{ $img_postion }} h-48 w-full object-cover lg:w-[60%]'>
 
-        <div class='{{ $loop->even ? 'pr-4' : 'pl-4' }}'>
-            <h2 class='text-2xl capitalize {{ $loop->even ? 'text-right' : '' }}'>
-                {{ __('web.nav_plots_'.$plot) }}
-            </h2>
-            <p class='text-gray-600 text-sm'>
-                {{ __('web.plots_'.$plot.'_description') }}
-            </p>
-        </div>
+                    <div class='{{ $loop->even ? 'pr-4' : 'pl-4' }}'>
+                        <h2 class='{{ $loop->even ? 'text-right' : '' }} text-2xl capitalize'>
+                            {{ __('web.nav_plots_' . $plot) }}
+                        </h2>
+                        <p class='text-sm text-gray-600'>
+                            {{ __('web.plots_' . $plot . '_description') }}
+                        </p>
+                    </div>
 
-    </div>
-@endforeach
+                </div>
+            @endforeach
 
 
 
