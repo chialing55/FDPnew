@@ -3,7 +3,7 @@
 $('.listlink').on('click', function(){
 	let type=$(this).attr('type');
 	if (typeof type!='undefined'){
-	location.href=(`/shoushan/plot/${type}`);
+	location.href=(`/admin/shoushan/plot/${type}`);
 	}
 
 })

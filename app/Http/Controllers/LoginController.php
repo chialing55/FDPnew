@@ -52,12 +52,12 @@ class LoginController extends Controller
             $request->session()->put('user', $input['id']);
 
 
-            return redirect()->to('choice')->send();
+            return redirect()->route('admin.choice')->send();
 
         } else {
             // echo 'no';
 
-            return view('/login1', [
+            return view('/admin/login', [
                 'check' => 'no'
             ]);
         }

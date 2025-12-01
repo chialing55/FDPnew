@@ -10,7 +10,7 @@
       @endphp
     </p>
   @endif --}}
-  <a href='/'><div id="header_text" class='fc-w'>
+  <a href='/admin/login'><div id="header_text" class='fc-w'>
     {{-- <img src="{{asset('/images/header.png')}}" alt="" border="0"/> --}}
     {{-- <img src="{{asset('/images/header_tree.png')}}" alt="" border="0" height="70" /> --}}
     台灣森林動態樣區資料管理系統
@@ -31,8 +31,6 @@
   </div>  
   </div>
     @yield('headerListinner')
-
-
 
 </div>
 

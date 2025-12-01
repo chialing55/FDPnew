@@ -1,6 +1,6 @@
 // console.log(type);
 //重新選擇工作項目
-let urlbase = '/fsseeds';
+let urlbase = '/admin/fsseeds';
 
 $('.listlink').on('click', function () {
   let type = $(this).attr('type');
@@ -9,7 +9,7 @@ $('.listlink').on('click', function () {
     if (type == 'websplist') {
       window.open('/web/splist', '_blank');
     } else {
-      location.href = (`/fushan/seeds/${type}`);
+      location.href = (`/admin/fushan/seeds/${type}`);
     }
 
   }

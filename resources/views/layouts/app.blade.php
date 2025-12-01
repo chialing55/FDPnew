@@ -47,7 +47,7 @@ date_default_timezone_set("Asia/Taipei");
 <script src="{{asset('/js/jquery.tablesorter.widgets.min.js')}}"></script>
 <script>
     $('.back').on('click', function(){
-        location.href=`/choice`;
+        location.href=`/admin/choice`;
     })
 
 

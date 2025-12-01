@@ -51,8 +51,8 @@ Route::prefix('admin')->group(function () {
         return view('login1');
     })->name('admin.login');
 
-    // 登入送出：/admin/login
-    Route::post('/login', [LoginController::class, 'login'])->name('admin.login.post');
+    // 登入送出：/admin/login2
+    Route::post('/login2', [LoginController::class, 'login'])->name('admin.login.post');
 
     // 選擇工作頁：/admin/choice
     Route::get('/choice', [ChoiceController::class, 'check'])->name('admin.choice');
@@ -61,7 +61,7 @@ Route::prefix('admin')->group(function () {
 
 
 // 原本：Route::prefix('fushan')->group(function () { Route::get('{project}', function($project) { ... }); });
-Route::prefix('fushan')->group(function () {
+Route::prefix('admin/fushan')->group(function () {
 
     // /fushan/seedling  -> SeedlingController@seedling
     Route::get('/seedling', [SeedlingController::class, 'seedling'])->defaults('site', 'fushan');
@@ -113,7 +113,7 @@ Route::prefix('fushan')->group(function () {
 
 // 原本：Route::get('/shoushan/{project}', function($project) {...});
 // 以及 /shoushan/{project}/{type}
-Route::prefix('shoushan')->group(function () {
+Route::prefix('admin/shoushan')->group(function () {
 
     Route::get('/plot', [PlotController::class, 'plot'])->defaults('site', 'shoushan');
 

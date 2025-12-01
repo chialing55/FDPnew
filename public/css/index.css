@@ -117,19 +117,28 @@
 	border-bottom: 100px solid #90a955;
 }
 
-.box1, .box2 {
+.box1, .box2, .box3 {
 	display: flex;
-	flex-direction: column;
+	flex-direction: row;
 	padding:20px;
+	gap:10px;
 	background-color: white;
 	width: fit-content;
 	margin: 30px 10px 10px 0;
 	border-radius: 5px;
 	border: 1px solid #eee;
+	width: 350px;
+	justify-content: space-between;
+	flex-wrap: wrap;
+	
 }
 
 .box2 {
 	background-color: #e6e6e6;
+}
+
+.box3 {
+	background-color: #cdd7cb;
 }
 
 .img {

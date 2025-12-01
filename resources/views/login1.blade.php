@@ -32,7 +32,7 @@
 
       @endif
 
-        <form action="/login2" method="post">
+        <form action="/admin/login2" method="post">
           @csrf  
           {{-- {{ csrf_field() }} --}}
           {{-- //提供表單驗證功能 (name=_token) --}}
