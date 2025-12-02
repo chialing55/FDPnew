@@ -4,7 +4,7 @@ FROM composer:2 AS composer
 # 第二步：主容器使用 PHP 8.2 FPM
 FROM php:8.2-fpm
 
-# 安裝系統套件
+# 安裝系統套件 + PHP extensions
 RUN apt-get update && apt-get install -y \
     git \
     curl \
@@ -18,15 +18,18 @@ RUN apt-get update && apt-get install -y \
     libonig-dev \
     libxml2-dev \
     libzip-dev \
+    libicu-dev \
     && docker-php-ext-configure gd --with-freetype --with-jpeg \
     && docker-php-ext-install \
-    pdo \
-    pdo_mysql \
-    zip \
-    gd \
-    mbstring \
-    xml \
+        pdo \
+        pdo_mysql \
+        zip \
+        gd \
+        mbstring \
+        xml \
+        intl \
     && apt-get clean && rm -rf /var/lib/apt/lists/*
+
 
 
 # 設定工作目錄
@@ -39,7 +42,7 @@ COPY --from=composer /usr/bin/composer /usr/bin/composer
 COPY composer.json composer.lock ./
 
 # 安裝 Composer 套件
-RUN composer install --no-interaction --prefer-dist --no-scripts --ignore-platform-reqs
+RUN composer install --no-interaction --prefer-dist --no-scripts 
 
 # 複製整個專案
 COPY . .
