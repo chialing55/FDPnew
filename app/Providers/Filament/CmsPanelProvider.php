@@ -17,6 +17,8 @@ use Illuminate\Foundation\Http\Middleware\VerifyCsrfToken;
 use Illuminate\Routing\Middleware\SubstituteBindings;
 use Illuminate\Session\Middleware\StartSession;
 use Illuminate\View\Middleware\ShareErrorsFromSession;
+use Filament\Navigation\NavigationItem;
+
 
 class CmsPanelProvider extends PanelProvider
 {
@@ -27,6 +29,14 @@ class CmsPanelProvider extends PanelProvider
             ->id('cms')
             ->path('cms')
             ->login()
+            ->authGuard('web')
+            ->brandName('森林動態樣區研究成果平台・後台') 
+            ->navigationItems([
+                NavigationItem::make('回到前台首頁')
+                    ->url(url('/'))           // 如果有 route('index') 也可以改成 ->url(route('index'))
+                    ->icon('heroicon-o-home')
+                    ->openUrlInNewTab(),     // 新分頁打開，比較安全
+            ])
             ->colors([
                 'primary' => Color::Amber,
             ])

@@ -126,7 +126,7 @@
     /* 共用樣式 */
 
     .web-btn-navigation-2 {
-        @apply absolute bg-white/90 text-black shadow-lg rounded z-10 min-w-[10rem] -left-4;
+        @apply absolute bg-white/90 text-black shadow-lg rounded z-10 min-w-[10rem] right-0 text-end;
     }
 
     .web-btn-navigation-2 a {

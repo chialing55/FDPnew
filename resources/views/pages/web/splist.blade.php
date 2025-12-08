@@ -1,18 +1,12 @@
-@extends('layouts/webpage') 
+@extends('layouts/webpage')
 @section('pagejs')
-<script>
-  // var element = document.getElementById("#list1");
-  // element.classList.add("now");
+    <script>
+        // var element = document.getElementById("#list1");
+        // element.classList.add("now");
+    </script>
 
-
-</script>
-
-<script>
-
-</script>
+    <script></script>
 @endsection
 @section('rightbox')
-
-@livewire('web.showsplist')
-
+    <livewire:web.showsplist />
 @endsection

@@ -15,7 +15,8 @@ class Page extends Model
     protected $fillable = [
         'slug',
         'title_zh_tw', 'title_en',
-        'route_name',
+        'view_name', 'description', 'hero_image',
+        'nav_group', 'nav_order',
     ];
 
     public function getTitleAttribute()

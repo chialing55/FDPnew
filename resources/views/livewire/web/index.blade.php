@@ -31,10 +31,10 @@
 
                     <div class='{{ $loop->even ? 'pr-4' : 'pl-4' }}'>
                         <h2 class='{{ $loop->even ? 'text-right' : '' }} text-2xl capitalize'>
-                            {{ __('web.nav_plots_' . $plot) }}
+                            {{ $plotsContent[$plot]['title'] ?? '' }}
                         </h2>
                         <p class='text-sm text-gray-600'>
-                            {{ __('web.plots_' . $plot . '_description') }}
+
                         </p>
                     </div>
 
@@ -48,7 +48,7 @@
 
     {{-- news --}}
     <div>
-        <h1 class='inline-block bg-forest-dark p-2 text-white'>{{ __('web.nav_news') }}</h1>
+        <h1 class='inline-block bg-forest-dark p-2 text-white'>{{ __('web.index_news') }}</h1>
 
     </div>
 

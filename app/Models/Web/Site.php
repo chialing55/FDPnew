@@ -57,9 +57,13 @@ class Site extends Model
             ->orderBy('sort_order');
     }
 
+    public function siteTeams()
+    {
+        return $this->hasMany(SiteTeam::class);
+    }    
     public function teams()
     {
-        return $this->belongsToMany(Team::class, 'site_team', 'site_id', 'team_id')
-            ->withTimestamps();
+        return $this->belongsToMany(Team::class, 'site_team')
+            ->withPivot('role', 'sort_order');
     }
 }

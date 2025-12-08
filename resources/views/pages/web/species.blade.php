@@ -1,6 +1,6 @@
 @extends('layouts/webpage')
 
-@section('title', '樣區植物名錄-福山森林動態樣區')
+@section('title', '樣區植物名錄-{{__('web.title')}}')
 
 @section('pagejs')
     <script>
@@ -14,5 +14,5 @@
 @section('rightbox')
 
     @livewire('web.showspecies', ['spcode' => $spcode])
-
+    <livewire:web.showspecies, ['spcode' => $spcode] />
 @endsection

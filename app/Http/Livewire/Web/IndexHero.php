@@ -16,6 +16,13 @@ class IndexHero extends Component
 
     public function mount(): void
     {
+
+        // dd($this->title);
+        $this->title = $this->title();
+        $this->hero = $this->pickRandomHero();
+    } 
+
+    protected function title(){
         $segment1 = request()->segment(1);  // 'background'
         // 第二段：motivation / team / ...  可能是 null
         $segment2 = request()->segment(2);  // 'motivation'
@@ -27,12 +34,9 @@ class IndexHero extends Component
         } else {
             $key = 'web.nav_'.$segment1;
         }  
-        $this->title = __($key);  
-        // dd($this->title);
+        return __($key); 
+    }
 
-        $this->hero = $this->pickRandomHero();
-
-    } 
     protected function pickRandomHero(): string
     {
         $dir = public_path('images/hero');

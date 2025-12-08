@@ -6,30 +6,19 @@ return [
     'index_hero_2' => '- Fushan & Nanjenshan',
 //nav
     'nav_home'        => 'Home',
-    'nav_background'       => 'Background',
-    'nav_background_motivation'  => 'Motivation',
-    'nav_background_team'  => 'Teams',
-    'nav_background_partners'  => 'Partners',
-    'nav_background_taiwanplots'  => 'Taiwan Forest Plots',    
+    'nav_about'       => 'About Us',
+   
     'nav_plots'        => 'Plots',
-    'nav_plots_fushan'        => 'Fushan', 
-    'nav_plots_nanjenshan'        => 'Nanjenshan',
-    'nav_plots_shoushan'        => 'Shoushan',   
-    'nav_subjects'    => 'Topics',
-    'nav_subjects_tree'    => 'Forest Dynamics',
-    'nav_subjects_seedling'    => 'Seedling Dynamics',
-    'nav_subjects_seeds'    => 'Seed Rain & Plant Phenology',
-    'nav_subjects_mortality'    => 'Tree Mortality',
-    'nav_subjects_functionaltraits'    => 'Functional Traits',
-    'nav_subjects_canopy'    => 'Canopy Survey',
-    'nav_subjects_epiphytes'    => 'Epiphytes',
-    'nav_plants'      => 'Plants',
-    'nav_news'      => 'News',
-    'nav_contact'     => 'Contact',
+  
+    'nav_subjects'    => 'Subjects',
+    'nav_results'    => 'Results',
+
 
     'index_text_1'    => 'plots',
     'index_text_2'    => 'plant species',
-    'index_text_3'    => 'trees',    
+    'index_text_3'    => 'trees',
+    
+    'index_news' => 'NEWS',
 
     'header_title'    => 'Long-term Plant Phenology Monitoring Station',
     'footer_copyright'=> 'All rights reserved',

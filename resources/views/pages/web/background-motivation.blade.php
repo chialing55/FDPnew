@@ -6,8 +6,8 @@
     </script>
 @endsection
 @section('hero')
-    @livewire('web.page-background-hero')
+    <livewire:web.page-background-hero />
 @endsection
 @section('content')
-    @livewire('web.background-motivation')
+    <livewire:web.background-motivation />
 @endsection

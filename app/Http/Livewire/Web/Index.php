@@ -12,6 +12,7 @@ class Index extends Component
 {
     public $plots=['fushan', 'nanjenshan', 'shoushan'];
     public $indexIntro;
+    public $plotsContent=[];
 
     public function mount(): void
     {
@@ -20,6 +21,12 @@ class Index extends Component
 
         // 2. 載入該頁的內容區塊
         $this->indexIntro = $page->blocks()->where('block_type','intro')->first();
+
+        // 3. 載入各樣區的內容區塊
+        foreach ($this->plots as $plot) {
+            $plotBlock = Page::where('title_en', $plot)->firstOrFail();
+            $this->plotsContent[$plot]['title'] = $plotBlock->title;
+        }
         
         // dd($this->indexIntro);
 

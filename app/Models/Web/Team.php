@@ -14,10 +14,6 @@ class Team extends Model
 
     protected $fillable = [
         'team_type',          // academic / government / ngo / other
-        'name_zh_tw',
-        'name_en',
-        'short_name_zh_tw',
-        'short_name_en',
         'institution_zh_tw',
         'institution_en',
         'department_zh_tw',
@@ -30,22 +26,6 @@ class Team extends Model
         'logo_path',
         'is_active',
     ];
-
-    /** 依語系回傳團隊名稱 */
-    public function getNameAttribute(): ?string
-    {
-        return app()->getLocale() === 'en'
-            ? $this->name_en
-            : $this->name_zh_tw;
-    }
-
-    /** 依語系回傳簡稱 */
-    public function getShortNameAttribute(): ?string
-    {
-        return app()->getLocale() === 'en'
-            ? $this->short_name_en
-            : $this->short_name_zh_tw;
-    }
 
     public function getInstitutionAttribute(): ?string
     {
@@ -78,7 +58,12 @@ class Team extends Model
     /** 參與的樣區（透過 site_team pivot） */
     public function sites()
     {
-        return $this->belongsToMany(Site::class, 'site_team', 'team_id', 'site_id')
-            ->withTimestamps();
+        return $this->belongsToMany(Site::class, 'site_team')
+            ->withPivot('role', 'sort_order');
+    }
+
+    public function siteTeams()
+    {
+        return $this->hasMany(SiteTeam::class);
     }
 }

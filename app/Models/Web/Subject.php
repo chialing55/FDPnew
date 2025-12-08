@@ -5,11 +5,11 @@ namespace App\Models\Web;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-class Topic extends Model
+class Subject extends Model
 {
     use HasFactory;
 
-    protected $table = 'topics';
+    protected $table = 'subjects';
     protected $connection = 'mysql_web';
 
     protected $fillable = [
@@ -57,7 +57,7 @@ class Topic extends Model
     public function blocks()
     {
         return $this->hasMany(ContentBlock::class, 'owner_id')
-            ->where('owner_type', 'topic')
+            ->where('owner_type', 'subjects')
             ->orderBy('sort_order');
     }
 }

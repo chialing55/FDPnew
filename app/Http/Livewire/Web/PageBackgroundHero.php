@@ -6,6 +6,7 @@ use Livewire\Component;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\File;
 use App\Helpers\PageTitleHelper;
+use App\Models\Web\Page;
 
 class PageBackgroundHero extends Component
 {
@@ -15,12 +16,21 @@ class PageBackgroundHero extends Component
     public $censuses = '';
     public string $title = '';
     public array $breadcrumbs = [];
+    public string $slug;
+    public $page;
 
-    public function mount(): void
+    public function mount($slug): void
     {
-        $this->title = PageTitleHelper::getTranslatedTitle(); 
+        $this->page = Page::where('slug', $slug)->firstOrFail();
+        $this->title = $this->page->title;
+        // $this->title = PageTitleHelper::getTranslatedTitle(); 
         // dd($this->title);
-        $this->breadcrumbs = PageTitleHelper::breadcrumbs();
+
+        $breadcrumbs[] = ['label' => __('web.nav_home'), 'url' => '/'];
+        $breadcrumbs[] = ['label' => __('web.nav_'.$this->page->nav_group.''), 'url' => ''];
+        $breadcrumbs[] = ['label' => __(''.$this->page->title.''), 'url' => ''];
+
+        $this->breadcrumbs = $breadcrumbs;
 
         $this->hero = $this->pickRandomHero();
     } 

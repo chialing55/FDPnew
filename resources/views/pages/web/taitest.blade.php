@@ -12,7 +12,6 @@
 </script>
 @endsection
 @section('rightbox')
-
-@livewire('web.taitest')
+<livewire:web.taitest />
 
 @endsection

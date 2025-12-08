@@ -13,7 +13,7 @@ class SiteTeam extends Model
     protected $connection = 'mysql_web';
 
     // 如果你只用 pivot 不會單獨操作，也可以把 $timestamps = false;
-    public $timestamps = true;
+    public $timestamps = false;
 
     protected $fillable = [
         'site_id',
