@@ -63,7 +63,7 @@ class PageResource extends Resource
                             ->label('導覽群組')
                             ->options([
                                 'about' => '關於我們（about）',
-                                'plots'      => '動態樣區（plots）',
+                                'sites'      => '動態樣區（sites）',
                                 'subjects'   => '研究主題（subjects）',
                                 'results'    => '研究成果（results）',
                                 'others'     => '其他頁面（others）',

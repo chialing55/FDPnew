@@ -2,13 +2,17 @@
 
 return [
     'title'      => '台灣森林動態樣區研究成果平台',
-    'index_hero_1' => '用長期生態調查資料述說台灣森林的故事',
+    'index_hero_1_part1' => '用',
+    'index_hero_1_highlight' => '長期生態調查資料',
+    'index_hero_1_part2' => '述說',
+    'index_hero_1_forest' => '台灣森林',
+    'index_hero_1_tail' => '的故事',
     'index_hero_2' => '- 福山與南仁山',
 //nav
     'nav_home'        => '首頁',
     'nav_about'       => '關於我們',
     
-    'nav_plots'        => '動態樣區', 
+    'nav_sites'        => '動態樣區', 
 
     'nav_subjects'    => '研究主題',
     'nav_results'    => '研究成果',

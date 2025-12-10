@@ -33,7 +33,7 @@ class AppServiceProvider extends ServiceProvider
                 ->orderBy('nav_order')
                 ->get();
 
-            $plotPages = Page::where('nav_group', 'plots')
+            $sitePages = Page::where('nav_group', 'sites')
                 ->orderBy('nav_order')
                 ->get();
 
@@ -47,7 +47,7 @@ class AppServiceProvider extends ServiceProvider
 
             $view->with([
                 'navAboutPages' => $aboutPages,
-                'navPlotPages'       => $plotPages,
+                'navSitePages'       => $sitePages,
                 'navSubjectPages'    => $subjectPages,
                 'navResultsPages'    => $resultPages,
             ]);

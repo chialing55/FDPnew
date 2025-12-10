@@ -14,6 +14,12 @@ use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
 use Filament\Forms\Components\RichEditor;
+use Wiebenieuwenhuis\FilamentCodeEditor\Components\CodeEditor;
+use Filament\Forms\Components\Textarea;
+use Filament\Forms\Components\Tabs;
+use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\View;
 
 class ContentBlockResource extends Resource
 {
@@ -27,80 +33,55 @@ class ContentBlockResource extends Resource
 
     public static function form(Form $form): Form
     {
+/** @var \Illuminate\Contracts\Support\Htmlable $imageExampleView */
+$imageExampleView = View::make('filament.partials.image_example');
+
         return $form
             ->schema([
                 // ====== 基本設定 ======
                 Forms\Components\Section::make('基本設定')
                     ->schema([
-                        // owner_type + owner_id
                         Forms\Components\Grid::make(2)->schema([
-
-                            // 1. owner_type 選單
-                            Forms\Components\Select::make('owner_type')
-                                ->label('所屬類型')
-                                ->required()
-                                ->options([
-                                    'site'   => '樣區（sites）',
-                                    'topic'  => '研究主題（topics）',
-                                    'pages'  => '頁面（pages）',
-                                ])
-                                ->native(false)
-                                ->live(), // ★ 變更時刷新 owner_id
-
-                            // 2. owner_id 會依 owner_type 改選項
-                            Forms\Components\Select::make('owner_id')
-                                ->label('所屬對象')
-                                ->required()
-                                ->options(function (Get $get) {
-                                    $type = $get('owner_type');
-
-                                    if (! $type) {
-                                        return [];
-                                    }
-
-                                    return match ($type) {
-                                        'site' => Site::query()
-                                            ->orderBy('slug')
-                                            ->get()
-                                            ->mapWithKeys(fn ($site) => [
-                                                $site->id => 'site: ' . $site->slug . ' - ' . $site->name_zh_tw,
-                                            ]),
-
-                                        'topic' => Subject::query()
-                                            ->orderBy('slug')
-                                            ->get()
-                                            ->mapWithKeys(fn ($topic) => [
-                                                $topic->id => 'topic: ' . $topic->slug . ' - ' . $topic->name_zh_tw,
-                                            ]),
-
-                                        'pages' => Page::query()
-                                            ->orderBy('slug')
-                                            ->get()
-                                            ->mapWithKeys(fn ($page) => [
-                                                $page->id => 'page: ' . $page->slug . ' - ' . $page->title_zh_tw,
-                                            ]),
-
-                                        default => [],
-                                    };
-                                })
+                            Forms\Components\Select::make('page_id')
+                                ->label('對應頁面（Slug）')
+                                ->relationship(
+                                    name: 'page',
+                                    titleAttribute: 'slug',
+                                    modifyQueryUsing: fn (Builder $query) => $query->orderBy('slug'),
+                                )
+                                ->getOptionLabelFromRecordUsing(
+                                    fn (Page $record) => $record->slug . ' - ' . $record->title_zh_tw
+                                )
                                 ->searchable()
-                                ->native(false)
-                                ->disabled(fn (Get $get) => ! $get('owner_type'))
-                                ->hint('先選擇所屬類型，再從這裡選擇對象'),
+                                ->preload()
+                                ->required()
+                                ->helperText('從頁面中選擇一個 slug 對應這個內容區塊'),
                         ]),
 
+
                         Forms\Components\Grid::make(3)->schema([
-                            Forms\Components\TextInput::make('block_type')
+                            Forms\Components\Select::make('block_type')
                                 ->label('區塊類型')
                                 ->required()
-                                ->maxLength(50)
-                                ->helperText('例如 environment、climate、intro、method_detail'),
+                                ->options([
+                                    'intro'     => '簡介區塊（intro）',
+                                    'content'   => '一般內容（content）',
+                                    'gallery'   => '相片區塊（gallery）',
+                                    'map'       => '地圖區塊（map）',
+                                    'stats'     => '統計數據區塊（stats）',
+                                    'quote'     => '重點引言（quote）',
+                                    'table'     => '表格內容（table）',
+                                    'download'  => '附件下載（download）',
+                                ]),
+                                
 
                             Forms\Components\TextInput::make('sort_order')
                                 ->label('區塊排序')
                                 ->numeric()
                                 ->default(0),
-
+                            Forms\Components\TextInput::make('view')
+                                ->label('插入view')
+                                ->maxLength(100),
                             Forms\Components\Toggle::make('is_public')
                                 ->label('是否顯示於前台')
                                 ->default(true),
@@ -123,27 +104,81 @@ class ContentBlockResource extends Resource
 
                         Forms\Components\Grid::make()
                             ->schema([
+                                Textarea::make('body_zh_tw')
+                                    ->label('內容（中）')
+                                    ->rows(10)
+                                    ->columnSpanFull()
+                                    ->helperText($imageExampleView),
 
-                            // 中文內容
-                            RichEditor::make('body_zh_tw')
-                                ->label('內容（中）')
-                                ->columnSpanFull()
-                                ->fileAttachmentsDisk('public')                 // 存在 storage/app/public
-                                ->fileAttachmentsDirectory(function (Get $get) {
-                                    return 'content_blocks/' . $get('owner_type') . '/' . $get('owner_id');
-                                }),                 // 動態目錄
 
-                            // 英文內容
-                            RichEditor::make('body_en')
-                                ->label('內容（英）')
-                                ->columnSpanFull()
-                                ->fileAttachmentsDisk('public')
-                                ->fileAttachmentsDirectory(function (Get $get) {
-                                    return 'content_blocks/' . $get('owner_type') . '/' . $get('owner_id');
-                                }), // 動態目錄
+                                // 英文內容（RichEditor + HTML）
+                                Textarea::make('body_en')
+                                    ->label('內容（英）')
+                                    ->rows(10)
+                                    ->columnSpanFull(),
+                        ]),
+                        Forms\Components\Grid::make()
+                            ->schema([
+                            Textarea::make('attachments_preview')
+                                ->label('已上傳圖片路徑')
+                                ->disabled()
+                                ->dehydrated(false) // 不寫回資料庫
+                                ->rows(4)
+                                ->formatStateUsing(function ($state, Get $get) {
+                                    $files = $get('attachments') ?? [];
+
+                                    if (! is_array($files)) {
+                                        return '';
+                                    }
+
+                                    return collect($files)
+                                        ->map(fn ($path) => '/storage/' . ltrim($path, '/'))
+                                        ->implode("\n");
+                                })
+                                ->helperText('複製上方路徑，貼到內文中作為 <img src="..."> 使用。')
+                                ->columnSpanFull(),
+                        ]),
+
+                        Forms\Components\Grid::make()
+                            ->schema([
+                            Forms\Components\FileUpload::make('attachments')
+                                ->label('附加圖片')
+                                ->disk('public')
+                                ->directory(function (?ContentBlock $record, Get $get) {
+                                    if ($record && $record->id) {
+                                        return "content_blocks/{$record->id}";
+                                    }
+                                    return 'content_blocks/pending';
+                                })
+                                ->image()
+                                ->multiple()
+                                ->preserveFilenames()
+                                ->imagePreviewHeight('150')
+                                ->panelLayout('grid')
+                                ->enableOpen()
+                                ->helperText('可上傳多張圖片，儲存後可使用 /storage/... 路徑插入到內文中')
+                                ->deleteUploadedFileUsing(function (string $file) {
+                                    Storage::disk('public')->delete($file);
+                                })
+                                // ⭐ 關鍵：attachments 變動時，順便更新 attachments_preview
+                                ->afterStateUpdated(function ($state, callable $set) {
+                                    $files = $state ?? [];
+
+                                    if (! is_array($files)) {
+                                        $files = [];
+                                    }
+
+                                    $text = collect($files)
+                                        ->map(fn ($path) => '/storage/' . ltrim($path, '/'))
+                                        ->implode("\n");
+
+                                    $set('attachments_preview', $text);
+                                })
+                                ->columnSpanFull(),
 
                             ]),
-                    ]),
+  
+                ]),
             ]);
     }
 
@@ -151,13 +186,16 @@ class ContentBlockResource extends Resource
     {
         return $table
             ->columns([
-                Tables\Columns\TextColumn::make('owner_type')
-                    ->label('類型')
-                    ->sortable(),
+                Tables\Columns\TextColumn::make('page.slug')
+                    ->label('頁面 Slug')
+                    ->sortable()
+                    ->searchable(),
 
-                Tables\Columns\TextColumn::make('owner_id')
-                    ->label('對象ID')
-                    ->sortable(),
+                Tables\Columns\TextColumn::make('page.title_zh_tw')
+                    ->label('頁面標題')
+                    ->sortable()
+                    ->searchable(),
+
 
                 Tables\Columns\TextColumn::make('block_type')
                     ->label('區塊類型')

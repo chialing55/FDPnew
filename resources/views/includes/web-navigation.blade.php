@@ -51,7 +51,7 @@
 
                 {{-- 動態樣區：單一連結或未來也可以做 dropdown --}}
                 <div>
-                    <x-nav.web-dropdown :label="__('web.nav_plots')" :pages="$navPlotPages" />
+                    <x-nav.web-dropdown :label="__('web.nav_sites')" :pages="$navSitePages" />
                 </div>
 
                 {{-- 研究主題：也可以做 dropdown --}}
@@ -89,7 +89,7 @@
 
             <div><a href="/">{{ __('web.nav_home') }}</a></div>
 
-            @foreach ($navPlotPages as $page)
+            @foreach ($navSitePages as $page)
                 <div><a href="{{ url($page->slug) }}">
                         {{ __('web.nav_' . $page->nav_group . '') }} - {{ $page->title }}
                     </a></div>

@@ -25,19 +25,19 @@
     @yield('header_js')
 </head>
 
-<body class="text-gray-900 min-h-screen flex flex-col">
+<body class="flex min-h-screen flex-col overflow-x-hidden text-gray-900">
 
     @include('includes.web-navigation')
     <div>
         @yield('hero')
     </div>
-    <main class="p-6 flex-1">
-        <div class='m-auto max-w-7xl w-full'>
+    <main class="flex-1 p-6">
+        <div class='m-auto w-full max-w-7xl'>
             @yield('content')
         </div>
     </main>
     <footer>
-        <div class='bg-forest-dark p-2 text-white flex justify-between text-sm'>
+        <div class='flex justify-between bg-forest-dark p-2 text-sm text-white'>
             <p>
                 國立東華大學 NDHU / 國立中山大學 NSYSU / 國立台灣大學 NTU<br>
                 林務局 TFB / 林業試驗所 TFRI / ForestGEO

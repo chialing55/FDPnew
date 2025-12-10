@@ -26,12 +26,14 @@ class Page extends Model
             : $this->title_zh_tw;
     }
 
-    public function blocks()
+    public function contentBlocks()
     {
-        return $this->hasMany(ContentBlock::class, 'owner_id')
-            ->where('owner_type', 'pages')
-            ->orderBy('sort_order');
+        return $this->hasMany(ContentBlock::class, 'page_id');
     }
 
+    public function site()
+    {
+        return $this->hasOne(Site::class);
+    }
 }
 

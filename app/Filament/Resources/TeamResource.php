@@ -124,19 +124,17 @@ class TeamResource extends Resource
 
                 Tables\Columns\TextColumn::make('team_type')
                     ->label('類別')
-                    ->formatStateUsing(fn ($state) => match ($state) {
-                        'academic' => '學術機構',
-                        'government' => '政府單位',
-                        'other' => '其他',
-                        default => $state,
-                    })
+                    ->searchable()
                     ->sortable(),
 
                 Tables\Columns\TextColumn::make('institution_zh_tw')
                     ->label('所屬機構')
                     ->searchable()
                     ->sortable(),
-
+                Tables\Columns\TextColumn::make('department_zh_tw')
+                    ->label('系所單位')
+                    ->searchable()
+                    ->sortable(),
                 Tables\Columns\TextColumn::make('pi_name_zh_tw')
                     ->label('負責人（中）')
                     ->searchable(),

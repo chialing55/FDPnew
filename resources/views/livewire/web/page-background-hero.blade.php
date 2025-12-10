@@ -9,7 +9,7 @@
             <div
                 class="absolute left-1/2 top-1/2 
             -translate-x-1/2 -translate-y-1/2
-            text-white text-4xl md:text-5xl font-extrabold  
+            text-white text-4xl md:text-[5rem] font-extrabold  
             tracking-widest md:tracking-[0.5em] text-center hero-title-stroke">
 
                 @if (isset($title))

@@ -12,6 +12,7 @@ use Filament\Tables\Table;
 use App\Models\Web\Page;
 use Filament\Forms\Set;
 use Filament\Forms\Get;
+use Filament\Forms\Components\Select;
 use App\Filament\Resources\SiteResource\RelationManagers\SiteTeamsRelationManager;
 
 class SiteResource extends Resource
@@ -32,40 +33,49 @@ class SiteResource extends Resource
                 Forms\Components\Section::make('基本資訊')
                     ->schema([
                         Forms\Components\Grid::make(2)->schema([
-                            Forms\Components\Select::make('slug')
+                            Select::make('page_id')
                                 ->label('對應頁面（Slug）')
                                 ->required()
-                                ->options(function () {
-                                    $usedSlugs = Site::pluck('slug')->toArray();
+                                ->options(function (?Site $record) {
+                                    // 取出已經被其它 site 使用的 page_id（排除目前正在編輯的這筆）
+                                    $usedPageIds = Site::query()
+                                        ->when($record?->id, fn ($q) => $q->where('id', '!=', $record->id))
+                                        ->pluck('page_id')
+                                        ->filter()
+                                        ->all();
+
                                     return Page::query()
                                         ->where('nav_group', 'plots')
-                                        ->whereNotIn('slug', $usedSlugs)
+                                        ->when($usedPageIds, fn ($q) => $q->whereNotIn('id', $usedPageIds))
                                         ->orderBy('nav_order')
                                         ->get()
-                                        ->mapWithKeys(function ($page) {
-                                            // 下拉選單顯示：slug - 中文標題
+                                        ->mapWithKeys(function (Page $page) {
+                                            // 下拉顯示：slug - 中文標題
                                             return [
-                                                $page->slug => $page->slug . ' - ' . $page->title_zh_tw,
+                                                $page->id => $page->slug . ' - ' . $page->title_zh_tw,
                                             ];
-                                        });                              
+                                        });
                                 })
                                 ->searchable()
                                 ->native(false)  // 使用 Filament 的美化選單
                                 ->helperText('從 plots 群組的頁面中選擇一個 slug 對應這個樣區')
-                                ->unique(ignoreRecord: true)  // 在 topics.slug 裡保持唯一
-                                ->live() 
+                                // 確保每個 page_id 只被一個 site 用
+                                ->unique(ignoreRecord: true, column: 'page_id')
+                                ->live()
                                 ->afterStateUpdated(function (Get $get, Set $set) {
-                                    $slug = $get('slug'); 
-                                    if (!$slug) return;
+                                    $pageId = $get('page_id');
+                                    if (! $pageId) {
+                                        return;
+                                    }
 
-                                    $page = Page::where('slug', $slug)->first();
+                                    $page = Page::find($pageId);
 
                                     if ($page) {
-                                        // 自動填入
+                                        // 自動填入樣區名稱
                                         $set('name_zh_tw', $page->title_zh_tw);
                                         $set('name_en', $page->title_en);
                                     }
-                                }),                                
+                                }),
                         ]), 
                         Forms\Components\Grid::make(2)->schema([        
                             Forms\Components\TextInput::make('name_zh_tw')
@@ -118,10 +128,15 @@ class SiteResource extends Resource
     {
         return $table
             ->columns([
-                Tables\Columns\TextColumn::make('slug')
-                    ->label('Slug')
-                    ->searchable()
-                    ->sortable(),
+                Tables\Columns\TextColumn::make('page.slug')
+                    ->label('頁面 Slug')
+                    ->sortable()
+                    ->searchable(),
+
+                Tables\Columns\TextColumn::make('page.title_zh_tw')
+                    ->label('頁面標題')
+                    ->sortable()
+                    ->searchable(),
 
                 Tables\Columns\TextColumn::make('name_zh_tw')
                     ->label('樣區名稱（中）')

@@ -2,19 +2,19 @@
 
 return [
     'title'      => 'Taiwan Forest Dynamics Plot Research Results Platform',
-    'index_hero_1' => 'Using long-term ecological monitoring data to tell the story of Taiwan’s forests',
+    'index_hero_1' => 'Using long-term ecological monitoring data<br> to tell the story of Taiwan’s forests',
     'index_hero_2' => '- Fushan & Nanjenshan',
 //nav
     'nav_home'        => 'Home',
     'nav_about'       => 'About Us',
    
-    'nav_plots'        => 'Plots',
+    'nav_sites'        => 'Sites',
   
     'nav_subjects'    => 'Subjects',
     'nav_results'    => 'Results',
 
 
-    'index_text_1'    => 'plots',
+    'index_text_1'    => 'sites',
     'index_text_2'    => 'plant species',
     'index_text_3'    => 'trees',
     

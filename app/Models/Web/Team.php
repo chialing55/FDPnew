@@ -66,4 +66,16 @@ class Team extends Model
     {
         return $this->hasMany(SiteTeam::class);
     }
+
+    /** 顯示名稱：機構 / 部門 / PI 名（後台與前台都可以統一使用） */
+    public function getDisplayNameAttribute(): string
+    {
+        return trim(sprintf(
+            '%s / %s / %s',
+            $this->institution_zh_tw ?? '',
+            $this->department_zh_tw ?? '',
+            $this->pi_name_zh_tw ?? ''
+        ), ' /');
+    }
+
 }

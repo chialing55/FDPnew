@@ -13,7 +13,7 @@ class Site extends Model
     protected $connection = 'mysql_web';
 
     protected $fillable = [
-        'slug',
+        'page_id',
         'name_zh_tw',
         'name_en',
         'short_name_zh_tw',
@@ -50,11 +50,9 @@ class Site extends Model
     }
 
     /** 樣區相關的內容區塊 */
-    public function blocks()
+    public function page()
     {
-        return $this->hasMany(ContentBlock::class, 'owner_id')
-            ->where('owner_type', 'site')
-            ->orderBy('sort_order');
+        return $this->belongsTo(Page::class);
     }
 
     public function siteTeams()
