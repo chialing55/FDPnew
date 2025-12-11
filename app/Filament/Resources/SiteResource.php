@@ -45,7 +45,7 @@ class SiteResource extends Resource
                                         ->all();
 
                                     return Page::query()
-                                        ->where('nav_group', 'plots')
+                                        ->where('nav_group', 'sites')
                                         ->when($usedPageIds, fn ($q) => $q->whereNotIn('id', $usedPageIds))
                                         ->orderBy('nav_order')
                                         ->get()
@@ -58,7 +58,7 @@ class SiteResource extends Resource
                                 })
                                 ->searchable()
                                 ->native(false)  // 使用 Filament 的美化選單
-                                ->helperText('從 plots 群組的頁面中選擇一個 slug 對應這個樣區')
+                                ->helperText('從 sites 群組的頁面中選擇一個 slug 對應這個樣區')
                                 // 確保每個 page_id 只被一個 site 用
                                 ->unique(ignoreRecord: true, column: 'page_id')
                                 ->live()

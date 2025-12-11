@@ -13,6 +13,7 @@ class ContentBlock extends Model
     protected $connection = 'mysql_web';
     protected $casts = [
         'attachments' => 'array',
+        'params' => 'array',
     ];
     protected $fillable = [
         'page_id',
@@ -22,6 +23,8 @@ class ContentBlock extends Model
         'body_zh_tw',
         'body_en',
         'attachments',
+        'view',
+        'params',
         'sort_order',
         'is_public',
     ];

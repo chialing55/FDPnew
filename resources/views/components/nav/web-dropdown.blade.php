@@ -8,7 +8,7 @@
     </div>
     
 @php
-    $shiftClass = $shift ? 'transform: translateX(-30%);' : '';
+    $shiftClass = $shift ? 'transform: translateX(-25%);' : '';
 @endphp
 
     <div x-show="open" x-cloak

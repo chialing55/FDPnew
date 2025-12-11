@@ -66,6 +66,7 @@ $imageExampleView = View::make('filament.partials.image_example');
                                 ->options([
                                     'intro'     => '簡介區塊（intro）',
                                     'content'   => '一般內容（content）',
+                                    'view'      => '自訂view區塊（view）',
                                     'gallery'   => '相片區塊（gallery）',
                                     'map'       => '地圖區塊（map）',
                                     'stats'     => '統計數據區塊（stats）',
@@ -79,12 +80,18 @@ $imageExampleView = View::make('filament.partials.image_example');
                                 ->label('區塊排序')
                                 ->numeric()
                                 ->default(0),
-                            Forms\Components\TextInput::make('view')
-                                ->label('插入view')
-                                ->maxLength(100),
                             Forms\Components\Toggle::make('is_public')
                                 ->label('是否顯示於前台')
                                 ->default(true),
+                            Forms\Components\TextInput::make('view')
+                                ->label('插入view')
+                                ->maxLength(100),
+                            Forms\Components\KeyValue::make('params')
+                                ->label('參數設定')
+                                ->keyLabel('參數名稱')
+                                ->valueLabel('參數內容')
+                                ->reorderable()
+                            
                         ]),
                     ])
                     ->columns(1),

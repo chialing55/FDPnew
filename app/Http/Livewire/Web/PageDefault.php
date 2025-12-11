@@ -4,6 +4,7 @@ namespace App\Http\Livewire\Web;
 
 use Livewire\Component;
 use App\Models\Web\Page;
+use App\Models\Web\Subject;
 use App\Models\Web\ContentBlock;
 use Illuminate\Mail\Mailables\Content;
 use Illuminate\Support\Str;
@@ -28,10 +29,20 @@ class PageDefault extends Component
         
         if ($slugGrpoup[0] === 'sites' ) {
             // 針對動態樣區頁面，加入預設的內容區塊
-            $additionalBlocks = $this->siteContent($slug);
+            $site = $slugGrpoup[1];
+            $additionalBlocks = $this->siteContent($site);
             $blocks = $blocks->concat($additionalBlocks);
-            
+            // 
         }
+
+        if ($slugGrpoup[0] === 'subjects' ) {
+            // 針對動態主題頁面，加入預設的內容區塊
+            // $subjectSlug = $slugGrpoup[1];
+            $additionalBlocks = $this->subjectContent($slug);
+            $blocks = $additionalBlocks->concat($blocks);
+            // 
+        }
+
         // dd($blocks->toArray());
 
         foreach ($blocks as $block) {
@@ -45,16 +56,19 @@ class PageDefault extends Component
         $this->contentBlocks = $blocks;
     }
 
-    public function siteContent($slug): Collection
+    public function siteContent($site): Collection
     {
         return collect([
             new ContentBlock([
                 'id'          => null, // 或給個虛擬 id，如 'site-team'
                 'title_zh_tw' => '參與團隊',
                 'title_en'    => 'Team Members',
-                'body_zh_tw'  => 'Sample body content.',
-                'body_en'     => 'Sample body content.',
-                'view'        => '', // 可選，指定 Blade 視圖
+                'body_zh_tw'  => '',
+                'body_en'     => '',
+                'view'        => 'web.site-teams-block', // 可選，指定 Blade 視圖
+                'params'      => [
+                    'currentSite' => $site,   // 傳給這個 block 的參數
+                ],
             ]),
             new ContentBlock([
                 'id'          => null,
@@ -81,6 +95,36 @@ class PageDefault extends Component
                 'view'        => '', // 可選，指定 Blade 視圖
             ]),
         ]);
+    }
+
+    public function subjectContent($slug): Collection
+    {
+        $blocks = Subject::where('slug', $slug)
+            ->orderBy('sort_order')
+            ->first();
+
+        return collect([
+            new ContentBlock([
+                'id'          => null, // 或給個虛擬 id，如 'site-team'
+                'title_zh_tw' => '',
+                'title_en'    => '',
+                'body_zh_tw'  => $blocks->description_zh_tw,
+                'body_en'     => $blocks->description_en,
+                'view'        => '', // 可選，指定 Blade 視圖
+                'params'      => '',
+            ]),
+            new ContentBlock([
+                'id'          => null, // 或給個虛擬 id，如 'site-team'
+                'title_zh_tw' => '研究方法',
+                'title_en'    => 'Methods',
+                'body_zh_tw'  => $blocks->method_zh_tw,
+                'body_en'     => $blocks->method_en,
+                'view'        => '', // 可選，指定 Blade 視圖
+                'params'      => '',
+            ]),
+        ]);
+
+
     }
 
 

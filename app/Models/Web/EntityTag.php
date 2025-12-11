@@ -13,10 +13,10 @@ class EntityTag extends Model
     protected $connection = 'mysql_web';
 
     protected $fillable = [
-        'entity_type',   // research_output / research_project / publication
+        'entity_type',   // page(research_output) / research_project / publication
         'entity_id',
-        'tag_type',      // site / topic
-        'tag_id',
+        'site_id',      // site / topic
+        'subject_id',
     ];
 
     /** 所屬樣區（tag_type = site 時才有意義） */
@@ -29,7 +29,7 @@ class EntityTag extends Model
     /** 所屬主題（tag_type = topic 時才有意義） */
     public function topic()
     {
-        return $this->belongsTo(Topic::class, 'tag_id')
+        return $this->belongsTo(Subject::class, 'tag_id')
             ->where('tag_type', 'topic');
     }
 
