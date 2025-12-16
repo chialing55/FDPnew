@@ -1116,12 +1116,9 @@ input[type='checkbox']:checked {
 }
 
 .page-two-column {
-  margin-top: 1rem;
-  margin-bottom: 1rem;
   display: grid;
   grid-template-columns: repeat(1, minmax(0, 1fr));
   gap: 1.5rem;
-  padding: 1rem;
 }
 
 @media (min-width: 1024px) {
@@ -1152,6 +1149,28 @@ figure figcaption {
   color: #666;
   margin-top: 0.3rem;
   line-height: 1.4;
+}
+
+.banner-gradient {
+  background: linear-gradient(
+            to right,
+            #3d4e17 10%,    /* forest 深綠 */
+            #3d4e17 25%, /* forest-mist */
+        
+            rgba(67, 157, 138, 0.00) 100% /* 完全透明 */
+        );
+  /* border: 5px solid red !important; */
+}
+
+.hero-bottom-gradient {
+  background: radial-gradient(
+            circle at bottom left,   /* 發光點在左下角 */
+            rgba(61, 78, 23, 0.70) 0%,
+            rgba(61, 78, 23, 0.55) 20%,
+            rgba(61, 78, 23, 0.30) 40%,
+            rgba(61, 78, 23, 0.10) 65%,
+            rgba(61, 78, 23, 0.00) 100%
+        );
 }
 
 .hanb a {
@@ -1456,10 +1475,6 @@ figure figcaption {
   bottom: -50%;
 }
 
-.-left-2 {
-  left: -0.5rem;
-}
-
 .-left-\[15px\] {
   left: -15px;
 }
@@ -1498,6 +1513,10 @@ figure figcaption {
 
 .left-1\/2 {
   left: 50%;
+}
+
+.left-8 {
+  left: 2rem;
 }
 
 .right-0 {
@@ -1550,6 +1569,10 @@ figure figcaption {
 
 .isolate {
   isolation: isolate;
+}
+
+.z-0 {
+  z-index: 0;
 }
 
 .z-10 {
@@ -1706,8 +1729,8 @@ figure figcaption {
   margin-inline-end: -0.5rem;
 }
 
-.-ml-8 {
-  margin-left: -2rem;
+.-ml-1 {
+  margin-left: -0.25rem;
 }
 
 .-ml-px {
@@ -1732,6 +1755,10 @@ figure figcaption {
 
 .mb-0 {
   margin-bottom: 0px;
+}
+
+.mb-1 {
+  margin-bottom: 0.25rem;
 }
 
 .mb-12 {
@@ -1772,6 +1799,10 @@ figure figcaption {
 
 .ml-2 {
   margin-left: 0.5rem;
+}
+
+.ml-3 {
+  margin-left: 0.75rem;
 }
 
 .ml-4 {
@@ -1965,6 +1996,10 @@ figure figcaption {
   height: 45vh;
 }
 
+.h-\[60\%\] {
+  height: 60%;
+}
+
 .h-dvh {
   height: 100dvh;
 }
@@ -1975,10 +2010,6 @@ figure figcaption {
 
 .h-screen {
   height: 100vh;
-}
-
-.min-h-\[theme\(spacing\.48\)\] {
-  min-height: 12rem;
 }
 
 .min-h-full {
@@ -2057,6 +2088,10 @@ figure figcaption {
   width: var(--sidebar-width);
 }
 
+.w-\[70\%\] {
+  width: 70%;
+}
+
 .w-\[calc\(100\%\+2rem\)\] {
   width: calc(100% + 2rem);
 }
@@ -2094,6 +2129,10 @@ figure figcaption {
   min-width: 10rem;
 }
 
+.min-w-\[6rem\] {
+  min-width: 6rem;
+}
+
 .min-w-\[theme\(spacing\.4\)\] {
   min-width: 1rem;
 }
@@ -2104,14 +2143,6 @@ figure figcaption {
 
 .min-w-\[theme\(spacing\.6\)\] {
   min-width: 1.5rem;
-}
-
-.min-w-\[theme\(spacing\.8\)\] {
-  min-width: 2rem;
-}
-
-.min-w-full {
-  min-width: 100%;
 }
 
 .\!max-w-2xl {
@@ -2184,6 +2215,10 @@ figure figcaption {
 
 .max-w-7xl {
   max-width: 80rem;
+}
+
+.max-w-\[10rem\] {
+  max-width: 10rem;
 }
 
 .max-w-fit {
@@ -2445,10 +2480,6 @@ figure figcaption {
 
 .grid-cols-1 {
   grid-template-columns: repeat(1, minmax(0, 1fr));
-}
-
-.grid-cols-3 {
-  grid-template-columns: repeat(3, minmax(0, 1fr));
 }
 
 .grid-cols-\[--cols-default\] {
@@ -2908,10 +2939,6 @@ figure figcaption {
   border-style: dashed;
 }
 
-.\!border-none {
-  border-style: none !important;
-}
-
 .border-none {
   border-style: none;
 }
@@ -2939,11 +2966,6 @@ figure figcaption {
 .border-forest-soil {
   --tw-border-opacity: 1;
   border-color: rgb(131 105 83 / var(--tw-border-opacity, 1));
-}
-
-.border-gray-100 {
-  --tw-border-opacity: 1;
-  border-color: rgb(243 244 246 / var(--tw-border-opacity, 1));
 }
 
 .border-gray-200 {
@@ -3092,6 +3114,11 @@ figure figcaption {
 .bg-yellow-100 {
   --tw-bg-opacity: 1;
   background-color: rgb(254 249 195 / var(--tw-bg-opacity, 1));
+}
+
+.bg-yellow-400 {
+  --tw-bg-opacity: 1;
+  background-color: rgb(250 204 21 / var(--tw-bg-opacity, 1));
 }
 
 .\!bg-none {
@@ -3264,6 +3291,10 @@ figure figcaption {
   padding-bottom: 2px;
 }
 
+.pb-2 {
+  padding-bottom: 0.5rem;
+}
+
 .pb-6 {
   padding-bottom: 1.5rem;
 }
@@ -3308,6 +3339,10 @@ figure figcaption {
   padding-left: 2rem;
 }
 
+.pr-4 {
+  padding-right: 1rem;
+}
+
 .ps-0 {
   padding-inline-start: 0px;
 }
@@ -3334,6 +3369,10 @@ figure figcaption {
 
 .pt-0 {
   padding-top: 0px;
+}
+
+.pt-2 {
+  padding-top: 0.5rem;
 }
 
 .pt-6 {
@@ -3404,11 +3443,6 @@ figure figcaption {
 .text-4xl {
   font-size: 2.25rem;
   line-height: 2.5rem;
-}
-
-.text-5xl {
-  font-size: 3rem;
-  line-height: 1;
 }
 
 .text-base {
@@ -3518,10 +3552,6 @@ figure figcaption {
 
 .tracking-wider {
   letter-spacing: 0.05em;
-}
-
-.tracking-widest {
-  letter-spacing: 0.1em;
 }
 
 .text-black {
@@ -3722,6 +3752,11 @@ figure figcaption {
   --tw-ring-inset: inset;
 }
 
+.ring-blue-300 {
+  --tw-ring-opacity: 1;
+  --tw-ring-color: rgb(147 197 253 / var(--tw-ring-opacity, 1));
+}
+
 .ring-forest\/10 {
   --tw-ring-color: rgb(47 79 79 / 0.1);
 }
@@ -3866,35 +3901,14 @@ figure figcaption {
   inset-inline-start: 0px;
 }
 
-.before\:top-0::before {
-  content: var(--tw-content);
-  top: 0px;
-}
-
 .before\:h-8::before {
   content: var(--tw-content);
   height: 2rem;
 }
 
-.before\:h-full::before {
-  content: var(--tw-content);
-  height: 100%;
-}
-
 .before\:w-0\.5::before {
   content: var(--tw-content);
   width: 0.125rem;
-}
-
-.before\:w-2::before {
-  content: var(--tw-content);
-  width: 0.5rem;
-}
-
-.before\:bg-yellow-400::before {
-  content: var(--tw-content);
-  --tw-bg-opacity: 1;
-  background-color: rgb(250 204 21 / var(--tw-bg-opacity, 1));
 }
 
 .before\:content-\[\'\'\]::before {
@@ -4023,6 +4037,10 @@ figure figcaption {
   box-shadow: var(--tw-ring-offset-shadow, 0 0 #0000), var(--tw-ring-shadow, 0 0 #0000), var(--tw-shadow);
 }
 
+.focus\:z-10:focus {
+  z-index: 10;
+}
+
 .focus\:border-blue-300:focus {
   --tw-border-opacity: 1;
   border-color: rgb(147 197 253 / var(--tw-border-opacity, 1));
@@ -4031,6 +4049,11 @@ figure figcaption {
 .focus\:border-forest-fern:focus {
   --tw-border-opacity: 1;
   border-color: rgb(107 142 35 / var(--tw-border-opacity, 1));
+}
+
+.focus\:border-gray-400:focus {
+  --tw-border-opacity: 1;
+  border-color: rgb(156 163 175 / var(--tw-border-opacity, 1));
 }
 
 .focus\:outline-none:focus {
@@ -4086,11 +4109,6 @@ figure figcaption {
 
 .focus-visible\:text-gray-700\/75:focus-visible {
   color: rgb(55 65 81 / 0.75);
-}
-
-.focus-visible\:outline-none:focus-visible {
-  outline: 2px solid transparent;
-  outline-offset: 2px;
 }
 
 .focus-visible\:ring-1:focus-visible {
@@ -4210,11 +4228,6 @@ figure figcaption {
   color: rgb(107 114 128 / var(--tw-text-opacity, 1));
 }
 
-.group:hover .group-hover\:text-gray-700 {
-  --tw-text-opacity: 1;
-  color: rgb(55 65 81 / var(--tw-text-opacity, 1));
-}
-
 .group\/item:hover .group-hover\/item\:underline {
   text-decoration-line: underline;
 }
@@ -4226,11 +4239,6 @@ figure figcaption {
 .group:focus-visible .group-focus-visible\:text-gray-500 {
   --tw-text-opacity: 1;
   color: rgb(107 114 128 / var(--tw-text-opacity, 1));
-}
-
-.group:focus-visible .group-focus-visible\:text-gray-700 {
-  --tw-text-opacity: 1;
-  color: rgb(55 65 81 / var(--tw-text-opacity, 1));
 }
 
 .group\/item:focus-visible .group-focus-visible\/item\:underline {
@@ -4261,10 +4269,6 @@ figure figcaption {
 
   .sm\:ml-0 {
     margin-left: 0px;
-  }
-
-  .sm\:ms-auto {
-    margin-inline-start: auto;
   }
 
   .sm\:mt-7 {
@@ -4301,6 +4305,10 @@ figure figcaption {
 
   .sm\:h-20 {
     height: 5rem;
+  }
+
+  .sm\:w-64 {
+    width: 16rem;
   }
 
   .sm\:w-\[calc\(100\%\+3rem\)\] {
@@ -4473,6 +4481,10 @@ figure figcaption {
     bottom: 1rem;
   }
 
+  .md\:left-12 {
+    left: 3rem;
+  }
+
   .md\:order-first {
     order: -9999;
   }
@@ -4489,8 +4501,24 @@ figure figcaption {
     grid-column-start: var(--col-start-md);
   }
 
+  .md\:-ml-8 {
+    margin-left: -2rem;
+  }
+
+  .md\:mb-0 {
+    margin-bottom: 0px;
+  }
+
+  .md\:block {
+    display: block;
+  }
+
   .md\:table-cell {
     display: table-cell;
+  }
+
+  .md\:grid {
+    display: grid;
   }
 
   .md\:inline-grid {
@@ -4505,8 +4533,16 @@ figure figcaption {
     height: 30vh;
   }
 
+  .md\:h-\[50\%\] {
+    height: 50%;
+  }
+
   .md\:h-\[60vh\] {
     height: 60vh;
+  }
+
+  .md\:w-\[50\%\] {
+    width: 50%;
   }
 
   .md\:columns-\[--cols-md\] {
@@ -4524,6 +4560,10 @@ figure figcaption {
 
   .md\:grid-cols-\[--cols-md\] {
     grid-template-columns: var(--cols-md);
+  }
+
+  .md\:grid-cols-\[auto_1px_minmax\(0\2c 1fr\)\] {
+    grid-template-columns: auto 1px minmax(0,1fr);
   }
 
   .md\:flex-row {
@@ -4595,11 +4635,6 @@ figure figcaption {
     padding-inline-start: 0.75rem;
   }
 
-  .md\:text-2xl {
-    font-size: 1.5rem;
-    line-height: 2rem;
-  }
-
   .md\:text-4xl {
     font-size: 2.25rem;
     line-height: 2.5rem;
@@ -4608,6 +4643,14 @@ figure figcaption {
   .md\:text-5xl {
     font-size: 3rem;
     line-height: 1;
+  }
+
+  .md\:text-\[3rem\] {
+    font-size: 3rem;
+  }
+
+  .md\:text-\[4rem\] {
+    font-size: 4rem;
   }
 
   .md\:text-\[5rem\] {
@@ -4623,8 +4666,12 @@ figure figcaption {
     line-height: 3rem;
   }
 
-  .md\:tracking-\[0\.5em\] {
-    letter-spacing: 0.5em;
+  .md\:leading-\[7rem\] {
+    line-height: 7rem;
+  }
+
+  .md\:tracking-normal {
+    letter-spacing: 0em;
   }
 }
 
@@ -4677,12 +4724,8 @@ figure figcaption {
     height: 100%;
   }
 
-  .lg\:w-1\/4 {
-    width: 25%;
-  }
-
-  .lg\:w-3\/4 {
-    width: 75%;
+  .lg\:w-\[20\%\] {
+    width: 20%;
   }
 
   .lg\:w-\[40\%\] {
@@ -4691,6 +4734,10 @@ figure figcaption {
 
   .lg\:w-\[60\%\] {
     width: 60%;
+  }
+
+  .lg\:w-\[80\%\] {
+    width: 80%;
   }
 
   .lg\:max-w-\[70rem\] {
@@ -4718,10 +4765,6 @@ figure figcaption {
   .lg\:columns-\[--cols-lg\] {
     -moz-columns: var(--cols-lg);
          columns: var(--cols-lg);
-  }
-
-  .lg\:grid-cols-2 {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
   .lg\:grid-cols-\[--cols-lg\] {
@@ -5196,19 +5239,9 @@ figure figcaption {
     color: rgb(156 163 175 / var(--tw-text-opacity, 1));
   }
 
-  .group:hover .dark\:group-hover\:text-gray-200 {
-    --tw-text-opacity: 1;
-    color: rgb(229 231 235 / var(--tw-text-opacity, 1));
-  }
-
   .group:hover .dark\:group-hover\:text-gray-400 {
     --tw-text-opacity: 1;
     color: rgb(156 163 175 / var(--tw-text-opacity, 1));
-  }
-
-  .group:focus-visible .dark\:group-focus-visible\:text-gray-200 {
-    --tw-text-opacity: 1;
-    color: rgb(229 231 235 / var(--tw-text-opacity, 1));
   }
 
   .group:focus-visible .dark\:group-focus-visible\:text-gray-400 {
@@ -5220,17 +5253,6 @@ figure figcaption {
     .dark\:lg\:bg-transparent {
       background-color: transparent;
     }
-  }
-}
-
-.\[\&\.trix-active\]\:bg-gray-50.trix-active {
-  --tw-bg-opacity: 1;
-  background-color: rgb(249 250 251 / var(--tw-bg-opacity, 1));
-}
-
-@media (prefers-color-scheme: dark) {
-  .dark\:\[\&\.trix-active\]\:bg-white\/5.trix-active {
-    background-color: rgb(255 255 255 / 0.05);
   }
 }
 

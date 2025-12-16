@@ -16,7 +16,8 @@ class ContentBlock extends Model
         'params' => 'array',
     ];
     protected $fillable = [
-        'page_id',
+        'owner_type',
+        'owner_id',
         'block_type',
         'title_zh_tw',
         'title_en',
@@ -45,9 +46,11 @@ class ContentBlock extends Model
             : $this->body_zh_tw;
     }
 
-    public function page()
+    public function owner()
     {
-        return $this->belongsTo(Page::class);
+        return $this->morphTo();
     }
+
+
 
 }

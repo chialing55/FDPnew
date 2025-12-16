@@ -64,4 +64,12 @@ class Site extends Model
         return $this->belongsToMany(Team::class, 'site_team')
             ->withPivot('role', 'sort_order');
     }
+
+    public function researchOutputs()
+    {
+        return $this->belongsToMany(
+            ResearchOutput::class,
+            'research_output_site'
+        );
+    }    
 }

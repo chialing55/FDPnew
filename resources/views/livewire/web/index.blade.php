@@ -31,7 +31,7 @@
                             class='{{ $img_postion }} h-48 w-full object-cover'>
                     </div>
                     <div class='p-4 text-left lg:w-[40%] lg:max-w-lg'>
-                        <h1 class='{{ $loop->even ? '' : 'text-right' }} mt-0 text-5xl capitalize'
+                        <h1 class='{{ $loop->even ? '' : 'text-right' }} mt-0 text-2xl md:text-5xl capitalize'
                             style='text-shadow: 1px 1px 4px rgba(51, 77, 43, 0.7); line-height:2rem;'>
                             {{ $plotsContent[$plot]['title'] ?? '' }} </h1>
                         <p class='text-sm text-gray-600'> {!! $plotsContent[$plot]['intro'] ?? '' !!} </p>

@@ -31,7 +31,7 @@
     <div>
         @yield('hero')
     </div>
-    <main class="flex-1 p-6">
+    <main class="flex-1 bg-gray-100">
         <div class='m-auto w-full max-w-7xl'>
             @yield('content')
         </div>

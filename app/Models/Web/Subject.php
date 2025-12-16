@@ -13,7 +13,7 @@ class Subject extends Model
     protected $connection = 'mysql_web';
 
     protected $fillable = [
-        'slug',
+        'page_id',
         'name_zh_tw',
         'name_en',
         'short_name_zh_tw',
@@ -54,10 +54,16 @@ class Subject extends Model
             : $this->method_zh_tw;
     }
     /** 主題相關的內容區塊 */
-    public function blocks()
+    public function page()
     {
-        return $this->hasMany(ContentBlock::class, 'owner_id')
-            ->where('owner_type', 'subjects')
-            ->orderBy('sort_order');
+        return $this->belongsTo(Page::class);
+    }
+
+    public function researchOutputs()
+    {
+        return $this->belongsToMany(
+            ResearchOutput::class,
+            'research_output_subject'
+        );
     }
 }

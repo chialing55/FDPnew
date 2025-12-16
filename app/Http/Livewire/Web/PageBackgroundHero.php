@@ -18,19 +18,40 @@ class PageBackgroundHero extends Component
     public array $breadcrumbs = [];
     public string $slug;
     public $page;
+    public $segment1;
+    public $segment2;
 
-    public function mount($slug): void
+    public function mount($slug, $page): void
     {
-        $this->page = Page::where('slug', $slug)->firstOrFail();
+        $this->page = $page;
+        $this->slug = $slug;
         $this->title = $this->page->title;
         // $this->title = PageTitleHelper::getTranslatedTitle(); 
         // dd($this->title);
 
+        $this->segment1  = request()->segment(1);  // 'background'
+        $this->segment2 = request()->segment(2);  // 'background'
+
+
+        if ($this->page->nav_group) {
+            $pageNavLabel = __('web.nav_'.$this->page->nav_group.'');
+            $pageNavUrl = '';
+        } else {
+            $pageNavLabel = __('web.nav_results');
+            $pageNavUrl = '/results';
+        }
+
         $breadcrumbs[] = ['label' => __('web.nav_home'), 'url' => '/'];
-        $breadcrumbs[] = ['label' => __('web.nav_'.$this->page->nav_group.''), 'url' => ''];
+        $breadcrumbs[] = ['label' => $pageNavLabel, 'url' => $pageNavUrl];
         $breadcrumbs[] = ['label' => __(''.$this->page->title.''), 'url' => ''];
 
         $this->breadcrumbs = $breadcrumbs;
+
+        if($this->page->hero_image){
+            $this->hero = $this->page->hero_image;
+        } else {
+            $this->hero = $this->pickRandomHero();
+        }
 
         $this->hero = $this->pickRandomHero();
     } 

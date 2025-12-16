@@ -82,7 +82,7 @@ class PageResource extends Resource
 
                     // 第 3 行：剩下的資料（你可以再細分）
                     Forms\Components\Grid::make(3)->schema([
-                        Forms\Components\TextInput::make('view_name')
+                        Forms\Components\TextInput::make('view')
                             ->label('模板 view')
                             ->columnSpan(1)
                             ->maxLength(150)
@@ -127,7 +127,7 @@ class PageResource extends Resource
                     ->label('導覽排序')
                     ->toggleable(isToggledHiddenByDefault: true),
 
-                Tables\Columns\TextColumn::make('view_name')
+                Tables\Columns\TextColumn::make('view')
                     ->label('模板 (view)')
                     ->toggleable(isToggledHiddenByDefault: true),
 

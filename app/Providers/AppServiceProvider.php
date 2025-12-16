@@ -8,6 +8,11 @@ use Illuminate\Support\Facades\Session;
 use Illuminate\Support\Facades\View;
 use App\Models\Web\Page;
 
+use Illuminate\Database\Eloquent\Relations\Relation;
+
+use App\Models\Web\ResearchOutput;
+
+
 class AppServiceProvider extends ServiceProvider
 {
     /**
@@ -52,6 +57,16 @@ class AppServiceProvider extends ServiceProvider
                 'navResultsPages'    => $resultPages,
             ]);
         });
+        Relation::morphMap([
+            // key = 資料庫 owner_type 存的字串
+            // value = 實際的 Model 類別
 
+            'pages'            => Page::class,
+            'research_outputs' => ResearchOutput::class,
+
+            // 如果你想改成簡短一點也可以：
+            // 'page'   => Page::class,
+            // 'result' => ResearchOutput::class,
+        ]);
     }
 }

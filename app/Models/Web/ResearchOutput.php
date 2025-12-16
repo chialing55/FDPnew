@@ -11,16 +11,21 @@ class ResearchOutput extends Model
 
     protected $table = 'research_outputs';
     protected $connection = 'mysql_web';
+    protected $casts = [
+        'params' => 'array',
+        'is_public' => 'boolean',
+    ];
 
     protected $fillable = [
         'slug',
         'title_zh_tw',
         'title_en',
-        'summary_zh_tw',
-        'summary_en',
-        'cover_image',
-        'year',
-        'status',
+        'body_zh_tw',
+        'body_en',
+        'view',
+        'params',
+        'hero_image',
+        'is_public',
     ];
 
     /** 依語系回傳標題 */
@@ -32,18 +37,17 @@ class ResearchOutput extends Model
     }
 
     /** 依語系回傳摘要 */
-    public function getSummaryAttribute(): ?string
+    public function getBodyAttribute(): ?string
     {
         return app()->getLocale() === 'en'
-            ? $this->summary_en
-            : $this->summary_zh_tw;
+            ? $this->body_en
+            : $this->body_zh_tw;
     }
 
-    /** 小主題區塊（sections） */
-    public function sections()
+
+    public function contentBlocks()
     {
-        return $this->hasMany(ResearchOutputSection::class, 'research_output_id')
-            ->orderBy('order_no');
+        return $this->morphMany(ContentBlock::class, 'owner');
     }
 
     /** 只取發布中的成果 */
@@ -57,5 +61,21 @@ class ResearchOutput extends Model
         return $this->hasMany(EntityTag::class, 'entity_id')
             ->where('entity_type', 'research_output')
             ->where('tag_type', 'site');
+    }
+
+    public function subjects()
+    {
+        return $this->belongsToMany(
+            Subject::class,
+            'research_output_subject'
+        )->withTimestamps();;
+    }
+
+    public function sites()
+    {
+        return $this->belongsToMany(
+            Site::class,
+            'research_output_site'
+        )->withTimestamps();;
     }
 }

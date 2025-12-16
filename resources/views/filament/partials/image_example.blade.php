@@ -3,7 +3,7 @@
 
     <pre class="bg-gray-100 text-xs p-3 rounded overflow-x-auto border">
 <code>
-&lt;div class="page-two-column"&gt;
+&lt;div class="page-two-column p-4 my-4"&gt;
     &lt;figure&gt;
         &lt;img src="/storage/content_blocks/4/3D地形圖.jpg" alt="3D 地形圖"&gt;
         &lt;figcaption&gt;福山樣區 3D 地形示意圖&lt;/figcaption&gt;

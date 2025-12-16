@@ -3,6 +3,7 @@
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Web\WebIndexController;
 use App\Http\Controllers\Web\PageController;
+use App\Http\Controllers\Web\ResearchOutputController;
 
 // Route::prefix('web')->group(function () {
 //     Route::get('/splist', [WebIndexController::class, 'splist']);
@@ -23,7 +24,23 @@ use App\Http\Controllers\Web\PageController;
 // Route::get('/species/{spcode}', [WebIndexController::class, 'species'])->name('front.species');
 
 
-Route::get('{slug}', [PageController::class, 'show'])->where('slug', '.*');
+// 成果首頁（可先用 Page 或獨立 controller）
+Route::get('results', [PageController::class, 'show'])
+    ->defaults('slug', 'results')
+    ->name('results.index');
+    
+// Route::get('results', [ResearchOutputController::class, 'index'])
+//     ->name('results.index');
+
+// 單一成果頁（ResearchOutput）
+Route::get('results/{slug}', [ResearchOutputController::class, 'show'])
+    ->where('slug', '[A-Za-z0-9\-]+')
+    ->name('research_outputs.show');
+
+
+
+//通用版要放在最後面
+Route::get('{slug}', [PageController::class, 'show'])->where('slug', '.*')->name('pages.show');;
 
 
 //background

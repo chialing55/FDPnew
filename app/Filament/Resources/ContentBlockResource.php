@@ -7,6 +7,7 @@ use App\Models\Web\ContentBlock;
 use App\Models\Web\Site;
 use App\Models\Web\Subject;
 use App\Models\Web\Page;
+use App\Models\Web\ResearchOutput;
 use Filament\Forms;
 use Filament\Forms\Form;
 use Filament\Forms\Get;
@@ -20,6 +21,7 @@ use Filament\Forms\Components\Tabs;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\View;
+use Filament\Forms\Set;
 
 class ContentBlockResource extends Resource
 {
@@ -38,25 +40,128 @@ $imageExampleView = View::make('filament.partials.image_example');
 
         return $form
             ->schema([
+                Forms\Components\Hidden::make('owner_type'),
+                Forms\Components\Hidden::make('owner_id'),
                 // ====== 基本設定 ======
                 Forms\Components\Section::make('基本設定')
                     ->schema([
-                        Forms\Components\Grid::make(2)->schema([
-                            Forms\Components\Select::make('page_id')
-                                ->label('對應頁面（Slug）')
-                                ->relationship(
-                                    name: 'page',
-                                    titleAttribute: 'slug',
-                                    modifyQueryUsing: fn (Builder $query) => $query->orderBy('slug'),
-                                )
-                                ->getOptionLabelFromRecordUsing(
-                                    fn (Page $record) => $record->slug . ' - ' . $record->title_zh_tw
-                                )
-                                ->searchable()
-                                ->preload()
-                                ->required()
-                                ->helperText('從頁面中選擇一個 slug 對應這個內容區塊'),
-                        ]),
+Forms\Components\Select::make('owner_selector')
+    ->label('對應物件（頁面或成果）')
+    ->helperText('從 Page 或 ResearchOutput 中選擇一個作為這個內容區塊的擁有者')
+    ->searchable()
+    ->preload()
+    ->native(false) // 用 Filament 的美化 select
+    ->options(function () {
+        // 預先載入一批常用選項（例如全部或前幾筆）
+        $options = [];
+
+        Page::query()
+            ->orderBy('slug')
+            ->limit(50)
+            ->get()
+            ->each(function (Page $page) use (&$options) {
+                $key = 'page:' . $page->id;
+                $options[$key] = '頁面: ' . $page->slug . ' - ' . $page->title_zh_tw;
+            });
+
+        ResearchOutput::query()
+            ->orderBy('id')
+            ->limit(50)
+            ->get()
+            ->each(function (ResearchOutput $output) use (&$options) {
+                $key = 'result:' . $output->id;
+                $options[$key] = '成果: ' . $output->slug . ' - ' . $output->title_zh_tw;
+            });
+
+        return $options;
+    })
+    ->getSearchResultsUsing(function (string $search): array {
+        $results = [];
+
+        // 🔍 搜 Page
+        Page::query()
+            ->where(function (Builder $query) use ($search) {
+                $query->where('slug', 'like', "%{$search}%")
+                    ->orWhere('title_zh_tw', 'like', "%{$search}%");
+            })
+            ->orderBy('slug')
+            ->limit(20)
+            ->get()
+            ->each(function (Page $page) use (&$results) {
+                $key = 'page:' . $page->id;
+                $results[$key] = '頁面: ' . $page->slug . ' - ' . $page->title_zh_tw;
+            });
+
+        // 🔍 搜 ResearchOutput
+        ResearchOutput::query()
+            ->where(function (Builder $query) use ($search) {
+                $query->where('title_zh_tw', 'like', "%{$search}%")
+                    ->orWhere('title_en', 'like', "%{$search}%")
+                    ;
+            })
+            ->orderBy('id')
+            ->limit(20)
+            ->get()
+            ->each(function (ResearchOutput $output) use (&$results) {
+                $key = 'result:' . $output->id;
+                $results[$key] = '成果: ' . $output->slug . ' - ' . $output->title_zh_tw;
+            });
+
+        return $results;
+    })
+    ->getOptionLabelUsing(function (?string $value): ?string {
+        if (! $value) {
+            return null;
+        }
+
+        [$type, $id] = explode(':', $value);
+
+        return match ($type) {
+            'page' => optional(Page::find($id), fn ($page) =>
+                '頁面: ' . $page->slug . ' - ' . $page->title_zh_tw),
+            'result' => optional(ResearchOutput::find($id), fn ($output) =>
+                '成果: ' . $output->slug . ' - ' . $output->title_zh_tw),
+            default => null,
+        };
+    })
+->afterStateUpdated(function ($state, Set $set) {
+    if (! $state) {
+        $set('owner_type', null);
+        $set('owner_id', null);
+        return;
+    }
+
+    [$type, $id] = explode(':', $state);
+
+    // 這裡存「morphMap 的 key」，不是完整類別
+    match ($type) {
+        'page'   => $set('owner_type', 'pages'),             // 對應 morphMap 裡的 'pages'
+        'result' => $set('owner_type', 'research_outputs'),  // 對應 morphMap 裡的 'research_outputs'
+        default  => null,
+    };
+
+    $set('owner_id', (int) $id);
+})
+
+    ->afterStateHydrated(function ($state, Set $set, ?ContentBlock $record) {
+        // 編輯時，依照 record 補上 owner_selector 的值
+        if (! $record) {
+            return;
+        }
+
+        $type = match ($record->owner_type) {
+            Page::class => 'page',
+            ResearchOutput::class => 'result',
+            default => null,
+        };
+
+        if (! $type || ! $record->owner_id) {
+            return;
+        }
+
+        $set('owner_selector', $type . ':' . $record->owner_id);
+    })
+    ->dehydrated(false), // 這個欄位本身不寫入資料庫，只用來填 owner_type / owner_id
 
 
                         Forms\Components\Grid::make(3)->schema([
@@ -193,16 +298,40 @@ $imageExampleView = View::make('filament.partials.image_example');
     {
         return $table
             ->columns([
-                Tables\Columns\TextColumn::make('page.slug')
-                    ->label('頁面 Slug')
-                    ->sortable()
-                    ->searchable(),
+            Tables\Columns\TextColumn::make('id')
+                ->sortable(),
 
-                Tables\Columns\TextColumn::make('page.title_zh_tw')
-                    ->label('頁面標題')
-                    ->sortable()
-                    ->searchable(),
+            Tables\Columns\TextColumn::make('owner_type')
+                ->label('類型')
+                ->formatStateUsing(fn ($state) => match ($state) {
+                    Page::class => '頁面 Page',
+                    ResearchOutput::class => '成果 Result',
+                    default => class_basename($state),
+                })
+                ->sortable(),
 
+            Tables\Columns\TextColumn::make('owner')
+                ->label('對應物件')
+                ->formatStateUsing(function ($record) {
+                    $owner = $record->owner;
+
+                    if (! $owner) {
+                        return '-';
+                    }
+
+                    return match (true) {
+                        $owner instanceof Page
+                            => "頁面: {$owner->slug} ({$owner->title_zh_tw})",
+
+                        $owner instanceof ResearchOutput
+                            => "成果: {$owner->slug} - {$owner->title_zh_tw}",
+
+                        default
+                            => class_basename($record->owner_type) . ': ' . ($owner->name ?? $owner->title ?? $owner->id),
+                    };
+                })
+                ->sortable()
+                ->searchable(),
 
                 Tables\Columns\TextColumn::make('block_type')
                     ->label('區塊類型')

@@ -1,11 +1,19 @@
-<div class="grid grid-cols-3 gap-4">
+<div class="gap-4 md:grid md:grid-cols-2">
 
     @php
         // role code 對應顯示文字
-        $roleLabels = [
-            'plot_manager' => '樣區負責人',
-            'team_partner' => '合作單位',
-        ];
+        $locale = app()->getLocale();
+        if ($locale === 'en') {
+            $roleLabels = [
+                'plot_manager' => 'Plot Manager',
+                'team_partner' => 'Partner Institution',
+            ];
+        } else {
+            $roleLabels = [
+                'plot_manager' => '樣區負責人',
+                'team_partner' => '合作單位',
+            ];
+        }
     @endphp
 
     @foreach ($teams as $card)
@@ -18,7 +26,7 @@
 
         {{-- 整張卡片變成可點連結 --}}
         <a href="{{ $team->website_url ?: '#' }}" @if ($team->website_url) target="_blank" rel="noopener" @endif
-            class="group block rounded-xl border border-gray-200 bg-white p-4 !font-normal !no-underline shadow-sm transition hover:-translate-y-0.5 hover:!font-normal hover:!no-underline hover:shadow-lg">
+            class="group mb-4 block rounded-xl border border-gray-200 bg-white p-4 !font-normal !no-underline shadow-sm transition hover:-translate-y-0.5 hover:!font-normal hover:!no-underline hover:shadow-lg md:mb-0">
 
             <div class="flex flex-col items-start gap-4 sm:flex-row sm:items-center">
                 {{-- 左側：logo --}}
@@ -38,7 +46,7 @@
                 {{-- 右側：文字區塊 --}}
                 <div class="flex-1 space-y-1">
                     {{-- 標題 + 標籤列 --}}
-                    <div class="flex flex-wrap items-center gap-1">
+                    <div class="">
                         {{-- 主標題 --}}
                         <h3 class="mb-0 pt-0 text-base font-semibold text-gray-900">
                             @if ($team->team_type == 'academic')

@@ -19,6 +19,11 @@ return [
     'index_text_3'    => 'trees',
     
     'index_news' => 'NEWS',
+    'select_site' => 'Site',
+    'select_all_site' => 'All Sites',
+    'select_subject' => 'Research Subject',
+    'select_all_subject' => 'All Subjects',
+    'select_clear' => 'Clear',
 
     'header_title'    => 'Long-term Plant Phenology Monitoring Station',
     'footer_copyright'=> 'All rights reserved',

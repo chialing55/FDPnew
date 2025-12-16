@@ -12,6 +12,7 @@ use Filament\Tables\Table;
 use App\Models\Web\Page;
 use Filament\Forms\Set;
 use Filament\Forms\Get;
+use Illuminate\Database\Eloquent\Builder;
 
 class SubjectResource extends Resource
 {
@@ -32,46 +33,46 @@ class SubjectResource extends Resource
                     ->schema([
                         // slug 一行獨占
                         Forms\Components\Grid::make(2)->schema([
-                            Forms\Components\Select::make('slug')
-                                ->label('對應頁面（Slug）')
-                                ->required()
-                                ->options(function () {
-                                    $usedSlugs = Subject::pluck('slug')->toArray();
-                                    return Page::query()
+                        Forms\Components\Select::make('page_id')
+                            ->label('對應頁面（Subject Page）')
+                            ->required()
+                            ->relationship(
+                                name: 'page',
+                                titleAttribute: 'slug',
+                                modifyQueryUsing: function (Builder $query, Get $get) {
+                                    $usedPageIds = Subject::pluck('page_id')->filter()->toArray();
+
+                                    // ✅ 保留自己目前選到的 page_id（編輯時）
+                                    $current = $get('page_id');
+                                    if ($current) {
+                                        $usedPageIds = array_values(array_diff($usedPageIds, [(int) $current]));
+                                    }
+
+                                    return $query
                                         ->where('nav_group', 'subjects')
-                                        ->whereNotIn('slug', $usedSlugs)
-                                        ->orderBy('slug')
-                                        ->get()
-                                        ->mapWithKeys(fn ($page) => [
-                                            $page->slug => $page->slug . ' - ' . $page->title_zh_tw,
-                                        ]);
-                                })
-                                ->searchable()
-                                ->native(false)
-                                ->helperText('從 plots 群組的頁面中選擇一個 slug 對應這個樣區')
-                                ->unique(ignoreRecord: true)
-                                ->live()   // ★ 一定要有，選完 slug 才會觸發更新
-                                ->afterStateUpdated(function (Get $get, Set $set) {
-                                    $slug = $get('slug');   // 也可以用傳進來的 $state，但這樣最穩
+                                        ->whereNotIn('id', $usedPageIds)
+                                        ->orderBy('nav_order');
+                                }
+                            )
+                            ->getOptionLabelFromRecordUsing(fn (Page $record) => $record->slug . ' - ' . $record->title_zh_tw)
+                            ->searchable()
+                            ->preload()
+                            ->native(false)
+                            ->helperText('從 subjects 群組的頁面中選擇一個對應頁面')
+                            ->live()
+                            ->afterStateUpdated(function (Get $get, Set $set) {
+                                $pageId = $get('page_id');
+                                if (! $pageId) return;
 
-                                    if (! $slug) {
-                                        return;
-                                    }
+                                $page = Page::find($pageId);
+                                if (! $page) return;
 
-                                    $page = Page::where('slug', $slug)->first();
-
-                                    if (! $page) {
-                                        return;
-                                    }
-
-                                    // 若你不想覆蓋使用者已經打好的內容，可以先檢查 $get(...)
-                                    $set('short_name_zh_tw', $page->title_zh_tw);
-                                    $set('short_name_en',   $page->title_en);
-                                    $set('name_zh_tw',      $page->title_zh_tw);
-                                    $set('name_en',         $page->title_en);
-                                }),                               
+                                $set('short_name_zh_tw', $page->title_zh_tw);
+                                $set('short_name_en',   $page->title_en);
+                                $set('name_zh_tw',      $page->title_zh_tw);
+                                $set('name_en',         $page->title_en);
+                            }),
                         ]),
-
 
                         // 中英文主題名稱
                         Forms\Components\Grid::make(2)->schema([
@@ -152,9 +153,8 @@ class SubjectResource extends Resource
     {
         return $table
             ->columns([
-                Tables\Columns\TextColumn::make('slug')
-                    ->label('Slug')
-                    ->searchable()
+                Tables\Columns\TextColumn::make('page.slug')
+                    ->label('頁面')
                     ->sortable(),
 
                 Tables\Columns\TextColumn::make('name_zh_tw')

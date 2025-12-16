@@ -9,6 +9,7 @@ services:
       - .:/app
       - ../FDPfiles:/app/public/FDPfiles
       - ../SSPfiles:/app/public/SSPfiles
+      - ./docker/php/uploads.ini:/usr/local/etc/php/conf.d/uploads.ini
     depends_on:
       - db
     expose:

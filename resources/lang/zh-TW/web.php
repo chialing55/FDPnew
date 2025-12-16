@@ -22,6 +22,11 @@ return [
     'index_text_3'    => '棵樹',
 
     'index_news' => '最新消息',
+    'select_site' => '樣區',
+    'select_all_site' => '全部樣區',
+    'select_subject' => '研究主題',
+    'select_all_subject' => '全部主題',
+    'select_clear' => '清除',
 
     'header_title'    => '植物物候長期監測站',
     'footer_copyright'=> '版權所有',

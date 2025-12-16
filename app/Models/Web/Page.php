@@ -15,7 +15,7 @@ class Page extends Model
     protected $fillable = [
         'slug',
         'title_zh_tw', 'title_en',
-        'view_name', 'description', 'hero_image',
+        'view', 'description', 'hero_image',
         'nav_group', 'nav_order',
     ];
 
@@ -28,7 +28,7 @@ class Page extends Model
 
     public function contentBlocks()
     {
-        return $this->hasMany(ContentBlock::class, 'page_id');
+        return $this->morphMany(ContentBlock::class, 'owner');
     }
 
     public function site()

@@ -5,11 +5,11 @@ namespace App\Models\Web;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-class ResearchProject extends Model
+class Project extends Model
 {
     use HasFactory;
 
-    protected $table = 'research_projects';
+    protected $table = 'projects';
     protected $connection = 'mysql_web';
 
     protected $fillable = [

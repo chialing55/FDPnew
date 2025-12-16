@@ -138,7 +138,7 @@
     }
 
     .page-two-column {
-        @apply grid grid-cols-1 gap-6 lg:grid-cols-2 p-4 my-4;
+        @apply grid grid-cols-1 gap-6 lg:grid-cols-2;
     }
 
     .with-b {
@@ -161,6 +161,30 @@
         margin-top: 0.3rem;
         line-height: 1.4;
     }
+
+    .banner-gradient {
+        background: linear-gradient(
+            to right,
+            #3d4e17 10%,    /* forest 深綠 */
+            #3d4e17 25%, /* forest-mist */
+        
+            rgba(67, 157, 138, 0.00) 100% /* 完全透明 */
+        );
+        /* border: 5px solid red !important; */
+    }
+
+    .hero-bottom-gradient {
+        background: radial-gradient(
+            circle at bottom left,   /* 發光點在左下角 */
+            rgba(61, 78, 23, 0.70) 0%,
+            rgba(61, 78, 23, 0.55) 20%,
+            rgba(61, 78, 23, 0.30) 40%,
+            rgba(61, 78, 23, 0.10) 65%,
+            rgba(61, 78, 23, 0.00) 100%
+        );
+    }
+
+
 
 
     .hanb a {
