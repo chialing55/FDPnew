@@ -2,7 +2,7 @@
 FROM composer:2 AS composer
 
 # 第二步：主容器使用 PHP 8.2 FPM
-FROM php:8.2-fpm
+FROM php:8.3-fpm
 
 # 安裝系統套件 + PHP extensions
 RUN apt-get update && apt-get install -y \

@@ -19,6 +19,9 @@ class ResearchOutputList extends Component
     public bool $showSiteTags = true;
     public bool $showSubjectTags = true;
 
+    public bool $showSiteFilter = true;
+    public bool $showSubjectFilter = true;
+
     public bool $showFilters = false;
 
     public array $siteOptions = [];     // [id => name]
@@ -32,17 +35,24 @@ class ResearchOutputList extends Component
         $this->site = $this->blankToNull($this->site);
         $this->subject = $this->blankToNull($this->subject);
 
+        // tag 顯示邏輯（你原本的是對的）
         $this->showSiteTags    = $this->site === null;
         $this->showSubjectTags = $this->subject === null;
 
-        // ✅ 只有總表（兩者都沒給）才顯示篩選器
-        $this->showFilters = ($this->site === null && $this->subject === null);
+        // ⭐ 篩選器顯示邏輯（新）
+        $this->showSiteFilter    = $this->site === null;
+        $this->showSubjectFilter = $this->subject === null;
 
-        if ($this->showFilters) {
-            $this->siteOptions = $this->getSiteOptions();
-            $this->subjectOptions = $this->getSubjectOptions();
+        // 只要「至少有一個篩選器會顯示」，就需要 options
+        if ($this->showSiteFilter || $this->showSubjectFilter) {
+            if ($this->showSiteFilter) {
+                $this->siteOptions = $this->getSiteOptions();
+            }
+
+            if ($this->showSubjectFilter) {
+                $this->subjectOptions = $this->getSubjectOptions();
+            }
         }
-
     }
 
     private function blankToNull($v): ?string

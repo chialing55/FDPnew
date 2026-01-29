@@ -1,4 +1,4 @@
-@extends('layouts/app') 
+@extends('layouts/adminapp') 
 @section('footer')
 	<footer>
       <div id="header_text" class='fc-w flex' style='font-size: 14px;' >

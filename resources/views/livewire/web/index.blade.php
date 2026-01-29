@@ -12,12 +12,23 @@
     {{-- plots --}}
 
     <div class='relative left-1/2 right-1/2 mb-12 ml-[-50vw] mr-[-50vw] bg-gray-200 py-6 lg:mt-8' style='width: 100vw;'>
-        <div class='mx-auto lg:-mt-16 lg:max-w-[70rem]'>
+        <div class="pointer-events-none absolute inset-0 z-10">
+            <div class="sticky bottom-0 h-full w-full"
+                style="
+      background-image: url('{{ asset('images/background/森林底圖手繪風3.png') }}');
+      background-size: cover;
+      background-position: bottom;
+      background-repeat: no-repeat;
+      opacity: 0.1;
+    ">
+            </div>
+        </div>
+        <div class='relative z-20 mx-auto lg:-mt-16 lg:max-w-[70rem]'>
             @foreach ($plots as $plot)
                 @php
                     $img_postion = match ($plot) {
                         'fushan' => 'object-top md:object-[0%_-50px]',
-                        'nanjenshan' => 'object-center',
+                        'nanjenshan' => 'object-center md:object-[0%_-120px]',
                         'shoushan' => 'object-top',
                         default => 'object-center',
                     };
@@ -31,7 +42,7 @@
                             class='{{ $img_postion }} h-48 w-full object-cover'>
                     </div>
                     <div class='p-4 text-left lg:w-[40%] lg:max-w-lg'>
-                        <h1 class='{{ $loop->even ? '' : 'text-right' }} mt-0 text-2xl md:text-5xl capitalize'
+                        <h1 class='{{ $loop->even ? '' : 'text-right' }} mt-0 text-2xl capitalize md:text-5xl'
                             style='text-shadow: 1px 1px 4px rgba(51, 77, 43, 0.7); line-height:2rem;'>
                             {{ $plotsContent[$plot]['title'] ?? '' }} </h1>
                         <p class='text-sm text-gray-600'> {!! $plotsContent[$plot]['intro'] ?? '' !!} </p>

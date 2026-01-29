@@ -1,38 +1,60 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
+use Illuminate\Support\Facades\Session;
+use Illuminate\Support\Facades\App;
+
+use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\UpdateController;
 use App\Http\Controllers\Web\WebIndexController;
-use Illuminate\Support\Facades\App;
-use Illuminate\Support\Facades\Session;
 
+/*
+|--------------------------------------------------------------------------
+| 語系切換
+|--------------------------------------------------------------------------
+*/
 Route::get('/locale/{locale}', function ($locale) {
     $availableLocales = ['zh-TW', 'en'];
 
     if (! in_array($locale, $availableLocales)) {
-        $locale = config('app.locale'); // 回到預設
+        $locale = config('app.locale');
     }
 
-    // 寫入 Session，之後 Middleware 會負責 setLocale
     Session::put('locale', $locale);
 
-    // 回上一頁，沒有就回首頁
     return redirect()->back();
 })->name('locale.switch');
-// Route::get('/', function () {    
-//     return view('login1');
-// });
 
+/*
+|--------------------------------------------------------------------------
+| 前台首頁（你原本的）
+|--------------------------------------------------------------------------
+*/
 Route::view('/', 'webindex')->name('webindex');
+// 或如果你之後要用 controller：
+// Route::get('/', [WebIndexController::class, 'splist'])->name('front.home');
 
-// 首頁（給一般使用者看的）
-// Route::get('/', [WebIndexController::class, 'splist'])->name('front.home'); 
+/*
+|--------------------------------------------------------------------------
+| Breeze / Laravel Auth 相關（只留必要）
+|--------------------------------------------------------------------------
+*/
+Route::middleware('auth')->group(function () {
+    Route::get('/profile', [ProfileController::class, 'edit'])
+        ->name('profile.edit');
 
-// Route::get('/latest-updates', [UpdateController::class, 'latestUpdates'])
-//     ->name('latest-updates');
+    Route::patch('/profile', [ProfileController::class, 'update'])
+        ->name('profile.update');
 
+    Route::delete('/profile', [ProfileController::class, 'destroy'])
+        ->name('profile.destroy');
+});
+
+/*
+|--------------------------------------------------------------------------
+| 其他 routes
+|--------------------------------------------------------------------------
+*/
 require __DIR__.'/web_admin_legacy.php'; // 舊後台
 require __DIR__.'/web_public.php';       // 新前台
-
-
-
+require __DIR__.'/auth.php';             // Breeze 產生（login / logout / register）

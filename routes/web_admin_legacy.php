@@ -40,14 +40,14 @@ use App\Http\Controllers\Shoushan\PlotAlternote;
 
 // === 後台登入與入口 ===
 
-Route::get('/login1', function () {
-    return redirect()->route('admin.login');
-});
+// Route::get('/login1', function () {
+//     return redirect()->route('admin.login');
+// });
 
 Route::prefix('admin')->group(function () {
 
     // 後台登入頁：/admin/login
-    Route::get('/login', function () {
+    Route::get('/login-old', function () {
         return view('login1');
     })->name('admin.login');
 

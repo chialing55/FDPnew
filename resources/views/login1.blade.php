@@ -1,4 +1,4 @@
-@extends('layouts/app') 
+@extends('layouts/adminapp') 
 
 @section('title', '登入-台灣森林動態樣區資料管理系統')
 

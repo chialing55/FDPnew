@@ -1,6 +1,9 @@
 <?php
 
 namespace App\Models\Web;
+use App\Models\Web\ProjectSite;
+use App\Models\Web\ProjectSubject;
+
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -28,6 +31,7 @@ class Project extends Model
         'website_url',           
         'is_active',
         'website_url',
+        'subject_other_zh_tw', 'subject_other_en',
     ];
 
     /** 依語系回傳標題 */
@@ -61,10 +65,25 @@ class Project extends Model
     }
 
 
-    /** 此計畫對應的 entity_tags 記錄 */
-    public function entityTags()
+    public function sites()
     {
-        return $this->hasMany(EntityTag::class, 'entity_id')
-            ->where('entity_type', 'research_project');
+        return $this->belongsToMany(Site::class, 'project_site')
+            ->using(ProjectSite::class)
+            ->withTimestamps();
     }
+
+    public function projectSites()
+    {
+        return $this->hasMany(ProjectSite::class);
+    }
+
+    public function subjects()
+    {
+        return $this->belongsToMany(\App\Models\Web\Subject::class, 'project_subject')
+            ->withTimestamps();
+    }
+     public function projectSubjects()
+    {
+        return $this->hasMany(ProjectSubject::class);
+    }   
 }

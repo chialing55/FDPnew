@@ -5,6 +5,7 @@ namespace App\Http\Livewire\Web;
 use Livewire\Component;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\File;
+use Illuminate\Support\Facades\Storage;
 use App\Helpers\PageTitleHelper;
 use App\Models\Web\Page;
 
@@ -48,12 +49,12 @@ class PageBackgroundHero extends Component
         $this->breadcrumbs = $breadcrumbs;
 
         if($this->page->hero_image){
-            $this->hero = $this->page->hero_image;
+            $this->hero = Storage::url($this->page->hero_image);
         } else {
-            $this->hero = $this->pickRandomHero();
+            $this->hero = asset('images/hero/' . $this->pickRandomHero());
         }
 
-        $this->hero = $this->pickRandomHero();
+        // $this->hero = $this->pickRandomHero();
     } 
 
     protected function pickRandomHero(): string

@@ -87,9 +87,13 @@ class PageDefault extends Component
                 'id'          => null,
                 'title_zh_tw' => '研究計畫',
                 'title_en'    => 'Research projects',
-                'body_zh_tw'  => 'Sample body content.',
-                'body_en'     => 'Sample body content.',
-                'view'        => '', // 可選，指定 Blade 視圖
+                'body_zh_tw'  => '',
+                'body_en'     => '',
+                'view'        => 'web.project-list', // 可選，指定 Blade 視圖
+                'params'      => [
+                    'site' => $site,   // 傳給這個 block 的參數
+                    
+                ],
             ]),
             new ContentBlock([
                 'id'          => null,

@@ -1,85 +1,36 @@
-@php
-date_default_timezone_set("Asia/Taipei");
-@endphp
 <!DOCTYPE html>
-<html lang="tw">
-<head>
-	<meta charset="UTF-8">
-	<meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="csrf-token" content="{{ csrf_token() }}">
-  <meta name="language" content="zh-TW" />  
-  <link rel="alternate" href="" hreflang="en" /> 
- @livewireStyles
-	<title>@yield('title')</title>
-  @yield('meta')
+<html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
+    <head>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="csrf-token" content="{{ csrf_token() }}">
 
-  <link rel="stylesheet" href="{{asset('/js/handsontable/dist/handsontable.full.css')}}">
-  <link rel="stylesheet" href="{{asset('/css/index.css')}}">
-  <link rel="stylesheet" href="{{asset('/css/style.css')}}">
-  <link rel="stylesheet" href="{{asset('/css/theme.green.min.css')}}">
-  <link href="{{ asset('/css/all.min.css') }}" rel="stylesheet">  {{--Font Awesome --}}
-  @yield('css')
+        <title>{{ config('app.name', 'Laravel') }}</title>
 
+        <!-- Fonts -->
+        <link rel="preconnect" href="https://fonts.bunny.net">
+        <link href="https://fonts.bunny.net/css?family=figtree:400,500,600&display=swap" rel="stylesheet" />
 
-@yield('header_js')
+        <!-- Scripts -->
+        @vite(['resources/css/app.css', 'resources/js/app.js'])
+    </head>
+    <body class="font-sans antialiased">
+        <div class="min-h-screen bg-gray-100">
+            @include('layouts.navigation')
 
-</head>
-<body>
+            <!-- Page Heading -->
+            @isset($header)
+                <header class="bg-white shadow">
+                    <div class="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
+                        {{ $header }}
+                    </div>
+                </header>
+            @endisset
 
-
-<div class='main'>
-
-
-
-@yield('content')
-
-@yield('footer')
-
-</div>
-
-
-</body>
-
-{{-- <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script> --}}
-<script src="{{asset('/js/jquery-3.6.0.min.js')}}"></script>
-<script src="{{asset('/js/handsontable/dist/handsontable.full.js')}}"></script>
-<script src="{{asset('/js/jquery.tablesorter.min.js')}}"></script>
-<script src="{{asset('/js/jquery.tablesorter.widgets.min.js')}}"></script>
-<script>
-    $('.back').on('click', function(){
-        location.href=`/admin/choice`;
-    })
-
-
-    function handleHoverEvents(selector, innerSelector) {
-      $(selector + ', ' + innerSelector).on('mouseenter', function() {
-        $(innerSelector).css('display', 'inline-flex');
-        $(selector).css({'color': '#fff', 'background-color': '#91A21C'}); 
-        $('.now hr').css('color', 'transparent');
-      }).on('mouseleave', function() {
-        $(innerSelector).hide();
-        $(selector).css({'color': '', 'background-color': ''}); 
-        $('.now hr').css('color', '#91A21C');
-      });
-    }
-
-$(document).ajaxStart(function() {
-  $('.loading-container').addClass('visible');
-});
-$(document).ajaxStop(function() {
-  $('.loading-container').removeClass('visible');
-});
-
-
-</script>
-@livewireScripts
-
-
-
-@yield('js')
-
-    @php
-
-    @endphp
-
+            <!-- Page Content -->
+            <main>
+                {{ $slot }}
+            </main>
+        </div>
+    </body>
 </html>

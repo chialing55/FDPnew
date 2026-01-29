@@ -4,7 +4,7 @@
         <div class="relative z-10 h-[10vh] w-full overflow-hidden md:h-[30vh]" oncontextmenu="return false">
 
             <!-- 背景圖 -->
-            <img src="{{ asset('images/hero/' . $hero) }}" alt="Hero" class="h-full w-full object-cover" loading="eager"
+            <img src="{{ $hero }}" alt="Hero" class="h-full w-full object-cover" loading="eager"
                 decoding="async" fetchpriority="high">
 
             <!-- 左 → 右 的綠色漸層遮罩 -->

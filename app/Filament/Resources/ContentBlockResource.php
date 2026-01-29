@@ -150,9 +150,9 @@ Forms\Components\Select::make('owner_selector')
         }
 
         $type = match ($record->owner_type) {
-            Page::class => 'page',
-            ResearchOutput::class => 'result',
-            default => null,
+            'pages'            => 'page',
+            'research_outputs' => 'result',
+            default            => null,
         };
 
         if (! $type || ! $record->owner_id) {
