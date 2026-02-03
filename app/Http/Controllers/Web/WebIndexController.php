@@ -17,11 +17,10 @@ class WebIndexController extends Controller
 {
 
 
-    public function index(Request $request){
+    public function index(Request $request)
+    {
 
-        $user = $request->session()->get('user', function () {
-            return 'guest';
-        });
+        $user = $request->user()->name;
 
         // if ($user=='no'){
         //     return view('login1', [
@@ -31,10 +30,10 @@ class WebIndexController extends Controller
 
         // Session::start();
         // $input = Request::all();
-        $lasterUpdate='';
+        $lasterUpdate = '';
         $ob_update = new updateController;
-        $lasterUpdate=$ob_update->latestUpdates();
-      
+        $lasterUpdate = $ob_update->latestUpdates();
+
         $request->session()->put('latest_update', $lasterUpdate);
 
 
@@ -43,46 +42,27 @@ class WebIndexController extends Controller
 
     }
 
-    public function species(Request $request, $spcode){
+    public function species(Request $request, $spcode)
+    {
 
-        $user = $request->session()->get('user', function () {
-            return 'guest';
-        });
+        $user = $request->user()->name;
 
-             return view('pages/web/species',[
-                'spcode' => $spcode,
-                'user' => $user
-             ]);
-        
-
+        return view('pages/web/species', [
+            'spcode' => $spcode,
+            'user' => $user
+        ]);
     }
 
 
-    public function splist(Request $request){
+    public function splist(Request $request)
+    {
 
-        $user = $request->session()->get('user', function () {
-            return 'guest';
-        });
-
-
-             return view('pages/web/splist',[
-                'user' => $user
-             ]);
-        
+        $user = $request->user()->name;
 
 
-    }
-
-    public function taitest(Request $request){
-
-
-
-             return view('pages/web/taitest',[
-
-                'user' => 'chialing'
-             ]);
-        
-
+        return view('pages/web/splist', [
+            'user' => $user
+        ]);
     }
 
 }

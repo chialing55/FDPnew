@@ -1,28 +1,32 @@
 var plotType='ss1ha';
 
 
-window.addEventListener('data', event => {
+document.addEventListener('livewire:init', () => {
+  if (window.__boundSsDataEvent) return;
+  window.__boundSsDataEvent = true;
 
+  Livewire.on('data', ({ record, emptytable, envi, csplist }) => {
+    data = record;
+    emptytable = emptytable;
+    envi = envi;
+    csplist = csplist;
 
-  data=event.detail.record;
-  emptytable=event.detail.emptytable;
-  envi=event.detail.envi;
-  csplist=event.detail.csplist;
+    $(".save2").off();            // 取代 unbind()
+    $('.finishnote').html('');    // 原本 .html() 沒參數不會清空
 
+    // ⚠️ 建議先保護 data[0]，避免空陣列噴錯
+    if (!data || data.length === 0) return;
 
-  // console.log(emptytable);
-
-    $(".save2").unbind();
-    $('.finishnote').html();
-    
-    //一開始,thispage=1
+    // 一開始,thispage=1
     ssenvitable(envi, data[0].qx, data[0].qy, data[0].sqx, data[0].sqy);
 
-    if (data[0].tag!='無'){
-    ssdatatable(data, 1, 20);
-    ssrecruittable(data, emptytable, csplist);
-  }
+    if (data[0].tag !== '無') {
+      ssdatatable(data, 1, 20);
+      ssrecruittable(data, emptytable, csplist);
+    }
+  });
 });
+
 
 function cellfunction(tableType, container, row, col, prop){
   var cellProperties = {};
@@ -236,21 +240,19 @@ function alternotetable(alterdata, stemid, entry, thispage){
 
 //進行個別修改 //資料處理，後端資料更正
 
-window.addEventListener('stemiddata', event => {
+document.addEventListener('livewire:init', () => {
+  if (window.__boundSsStemEvent) return;
+  window.__boundSsStemEvent = true;
 
-  stemid=event.detail.stemid;
-  stemdata=event.detail.stemdata;
-  csplist=event.detail.csplist;
-  from=event.detail.from;
-  console.log(stemid);
+  Livewire.on('stemiddata', ({ stemid, stemdata, csplist, from }) => {
     ss1haupdatatable(stemid, stemdata, csplist, from);
+  });
 
+  Livewire.on('updateStemidlist', ({ data }) => {
+    Livewire.dispatch('updateStemidlist', { data });
+  });
 });
 
-Livewire.on('updateStemidlist', function(data) {
-    // 更新 Livewire 组件中的数组
-    Livewire.emit('updateStemidList', data);
-});
 
 //後端資料更正
 

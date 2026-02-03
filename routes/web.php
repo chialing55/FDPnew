@@ -55,6 +55,7 @@ Route::middleware('auth')->group(function () {
 | 其他 routes
 |--------------------------------------------------------------------------
 */
+require __DIR__.'/auth.php';             // Breeze 產生（login / logout / register）
 require __DIR__.'/web_admin_legacy.php'; // 舊後台
 require __DIR__.'/web_public.php';       // 新前台
-require __DIR__.'/auth.php';             // Breeze 產生（login / logout / register）
+

@@ -4,45 +4,63 @@ var realemptytable2;
 var plotType='ss10m';
 
 
-window.addEventListener('data', event => {
+document.addEventListener('livewire:init', () => {
+  if (window.__boundSsCovDataEvent) return;
+  window.__boundSsCovDataEvent = true;
 
-  covs=event.detail.covs;
-  data=event.detail.record;
-  emptytable=event.detail.emptytable;
-  emptytable2=event.detail.emptytable2;  //cov
-  realemptytable = deepCopy(emptytable);
-  realemptytable2 = deepCopy(emptytable2);  //cov
-  envi=event.detail.envi;
-  csplist=event.detail.csplist;
-  covcsplist=event.detail.covcsplist;
-  site=event.detail.site;
+  Livewire.on('data', ({
+    covs,
+    record,
+    emptytable,
+    emptytable2,
+    envi,
+    csplist,
+    covcsplist,
+    site
+  }) => {
+    // 對應原本變數（保留你用全域變數的習慣）
+    window.covs = covs;
+    window.data = record;
+    window.emptytable = emptytable;
+    window.emptytable2 = emptytable2;
+    window.envi = envi;
+    window.csplist = csplist;
+    window.covcsplist = covcsplist;
+    window.site = site;
 
-  // console.log(data);
+    window.realemptytable  = deepCopy(emptytable);
+    window.realemptytable2 = deepCopy(emptytable2);
 
-    $(".save2").unbind();
-    $('.finishnote').html();
+    $(".save2").off();
+    $('.finishnote').html('');
+
     sscovtable(covs, site, covcsplist);
-    ssaddcovtable(covs, site, emptytable2, covcsplist); 
-    if (covs.length!=0){
-      
+    ssaddcovtable(covs, site, emptytable2, covcsplist);
+
+    if (Array.isArray(covs) && covs.length !== 0) {
       $('.covtable').show();
       $('.nocovdata').hide();
- 
     } else {
-
       $('.covtable').hide();
       $('.nocovdata').show();
     }
-    console.log(data);
-    //一開始,thispage=1
+
+    console.log(record);
+
+    // 一開始,thispage=1
     ssenvitable(envi, site);
 
-    if (data!='無'){
-    ssdatatable(data, 1, 20, site);
-
+    // 你原本寫 if (data!='無')，我改成更安全：
+    // - 若 record 是字串 "無" 就跳過
+    // - 若 record 是陣列且有資料，就跑
+    if (record !== '無') {
+      ssdatatable(record, 1, 20, site);
     }
-    ssrecruittable(data, emptytable, csplist, site);
+
+    ssrecruittable(record, emptytable, csplist, site);
+  });
 });
+
 
   const aspectValidator = (value, callback) => {
     if (value === '0') {
@@ -398,21 +416,21 @@ function sscovtableupdate(covs){
 
 //進行個別修改 //資料處理，後端資料更正
 
-window.addEventListener('stemiddata', event => {
 
-  stemid=event.detail.stemid;
-  stemdata=event.detail.stemdata;
-  csplist=event.detail.csplist;
-  from=event.detail.from;
-  console.log(stemid);
-    ss10mupdatatable(stemid, stemdata, csplist, from);
 
+document.addEventListener('livewire:init', () => {
+  if (window.__boundSsStemEvent) return;
+  window.__boundSsStemEvent = true;
+
+  Livewire.on('stemiddata', ({ stemid, stemdata, csplist, from }) => {
+    ss1haupdatatable(stemid, stemdata, csplist, from);
+  });
+
+  Livewire.on('updateStemidlist', ({ data }) => {
+    Livewire.dispatch('updateStemidlist', { data });
+  });
 });
 
-Livewire.on('updateStemidlist', function(data) {
-    // 更新 Livewire 组件中的数组
-    Livewire.emit('updateStemidList', data);
-});
 
 //後端資料更正
 

@@ -125,14 +125,18 @@ function deletealternote(stemid, plotType, thispage){
 
 //map
 
-window.addEventListener('initTablesorter', event => {
+document.addEventListener('livewire:init', () => {
+  if (window.__boundInitTablesorter2) return;
+  window.__boundInitTablesorter2 = true;
 
-  const tablePlot=event.detail.tablePlot;
-  data=event.detail.data;
-  
-  const mapfile=event.detail.mapfile;
-  console.log(data);
-  $(`#mapTable${tablePlot}`).tablesorter();
-  drawChart(data, tablePlot, mapfile);
+  Livewire.on('initTablesorter', ({ tablePlot, data, mapfile }) => {
+    console.log(data);
 
+    requestAnimationFrame(() => {
+      $(`#mapTable${tablePlot}`).tablesorter();
+    });
+
+    drawChart(data, tablePlot, mapfile);
+  });
 });
+

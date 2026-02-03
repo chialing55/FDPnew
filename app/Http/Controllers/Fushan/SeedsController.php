@@ -20,164 +20,113 @@ class SeedsController extends Controller
 {
 
 
-    public function seeds(Request $request, $site){
-
-        $user = $request->session()->get('user', function () {
-            return 'no';
-        });
-
-        if ($user=='no'){
-            return view('login1', [
-                'check' => 'no'
-            ]);
-        } else {
-
-            return view('pages/fushan/seeds_doc', [
-                'site' => $site,
-                'project' => '種子雨',
-                'user' => $user
+    public function seeds(Request $request)
+    {
+        $user = $request->user();
+        $site = $request->route('site');
 
 
-            ]);
-        }
+        return view('pages/fushan/seeds_doc', [
+            'site' => $site,
+            'project' => '種子雨',
+            'user' => $user->name
+
+
+        ]);
     }
 
 
-    public function entry(Request $request, $site){
+    public function entry(Request $request)
+    {
 
-        $user = $request->session()->get('user', function () {
-            return 'no';
-        });
+        $user = $request->user();
+        $site = $request->route('site');
 
-        if ($user=='no'){
-            return view('login1', [
-                'check' => 'no'
-            ]);
-        } else {
 
-            return view('pages/fushan/seeds_entry', [
-                'site' => $site,
-                'project' => '種子雨',
-                'user' => $user
 
-            ]);
-        }
+        return view('pages/fushan/seeds_entry', [
+            'site' => $site,
+            'project' => '種子雨',
+            'user' => $user->name
+
+        ]);
     }
 
 
-    public function import(Request $request, $site){
+    public function import(Request $request)
+    {
 
-        $user = $request->session()->get('user', function () {
-            return 'no';
-        });
-
-        if ($user=='no'){
-            return view('login1', [
-                'check' => 'no'
-            ]);
-        } else {
+        $user = $request->user();
+        $site = $request->route('site');
 
 
-            return view('pages/fushan/seeds_import', [
-                'site' => $site,
-                'project' => '種子雨',
-                'user' => $user
+        return view('pages/fushan/seeds_import', [
+            'site' => $site,
+            'project' => '種子雨',
+            'user' => $user->name
 
-            ]);
-        }
+        ]);
     }
 
 
-    public function note(Request $request, $site){
+    public function note(Request $request)
+    {
 
-        $user = $request->session()->get('user', function () {
-            return 'no';
-        });
+        $user = $request->user();
+        $site = $request->route('site');
 
-        if ($user=='no'){
-            return view('login1', [
-                'check' => 'no'
-            ]);
-        } else {
+        return view('pages/fushan/seeds_note', [
+            'site' => $site,
+            'project' => '種子雨',
+            'user' => $user->name
 
 
-            return view('pages/fushan/seeds_note', [
-                'site' => $site,
-                'project' => '種子雨',
-                'user' => $user
-                
-
-            ]);
-        }
+        ]);
     }
 
 
-    public function showdata(Request $request, $site){
+    public function showdata(Request $request)
+    {
 
-        $user = $request->session()->get('user', function () {
-            return 'no';
-        });
-
-        if ($user=='no'){
-            return view('login1', [
-                'check' => 'no'
-            ]);
-        } else {
+        $user = $request->user();
+        $site = $request->route('site');
 
 
-            return view('pages/fushan/seeds_dataviewer', [
-                'site' => $site,
-                'project' => '種子雨',
-                'user' => $user
-                
+        return view('pages/fushan/seeds_dataviewer', [
+            'site' => $site,
+            'project' => '種子雨',
+            'user' => $user->name
 
-            ]);
-        }
+
+        ]);
     }
 
-    public function unknown(Request $request, $site){
+    public function unknown(Request $request)
+    {
 
-        $user = $request->session()->get('user', function () {
-            return 'no';
-        });
-
-        if ($user=='no'){
-            return view('login1', [
-                'check' => 'no'
-            ]);
-        } else {
+        $user = $request->user();
+        $site = $request->route('site');
 
 
-            return view('pages/fushan/seeds_unknown', [
-                'site' => $site,
-                'project' => '種子雨',
-                'user' => $user
-                
+        return view('pages/fushan/seeds_unknown', [
+            'site' => $site,
+            'project' => '種子雨',
+            'user' => $user->name
 
-            ]);
-        }
+
+        ]);
     }
 
-    public function updateBackData(Request $request, $site){
+    public function updateBackData(Request $request)
+    {
 
-        $user = $request->session()->get('user', function () {
-            return 'no';
-        });
+        $user = $request->user();
+        $site = $request->route('site');
+        return view('pages/fushan/seeds_updatebackdata', [
+            'site' => $site,
+            'project' => '種子雨',
+            'user' => $user->name
 
-        if ($user=='no'){
-            return view('login1', [
-                'check' => 'no'
-            ]);
-        } else {
-
-
-            return view('pages/fushan/seeds_updatebackdata', [
-                'site' => $site,
-                'project' => '種子雨',
-                'user' => $user
-                
-
-            ]);
-        }
+        ]);
     }
 }

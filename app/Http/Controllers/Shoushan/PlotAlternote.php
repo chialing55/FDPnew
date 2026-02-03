@@ -21,43 +21,41 @@ use App\Models\Ss1haRecord2;
 class PlotAlternote extends Controller
 {
 
-    public function alternote(Request $request, $stemid, $entry, $plotType, $thispage){
+    public function alternote(Request $request, $stemid, $entry, $plotType, $thispage)
+    {
 
 
-        if ($plotType=='ss10m'){
+        if ($plotType == 'ss10m') {
             if ($entry == '1') {
-                $table= new Ss10mTreeRecord1;
+                $table = new Ss10mTreeRecord1;
             } else {
-                $table= new Ss10mTreeRecord2;
+                $table = new Ss10mTreeRecord2;
             }
-            $alterdata=['stemid'=>$stemid, 'plot'=>'', 'sqx'=>'', 'sqy' => '', 'tag'=>'', 'b'=>'', 'csp'=>'', 'other'=>'', '原POM' =>''];
+            $alterdata = ['stemid' => $stemid, 'plot' => '', 'sqx' => '', 'sqy' => '', 'tag' => '', 'b' => '', 'csp' => '', 'other' => '', '原POM' => ''];
         } else {
 
             if ($entry == '1') {
-                $table= new Ss1haRecord1;
+                $table = new Ss1haRecord1;
             } else {
-                $table= new Ss1haRecord2;
+                $table = new Ss1haRecord2;
             }
-            $alterdata=['stemid'=>$stemid, 'qx'=>'','qy'=>'',  'sqx'=>'', 'sqy' => '', 'tag'=>'', 'b'=>'', 'csp'=>'', 'other'=>'', '原POM' =>''];
+            $alterdata = ['stemid' => $stemid, 'qx' => '', 'qy' => '',  'sqx' => '', 'sqy' => '', 'tag' => '', 'b' => '', 'csp' => '', 'other' => '', '原POM' => ''];
         }
 
-        $user = $request->session()->get('user', function () {
-            return 'no';
-        });
+        $user = $request->user()->name;
+
+        $result = $table::where('stemid', 'like', $stemid)->get()->toArray();
 
 
-        $result=$table::where('stemid', 'like', $stemid)->get()->toArray();
-        
-
-        if ($result[0]['alternote']==''){
-            $mergedArray=$alterdata;
-            $havedata='no';
+        if ($result[0]['alternote'] == '') {
+            $mergedArray = $alterdata;
+            $havedata = 'no';
         } else {
             //$string = "a:1, b:2";
             //把json轉array
             $alterdata1 = json_decode($result[0]['alternote'], true);
             $mergedArray = array_merge($alterdata, $alterdata1);
-            $havedata='yes';
+            $havedata = 'yes';
         }
 
 
@@ -72,15 +70,6 @@ class PlotAlternote extends Controller
             // 'csplist' => $csplist,
             'havedata' => $havedata
 
-        ];        
-
-        
+        ];
     }
-
-
-
-
-
-
-
 }

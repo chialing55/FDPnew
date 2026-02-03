@@ -18,34 +18,30 @@ use App\Models\FsTreeRecord2;
 class TreeAlternote extends Controller
 {
 
-    public function alternote(Request $request, $stemid, $entry, $thispage){
+    public function alternote(Request $request, $stemid, $entry, $thispage)
+    {
 
 
-        if ($entry=='1'){
-            $table= new FsTreeRecord1;
+        if ($entry == '1') {
+            $table = new FsTreeRecord1;
         } else {
-            $table= new FsTreeRecord2;
+            $table = new FsTreeRecord2;
         }
-
-        $user = $request->session()->get('user', function () {
-            return 'no';
-        });
+        $user = $request->user();
 
 
+        $result = $table::where('stemid', 'like', $stemid)->get()->toArray();
+        $alterdata = ['stemid' => $stemid, 'qx' => '', 'qy' => '', 'sqx' => '', 'sqy' => '', 'tag' => '', 'b' => '', 'csp' => '', 'dbh(<1)' => '',  'pom' => '', 'other' => ''];
 
-
-        $result=$table::where('stemid', 'like', $stemid)->get()->toArray();
-        $alterdata=['stemid'=>$stemid, 'qx'=>'', 'qy' => '', 'sqx'=>'', 'sqy' => '', 'tag'=>'', 'b'=>'', 'csp'=>'', 'dbh(<1)'=>'',  'pom'=>'', 'other'=>''];
-
-        if ($result[0]['alternote']==''){
-            $mergedArray=$alterdata;
-            $havedata='no';
+        if ($result[0]['alternote'] == '') {
+            $mergedArray = $alterdata;
+            $havedata = 'no';
         } else {
             //$string = "a:1, b:2";
             //把json轉array
             $alterdata1 = json_decode($result[0]['alternote'], true);
             $mergedArray = array_merge($alterdata, $alterdata1);
-            $havedata='yes';
+            $havedata = 'yes';
         }
 
 
@@ -54,21 +50,12 @@ class TreeAlternote extends Controller
             'result' => 'ok',
             'stemid' => $stemid,
             'entry' => $entry,
-            'user' => $user,
+            'user' => $user->name,
             'thispage' => $thispage,
             'alterdata' => $mergedArray,
             // 'csplist' => $csplist,
             'havedata' => $havedata
 
-        ];        
-
-        
+        ];
     }
-
-
-
-
-
-
-
 }

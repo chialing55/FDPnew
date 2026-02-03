@@ -71,14 +71,17 @@ function figtoggle(k) {
     }
 }
 
-window.addEventListener("fig1", (event) => {
-    const censusA = event.detail.censusA;
-    const censusR = event.detail.censusR;
-    const censusD = event.detail.censusD;
+document.addEventListener('livewire:init', () => {
+  if (window.__boundFig1Event) return;
+  window.__boundFig1Event = true;
+
+  Livewire.on('fig1', ({ censusA, censusR, censusD }) => {
     console.log(censusA);
     drawChart1(censusA, censusR, censusD);
     figtoggle(1);
+  });
 });
+
 
 //各次調查植株數量圖
 function drawChart1(censusA, censusR, censusD) {
@@ -120,12 +123,18 @@ function drawChart1(censusA, censusR, censusD) {
     fig1 = "yes";
 }
 
-window.addEventListener("fig2", (event) => {
-    const groupedCounts = event.detail.groupedCounts;
 
+
+document.addEventListener('livewire:init', () => {
+  if (window.__boundFig2Event) return;
+  window.__boundFig2Event = true;
+
+  Livewire.on('fig2', ({ groupedCounts }) => {
     drawChart2(groupedCounts);
     figtoggle(2);
+  });
 });
+
 
 //第四次調查徑級結構
 function drawChart2(groupedCounts) {
@@ -159,12 +168,15 @@ function drawChart2(groupedCounts) {
     fig2 = "yes";
 }
 
-window.addEventListener("fig3", (event) => {
-    const census4A = event.detail.census4A;
-    const group = event.detail.group;
 
+document.addEventListener('livewire:init', () => {
+  if (window.__boundFig3Event) return;
+  window.__boundFig3Event = true;
+
+  Livewire.on('fig3', ({ census4A, group }) => {
     drawChart3(census4A, group);
     figtoggle(3);
+  });
 });
 
 //第四次調查植株位置分布
@@ -308,12 +320,15 @@ function drawChart3(census4A, group) {
 }
 
 //開花量時間變化
-window.addEventListener("fig4", (event) => {
-    const flowerSeries = event.detail.flowerSeries;
-    // const dateSeries=event.detail.dateSeries;
 
+document.addEventListener('livewire:init', () => {
+  if (window.__boundFig4Event) return;
+  window.__boundFig4Event = true;
+
+  Livewire.on('fig4', ({ flowerSeries }) => {
     drawChart4(flowerSeries);
     figtoggle(4);
+  });
 });
 
 //chart作圖
@@ -365,12 +380,15 @@ function drawChart4(flowerSeries) {
 }
 
 //結果量時間變化
-window.addEventListener("fig5", (event) => {
-    const fruitsSeries = event.detail.fruitsSeries;
-    // const dateSeries=event.detail.dateSeries;
 
+document.addEventListener('livewire:init', () => {
+  if (window.__boundFig5Event) return;
+  window.__boundFig5Event = true;
+
+  Livewire.on('fig5', ({ flowerSeries }) => {
     drawChart5(fruitsSeries);
     figtoggle(5);
+  });
 });
 
 //chart作圖
@@ -422,12 +440,15 @@ function drawChart5(fruitsSeries) {
 }
 
 //結果量時間變化
-window.addEventListener("fig6", (event) => {
-    const seedlingSeries = event.detail.seedlingSeries;
-    // const dateSeries=event.detail.dateSeries;
 
+document.addEventListener('livewire:init', () => {
+  if (window.__boundFig6Event) return;
+  window.__boundFig6Event = true;
+
+  Livewire.on('fig6', ({ seedlingSeries }) => {
     drawChart6(seedlingSeries);
     figtoggle(6);
+  });
 });
 
 //chart作圖

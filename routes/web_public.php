@@ -40,7 +40,10 @@ Route::get('results/{slug}', [ResearchOutputController::class, 'show'])
 
 
 //通用版要放在最後面
-Route::get('{slug}', [PageController::class, 'show'])->where('slug', '.*')->name('pages.show');;
+Route::get('{slug}', [\App\Http\Controllers\Web\PageController::class, 'show'])
+    ->where('slug', '^(?!login$|register$|logout$|forgot-password$|reset-password$|confirm-password$|verify-email$|email$|profile$|cms$|admin$).+')
+    ->name('pages.show');
+
 
 
 //background

@@ -24,36 +24,49 @@ handleHoverEvents(".list4", ".list4inner");
 var plotType = "fsseedling";
 var thispage = 1;
 
-window.addEventListener("initTablesorter", (event) => {
-    tag = event.detail.tag;
-    // console.log(tag);
-    $(`#progressTable${tag}`).tablesorter();
-});
+document.addEventListener("livewire:init", () => {
+    if (window.__boundSeedlingEvents) return;
+    window.__boundSeedlingEvents = true;
 
-window.addEventListener("data", (event) => {
-    covs = event.detail.covs;
-    data = event.detail.record;
-    emptytable = event.detail.emptytable;
-    maxid = event.detail.maxid;
-    slroll = event.detail.slroll;
-    csplist = event.detail.csplist;
-    realemptytable = deepCopy(emptytable);
+    // initTablesorter
+    Livewire.on("initTablesorter", ({ tag }) => {
+        // tag = event.detail.tag;
+        window.tag = tag; // 如果你其他地方還要用 tag，就存成全域比較安全
+        requestAnimationFrame(() => {
+            $(`#progressTable${tag}`).tablesorter();
+        });
+    });
 
-    // data=event.detail;
-    // console.log(data);
-    // console.log(slroll);
-    // console.log(emptytable);
-    // $('#slrolltable').html('');
-    $(".save2").unbind();
+    // data
+    Livewire.on(
+        "data",
+        ({ covs, record, emptytable, maxid, slroll, csplist }) => {
+            // covs = event.detail.covs;
+            // data = event.detail.record;
+            // ...
 
-    fscovtable(covs);
-    //一開始,thispage=1
+            window.covs = covs;
+            window.data = record;
+            window.emptytable = emptytable;
+            window.maxid = maxid;
+            window.slroll = slroll;
+            window.csplist = csplist;
 
-    if (data[0].tag != "無") {
-        fsseedlingtable(data, 1, 20, maxid);
-    }
-    recruittable(data, emptytable, csplist);
-    fsslrolltable(slroll, covs);
+            window.realemptytable = deepCopy(emptytable);
+
+            // $(".save2").unbind();
+            $(".save2").off(); // 建議用 off()（jQuery 新寫法）
+
+            fscovtable(covs);
+
+            if (record?.[0]?.tag !== "無") {
+                fsseedlingtable(record, 1, 20, maxid);
+            }
+
+            recruittable(record, emptytable, csplist);
+            fsslrolltable(slroll, covs);
+        },
+    );
 });
 
 function handleSuccessAllTable(res, tableType, handsontable) {
@@ -154,7 +167,7 @@ function fscovtable(covs) {
         colWidths,
         hiddenColumns,
         colHeaders,
-        thispage
+        thispage,
     );
 }
 
@@ -178,7 +191,7 @@ function deleteid(tag, entry, thispage) {
             ajaxData,
             ajaxType,
             handleSuccess,
-            function () {}
+            function () {},
         );
     }
 }
@@ -275,7 +288,7 @@ function fsseedlingtable(data, thispage, pps, maxid) {
         colWidths,
         hiddenColumns,
         colHeaders,
-        thispage
+        thispage,
     );
 }
 
@@ -385,7 +398,7 @@ function recruittable(data, emptytable, csplist) {
         colWidths,
         hiddenColumns,
         colHeaders,
-        thispage
+        thispage,
     );
 }
 
@@ -408,7 +421,7 @@ function deleteroll(tag, id, entry, trap) {
             ajaxData,
             ajaxType,
             handleSuccess,
-            function () {}
+            function () {},
         );
     }
 }
@@ -465,7 +478,7 @@ function fsslrolltable(slroll, covs) {
         colWidths,
         hiddenColumns,
         colHeaders,
-        thispage
+        thispage,
     );
 
     $(".deleteroll").on("click", function () {
@@ -545,7 +558,7 @@ function alternotetable(alterdata, tag, entry, thispage) {
         colWidths,
         hiddenColumns,
         colHeaders,
-        thispage
+        thispage,
     );
 }
 

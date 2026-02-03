@@ -23,7 +23,8 @@ class SeedsSaveController extends Controller
 {
 
 
-    public function getTableInstance($type) {
+    public function getTableInstance($type)
+    {
         if ($type == 'record') {
             return new FsSeedsRecord1;
         } else {
@@ -31,41 +32,42 @@ class SeedsSaveController extends Controller
         }
     }
 
-//產生名錄
-    public function spinfo(){
-        $spinfolist=FsSeedsSplist::query()->get()->toArray();
-        foreach ($spinfolist as $spinfo1){
-            $spinfo[$spinfo1['csp']]=$spinfo1;
+    //產生名錄
+    public function spinfo()
+    {
+        $spinfolist = FsSeedsSplist::query()->get()->toArray();
+        foreach ($spinfolist as $spinfo1) {
+            $spinfo[$spinfo1['csp']] = $spinfo1;
         }
 
         return $spinfo;
     }
 
-//預設鑑定者
-    public $identifier='黃小俊';
+    //預設鑑定者
+    public $identifier = '黃小俊';
 
-//重新載入資料
-    public function getRedata(){
+    //重新載入資料
+    public function getRedata()
+    {
 
-        $data1=FsSeedsRecord1::query()->get()->toArray();
+        $data1 = FsSeedsRecord1::query()->get()->toArray();
         $ob_table = new SeedsAddButton;
-        $redata=$ob_table->addbutton($data1, 'record');
+        $redata = $ob_table->addbutton($data1, 'record');
 
-        return $redata; 
-
+        return $redata;
     }
-//重新載入資料2
-    public function getRedata2($census){
+    //重新載入資料2
+    public function getRedata2($census)
+    {
 
-        $data1=FsSeedsFulldata::where('census', 'like', $census)->orderby('trap')->get()->toArray();
+        $data1 = FsSeedsFulldata::where('census', 'like', $census)->orderby('trap')->get()->toArray();
         $ob_table = new SeedsAddButton;
-        $redata=$ob_table->addbutton($data1, 'fulldata');
+        $redata = $ob_table->addbutton($data1, 'fulldata');
 
-        return $redata; 
-
+        return $redata;
     }
 
-//已輸入資料的修改與儲存
+    //已輸入資料的修改與儲存
     public function savedata(Request $request, $type)
     {
         $table = $this->getTableInstance($type);
@@ -85,7 +87,7 @@ class SeedsSaveController extends Controller
         $existingSigns = ($type === 'record')
             ? \App\Models\FsSeedsRecord1::selectRaw("CONCAT(census, trap, csp, code) AS sign")->pluck('sign')->toArray()
             : \App\Models\FsSeedsFulldata::where('census', $census)
-                ->selectRaw("CONCAT(census, trap, csp, code) AS sign")->pluck('sign')->toArray();
+            ->selectRaw("CONCAT(census, trap, csp, code) AS sign")->pluck('sign')->toArray();
 
         $checker = new \App\Jobs\FsSeedsCheck;
         $lastUpdatedId = null;
@@ -155,7 +157,7 @@ class SeedsSaveController extends Controller
             $k = ($lastUpdatedId - $redata[0]['id']) + 1;
             $thispage = ceil($k / 29);
         }
-        if($lastUpdatedId === null) {
+        if ($lastUpdatedId === null) {
             $thispage = 1; // 如果沒有更新，則回到第一頁
         }
         return [
@@ -166,16 +168,15 @@ class SeedsSaveController extends Controller
         ];
     }
 
-//空白表單的輸入與儲存
+    //空白表單的輸入與儲存
     public function savedata1(Request $request, $type)
     {
         $table = $this->getTableInstance($type);
         $data_all = $request->all();
         $data = $data_all['data'];
 
-        $user = $request->session()->get('user', function () {
-            return view('login1', ['check' => 'no']);
-        });
+        $user = $request->user();
+
 
         $spinfo = $this->spinfo();
 
@@ -219,7 +220,7 @@ class SeedsSaveController extends Controller
             }
 
             $inlist['checknote'] = $checknote;
-            $inlist['updated_id'] = $user;
+            $inlist['updated_id'] = $user->name;
             $inlist['updated_at'] = now();
 
             // 補足物種資訊（fulldata）
@@ -298,12 +299,11 @@ class SeedsSaveController extends Controller
     }
 
 
-//刪除已輸入資料
+    //刪除已輸入資料
     public function deletedata(Request $request, $id, $info, $thispage, $type)
     {
-        $user = $request->session()->get('user', function () {
-            return view('login1', ['check' => 'no']);
-        });
+        $user = $request->user();
+
 
         $datasavenote = '';
         $table = $this->getTableInstance($type);
@@ -339,7 +339,7 @@ class SeedsSaveController extends Controller
                 'type' => 'delete',
                 'census' => $census,
                 'descript' => json_encode($updatedes, JSON_UNESCAPED_UNICODE),
-                'updated_id' => $user,
+                'updated_id' => $user->name,
                 'updated_at' => now(),
             ]);
 
@@ -365,7 +365,7 @@ class SeedsSaveController extends Controller
                     'identifier' => $this->identifier,
                     'note' => '',
                     'checknote' => '',
-                    'updated_id' => $user,
+                    'updated_id' => $user->name,
                     'updated_at' => now(),
                 ]);
             }
@@ -390,113 +390,110 @@ class SeedsSaveController extends Controller
     }
 
 
-//輸入完成檢查，並匯入大表
-public function finishnote(Request $request)
-{
-    $user = $request->session()->get('user', function () {
-        return view('login1', ['check' => 'no']);
-    });
+    //輸入完成檢查，並匯入大表
+    public function finishnote(Request $request)
+    {
+        $user = $request->user();
 
-    $finishnote = '';
-    $spinfo = $this->spinfo();
 
-    // 檢查是否有未修正錯誤資料
-    $hasErrors = FsSeedsRecord1::where('checknote', '!=', '')->exists();
-    if ($hasErrors) {
+        $finishnote = '';
+        $spinfo = $this->spinfo();
+
+        // 檢查是否有未修正錯誤資料
+        $hasErrors = FsSeedsRecord1::where('checknote', '!=', '')->exists();
+        if ($hasErrors) {
+            return [
+                'result' => 'ok',
+                'finishnote' => '有資料錯誤未更正',
+            ];
+        }
+
+        // 取得所有 record 資料（用 trap 分組）
+        $records = FsSeedsRecord1::all()->groupBy('trap');
+        if ($records->isEmpty()) {
+            return [
+                'result' => 'ok',
+                'finishnote' => '無可匯入資料',
+            ];
+        }
+
+        // 用其中一筆資料的欄位建立預設空值 inlistf
+        $datacol = FsSeedsRecord1::first();
+        $inlistf = [];
+        foreach ($datacol->toArray() as $key => $val) {
+            $inlistf[$key] = '';
+        }
+        $inlistf['id'] = '0';
+        $inlistf['census'] = $datacol->census;
+
+        $insertList = [];
+        $trapHasData = [];
+
+        // 遍歷每個有資料的 trap
+        foreach ($records as $trap => $dataGroup) {
+            $trap = str_pad($trap, 3, '0', STR_PAD_LEFT);
+            $trapHasData[] = $trap;
+
+            foreach ($dataGroup as $record) {
+                $row = $record->toArray();
+                $row['id'] = '0';
+
+                foreach ($row as $key => $val) {
+                    if ($val === null) $val = '';
+                    $inlist[$key] = $val;
+                }
+
+                if (isset($spinfo[$inlist['csp']])) {
+                    $inlist['sp'] = $spinfo[$inlist['csp']]['sp'];
+                    $inlist['identified'] = $spinfo[$inlist['csp']]['identified'];
+                } else {
+                    $inlist['sp'] = '';
+                    $inlist['identified'] = 'N';
+                }
+
+                $inlist['updated_id'] = $user->name;
+                $inlist['updated_at'] = now();
+
+                $insertList[] = $inlist;
+            }
+        }
+
+        // 生成 001~107 的 trap，補缺漏
+        for ($j = 1; $j <= 107; $j++) {
+            $trap = str_pad($j, 3, '0', STR_PAD_LEFT);
+            if (!in_array($trap, $trapHasData)) {
+                $inlist = $inlistf;
+                $inlist['trap'] = $trap;
+                $inlist['csp'] = 'nothing';
+                $inlist['sp'] = 'NOTHING';
+                $inlist['identified'] = 'Y';
+                $inlist['code'] = '0';
+                $inlist['count'] = '0';
+                $inlist['seeds'] = '0';
+                $inlist['viability'] = '0';
+                $inlist['fragments'] = '0';
+                $inlist['sex'] = '';
+                $inlist['identifier'] = $this->identifier;
+                $inlist['note'] = '';
+                $inlist['checknote'] = '';
+                $inlist['updated_id'] = $user->name;
+                $inlist['updated_at'] = now();
+
+                $insertList[] = $inlist;
+            }
+        }
+
+        // 寫入資料
+        if (!empty($insertList)) {
+            FsSeedsFulldata::insert($insertList);
+        }
+
+        // 清空暫存表
+        FsSeedsRecord1::truncate();
+
         return [
             'result' => 'ok',
-            'finishnote' => '有資料錯誤未更正',
+            'finishnote' => '',
         ];
     }
-
-    // 取得所有 record 資料（用 trap 分組）
-    $records = FsSeedsRecord1::all()->groupBy('trap');
-    if ($records->isEmpty()) {
-        return [
-            'result' => 'ok',
-            'finishnote' => '無可匯入資料',
-        ];
-    }
-
-    // 用其中一筆資料的欄位建立預設空值 inlistf
-    $datacol = FsSeedsRecord1::first();
-    $inlistf = [];
-    foreach ($datacol->toArray() as $key => $val) {
-        $inlistf[$key] = '';
-    }
-    $inlistf['id'] = '0';
-    $inlistf['census'] = $datacol->census;
-
-    $insertList = [];
-    $trapHasData = [];
-
-    // 遍歷每個有資料的 trap
-    foreach ($records as $trap => $dataGroup) {
-        $trap = str_pad($trap, 3, '0', STR_PAD_LEFT);
-        $trapHasData[] = $trap;
-
-        foreach ($dataGroup as $record) {
-            $row = $record->toArray();
-            $row['id'] = '0';
-
-            foreach ($row as $key => $val) {
-                if ($val === null) $val = '';
-                $inlist[$key] = $val;
-            }
-
-            if (isset($spinfo[$inlist['csp']])) {
-                $inlist['sp'] = $spinfo[$inlist['csp']]['sp'];
-                $inlist['identified'] = $spinfo[$inlist['csp']]['identified'];
-            } else {
-                $inlist['sp'] = '';
-                $inlist['identified'] = 'N';
-            }
-
-            $inlist['updated_id'] = $user;
-            $inlist['updated_at'] = now();
-
-            $insertList[] = $inlist;
-        }
-    }
-
-    // 生成 001~107 的 trap，補缺漏
-    for ($j = 1; $j <= 107; $j++) {
-        $trap = str_pad($j, 3, '0', STR_PAD_LEFT);
-        if (!in_array($trap, $trapHasData)) {
-            $inlist = $inlistf;
-            $inlist['trap'] = $trap;
-            $inlist['csp'] = 'nothing';
-            $inlist['sp'] = 'NOTHING';
-            $inlist['identified'] = 'Y';
-            $inlist['code'] = '0';
-            $inlist['count'] = '0';
-            $inlist['seeds'] = '0';
-            $inlist['viability'] = '0';
-            $inlist['fragments'] = '0';
-            $inlist['sex'] = '';
-            $inlist['identifier'] = $this->identifier;
-            $inlist['note'] = '';
-            $inlist['checknote'] = '';
-            $inlist['updated_id'] = $user;
-            $inlist['updated_at'] = now();
-
-            $insertList[] = $inlist;
-        }
-    }
-
-    // 寫入資料
-    if (!empty($insertList)) {
-        FsSeedsFulldata::insert($insertList);
-    }
-
-    // 清空暫存表
-    FsSeedsRecord1::truncate();
-
-    return [
-        'result' => 'ok',
-        'finishnote' => '',
-    ];
-}
-
-
 }

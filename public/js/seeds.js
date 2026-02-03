@@ -54,34 +54,39 @@ $(document).on('click', 'button[name=show_seedstable]', function () {
 });
 
 
-window.addEventListener('data', event => {
+document.addEventListener('livewire:init', () => {
+  if (window.__boundSeedsDataEvent) return;
+  window.__boundSeedsDataEvent = true;
 
-  $('.entrytableout').show();
-  $('.keepenter').hide();
-  $('.dateinfo').hide();
-  fdata = event.detail.record;
-  emptytable = event.detail.emptytable;
-  census = event.detail.census;
-  csplist = event.detail.csplist;
-  realemptytable = deepCopy(emptytable);
-  // console.log(emptytable);
-  // console.log(fdata);
-  if (fdata.length > 0) {
-    console.log('1');
-    $('#seedstableout').show();
-    $('#seedstableout_empty').hide();
+  Livewire.on('data', ({ record, emptytable, census, csplist }) => {
+    $('.entrytableout').show();
+    $('.keepenter').hide();
+    $('.dateinfo').hide();
 
-    seedstable(fdata, 1, 29, emptytable)
-    emptyseedstable(emptytable);
+    fdata = record;
+    emptytable = emptytable;
+    census = census;
+    csplist = csplist;
 
-  } else {
-    $('#seedstableout').hide();
-    $('#seedstableout_empty').show();
-    seedstable(fdata, 1, 29, emptytable)
-    emptyseedstable(emptytable);
-  }
+    realemptytable = deepCopy(emptytable);
 
+    if (fdata.length > 0) {
+      console.log('1');
+      $('#seedstableout').show();
+      $('#seedstableout_empty').hide();
+
+      seedstable(fdata, 1, 29, emptytable);
+      emptyseedstable(emptytable);
+    } else {
+      $('#seedstableout').hide();
+      $('#seedstableout_empty').show();
+
+      seedstable(fdata, 1, 29, emptytable);
+      emptyseedstable(emptytable);
+    }
+  });
 });
+
 
 
 function handleSuccessAllTable(res, tableType, handsontable) {

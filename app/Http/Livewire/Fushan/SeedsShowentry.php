@@ -240,7 +240,15 @@ class SeedsShowentry extends Component
         $this->entry='y';
         $this->thiscensus=$census;
 
-        $this->dispatchBrowserEvent('data', [ 'census' => $census, 'record' => $entrytable, 'emptytable' => $emptytable, 'csplist' => $fsscsplist]);
+        // $this->dispatchBrowserEvent('data', [ 'census' => $census, 'record' => $entrytable, 'emptytable' => $emptytable, 'csplist' => $fsscsplist]);
+        $this->dispatch(
+            'data',
+            census: $census,
+            record: $entrytable,
+            emptytable: $emptytable,
+            csplist: $fsscsplist
+        );
+
 
     }
 

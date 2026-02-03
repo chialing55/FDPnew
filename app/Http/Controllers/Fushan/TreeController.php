@@ -20,31 +20,31 @@ use App\Models\FsTreeCensus3;
 class TreeController extends Controller
 {
 
-    public function tree(Request $request, $site){
+    public function tree(Request $request)
+    {
 
-        $user = $request->session()->get('user', function () {
-            return 'no';
-        });
+        $user = $request->user();
+        $site = $request->route('site');
 
-//物種清單，以SPCODE為KEY，傳入session
+        //物種清單，以SPCODE為KEY，傳入session
 
-        $splist=[];
+        $splist = [];
 
-        $splists=FsBaseSpinfo::select('spcode', 'csp')->where('tree', 'like', '1')->get()->toArray();
-        foreach($splists as $splist1){
-            $splist[$splist1['spcode']]=$splist1['csp'];
+        $splists = FsBaseSpinfo::select('spcode', 'csp')->where('tree', 'like', '1')->get()->toArray();
+        foreach ($splists as $splist1) {
+            $splist[$splist1['spcode']] = $splist1['csp'];
         }
         // print_r($splist);
         $request->session()->put('splist', $splist);
 
-        
 
-//產生record1，record2 
-        if (Schema::connection('mysql1')->hasTable('record1')){
-        //     //有輸入表單
+
+        //產生record1，record2 
+        if (Schema::connection('mysql1')->hasTable('record1')) {
+            //     //有輸入表單
         } else {
             DB::connection('mysql1')->select('CREATE TABLE record1 LIKE census4');
-       
+
             DB::connection('mysql1')->statement("INSERT IGNORE INTO record1 SELECT * FROM census4 where census4.deleted_at like ''");
 
             DB::connection('mysql1')->statement("ALTER TABLE `record1` CHANGE `date` `date` CHAR(10) NOT NULL");
@@ -55,311 +55,227 @@ class TreeController extends Controller
 
             DB::connection('mysql1')->statement("ALTER TABLE `record1` CHANGE `update_date` `updated_at` varchar(255) CHARACTER SET utf8 COLLATE utf8_general_ci NOT NULL;");
             //join base表單，更新樣區及種類
-            DB::connection('mysql1')->table('record1')->join('base', 'record1.tag', '=', 'base.tag')->update(['record1.qx'=>DB::raw('base.qx'), 'record1.qy'=>DB::raw('base.qy'),'record1.sqx'=>DB::raw('base.sqx'),'record1.sqy'=>DB::raw('base.sqy'),'record1.spcode'=>DB::raw('base.spcode')]);
+            DB::connection('mysql1')->table('record1')->join('base', 'record1.tag', '=', 'base.tag')->update(['record1.qx' => DB::raw('base.qx'), 'record1.qy' => DB::raw('base.qy'), 'record1.sqx' => DB::raw('base.sqx'), 'record1.sqy' => DB::raw('base.sqy'), 'record1.spcode' => DB::raw('base.spcode')]);
             //如果在base_r資料表有資料 ->改位置資訊
-            DB::connection('mysql1')->table('record1')->join('base_r', 'record1.stemid', '=', 'base_r.stemid')->update(['record1.qx'=>DB::raw('base_r.qx'), 'record1.qy'=>DB::raw('base_r.qy'),'record1.sqx'=>DB::raw('base_r.sqx'),'record1.sqy'=>DB::raw('base_r.sqy')]);
+            DB::connection('mysql1')->table('record1')->join('base_r', 'record1.stemid', '=', 'base_r.stemid')->update(['record1.qx' => DB::raw('base_r.qx'), 'record1.qy' => DB::raw('base_r.qy'), 'record1.sqx' => DB::raw('base_r.sqx'), 'record1.sqy' => DB::raw('base_r.sqy')]);
             //選擇輸入樣區時再把csp填入
-        //刪除欄位
+            //刪除欄位
             DB::connection('mysql1')->statement("ALTER TABLE `record1` DROP COLUMN `deleted_at`");
             //status=0, status=-3&branch=0   =>show=0
-            FsTreeRecord1::where('branch','!=', '0')->where('status', 'like', '-3')->update(['show'=>'0']);
-            FsTreeRecord1::where('status', 'like', '0')->update(['show'=>'0']);
+            FsTreeRecord1::where('branch', '!=', '0')->where('status', 'like', '-3')->update(['show' => '0']);
+            FsTreeRecord1::where('status', 'like', '0')->update(['show' => '0']);
 
             //分支status=-1, -2 => show=0
-            FsTreeRecord1::where('status', 'like', '-1')->where('branch', '!=', '0')->update(['show'=>'0']);
-            FsTreeRecord1::where('status', 'like', '-2')->where('branch', '!=', '0')->update(['show'=>'0']);
+            FsTreeRecord1::where('status', 'like', '-1')->where('branch', '!=', '0')->update(['show' => '0']);
+            FsTreeRecord1::where('status', 'like', '-2')->where('branch', '!=', '0')->update(['show' => '0']);
 
             //把census4已沒有資料的(date='0000-00-00')的show=0
-            FsTreeRecord1::where('date', 'like', '0000-00-00')->update(['show'=>'0']);
+            FsTreeRecord1::where('date', 'like', '0000-00-00')->update(['show' => '0']);
 
             //選擇輸入樣區時再把census3=-1的show改為0
- 
-            FsTreeRecord1::query()->update(['dbh'=>'0', 'h2'=>'0', 'date'=>'0000-00-00', 'code'=>'', 'updated_id' =>'', 'tocheck' =>'', 'tofix' =>'', 'confirm' =>'', 'alternote' => '']);
-            FsTreeRecord1::where('status', 'like', '-9')->update(['status'=>'']);
+
+            FsTreeRecord1::query()->update(['dbh' => '0', 'h2' => '0', 'date' => '0000-00-00', 'code' => '', 'updated_id' => '', 'tocheck' => '', 'tofix' => '', 'confirm' => '', 'alternote' => '']);
+            FsTreeRecord1::where('status', 'like', '-9')->update(['status' => '']);
 
             //產生record2
             DB::connection('mysql1')->select('CREATE TABLE record2 LIKE record1');
-       
+
             DB::connection('mysql1')->select("INSERT INTO record2 SELECT * FROM record1");
-
-         }
-
-
-        if ($user=='no'){
-            return view('login1', [
-                'check' => 'no'
-            ]);
-        } else {
-            // echo "1";
-            //最近一次調
-
-            // print_r($user);
-            return view('pages/fushan/tree_doc', [
-                'site' => $site,
-                'project' => '每木',
-                'user' => $user,
-                'census' => 5
-
-
-            ]);
         }
+
+
+        // echo "1";
+        //最近一次調
+
+        // print_r($user);
+        return view('pages/fushan/tree_doc', [
+            'site' => $site,
+            'project' => '每木',
+            'user' => $user->name,
+            'census' => 5
+
+
+        ]);
     }
 
 
-    public function note(Request $request, $site){
+    public function note(Request $request)
+    {
 
-        $user = $request->session()->get('user', function () {
-            return 'no';
-        });
+        $user = $request->user();
+        $site = $request->route('site');
+        // echo "1";
+        //最近一次調
 
-        if ($user=='no'){
-            return view('login1', [
-                'check' => 'no'
-            ]);
-        } else {
-            // echo "1";
-            //最近一次調
+        // print_r($user);
+        return view('pages/fushan/tree_note', [
+            'site' => $site,
+            'project' => '每木',
+            'user' => $user->name
 
-            // print_r($user);
-            return view('pages/fushan/tree_note', [
-                'site' => $site,
-                'project' => '每木',
-                'user' => $user
-
-            ]);
-        }
+        ]);
     }
 
 
-    public function entry(Request $request, $site, $entry){
+    public function entry(Request $request)
+    {
 
-        $user = $request->session()->get('user', function () {
-            return 'no';
-        });
+        $user = $request->user();
+        $site = $request->route('site');
+        $entry = $request->route('entry');
+        // echo "1";
+        //最近一次調
 
-        if ($user=='no'){
-            return view('login1', [
-                'check' => 'no'
-            ]);
-        } else {
-            // echo "1";
-            //最近一次調
-
-            // print_r($user);
-            return view('pages/fushan/tree_entry', [
-                'site' => $site,
-                'project' => '每木',
-                'entry' => $entry,
-                'user' => $user,
-            ]);
-        }
+        // print_r($user);
+        return view('pages/fushan/tree_entry', [
+            'site' => $site,
+            'project' => '每木',
+            'entry' => $entry,
+            'user' => $user->name,
+        ]);
     }
 
-    public function progress(Request $request, $site){
+    public function progress(Request $request)
+    {
 
-        $user = $request->session()->get('user', function () {
-            return 'no';
-        });
+        $user = $request->user();
+        $site = $request->route('site');
 
-        if ($user=='no'){
-            return view('login1', [
-                'check' => 'no'
-            ]);
-        } else {
-            // echo "1";
-            //最近一次調
+        // echo "1";
+        //最近一次調
 
-            // print_r($user);
-            return view('pages/fushan/tree_progress', [
-                'site' => $site,
-                'project' => '每木',
-                'user' => $user,
-            ]);
-        }
+        // print_r($user);
+        return view('pages/fushan/tree_progress', [
+            'site' => $site,
+            'project' => '每木',
+            'user' => $user->name,
+        ]);
     }
 
-    public function dataviewer(Request $request, $site){
+    public function dataviewer(Request $request)
+    {
 
-        $user = $request->session()->get('user', function () {
-            return 'no';
-        });
+        $user = $request->user();
+        $site = $request->route('site');
+        // echo "1";
+        //最近一次調
 
-        if ($user=='no'){
-            return view('login1', [
-                'check' => 'no'
-            ]);
-        } else {
-            // echo "1";
-            //最近一次調
-
-            // print_r($user);
-            return view('pages/fushan/tree_dataviewer', [
-                'site' => $site,
-                'project' => '每木',
-                'user' => $user,
-            ]);
-        }
+        // print_r($user);
+        return view('pages/fushan/tree_dataviewer', [
+            'site' => $site,
+            'project' => '每木',
+            'user' => $user->name,
+        ]);
     }
 
-    public function entryprogress(Request $request, $site){
+    public function entryprogress(Request $request)
+    {
 
-        $user = $request->session()->get('user', function () {
-            return 'no';
-        });
+        $user = $request->user();
+        $site = $request->route('site');
+        // echo "1";
+        //最近一次調
 
-        if ($user=='no'){
-            return view('login1', [
-                'check' => 'no'
-            ]);
-        } else {
-            // echo "1";
-            //最近一次調
-
-            // print_r($user);
-            return view('pages/fushan/tree_entryprogress', [
-                'site' => $site,
-                'project' => '每木',
-                'user' => $user,
-            ]);
-        }
+        // print_r($user);
+        return view('pages/fushan/tree_entryprogress', [
+            'site' => $site,
+            'project' => '每木',
+            'user' => $user->name,
+        ]);
     }
 
-    public function compare(Request $request, $site){
+    public function compare(Request $request)
+    {
 
-        $user = $request->session()->get('user', function () {
-            return 'no';
-        });
+        $user = $request->user();
+        $site = $request->route('site');
+        // echo "1";
+        //最近一次調
 
-        if ($user=='no'){
-            return view('login1', [
-                'check' => 'no'
-            ]);
-        } else {
-            // echo "1";
-            //最近一次調
-
-            // print_r($user);
-            return view('pages/fushan/tree_compare', [
-                'site' => $site,
-                'project' => '每木',
-                'user' => $user,
-            ]);
-        }
+        // print_r($user);
+        return view('pages/fushan/tree_compare', [
+            'site' => $site,
+            'project' => '每木',
+            'user' => $user->name,
+        ]);
     }
 
-    public function modifyPathway(Request $request, $site){
+    public function modifyPathway(Request $request)
+    {
 
-        $user = $request->session()->get('user', function () {
-            return 'no';
-        });
+        $user = $request->user();
+        $site = $request->route('site');
+        // echo "1";
+        //最近一次調
 
-        if ($user=='no'){
-            return view('login1', [
-                'check' => 'no'
-            ]);
-        } else {
-            // echo "1";
-            //最近一次調
-
-            // print_r($user);
-            return view('pages/fushan/tree_modifyPathway', [
-                'site' => $site,
-                'project' => '每木',
-                'user' => $user,
-            ]);
-        }
+        // print_r($user);
+        return view('pages/fushan/tree_modifyPathway', [
+            'site' => $site,
+            'project' => '每木',
+            'user' => $user->name,
+        ]);
     }
 
-    public function updateTable(Request $request, $site){
+    public function updateTable(Request $request)
+    {
+        $user = $request->user();
+        $site = $request->route('site');
+        // echo "1";
+        //最近一次調
 
-        $user = $request->session()->get('user', function () {
-            return 'no';
-        });
-
-        if ($user=='no'){
-            return view('login1', [
-                'check' => 'no'
-            ]);
-        } else {
-            // echo "1";
-            //最近一次調
-
-            // print_r($user);
-            return view('pages/fushan/tree_updateTable', [
-                'site' => $site,
-                'project' => '每木',
-                'user' => $user,
-            ]);
-        }
+        // print_r($user);
+        return view('pages/fushan/tree_updateTable', [
+            'site' => $site,
+            'project' => '每木',
+            'user' => $user->name,
+        ]);
     }
 
-    public function updateBackData(Request $request, $site){
+    public function updateBackData(Request $request)
+    {
 
-        $user = $request->session()->get('user', function () {
-            return 'no';
-        });
+        $user = $request->user();
+        $site = $request->route('site');
+        // echo "1";
+        //最近一次調
 
-        if ($user=='no'){
-            return view('login1', [
-                'check' => 'no'
-            ]);
-        } else {
-            // echo "1";
-            //最近一次調
-
-            // print_r($user);
-            return view('pages/fushan/tree_updateBackData', [
-                'site' => $site,
-                'project' => '每木',
-                'user' => $user,
-            ]);
-        }
+        // print_r($user);
+        return view('pages/fushan/tree_updateBackData', [
+            'site' => $site,
+            'project' => '每木',
+            'user' => $user->name,
+        ]);
     }
 
-    public function addData(Request $request, $site){
+    public function addData(Request $request)
+    {
 
-        $user = $request->session()->get('user', function () {
-            return 'no';
-        });
+        $user = $request->user();
+        $site = $request->route('site');
+        // echo "1";
+        //最近一次調
 
-        if ($user=='no'){
-            return view('login1', [
-                'check' => 'no'
-            ]);
-        } else {
-            // echo "1";
-            //最近一次調
-
-            // print_r($user);
-            return view('pages/fushan/tree_addData', [
-                'site' => $site,
-                'project' => '每木',
-                'user' => $user,
-            ]);
-        }
+        // print_r($user);
+        return view('pages/fushan/tree_addData', [
+            'site' => $site,
+            'project' => '每木',
+            'user' => $user->name,
+        ]);
     }
 
-    public function map(Request $request, $site){
+    public function map(Request $request)
+    {
 
-        $user = $request->session()->get('user', function () {
-            return 'no';
-        });
+        $user = $request->user();
+        $site = $request->route('site');
+        // echo "1";
+        //最近一次調
 
-        if ($user=='no'){
-            return view('login1', [
-                'check' => 'no'
-            ]);
-        } else {
-            // echo "1";
-            //最近一次調
-
-            // print_r($user);
-            return view('pages/fushan/tree_map', [
-                'site' => $site,
-                'project' => '每木',
-                'user' => $user,
-            ]);
-        }
+        // print_r($user);
+        return view('pages/fushan/tree_map', [
+            'site' => $site,
+            'project' => '每木',
+            'user' => $user->name,
+        ]);
     }
-
 }

@@ -30,7 +30,8 @@ use App\Jobs\SeedlingAddButton;
 class SeedlingSaveController extends Controller
 {
 
-     public function getTableInstance($entry) {
+    public function getTableInstance($entry)
+    {
         if ($entry == '1') {
             return new FsSeedlingSlrecord1;
         } else {
@@ -38,7 +39,8 @@ class SeedlingSaveController extends Controller
         }
     }
 
-    public function getTableInstanceCov($entry) {
+    public function getTableInstanceCov($entry)
+    {
         if ($entry == '1') {
             return new FsSeedlingSlcov1;
         } else {
@@ -46,7 +48,8 @@ class SeedlingSaveController extends Controller
         }
     }
 
-    public function getTableInstanceRoll($entry) {
+    public function getTableInstanceRoll($entry)
+    {
         if ($entry == '1') {
             return new FsSeedlingSlroll1;
         } else {
@@ -54,171 +57,164 @@ class SeedlingSaveController extends Controller
         }
     }
 
-    public function getRedata($entry, $trap){
-//存檔後都需重新產生資料
+    public function getRedata($entry, $trap)
+    {
+        //存檔後都需重新產生資料
         $table = $this->getTableInstance($entry);
 
-        $redata=$table::where('trap', 'like', $trap)->orderBy('plot', 'asc')->orderBy('tag', 'asc')->get();
-    
+        $redata = $table::where('trap', 'like', $trap)->orderBy('plot', 'asc')->orderBy('tag', 'asc')->get();
+
 
         $ob_redata = new SeedlingAddButton;
-        $redata=$ob_redata->addbutton($redata, $entry);
+        $redata = $ob_redata->addbutton($redata, $entry);
 
-        return $redata; 
-
+        return $redata;
     }
 
-//輸入完成後檢查
-    public function finishnote(Request $request, $entry){
-        $user = $request->session()->get('user', function () {
-            return view('login1', [
-            'check' => 'no'
-            ]);
-        });
-
+    //輸入完成後檢查
+    public function finishnote(Request $request, $entry)
+    {
 
         $tablecov = $this->getTableInstanceCov($entry);
         $table = $this->getTableInstance($entry);
-        $pass='1';
-        $finishnote='';
+        $pass = '1';
+        $finishnote = '';
         $cov = $tablecov::query()->where('date', 'like', '0000-00-00')->get();
-        if (count($cov)!='0'){
-            foreach($cov as $temp){
-                $traplist[]=$temp['trap'];
+        if (count($cov) != '0') {
+            foreach ($cov as $temp) {
+                $traplist[] = $temp['trap'];
             }
-            $traplist=array_unique($traplist);
+            $traplist = array_unique($traplist);
             sort($traplist);
             $string = implode(", ", $traplist);
-            $finishnote='有資料未輸入完成 ['.$string.']';
+            $finishnote = '有資料未輸入完成 [' . $string . ']';
         } else {
 
 
             $data = $table::query()->where('date', 'like', '0000-00-00')->get();
-            if (count($data)!='0'){
-                foreach($data as $temp){
-                    $traplist[]=$temp['trap'];
+            if (count($data) != '0') {
+                foreach ($data as $temp) {
+                    $traplist[] = $temp['trap'];
                 }
-                $traplist=array_unique($traplist);
+                $traplist = array_unique($traplist);
                 sort($traplist);
                 $string = implode(", ", $traplist);
-                $finishnote='有資料未輸入完成 ['.$string.']';
+                $finishnote = '有資料未輸入完成 [' . $string . ']';
             }
-
         }
 
-        if ($finishnote==''){$finishnote='輸入完成';}
+        if ($finishnote == '') {
+            $finishnote = '輸入完成';
+        }
 
         // echo $user;
         return [
             'result' => 'ok',
             'pass' => $pass,
-            // 'test'=> $splist,
-
             'finishnote' => $finishnote
         ];
-
     }
-//地被資料儲存
-    public function savecov(Request $request){
+    //地被資料儲存
+    public function savecov(Request $request)
+    {
+        $user = $request->user();
 
         $data_all = request()->all();
         // print_r($savecov);
-        $savecov=$data_all['data'];
-        $entry=$data_all['entry'];
-        $user = $request->session()->get('user', function () {
-            return view('login1', [
-            'check' => 'no'
-            ]);
-        });
+        $savecov = $data_all['data'];
+        $entry = $data_all['entry'];
 
-        $covsavenote='';
+        $covsavenote = '';
 
         $tablecov = $this->getTableInstanceCov($entry);
 
-        for($i=0; $i<count($savecov);$i++){
+        for ($i = 0; $i < count($savecov); $i++) {
 
-            if ($savecov[$i]['date']==''){$savecov[$i]['date']='0000-00-00';}
-//地被資料基本檢查
-            if ($savecov[$i]['date']=='0000-00-00'){
-                $covsavenote='需有日期資料';
+            if ($savecov[$i]['date'] == '') {
+                $savecov[$i]['date'] = '0000-00-00';
+            }
+            //地被資料基本檢查
+            if ($savecov[$i]['date'] == '0000-00-00') {
+                $covsavenote = '需有日期資料';
                 break;
             }
 
-             if ($savecov[$i]['canopy']=='' || $savecov[$i]['date']=='' || $savecov[$i]['cov'] == ''){
-                $covsavenote='資料有空白值';
+            if ($savecov[$i]['canopy'] == '' || $savecov[$i]['date'] == '' || $savecov[$i]['cov'] == '') {
+                $covsavenote = '資料有空白值';
                 break;
-            }           
+            }
 
-            if ($savecov[$i]['cov']<0 || $savecov[$i]['cov']>100){
-                $covsavenote='覆蓋度資料有誤';
+            if ($savecov[$i]['cov'] < 0 || $savecov[$i]['cov'] > 100) {
+                $covsavenote = '覆蓋度資料有誤';
                 break;
-
             } else {
 
-               
-                $tablecov::where('id', $savecov[$i]['id'])->update(['cov'=>$savecov[$i]['cov'], 'date'=>$savecov[$i]['date'], 'canopy'=>$savecov[$i]['canopy'], 'note'=>$savecov[$i]['note'], 'updated_id'=>$user]);
-                    //重新下載資料
+
+                $tablecov::where('id', $savecov[$i]['id'])->update(['cov' => $savecov[$i]['cov'], 'date' => $savecov[$i]['date'], 'canopy' => $savecov[$i]['canopy'], 'note' => $savecov[$i]['note'], 'updated_id' => $user->name]);
+                //重新下載資料
 
 
-                $covsavenote='已儲存環境資料';
+                $covsavenote = '已儲存環境資料';
             }
         }
 
 
-            return [
-                'result' => 'ok',
-                // 'covs' => $slcov,
-                'covsavenote' => $covsavenote
+        return [
+            'result' => 'ok',
+            // 'covs' => $slcov,
+            'covsavenote' => $covsavenote
 
-            ];
-        
+        ];
     }
 
-//小苗資料儲存
- public function savedata(Request $request){
+    //小苗資料儲存
+    public function savedata(Request $request)
+    {
 
         $data_all = request()->all();
         // // print_r($savecov);
-        $data=$data_all['data'];
-        $entry=$data_all['entry'];
-        $user=$data_all['user'];
+        $data = $data_all['data'];
+        $entry = $data_all['entry'];
+        $user = $data_all['user'];
 
         // $user=$data[0]['user'];
         // // $temp=[];
         // $list='';
-        $datasavenote='';
+        $datasavenote = '';
 
         $table = $this->getTableInstance($entry);
 
-        for ($i=0;$i<count($data);$i++){
-            if ($data[$i]['date']==''){$data[$i]['date']='0000-00-00';}
+        for ($i = 0; $i < count($data); $i++) {
+            if ($data[$i]['date'] == '') {
+                $data[$i]['date'] = '0000-00-00';
+            }
 
             // $list[]=$data[$i]['tag'];
-            $uplist=[];
-//需有資料  
-            $datacheck=['pass'=>'1', 'datasavenote'=>''];
-//舊苗檢查
+            $uplist = [];
+            //需有資料  
+            $datacheck = ['pass' => '1', 'datasavenote' => ''];
+            //舊苗檢查
             $check = new FsSeedlingDataCheck;
-            $datacheck=$check->check($data[$i], $table);
-            $data[$i]=$datacheck['data'];
+            $datacheck = $check->check($data[$i], $table);
+            $data[$i] = $datacheck['data'];
 
-//修改tag  //如果是修改新增小苗的號碼，則mtag也要一起修改
-            $alterdata=[];
-            $slrecord=$table::where('id', 'like', $data[$i]['id'])->get();
+            //修改tag  //如果是修改新增小苗的號碼，則mtag也要一起修改
+            $alterdata = [];
+            $slrecord = $table::where('id', 'like', $data[$i]['id'])->get();
 
-            if ($data[$i]['tag'] != $slrecord[0]['tag']){
-                $data[$i]['tag']=strtoupper($data[$i]['tag']);
-                $mtag=explode('.',trim($data[$i]['tag']));
+            if ($data[$i]['tag'] != $slrecord[0]['tag']) {
+                $data[$i]['tag'] = strtoupper($data[$i]['tag']);
+                $mtag = explode('.', trim($data[$i]['tag']));
                 $data[$i]['mtag'] = $mtag[0];
             }
-//如果原本的status是N，後來不是N (A, G, D)，新增alternote說明
-        //echo 'recruit: '.$data[$i]['recruit'];
-            if ($slrecord[0]['recruit'] == 'N' && $data[$i]['status'] !='N'){
+            //如果原本的status是N，後來不是N (A, G, D)，新增alternote說明
+            //echo 'recruit: '.$data[$i]['recruit'];
+            if ($slrecord[0]['recruit'] == 'N' && $data[$i]['status'] != 'N') {
 
-                if ($data[$i]['alternote']!=''){
+                if ($data[$i]['alternote'] != '') {
                     $alterdata = json_decode($data[$i]['alternote'], true);  //把json轉array
                 }
-                $alterdata['other']='原消失已被找到';
+                $alterdata['other'] = '原消失已被找到';
 
                 $data[$i]['alternote'] = json_encode($alterdata, JSON_UNESCAPED_UNICODE);  //把array轉json
             }
@@ -227,221 +223,208 @@ class SeedlingSaveController extends Controller
             //     $data[$i]['recruit'] ='S';
             // }
 
-            if ($datacheck['pass']==1){
-// ['year' => date('Y'), 'month' => $month, 'date' => '0000-00-00']
-                foreach($data[$i] as $key => $value){
+            if ($datacheck['pass'] == 1) {
+                // ['year' => date('Y'), 'month' => $month, 'date' => '0000-00-00']
+                foreach ($data[$i] as $key => $value) {
                     // dd($key);
-                    if (!in_array($key, ['user', 'entry', 'updated_at', 'updated_id', 'alternotetable'])){
-                        if ($slrecord[0][$key]!=$value){
-                            $uplist[$key]=trim($value);
-
+                    if (!in_array($key, ['user', 'entry', 'updated_at', 'updated_id', 'alternotetable'])) {
+                        if ($slrecord[0][$key] != $value) {
+                            $uplist[$key] = trim($value);
                         }
                     }
                 }
                 // dd($uplist);
                 // $uplist2="['updated_id' => 'test']";
-                if ($uplist!=[]){  //有資料要存
-                    $list=$data[$i]['tag'];
-                    $uplist['updated_id'] =$user;
+                if ($uplist != []) {  //有資料要存
+                    $list = $data[$i]['tag'];
+                    $uplist['updated_id'] = $user;
 
-                    $table::where('id', 'like', $data[$i]['id'])->update($uplist); 
+                    $table::where('id', 'like', $data[$i]['id'])->update($uplist);
 
-                    $datasavenote='資料已儲存';
-                } 
+                    $datasavenote = '資料已儲存';
+                }
             } else {
-                $datasavenote=$datacheck['datasavenote'];
+                $datasavenote = $datacheck['datasavenote'];
                 break;
-                
-
             }
         } //最外層
 
 
-        $redata=$this->getRedata($entry, $data[0]['trap']);
+        $redata = $this->getRedata($entry, $data[0]['trap']);
 
-            return [
-                'result' => 'ok',
-                // 'uplist' => $uplist,
-                'data' => $redata,
-                // 'list' => $list,
-                'datasavenote' => $datasavenote
+        return [
+            'result' => 'ok',
+            // 'uplist' => $uplist,
+            'data' => $redata,
+            // 'list' => $list,
+            'datasavenote' => $datasavenote
 
-            ];
-        
+        ];
     }
-//新增苗儲存
+    //新增苗儲存
 
-    public function saverecruit(Request $request){
+    public function saverecruit(Request $request)
+    {
 
         $data = request()->all();
         // print_r($savecov);
-        $recruit=$data['data'];
-        $entry=$data['entry'];
+        $recruit = $data['data'];
+        $entry = $data['entry'];
         $user = $data['user'];
-        $recruitsavenote='';
-        $nonsavelist=[];
-        
+        $recruitsavenote = '';
+        $nonsavelist = [];
+
 
         $table = $this->getTableInstance($entry);
 
         // $temp=[[]];
 
-        for($i=0; $i<count($recruit);$i++){
-        // $recruitsavenote='';
-        $insertkey='';
-        $insertvalue='';
-        $insert1='';
+        for ($i = 0; $i < count($recruit); $i++) {
+            // $recruitsavenote='';
 
-
-
-            if ($recruit[$i]['date']=='' ) {
+            if ($recruit[$i]['date'] == '') {
                 // $recruitsavenote = '資料不完整';
-                $nonsavelist[$i]=$recruit[$i]; 
+                $nonsavelist[$i] = $recruit[$i];
                 continue;
             }
 
-            if ($recruit[$i]['tag']==''){
-                $nonsavelist[$i]=$recruit[$i]; 
+            if ($recruit[$i]['tag'] == '') {
+                $nonsavelist[$i] = $recruit[$i];
                 continue;
             } else {
-                $recruit[$i]['tag']=strtoupper($recruit[$i]['tag']); //轉為大寫
+                $recruit[$i]['tag'] = strtoupper($recruit[$i]['tag']); //轉為大寫
 
-                if ($recruit[$i]['plot']=='' || $recruit[$i]['csp']=='' || $recruit[$i]['ht']=='' || $recruit[$i]['leafno']==''){
-                    $recruitsavenote = $recruitsavenote."<br>第".($i+1).'筆資料 資料不完整';
-                    $nonsavelist[$i]=$recruit[$i]; 
+                if ($recruit[$i]['plot'] == '' || $recruit[$i]['csp'] == '' || $recruit[$i]['ht'] == '' || $recruit[$i]['leafno'] == '') {
+                    $recruitsavenote = $recruitsavenote . "<br>第" . ($i + 1) . '筆資料 資料不完整';
+                    $nonsavelist[$i] = $recruit[$i];
                     continue;
                 }
-                if ($recruit[$i]['cotno']==''){
-                    $recruit[$i]['cotno']=0;
+                if ($recruit[$i]['cotno'] == '') {
+                    $recruit[$i]['cotno'] = 0;
                 }
-                $mtag=explode('.', $recruit[$i]['tag']);
-                $recruit[$i]['mtag']=$mtag[0];
+                $mtag = explode('.', $recruit[$i]['tag']);
+                $recruit[$i]['mtag'] = $mtag[0];
 
-$datacheck=['pass'=>'1', 'datasavenote'=>''];
+                $datacheck = ['pass' => '1', 'datasavenote' => ''];
 
-                if ($recruit[$i]['tofix']=='1'){  //勾選為漏資料
+                if ($recruit[$i]['tofix'] == '1') {  //勾選為漏資料
                     //找舊資料
-                    $seedling=FsSeedlingData::where('tag', 'like', $recruit[$i]['tag'])->orderBy('census', 'DESC')->get();
-                    if ($seedling->isEmpty()){
-                        $datacheck['datasavenote'] = $datacheck['datasavenote']."<br>第".($i+1).'筆 查無舊資料';
-                        $datacheck['pass']="0";
-
+                    $seedling = FsSeedlingData::where('tag', 'like', $recruit[$i]['tag'])->orderBy('census', 'DESC')->get();
+                    if ($seedling->isEmpty()) {
+                        $datacheck['datasavenote'] = $datacheck['datasavenote'] . "<br>第" . ($i + 1) . '筆 查無舊資料';
+                        $datacheck['pass'] = "0";
                     } else {
 
-                        if ($recruit[$i]['x']=='')
-                        {
-                            $base=FsSeedlingBase::where('mtag', 'like', $recruit[$i]['mtag'])->get();
-                            $recruit[$i]['x']=$base[0]['x'];
-                            $recruit[$i]['y']=$base[0]['y'];
+                        if ($recruit[$i]['x'] == '') {
+                            $base = FsSeedlingBase::where('mtag', 'like', $recruit[$i]['mtag'])->get();
+                            $recruit[$i]['x'] = $base[0]['x'];
+                            $recruit[$i]['y'] = $base[0]['y'];
                         }
-                        
-                        $recruit[$i]['status']='A';
-                        $recruit[$i]['recruit']='O';
-                        $recruit[$i]['alternotetable']="{\"other\":\"漏資料\"}";
 
-                        $includeKeys=['trap', 'plot', 'csp', 'sprout'];
-                        foreach($recruit[$i] as $key => $value){
+                        $recruit[$i]['status'] = 'A';
+                        $recruit[$i]['recruit'] = 'O';
+                        $recruit[$i]['alternotetable'] = "{\"other\":\"漏資料\"}";
+
+                        $includeKeys = ['trap', 'plot', 'csp', 'sprout'];
+                        foreach ($recruit[$i] as $key => $value) {
 
                             if (in_array($key, $includeKeys)) {
-                                if ($seedling[0][$key] != $value){
-                                    $recruitsavenote = $recruitsavenote."<br>".$recruit[$i]['tag'] .' 漏資料，但基本資料 '.$key.' 與原始資料不符。以舊資料儲存，如需修改，請填寫特殊修改。';
-                                    $recruit[$i][$key]=$seedling[0][$key];
-                                } 
+                                if ($seedling[0][$key] != $value) {
+                                    $recruitsavenote = $recruitsavenote . "<br>" . $recruit[$i]['tag'] . ' 漏資料，但基本資料 ' . $key . ' 與原始資料不符。以舊資料儲存，如需修改，請填寫特殊修改。';
+                                    $recruit[$i][$key] = $seedling[0][$key];
+                                }
                             }
                         }
                         //漏資料的舊苗走舊苗的檢查
-                    $check = new FsSeedlingDataCheck;
-                    $datacheck=$check->check($recruit[$i], $table);
-
+                        $check = new FsSeedlingDataCheck;
+                        $datacheck = $check->check($recruit[$i], $table);
                     }
-
                 } else {
                     //新增苗檢查
                     $check = new FsSeedlingRecruitCheck;
-                    $datacheck=$check->check($recruit[$i], $entry, $i);
+                    $datacheck = $check->check($recruit[$i], $entry, $i);
                 }
 
 
 
-// //補上資料庫其他欄位的資料       
-            if ($datacheck['pass']==1){
+                // //補上資料庫其他欄位的資料       
+                if ($datacheck['pass'] == 1) {
 
-                $recruit[$i]=$datacheck['data'];
+                    $recruit[$i] = $datacheck['data'];
 
-                $census=$table::first();
-                $recruit[$i]['status']='A';
-                $recruit[$i]['census']=$census['census'];
-                $recruit[$i]['year']=$census['year'];
-                $recruit[$i]['month']=$census['month'];
-                
-                $recruit[$i]['id']='0';
-                $recruit[$i]['ind']='1';
-                if (!isset( $recruit[$i]['note'])){
-                $recruit[$i]['note']='';}
-                if (!isset( $recruit[$i]['alternotetable'])){
-                $recruit[$i]['alternote']='';} else {
-                    $recruit[$i]['alternote']=$recruit[$i]['alternotetable'];
-                    unset($recruit[$i]['alternotetable']);
-                }
-                unset($recruit[$i]['tofix']);
-                
-                $recruit[$i]['updated_id']=$user;
-                $recruit[$i]['updated_at']=date("Y-m-d H:i:s");
+                    $census = $table::first();
+                    $recruit[$i]['status'] = 'A';
+                    $recruit[$i]['census'] = $census['census'];
+                    $recruit[$i]['year'] = $census['year'];
+                    $recruit[$i]['month'] = $census['month'];
 
-                //存檔
-                $insert2=[];
+                    $recruit[$i]['id'] = '0';
+                    $recruit[$i]['ind'] = '1';
+                    if (!isset($recruit[$i]['note'])) {
+                        $recruit[$i]['note'] = '';
+                    }
+                    if (!isset($recruit[$i]['alternotetable'])) {
+                        $recruit[$i]['alternote'] = '';
+                    } else {
+                        $recruit[$i]['alternote'] = $recruit[$i]['alternotetable'];
+                        unset($recruit[$i]['alternotetable']);
+                    }
+                    unset($recruit[$i]['tofix']);
 
-                foreach ($recruit[$i] as $key => $value){
-                        $insert2[$key]=$value;
+                    $recruit[$i]['updated_id'] = $user;
+                    $recruit[$i]['updated_at'] = date("Y-m-d H:i:s");
+
+                    //存檔
+                    $insert2 = [];
+
+                    foreach ($recruit[$i] as $key => $value) {
+                        $insert2[$key] = $value;
                         // $insertkey=$insertkey.$key.",";
                         // $insertvalue=$insertvalue."'".trim($value)."',";
 
+                    }
+                    //產生空白表
+                    $nonsavelist[$i]['date'] = '';
+                    $nonsavelist[$i]['trap'] = $recruit[$i]['trap'];
+                    $nonsavelist[$i]['recruit'] = 'R';
+                    $nonsavelist[$i]['sprout'] = 'FALSE';
+                    $nonsavelist[$i]['tag'] = '';
+                    $nonsavelist[$i]['csp'] = '';
+                    $nonsavelist[$i]['ht'] = '';
+                    $nonsavelist[$i]['cotno'] = '';
+                    $nonsavelist[$i]['leafno'] = '';
+                    $nonsavelist[$i]['x'] = '';
+                    $nonsavelist[$i]['y'] = '';
+                    $nonsavelist[$i]['note'] = '';
+                    $nonsavelist[$i]['tofix'] = '';
+
+
+
+                    $table::insert($insert2);
+
+                    $recruitsavenote = $recruitsavenote . "<br>第" . ($i + 1) . '筆資料已儲存';
+                } else {  // $datacheck['pass']!=1
+                    $recruitsavenote = $recruitsavenote . "<br>" . $datacheck['datasavenote'];
+                    $nonsavelist[$i] = $recruit[$i];
+                    // break;
+
                 }
-                //產生空白表
-                $nonsavelist[$i]['date']='';
-                $nonsavelist[$i]['trap']=$recruit[$i]['trap'];
-                $nonsavelist[$i]['recruit']='R';
-                $nonsavelist[$i]['sprout']='FALSE';
-                $nonsavelist[$i]['tag']='';
-                $nonsavelist[$i]['csp']='';
-                $nonsavelist[$i]['ht']='';
-                $nonsavelist[$i]['cotno']='';
-                $nonsavelist[$i]['leafno']='';
-                $nonsavelist[$i]['x']='';
-                $nonsavelist[$i]['y']='';
-                $nonsavelist[$i]['note']='';
-                $nonsavelist[$i]['tofix']='';
-
-
-
-                $table::insert($insert2);
-
-                $recruitsavenote=$recruitsavenote."<br>第".($i+1).'筆資料已儲存';
-
-
-            } else {  // $datacheck['pass']!=1
-                $recruitsavenote=$recruitsavenote."<br>".$datacheck['datasavenote'];
-                $nonsavelist[$i]=$recruit[$i];
-                // break;
-
-            }
-
             }  //來自 tag
-        }//最外層
+        } //最外層
 
         //maxid
-        $maxid=FsSeedlingSlrecord::count();
+        $maxid = FsSeedlingSlrecord::count();
 
         //重新載入資料
-        $thispage='1';
+        $thispage = '1';
 
-        $redata=$this->getRedata($entry, $recruit[0]['trap']);
+        $redata = $this->getRedata($entry, $recruit[0]['trap']);
         foreach ($redata as $key => $value) {
             if ($value['tag'] == $recruit[0]['tag']) {
-                $thispage=ceil(($key+1)/20);
-                break; 
+                $thispage = ceil(($key + 1) / 20);
+                break;
             }
-        }        
+        }
 
 
         return [
@@ -454,148 +437,136 @@ $datacheck=['pass'=>'1', 'datasavenote'=>''];
             // 'temp' => $temp,
             'recruitsavenote' => $recruitsavenote
             // 'insert' => $insert2
-           
+
 
         ];
-        
     }
 
-//刪除新增苗資料
+    //刪除新增苗資料
 
-    public function deletedata(Request $request, $tag, $entry, $thispage){
-        $test='';
-            $user = $request->session()->get('user', function () {
-                return view('login1', [
-                'check' => 'no'
-                ]);
-            });
+    public function deletedata(Request $request, $tag, $entry, $thispage)
+    {
+
         // $user='chialing';
-        $datasavenote='';
-    
+        $datasavenote = '';
+
         $table = $this->getTableInstance($entry);
 
-                $trap=$table::where('tag','like', $tag)->get();
-                $thistrap=$trap[0]['trap'];
-                $total=$table::where('trap', 'like', $thistrap)->orderBy('plot', 'asc')->orderBy('tag', 'asc')->get();
+        $trap = $table::where('tag', 'like', $tag)->get();
+        $thistrap = $trap[0]['trap'];
+        $total = $table::where('trap', 'like', $thistrap)->orderBy('plot', 'asc')->orderBy('tag', 'asc')->get();
 
-                $d_record = $table::where('tag', 'like', $tag)->delete();
+        $d_record = $table::where('tag', 'like', $tag)->delete();
 
-            $datasavenote='已刪除 '.$tag.' 新增小苗資料';
-            $maxid=FsSeedlingSlrecord::count();
+        $datasavenote = '已刪除 ' . $tag . ' 新增小苗資料';
+        $maxid = FsSeedlingSlrecord::count();
 
-            $redata=$this->getRedata($entry, $thistrap);
+        $redata = $this->getRedata($entry, $thistrap);
 
 
-            return [
-                'result' => 'ok',
-                // 'test'=> $test,
-                'thispage' => $thispage,  
-                'recruit' => $redata,
-                'maxid' => $maxid,
-                'datasavenote' => $datasavenote
-            ];
+        return [
+            'result' => 'ok',
+            // 'test'=> $test,
+            'thispage' => $thispage,
+            'recruit' => $redata,
+            'maxid' => $maxid,
+            'datasavenote' => $datasavenote
+        ];
     }
 
-//撿到環儲存
-    public function saveslroll(Request $request, $entry, $trap){
+    //撿到環儲存
+    public function saveslroll(Request $request, $entry, $trap)
+    {
         // $test='';
-            $user = $request->session()->get('user', function () {
-                return view('login1', [
-                'check' => 'no'
-                ]);
-            });
-        $tableroll = $this->getTableInstanceRoll($entry);
-        $slrollsavenote='';
-        $slrolldata = request()->all();
-        $slrollnew=$slrolldata['data'];
+        $user = $request->user();
 
-        $insert1='';
-        for($i=0;$i<count($slrollnew);$i++){
-            $uplist=[];
+        $tableroll = $this->getTableInstanceRoll($entry);
+        $slrollsavenote = '';
+        $slrolldata = request()->all();
+        $slrollnew = $slrolldata['data'];
+
+        $insert1 = '';
+        for ($i = 0; $i < count($slrollnew); $i++) {
+            $uplist = [];
             if (empty($slrollnew[$i])) break;
 
 
-            if ($slrollnew[$i]['date']==''){
+            if ($slrollnew[$i]['date'] == '') {
                 break;
             }
 
-            if ($slrollnew[$i]['trap']=='' ||$slrollnew[$i]['plot']=='' || $slrollnew[$i]['tag']==''){
+            if ($slrollnew[$i]['trap'] == '' || $slrollnew[$i]['plot'] == '' || $slrollnew[$i]['tag'] == '') {
                 break;
             }
 
-            if (isset($slrollnew[$i]['id'])){
+            if (isset($slrollnew[$i]['id'])) {
                 // 比對舊資料
 
-                    $olddata=$tableroll::where('id', 'like', $slrollnew[$i]['id'])->get();
+                $olddata = $tableroll::where('id', 'like', $slrollnew[$i]['id'])->get();
 
-               foreach($slrollnew[$i] as $key => $value){
-                    if ($key!='updated_id' && $key !='updated_at' && $key!='delete'){
-                        if ($olddata[0][$key]!=$value){
-                            $uplist[$key]=trim($value);
+                foreach ($slrollnew[$i] as $key => $value) {
+                    if ($key != 'updated_id' && $key != 'updated_at' && $key != 'delete') {
+                        if ($olddata[0][$key] != $value) {
+                            $uplist[$key] = trim($value);
                         }
-                    }
-               }
-
-
-                if ($uplist!=[]){  //有資料要存
-                    // $list=$data[$i]['tag'];
-                    $uplist['updated_id'] =$user;
-
-                    $tableroll::where('id', 'like', $slrollnew[$i]['id'])->update($uplist); 
-
-                    $slrollsavenote='資料已儲存';
-                } 
-
-            } else { //新資料
-            $insertkey='';
-            $insertvalue='';
-            $insert2=[];
-                $slrollnew[$i]['updated_at']=date("Y-m-d H:i:s");
-                $cov=FsSeedlingSlcov1::first();
-                // 存檔
-                $slrollnew[$i]['month']=$cov['month'];
-                $slrollnew[$i]['year']=$cov['year'];
-                $slrollnew[$i]['id']='0';
-               
-                foreach ($slrollnew[$i] as $key => $value){
-                    if ($key != 'delete' && $key !='updated_id'){
-                        $insertkey=$insertkey.$key.",";
-                        $insertvalue=$insertvalue."'".trim($value)."',";
-                        $insert2[$key]=$value;
                     }
                 }
 
 
-                $insertkey=$insertkey.'updated_id';
-                $insertvalue=$insertvalue."'".$user."'";
-                $insert2['updated_id']=$user;
+                if ($uplist != []) {  //有資料要存
+                    // $list=$data[$i]['tag'];
+                    $uplist['updated_id'] = $user->name;
+
+                    $tableroll::where('id', 'like', $slrollnew[$i]['id'])->update($uplist);
+
+                    $slrollsavenote = '資料已儲存';
+                }
+            } else { //新資料
+                $insertkey = '';
+                $insertvalue = '';
+                $insert2 = [];
+                $slrollnew[$i]['updated_at'] = date("Y-m-d H:i:s");
+                $cov = FsSeedlingSlcov1::first();
+                // 存檔
+                $slrollnew[$i]['month'] = $cov['month'];
+                $slrollnew[$i]['year'] = $cov['year'];
+                $slrollnew[$i]['id'] = '0';
+
+                foreach ($slrollnew[$i] as $key => $value) {
+                    if ($key != 'delete' && $key != 'updated_id') {
+                        $insertkey = $insertkey . $key . ",";
+                        $insertvalue = $insertvalue . "'" . trim($value) . "',";
+                        $insert2[$key] = $value;
+                    }
+                }
+
+
+                $insertkey = $insertkey . 'updated_id';
+                $insertvalue = $insertvalue . "'" . $user . "'";
+                $insert2['updated_id'] = $user->name;
 
 
                 $tableroll::insert($insert2);
 
-            $slrollsavenote='資料已儲存';
-
+                $slrollsavenote = '資料已儲存';
             }
-
- 
         }
 
         // //重新載入資料
 
-            $slroll=$tableroll::orderBy('trap', 'asc')->orderBy('plot', 'asc')->orderBy('tag', 'asc')->get();
+        $slroll = $tableroll::orderBy('trap', 'asc')->orderBy('plot', 'asc')->orderBy('tag', 'asc')->get();
 
 
 
 
-            if (!$slroll->isEmpty()){
-                $slroll=$slroll->toArray();
-                for($m=0;$m<count($slroll);$m++){
-                    $slroll[$m]['delete']="<button class='deleteroll' deleteid='".$slroll[$m]['id']."' tag='".$slroll[$m]['tag']."' entry='".$entry."' trap='".$trap."'>X</button>";
-                }
-
-            } else {
-                $slroll=[];
+        if (!$slroll->isEmpty()) {
+            $slroll = $slroll->toArray();
+            for ($m = 0; $m < count($slroll); $m++) {
+                $slroll[$m]['delete'] = "<button class='deleteroll' deleteid='" . $slroll[$m]['id'] . "' tag='" . $slroll[$m]['tag'] . "' entry='" . $entry . "' trap='" . $trap . "'>X</button>";
             }
+        } else {
+            $slroll = [];
+        }
 
 
         return [
@@ -607,85 +578,85 @@ $datacheck=['pass'=>'1', 'datasavenote'=>''];
             'slrollsavenote' => $slrollsavenote
 
         ];
-
     }
-//刪除撿到環資料
+    //刪除撿到環資料
 
-    public function deleteslroll($tag, $id, $entry, $trap){
-      
-        $slrollsavenote='';
+    public function deleteslroll($tag, $id, $entry, $trap)
+    {
+
+        $slrollsavenote = '';
         $tableroll = $this->getTableInstanceRoll($entry);
 
-            $tableroll::where('id', 'like', $id)->delete();
-             
-            $slrollsavenote='已刪除 '.$tag.' 撿到環資料';
+        $tableroll::where('id', 'like', $id)->delete();
 
-            // 重新載入資料
+        $slrollsavenote = '已刪除 ' . $tag . ' 撿到環資料';
 
-
-                $slroll=$tableroll::orderBy('trap', 'asc')->orderBy('plot', 'asc')->orderBy('tag', 'asc')->get();
+        // 重新載入資料
 
 
-            if (!$slroll->isEmpty()){
-                $slroll=$slroll->toArray();
-                for($m=0;$m<count($slroll);$m++){
-                    $slroll[$m]['delete']="<button class='deleteroll' deleteid='".$slroll[$m]['id']."' tag='".$slroll[$m]['tag']."' entry='".$entry."' trap='".$trap."'>X</button>";
-                }
+        $slroll = $tableroll::orderBy('trap', 'asc')->orderBy('plot', 'asc')->orderBy('tag', 'asc')->get();
 
-            } else {
-                $slroll=[];
-                $slroll[0]['year']='';
-                $slroll[0]['month']='';
+
+        if (!$slroll->isEmpty()) {
+            $slroll = $slroll->toArray();
+            for ($m = 0; $m < count($slroll); $m++) {
+                $slroll[$m]['delete'] = "<button class='deleteroll' deleteid='" . $slroll[$m]['id'] . "' tag='" . $slroll[$m]['tag'] . "' entry='" . $entry . "' trap='" . $trap . "'>X</button>";
             }
+        } else {
+            $slroll = [];
+            $slroll[0]['year'] = '';
+            $slroll[0]['month'] = '';
+        }
 
 
-            return [
+        return [
             'result' => 'ok',
             'data' => $slroll,
             'trap' => $trap,
             'slrollsavenote' => $slrollsavenote
-            ];
+        ];
     }
 
 
 
-//儲存特殊修改
+    //儲存特殊修改
 
-    public function savealternote(Request $request){
+    public function savealternote(Request $request)
+    {
 
         $data_all = request()->all();
 
-        $data=$data_all['data'][0];
-        $entry=$data_all['entry'];
-        $thispage=$data_all['thispage'];
-        $uplist=[];
+        $data = $data_all['data'][0];
+        $entry = $data_all['entry'];
+        $thispage = $data_all['thispage'];
+        $uplist = [];
         $user = $data_all['user'];
         //將data資料變為string
-        $datasavenote='';
+        $datasavenote = '';
         $data2 = array_filter($data);
         unset($data2['id']);
 
-        if (!empty($data2)){
+        if (!empty($data2)) {
 
             // 轉換為 JSON 字串
             $alterdata = json_encode($data2, JSON_UNESCAPED_UNICODE);
 
             $table = $this->getTableInstance($entry);
-          
-            $olddata=$table::where('id', 'like', $data['id'])->get()->toArray();
 
-            if ($olddata[0]['alternote']!=$alterdata){
-                $uplist['alternote']=$alterdata;
-                $uplist['updated_id']=$user;
+            $olddata = $table::where('id', 'like', $data['id'])->get()->toArray();
+
+            if ($olddata[0]['alternote'] != $alterdata) {
+                $uplist['alternote'] = $alterdata;
+                $uplist['updated_id'] = $user;
                 $table::where('id', 'like', $data['id'])->update($uplist);
             }
-            $datasavenote='資料已儲存';
+            $datasavenote = '資料已儲存';
         }
- 
-//重新載入資料
-            $maxid=FsSeedlingSlrecord::count();
 
-        $redata=$this->getRedata($entry, $olddata[0]['trap']);
+        //重新載入資料
+        $maxid = FsSeedlingSlrecord::count();
+
+        $redata = $this->getRedata($entry, $olddata[0]['trap']);
 
 
         return [
@@ -696,40 +667,36 @@ $datacheck=['pass'=>'1', 'datasavenote'=>''];
             'thispage' => $thispage
             // 'thispage' => $thispage
             // 'inlist'=>$sql
-        ];        
-
+        ];
     }
 
-//刪除特殊修改
-    public function deletealter(Request $request, $tag, $entry, $thispage){
+    //刪除特殊修改
+    public function deletealter(Request $request, $tag, $entry, $thispage)
+    {
 
-        $user = $request->session()->get('user', function () {
-            return view('login1', [
-            'check' => 'no'
-            ]);
-        });
+
         $table = $this->getTableInstance($entry);
 
-        $datasavenote='';
+        $datasavenote = '';
 
-        $table::where('tag', 'like', $tag)->update(['alternote'=>'']);
-                // $test='y';
+        $table::where('tag', 'like', $tag)->update(['alternote' => '']);
+        // $test='y';
 
-        $datasavenote='已刪除 '.$tag.' 特殊修改資料';
-
-
-//重新載入資料
-        $olddata=$table::where('tag', 'like', $tag)->get()->toArray();
-        $maxid=FsSeedlingSlrecord::count();
-
-                // $redata='1';
-
-        $redata=$this->getRedata($entry, $olddata[0]['trap']);
+        $datasavenote = '已刪除 ' . $tag . ' 特殊修改資料';
 
 
+        //重新載入資料
+        $olddata = $table::where('tag', 'like', $tag)->get()->toArray();
+        $maxid = FsSeedlingSlrecord::count();
 
-        $realterdata=['Tag'=>'', 'Trap'=>'', 'Plot' => '', '原長度'=>'', '原葉片數'=>'', '狀態' => '', 'id'=> $olddata[0]['id']];
-        $havedata='no';
+        // $redata='1';
+
+        $redata = $this->getRedata($entry, $olddata[0]['trap']);
+
+
+
+        $realterdata = ['Tag' => '', 'Trap' => '', 'Plot' => '', '原長度' => '', '原葉片數' => '', '狀態' => '', 'id' => $olddata[0]['id']];
+        $havedata = 'no';
 
         return [
             'result' => 'ok',
@@ -742,11 +709,5 @@ $datacheck=['pass'=>'1', 'datasavenote'=>''];
 
             'datasavenote' => $datasavenote
         ];
-
-
     }
-
-
-
-
 }

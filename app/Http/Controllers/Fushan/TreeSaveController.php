@@ -335,11 +335,9 @@ class TreeSaveController extends Controller
 //刪除新增資料
     public function deletedata(Request $request, $stemid, $entry, $thispage){
         $test='';
-            $user = $request->session()->get('user', function () {
-                return view('login1', [
-                'check' => 'no'
-                ]);
-            });
+        $user = $request->user()->name;
+
+
         // $user='chialing';
         $datasavenote='';
 
@@ -373,11 +371,8 @@ class TreeSaveController extends Controller
 //儲存特殊修改
     public function savealternote(Request $request){
 
-        $user = $request->session()->get('user', function () {
-            return view('login1', [
-            'check' => 'no'
-            ]);
-        });
+        $user = $request->user()->name;
+
 
         $data_all = request()->all();
         $data=$data_all['data'][0];
@@ -450,11 +445,7 @@ class TreeSaveController extends Controller
 
     public function deletealter(Request $request, $stemid, $entry, $thispage){
 
-        $user = $request->session()->get('user', function () {
-            return view('login1', [
-            'check' => 'no'
-            ]);
-        });
+        $user = $request->user()->name;
         $table = $this->getTableInstance($entry);
         $datasavenote='';
        
@@ -493,11 +484,7 @@ class TreeSaveController extends Controller
 //輸入完成
     public function finishnote(Request $request, $qx, $qy, $entry){
 
-        $user = $request->session()->get('user', function () {
-            return view('login1', [
-            'check' => 'no'
-            ]);
-        });
+        $user = $request->user()->name;
 
         $splist = $request->session()->get('splist');
 

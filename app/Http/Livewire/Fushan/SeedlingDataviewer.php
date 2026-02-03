@@ -126,7 +126,8 @@ class SeedlingDataviewer extends Component
             $this->basedata=$basedata;
 
 
-            $this->dispatchBrowserEvent('initTablesorter', ['tag' => $this->tableTag]);        
+            // $this->dispatchBrowserEvent('initTablesorter', ['tag' => $this->tableTag]);
+            $this->dispatch('rePlots', plots: $this->tableTag);       
         }
 
 
