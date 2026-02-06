@@ -12,6 +12,9 @@ use App\Http\Controllers\Fushan\SeedsController;
 
 use App\Http\Controllers\Shoushan\PlotController;
 
+use App\Http\Controllers\Admin\UserApprovalController;
+use App\Http\Controllers\Admin\UserController;
+use App\Http\Controllers\Auth\ForcePasswordResetController;
 // Fushan actions
 use App\Http\Controllers\Fushan\TreePDFController;
 use App\Http\Controllers\Fushan\TreeSaveController;
@@ -85,6 +88,29 @@ Route::middleware(['auth'])->prefix('admin')->name('admin.')->group(function () 
     |--------------------------------------------------------------------------
     | 統一：/admin/fushan/{module}/{page}
     */
+
+    // Route::get('/users/pending', [UserApprovalController::class, 'index'])->name('users.pending');
+    // 使用者管理
+    Route::controller(UserController::class)->prefix('users')->name('users.')->group(function () {
+
+        Route::get('/', 'index')->name('index');
+        Route::get('{user}/edit', 'edit')->name('edit');
+        Route::post('{user}', 'update')->name('update');
+        Route::delete('{user}', 'destroy')->name('destroy');
+
+        // 審核
+        Route::post('{user}/approve', 'approve')->name('approve');
+        Route::post('{user}/reject',  'reject')->name('reject');
+
+        // 管理員重設密碼（發臨時密碼）
+        Route::post('{user}/reset-password', 'resetPassword')->name('reset-password');
+    });
+    // 使用者自行更換密碼（登入後）
+    Route::get('force-reset-password', [ForcePasswordResetController::class, 'edit'])
+        ->name('password.force.edit');
+
+    Route::post('force-reset-password', [ForcePasswordResetController::class, 'update'])
+        ->name('password.force.update');
 
     Route::prefix('fushan')->name('fushan.')->group(function () {
 

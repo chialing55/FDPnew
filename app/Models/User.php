@@ -24,6 +24,14 @@ class User extends Authenticatable
         'name',
         'email',
         'password',
+        'status',
+        'role',
+        'unit',
+        'site_id',
+        'approved_at',
+        'approved_by',
+        'force_password_reset',
+        'temp_password_issued_at',
     ];
 
     /**
@@ -43,6 +51,7 @@ class User extends Authenticatable
      */
     protected $casts = [
         'email_verified_at' => 'datetime',
+        'force_password_reset' => 'boolean',
     ];
 
     /**
@@ -62,14 +71,18 @@ class User extends Authenticatable
 
     public function userScopes()
     {
-        return $this->hasMany(UserScope::class);
+        return $this->hasMany(UserScope::class, 'user_id');
     }
-
 
     /**
      * 注意：這是「方便查」用的多對多，因為 pivot 仍有 module_id。
      * 真正權限建議仍以 userScopes 或 canScope() 為主。
      */
+
+    public function site()
+    {
+        return $this->belongsTo(Site::class, 'site_id');
+    }
     public function sites()
     {
         return $this->belongsToMany(Site::class, 'user_scopes', 'user_id', 'site_id')
@@ -103,40 +116,55 @@ class User extends Authenticatable
      */
     public function canScope(string|int $site, string|int $module, bool $requireApproved = true): bool
     {
-        // 1) 轉成 id（支援傳 code 或 id）
+        $allSiteId   = $this->siteIdByCode('all');
+        $allModuleId = $this->moduleIdByCode('all');
+
+        // 1) 轉成 id（支援 code 或 id；也允許傳 'all'）
         $siteId = is_numeric($site) ? (int) $site : $this->siteIdByCode((string) $site);
         $moduleId = is_numeric($module) ? (int) $module : $this->moduleIdByCode((string) $module);
 
         if (!$siteId || !$moduleId) {
-            return false; // code 找不到就視為沒權限
+            return false;
         }
 
-        // 2) all 的 id（若你尚未建立 all，會是 null）
-        $allSiteId = $this->siteIdByCode('all');
-        $allModuleId = $this->moduleIdByCode('all');
-
-        // 3) 用 Eloquent 走 UserScope（已是 Model，不用 DB::table）
         $q = UserScope::query()
-            ->where('user_id', $this->id);
+            ->where('user_id', $this->id)
+            ->where('is_enabled', 1);
 
         if ($requireApproved) {
             $q->whereNotNull('approved_at');
         }
 
-        // 若 all 不存在，就只做精確比對
+        // 2) 如果 DB 裡沒有 all，就只能精確比對（你原本的邏輯）
         if (!$allSiteId || !$allModuleId) {
-            $q->where('site_id', $siteId)
-                ->where('module_id', $moduleId);
-
-            return $q->exists();
+            return $q->where('site_id', $siteId)
+                ->where('module_id', $moduleId)
+                ->exists();
         }
 
-        // 含 all wildcard
-        $q->whereIn('site_id', [$siteId, $allSiteId])
-            ->whereIn('module_id', [$moduleId, $allModuleId]);
-
-        return $q->exists();
+        // 3) 有 all：wildcard 規則
+        // 允許：
+        // - 精確 (siteId, moduleId)
+        // - 全站 (allSiteId, moduleId)
+        // - 全模組 (siteId, allModuleId)
+        // - 全部 (allSiteId, allModuleId)
+        return $q->where(function ($qq) use ($siteId, $moduleId, $allSiteId, $allModuleId) {
+            $qq->where(function ($q1) use ($siteId, $moduleId) {
+                $q1->where('site_id', $siteId)->where('module_id', $moduleId);
+            })
+                ->orWhere(function ($q2) use ($allSiteId, $moduleId) {
+                    $q2->where('site_id', $allSiteId)->where('module_id', $moduleId);
+                })
+                ->orWhere(function ($q3) use ($siteId, $allModuleId) {
+                    $q3->where('site_id', $siteId)->where('module_id', $allModuleId);
+                })
+                ->orWhere(function ($q4) use ($allSiteId, $allModuleId) {
+                    $q4->where('site_id', $allSiteId)->where('module_id', $allModuleId);
+                });
+        })
+            ->exists();
     }
+
 
     /**
      * sites.code -> sites.id（永久快取）
@@ -166,4 +194,28 @@ class User extends Authenticatable
      * 如果你之後更新 sites/modules 的 code 或新增 all，記得清 cache：
      * php artisan cache:clear
      */
+
+
+    public function scopePending($q)
+    {
+        return $q->where('status', 'pending');
+    }
+    public function isApproved(): bool
+    {
+        return $this->status === 'approved';
+    }
+    public function isRejected(): bool
+    {
+        return $this->status === 'rejected';
+    }
+
+    public function getRoleLabelAttribute(): string
+    {
+        return match ($this->role) {
+            'admin' => '資料管理員',
+            'pi'    => '計畫主持人',
+            'ra'    => '研究助理',
+            default => '未知',
+        };
+    }
 }

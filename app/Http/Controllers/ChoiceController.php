@@ -10,7 +10,7 @@ class ChoiceController extends Controller
 {
     public function check(Request $request)
     {
-         /** @var \App\Models\User $user */
+        /** @var \App\Models\User $user */
         $user = Auth::user();
         if (!$user) {
             return redirect()->route('login'); // 或你的後台登入 route
@@ -20,38 +20,36 @@ class ChoiceController extends Controller
         // dd($user->id, $user->canScope('fushan', 'tree'), config('work'));
 
         $workItems = collect(config('work', []))
-            ->filter(function ($w) use ($user) {
-                return $user->canScope($w['site'] ?? '', $w['module'] ?? '');
+            // ① 排除語意型項目（all 不應該成為入口）
+            ->filter(function ($w) {
+                return ($w['site'] ?? '') !== 'all'
+                    && ($w['module'] ?? '') !== 'all'
+                    && !empty($w['route']); // 再保險一次
             })
+
+            // ② 使用者權限判斷（user_scopes.is_enabled 已在 canScope 內）
+            ->filter(function ($w) use ($user) {
+                return $user->canScope($w['site'], $w['module']);
+            })
+
+            // ③ 產生實際 url
             ->map(function ($w) {
                 $w['url'] = route($w['route']);
                 return $w;
             })
+
             ->values()
             ->all();
 
 
+
+
         // 2) 其它「不走 scope 的固定入口」（例如研究成果平台 / 網頁後台平台）
-        $fixedItems = [
-            [
-                'key'   => 'webhome',
-                'title' => '研究成果平台',
-                'url'   => url('/'),
-                'img'   => asset('/images/research/splist.png'),
-                'class' => 'box3',
-            ],
-            [
-                'key'   => 'webplatform',
-                'title' => '網頁後端管理平台',
-                'url'   => url('/web/splist'),
-                'img'   => asset('/images/research/DSCN6021.JPG'),
-                'class' => 'box3',
-            ],
-        ];
+
 
         return view('choice', [
             'authUserName' => $user->name,   // 這樣 blade 不會把 model 印出錯誤
-            'fixedItems'   => $fixedItems,
+            // 'fixedItems'   => $fixedItems,
             'workItems'    => $workItems,
         ]);
     }
