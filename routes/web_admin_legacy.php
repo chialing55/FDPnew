@@ -9,10 +9,12 @@ use App\Http\Controllers\ChoiceController;
 use App\Http\Controllers\Fushan\SeedlingController;
 use App\Http\Controllers\Fushan\TreeController;
 use App\Http\Controllers\Fushan\SeedsController;
+use App\Http\Controllers\Fushan\MortalityController;
+use App\Http\Controllers\Nanjenshan\SeedlingController as NanjenshanSeedlingController;
 
 use App\Http\Controllers\Shoushan\PlotController;
 
-use App\Http\Controllers\Admin\UserApprovalController;
+use App\Http\Controllers\Admin\ProfileController;
 use App\Http\Controllers\Admin\UserController;
 use App\Http\Controllers\Auth\ForcePasswordResetController;
 // Fushan actions
@@ -82,6 +84,12 @@ Route::middleware(['auth'])->prefix('admin')->name('admin.')->group(function () 
     Route::get('/choice', [ChoiceController::class, 'check'])
         ->name('choice');
 
+    Route::get('/profile', [ProfileController::class, 'edit'])
+        ->name('profile.edit');
+
+    Route::post('/profile', [ProfileController::class, 'update'])
+        ->name('profile.update');
+
     /*
     |--------------------------------------------------------------------------
     | Fushan - Pages (工作頁：只負責顯示)
@@ -89,7 +97,6 @@ Route::middleware(['auth'])->prefix('admin')->name('admin.')->group(function () 
     | 統一：/admin/fushan/{module}/{page}
     */
 
-    // Route::get('/users/pending', [UserApprovalController::class, 'index'])->name('users.pending');
     // 使用者管理
     Route::controller(UserController::class)->prefix('users')->name('users.')->group(function () {
 
@@ -153,6 +160,44 @@ Route::middleware(['auth'])->prefix('admin')->name('admin.')->group(function () 
 
             // 舊：/admin/fushan/seedling/dataviewer
             Route::get('/dataviewer', [SeedlingController::class, 'dataviewer'])
+                ->defaults('site', 'fushan')
+                ->name('dataviewer');
+        });
+
+        Route::prefix('mortality')->middleware('scope:fushan,mortality')->name('mortality.')->group(function () {
+            Route::get('/', [MortalityController::class, 'mortality'])
+                ->defaults('site', 'fushan')
+                ->name('index');
+
+            Route::get('/doc', [MortalityController::class, 'mortality'])
+                ->defaults('site', 'fushan')
+                ->name('doc');
+
+            Route::get('/entry', [MortalityController::class, 'entry'])
+                ->defaults('site', 'fushan')->defaults('entry', '1')
+                ->name('entry');
+
+            Route::get('/entry1', [MortalityController::class, 'entry'])
+                ->defaults('site', 'fushan')->defaults('entry', '1')
+                ->name('entry.1');
+
+            Route::get('/entry2', [MortalityController::class, 'entry'])
+                ->defaults('site', 'fushan')->defaults('entry', '2')
+                ->name('entry.2');
+
+            Route::get('/record', [MortalityController::class, 'record'])
+                ->defaults('site', 'fushan')
+                ->name('record');
+
+            Route::get('/compare', [MortalityController::class, 'compare'])
+                ->defaults('site', 'fushan')
+                ->name('compare');
+
+            Route::get('/import', [MortalityController::class, 'import'])
+                ->defaults('site', 'fushan')
+                ->name('import');
+
+            Route::get('/dataviewer', [MortalityController::class, 'dataviewer'])
                 ->defaults('site', 'fushan')
                 ->name('dataviewer');
         });
@@ -266,6 +311,22 @@ Route::middleware(['auth'])->prefix('admin')->name('admin.')->group(function () 
             Route::get('/update-back-data', [SeedsController::class, 'updateBackData'])
                 ->defaults('site', 'fushan')
                 ->name('update-back-data');
+        });
+    });
+
+    Route::prefix('nanjenshan')->name('nanjenshan.')->group(function () {
+        Route::prefix('seedling')->middleware('scope:nanjenshan,seedling')->name('seedling.')->group(function () {
+            Route::get('/', [NanjenshanSeedlingController::class, 'doc'])
+                ->defaults('site', 'nanjenshan')
+                ->name('index');
+
+            Route::get('/doc', [NanjenshanSeedlingController::class, 'doc'])
+                ->defaults('site', 'nanjenshan')
+                ->name('doc');
+
+            Route::get('/dataviewer', [NanjenshanSeedlingController::class, 'dataviewer'])
+                ->defaults('site', 'nanjenshan')
+                ->name('dataviewer');
         });
     });
 

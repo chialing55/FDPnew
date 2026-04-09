@@ -16,6 +16,13 @@ return [
         'module' => 'seedling',
     ],
     [
+        'key' => 'fushan.mortality',
+        'title' => '福山｜死亡率調查',
+        'route' => 'admin.fushan.mortality.index',
+        'site' => 'fushan',
+        'module' => 'mortality',
+    ],
+    [
         'key' => 'fushan.seeds',
         'title' => '福山｜種子',
         'route' => 'admin.fushan.seeds.index',
@@ -35,6 +42,13 @@ return [
         'route' => 'admin.shoushan.tree.index',
         'site' => 'shoushan',
         'module' => 'tree',
+    ],
+    [
+        'key' => 'nanjenshan.seedling',
+        'title' => '南仁山｜小苗',
+        'route' => 'admin.nanjenshan.seedling.index',
+        'site' => 'nanjenshan',
+        'module' => 'seedling',
     ],
     [
         'key' => 'shoushan.all',

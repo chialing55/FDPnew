@@ -48,6 +48,12 @@
                     </span>
                 @endif
 
+                @if (auth()->check())
+                    <a href="{{ route('admin.profile.edit') }}" class="nav-link" style='text-decoration: none;'>
+                        個人資訊
+                    </a>
+                @endif
+
                 @if (auth()->user()?->is_admin)
                     <a href="{{ route('admin.users.index') }}" class="nav-link" style='text-decoration: none;'>
                         使用者管理

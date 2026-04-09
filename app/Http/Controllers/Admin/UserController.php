@@ -39,6 +39,7 @@ class UserController extends Controller
                     ]);
             },
         ])
+            ->orderByRaw("CASE WHEN role = 'admin' THEN 0 ELSE 1 END")
             ->orderByDesc('created_at')
             ->get();
 

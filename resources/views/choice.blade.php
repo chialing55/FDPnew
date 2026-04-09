@@ -77,10 +77,20 @@
                         'class' => 'box1',
                         'label' => '福山 小苗',
                     ],
+                    'fushan.mortality' => [
+                        'img' => asset('/images/research/seedling.png'),
+                        'class' => 'box1',
+                        'label' => '福山 死亡率調查',
+                    ],
                     'shoushan.tree' => [
                         'img' => asset('/images/research/monkey.png'),
                         'class' => 'box2',
                         'label' => '壽山 每木',
+                    ],
+                    'nanjenshan.seedling' => [
+                        'img' => asset('/images/research/seedling.png'),
+                        'class' => 'box1',
+                        'label' => '南仁山 小苗',
                     ],
                 ];
             @endphp

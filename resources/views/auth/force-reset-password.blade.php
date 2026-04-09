@@ -158,7 +158,8 @@
 
                     <div class="form-row password-field">
                         <label class="label">{{ $user->force_password_reset ? '臨時密碼' : '原密碼' }}</label>
-                        <input id="current_password" class="input" type="password" name="current_password" required>
+                        <input id="current_password" class="input" type="password" name="current_password" required
+                            placeholder="請輸入目前密碼">
 
                         <button type="button" class="password-toggle" onclick="togglePasswordEye('current_password', this)"
                             aria-label="顯示密碼">
@@ -192,7 +193,8 @@
 
                     <div class="form-row password-field">
                         <label class="label">新密碼</label>
-                        <input id="password" class="input" type="password" name="password" required>
+                        <input id="password" class="input" type="password" name="password" required
+                            placeholder="至少 8 碼，需含英文字母、數字與符號">
 
                         <button type="button" class="password-toggle" onclick="togglePasswordEye('password', this)"
                             aria-label="顯示密碼">
@@ -227,7 +229,7 @@
                     <div class="form-row password-field">
                         <label class="label">確認新密碼</label>
                         <input class="input" id="password_confirmation" type="password" name="password_confirmation"
-                            required>
+                            required placeholder="請再次輸入新密碼">
 
                         <button type="button" class="password-toggle"
                             onclick="togglePasswordEye('password_confirmation', this)" aria-label="顯示密碼">

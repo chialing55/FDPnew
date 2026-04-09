@@ -1,0 +1,170 @@
+@tailwind components;
+@tailwind utilities;
+
+@layer components {
+    .admin-modern-page {
+        @apply min-h-screen;
+    }
+
+    .admin-modern-content {
+        @apply min-h-[calc(100vh-150px)];
+    }
+
+    .admin-modern {
+        @apply text-base leading-normal text-slate-800;
+    }
+
+    .admin-modern-footer {
+        background-color: #3d4e17;
+        position: relative;
+        z-index: 20;
+        clear: both;
+        width: 100%;
+    }
+
+    .admin-modern-header-bar {
+        @apply flex items-center justify-between px-[30px] py-2 text-white;
+    }
+
+    .admin-modern-header-bar h1,
+    .admin-modern-header-bar h2,
+    .admin-modern-header-bar h3,
+    .admin-modern-header-bar p,
+    .admin-modern-header-bar a,
+    .admin-modern-header-bar span {
+        color: #ffffff;
+    }
+
+    .admin-modern-header-bar h1,
+    .admin-modern-header-bar h2 {
+        @apply mb-0 text-xl font-semibold leading-tight;
+    }
+
+    .admin-modern-footer-inner {
+        @apply flex items-center justify-between px-[30px] py-3 text-sm text-white;
+        box-sizing: border-box;
+    }
+
+    .admin-modern h1 {
+        @apply mb-4 text-3xl font-bold text-slate-900;
+    }
+
+    .admin-modern h2 {
+        @apply mb-3 text-[1.75rem] font-semibold text-slate-900;
+    }
+
+    .admin-modern h3 {
+        @apply mb-3 text-xl font-semibold text-slate-800;
+    }
+
+    .admin-modern h4 {
+        @apply mb-2 text-lg font-semibold text-slate-800;
+    }
+
+    .admin-modern p {
+        @apply mb-2 text-sm leading-relaxed text-slate-700;
+    }
+
+    .admin-modern a {
+        @apply underline decoration-[1px] underline-offset-2;
+    }
+
+    .admin-modern label {
+        @apply mb-1.5 block text-sm text-slate-700;
+    }
+
+    .admin-modern input:not([type='checkbox']):not([type='radio']),
+    .admin-modern textarea,
+    .admin-modern select {
+        @apply block w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 shadow-sm;
+        @apply focus:border-teal-700 focus:ring-2 focus:ring-teal-700/20;
+    }
+
+    .admin-modern input::placeholder,
+    .admin-modern textarea::placeholder {
+        @apply text-sm italic text-slate-400;
+    }
+
+    .admin-modern [type='checkbox'] {
+        @apply h-4 w-4 rounded border-slate-300 text-lime-700 focus:ring-lime-700/20;
+    }
+
+    .admin-modern-card {
+        @apply rounded-[10px] border border-black/10 bg-white/90 p-[18px];
+    }
+
+    .admin-modern-subcard {
+        @apply rounded-xl border border-gray-200 bg-white/70 p-4;
+    }
+
+    .admin-modern-section-title {
+        @apply my-2 text-[1.3rem] font-semibold text-slate-800;
+    }
+
+    .admin-modern-section-hint {
+        @apply mt-1.5 text-sm text-slate-600;
+    }
+
+    .admin-modern-eyebrow {
+        @apply mb-1 text-xs font-semibold uppercase tracking-[0.12em] text-slate-500;
+    }
+
+    .admin-modern-chip {
+        @apply inline-flex cursor-pointer select-none items-center gap-1.5 rounded-[10px] border border-slate-200 bg-white/95 px-2.5 py-2 text-[0.95rem] text-slate-800 transition hover:border-slate-300 hover:bg-slate-50;
+    }
+
+    .admin-modern-chip-row {
+        @apply flex w-full flex-wrap items-start justify-start gap-2.5;
+    }
+
+    .admin-modern-chip small {
+        @apply text-xs text-slate-500;
+    }
+
+    .admin-modern-alert-success {
+        @apply mb-3.5 rounded-md border border-green-500/35 bg-green-500/10 px-3 py-2.5 text-green-900;
+    }
+
+    .admin-modern-alert-warning {
+        @apply mb-3.5 rounded-md border border-amber-500/45 bg-amber-500/15 px-3 py-2.5 text-amber-900;
+    }
+
+    .admin-modern-alert-error {
+        @apply mb-3.5 rounded-md border border-red-600/25 bg-red-600/10 px-3 py-2.5 text-red-900;
+    }
+
+    .admin-modern-btn {
+        @apply inline-flex items-center rounded-lg px-3.5 py-2.5 text-sm transition;
+    }
+
+    .admin-modern-btn-primary {
+        @apply bg-teal-800 text-white hover:bg-teal-900;
+    }
+
+    .admin-modern-btn-secondary {
+        @apply border border-black/15 bg-white/90 text-slate-800 hover:bg-white;
+    }
+
+    .admin-modern-btn-warning {
+        @apply bg-amber-700 text-white hover:bg-amber-800;
+    }
+
+    .admin-modern-footer-note {
+        @apply mb-0 text-sm font-normal leading-normal text-white;
+    }
+
+    .admin-modern-footer-link {
+        @apply text-sm font-normal text-white no-underline transition hover:text-white hover:no-underline;
+    }
+
+    .admin-modern-footer-btn {
+        @apply border border-white/25 bg-white/10 text-white hover:bg-white/15;
+    }
+
+    .admin-modern-footer a,
+    .admin-modern-footer a:hover,
+    .admin-modern-footer p,
+    .admin-modern-footer span {
+        color: #ffffff;
+    }
+}

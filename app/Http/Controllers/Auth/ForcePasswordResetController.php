@@ -7,6 +7,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use App\Models\User;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Validation\Rules\Password;
 
 class ForcePasswordResetController extends Controller
 {
@@ -33,11 +34,19 @@ class ForcePasswordResetController extends Controller
 
         $validated = $request->validate([
             'current_password' => ['required'],
-            'password' => ['required', 'string', 'min:8', 'confirmed'],
+            'password' => [
+                'required',
+                'string',
+                'confirmed',
+                Password::min(8)->letters()->numbers()->symbols(),
+            ],
         ], [
             'current_password.required' => '請輸入原密碼',
             'password.required' => '請輸入新密碼',
             'password.min' => '新密碼至少 8 碼',
+            'password.letters' => '新密碼需包含英文字母',
+            'password.numbers' => '新密碼需包含數字',
+            'password.symbols' => '新密碼需包含符號',
             'password.confirmed' => '兩次輸入的新密碼不一致',
         ]);
 

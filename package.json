@@ -2,9 +2,11 @@
     "private": true,
     "scripts": {
         "build:css": "node ./node_modules/tailwindcss/lib/cli.js -i ./resources/css/tailwind.css -o ./public/css/tailwind.css --minify",
-        "watch:css": "node ./node_modules/tailwindcss/lib/cli.js -i ./resources/css/tailwind.css -o ./public/css/tailwind.css --watch",
+        "build:admin-css": "node ./node_modules/tailwindcss/lib/cli.js -i ./resources/css/admin-tailwind.css -o ./public/css/admin-tailwind.css --minify",
+        "watch:css": "node ./node_modules/tailwindcss/lib/cli.js -i ./resources/css/tailwind.css -o ./public/css/tailwind.css --watch --poll",
+        "watch:admin-css": "node ./node_modules/tailwindcss/lib/cli.js -i ./resources/css/admin-tailwind.css -o ./public/css/admin-tailwind.css --watch --poll",
         "browser-sync": "browser-sync start --config bs-config.js",
-        "dev": "npm-run-all --parallel watch:css browser-sync"
+        "dev": "npm-run-all --parallel watch:css watch:admin-css browser-sync"
     },
     "devDependencies": {
         "@popperjs/core": "^2.11.6",

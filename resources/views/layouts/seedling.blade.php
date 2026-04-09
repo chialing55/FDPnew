@@ -52,8 +52,8 @@
           <li class='innerlist list41 listlink' type='note'>資料輸入注意事項</li>
           <li class='innerlist list42 listlink' type='entry1' >第一次輸入</li>
           <li class='innerlist list43 listlink' type='entry2' >第二次輸入</li>
-          <li class='innerlist list44 listlink' type='compare'>資料比對</li>
-      @if($user=='chialing')
+          <li class='innerlist list44 listlink' type='compare'>資料比對<hr></li>
+      @if($user=='呂佳陵')
           <li class='innerlist list45 listlink' type='import'>將資料匯入大表<hr></li>
       @endif
 

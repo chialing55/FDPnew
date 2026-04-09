@@ -78,6 +78,8 @@
                                         default => '未知',
                                     };
 
+                                    $isDataAdmin = $u->role === 'admin';
+
                                     $statusLabel = match ($u->status) {
                                         'approved' => '已啟用',
                                         'pending' => '',
@@ -94,7 +96,15 @@
                                     <td style="padding:10px; border-bottom:1px solid rgba(0,0,0,.06);">{{ $u->unit ?? '-' }}
                                     </td>
                                     <td style="padding:10px; border-bottom:1px solid rgba(0,0,0,.06); white-space:nowrap;">
-                                        {{ $roleLabel }}</td>
+                                        @if ($isDataAdmin)
+                                            <span
+                                                style="display:inline-block; padding:2px 8px; border-radius:999px; background:rgba(245, 158, 11, .18); border:1px solid rgba(245, 158, 11, .35); color:#92400e; font-weight:700;">
+                                                {{ $roleLabel }}
+                                            </span>
+                                        @else
+                                            {{ $roleLabel }}
+                                        @endif
+                                    </td>
                                     <td style="padding:10px; border-bottom:1px solid rgba(0,0,0,.06); white-space:nowrap;">
                                         {{ $u->site?->name ?? '-' }}
                                     </td>
@@ -190,7 +200,7 @@
                                         background: rgba(255,255,255,.9);
                                         color:#2f3e3b;
                                         text-decoration:none;
-                                    ">分派權限</a>
+                                    ">編輯</a>
                                         @if (!$u->is_admin)
                                             <form method="POST" action="{{ route('admin.users.destroy', $u) }}"
                                                 style="display:inline-block; margin-left:8px;"

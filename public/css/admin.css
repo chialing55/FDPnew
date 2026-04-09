@@ -1,0 +1,227 @@
+.user-edit-wrap {
+    width: min(920px, calc(100% - 60px));
+    margin: 0 auto;
+    padding: 8px 0 24px;
+    color: #1f2937;
+}
+
+.user-edit-alert {
+    margin-bottom: 14px;
+    padding: 10px 12px;
+    border-radius: 8px;
+    font-size: 14px;
+    line-height: 1.5;
+}
+
+.user-edit-alert-success {
+    border: 1px solid rgba(34, 197, 94, .35);
+    background: rgba(34, 197, 94, .12);
+    color: #14532d;
+}
+
+.user-edit-alert-warning {
+    border: 1px solid rgba(234, 179, 8, .45);
+    background: rgba(234, 179, 8, .14);
+    color: #713f12;
+}
+
+.user-edit-alert-error {
+    border: 1px solid rgba(220, 38, 38, .25);
+    background: rgba(220, 38, 38, .08);
+    color: #7f1d1d;
+}
+
+.user-edit-section-title {
+    margin: 0 0 10px;
+    font-size: 1.2rem;
+    font-weight: 700;
+    color: #1f2937;
+}
+
+.user-edit-section-hint {
+    margin: 6px 0 0;
+    font-size: 14px;
+    line-height: 1.6;
+    color: #475569;
+}
+
+.user-edit-basic-grid {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 14px;
+    align-items: start;
+}
+
+.user-edit-basic-item {
+    min-width: 0;
+}
+
+.user-edit-label {
+    display: block;
+    margin-bottom: 6px;
+    font-size: 14px;
+    color: #334155;
+}
+
+.user-edit-basic-control {
+    width: 100%;
+    min-width: 0;
+    height: 42px;
+    box-sizing: border-box;
+    padding: 8px 12px;
+    border: 1px solid #cbd5e1;
+    border-radius: 8px;
+    background: #fff;
+    color: #0f172a;
+    font-size: 14px;
+    line-height: 24px;
+    box-shadow: 0 1px 2px rgba(15, 23, 42, .04);
+}
+
+.user-edit-basic-control:focus {
+    outline: none;
+    border-color: #0f766e;
+    box-shadow: 0 0 0 2px rgba(15, 118, 110, .15);
+}
+
+.user-edit-password-field {
+    position: relative;
+}
+
+.user-edit-password-field .user-edit-basic-control {
+    padding-right: 40px;
+}
+
+.user-edit-password-toggle {
+    position: absolute;
+    right: 10px;
+    top: 37px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0;
+    border: none;
+    background: none;
+    color: #4f766f;
+    cursor: pointer;
+}
+
+.user-edit-password-toggle svg {
+    width: 20px;
+    height: 20px;
+}
+
+.user-edit-password-toggle .eye-closed {
+    display: none;
+}
+
+.user-edit-code {
+    display: inline-block;
+    padding: 4px 8px;
+    border-radius: 6px;
+    border: 1px solid rgba(0, 0, 0, .12);
+    background: rgba(255, 255, 255, .9);
+    font-size: 16px;
+}
+
+.user-edit-inline-actions {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 10px;
+}
+
+.user-edit-chip-row {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: flex-start;
+    align-items: flex-start;
+    gap: 10px;
+    width: 100%;
+}
+
+.user-edit-subcard {
+    border: 1px solid #e5e7eb;
+    border-radius: 12px;
+    background: rgba(255, 255, 255, .72);
+    padding: 16px;
+    margin-bottom: 14px;
+}
+
+.user-edit-site-title {
+    margin: 0 0 12px;
+    font-size: 1.05rem;
+    font-weight: 700;
+    color: #1f2937;
+}
+
+.user-edit-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 8px 10px;
+    border: 1px solid #e2e8f0;
+    border-radius: 10px;
+    background: rgba(255, 255, 255, .96);
+    color: #1f2937;
+    font-size: 15px;
+    cursor: pointer;
+}
+
+.user-edit-chip small {
+    font-size: 12px;
+    color: #64748b;
+}
+
+.user-edit-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+    margin-top: 24px;
+}
+
+.user-edit-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 10px 14px;
+    border-radius: 8px;
+    font-size: 14px;
+    text-decoration: none;
+    cursor: pointer;
+    border: 1px solid transparent;
+}
+
+.user-edit-btn-primary {
+    background: #6aa84f;
+    color: #fff;
+}
+
+.user-edit-btn-primary:hover {
+    background: #5b9642;
+}
+
+.user-edit-btn-secondary {
+    background: rgba(255, 255, 255, .9);
+    border-color: rgba(0, 0, 0, .15);
+    color: #1f2937;
+}
+
+.user-edit-btn-warning {
+    background: #b45309;
+    color: #fff;
+}
+
+.user-edit-btn-warning:hover {
+    background: #92400e;
+}
+
+@media (max-width: 900px) {
+    .user-edit-wrap {
+        width: calc(100% - 40px);
+    }
+
+    .user-edit-basic-grid {
+        grid-template-columns: 1fr;
+    }
+}
