@@ -183,7 +183,7 @@
                                 {{ session('status') }}
                             </div>
                         @endif
-                        @error('email')
+                        @error('account')
                             <div class="mb-4 p-3 text-red-700">
                                 {{ $message }}
                             </div>
@@ -193,8 +193,8 @@
                             @csrf
 
                             <div class="login-field">
-                                <label class="login-label">Email</label>
-                                <input type="email" name="email" value="{{ old('email') }}" required
+                                <label class="login-label">帳號</label>
+                                <input type="text" name="account" value="{{ old('account') }}" required
                                     class="login-input">
                             </div>
 

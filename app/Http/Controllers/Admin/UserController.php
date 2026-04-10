@@ -218,7 +218,7 @@ class UserController extends Controller
             'approved_at' => now(),
             'approved_by' => $request->user()->id,
         ]);
-        return back()->with('status', "已通過：{$user->email}");
+        return back()->with('status', "已通過：{$user->account}");
     }
 
     public function reject(Request $request, User $user)
@@ -230,6 +230,6 @@ class UserController extends Controller
             'approved_at' => null,
             'approved_by' => $request->user()->id,
         ]);
-        return back()->with('status', "已拒絕：{$user->email}");
+        return back()->with('status', "已拒絕：{$user->account}");
     }
 }

@@ -29,10 +29,16 @@ class UserResource extends Resource
                     ->required()
                     ->maxLength(255),
 
+                Forms\Components\TextInput::make('account')
+                    ->label('帳號')
+                    ->required()
+                    ->maxLength(50)
+                    ->unique(ignoreRecord: true),
+
                 Forms\Components\TextInput::make('email')
                     ->label('Email')
                     ->email()
-                    ->required()
+                    ->nullable()
                     ->unique(ignoreRecord: true),
 
                 // 密碼欄位：建立時必填，編輯時可留空＝不改密碼
@@ -59,6 +65,10 @@ class UserResource extends Resource
             ->columns([
                 Tables\Columns\TextColumn::make('name')
                     ->label('姓名')
+                    ->searchable(),
+
+                Tables\Columns\TextColumn::make('account')
+                    ->label('帳號')
                     ->searchable(),
 
                 Tables\Columns\TextColumn::make('email')

@@ -160,8 +160,14 @@
                             </div>
 
                             <div class="login-field">
-                                <label class="login-label">Email</label>
-                                <input type="email" name="email" value="{{ old('email') }}" required
+                                <label class="login-label">帳號</label>
+                                <input type="text" name="account" value="{{ old('account') }}" required
+                                    class="login-input" placeholder="只能使用英數字、底線或連字號">
+                            </div>
+
+                            <div class="login-field">
+                                <label class="login-label">Email（選填）</label>
+                                <input type="email" name="email" value="{{ old('email') }}"
                                     class="login-input">
                             </div>
                             <div class="login-field">

@@ -1,0 +1,34 @@
+<?php
+
+use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\Schema;
+
+return new class extends Migration {
+    protected $connection = 'fs_mortality';
+
+    public function up(): void
+    {
+        Schema::connection('fs_mortality')->create('tree_individuals', function (Blueprint $table) {
+            $table->id();
+            $table->string('stemid', 50)->unique();
+            $table->string('spcode', 50)->index();
+            $table->integer('qx');
+            $table->integer('qy');
+            $table->integer('subqx');
+            $table->integer('subqy');
+            $table->decimal('qudx', 6, 2);
+            $table->decimal('qudy', 6, 2);
+            $table->boolean('is_active')->default(true)->index();
+            $table->text('note')->nullable();
+            $table->index(['qx', 'qy']);
+            $table->index(['subqx', 'subqy']);
+            $table->timestamps();
+        });
+    }
+
+    public function down(): void
+    {
+        Schema::connection('fs_mortality')->dropIfExists('tree_individuals');
+    }
+};

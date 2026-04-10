@@ -18,7 +18,7 @@
         <div class="header_bottom fc-w flex"
             style="padding: 10px 30px;  align-items: center;
   justify-content: space-between">
-            <h2>編輯使用者：{{ $user->name }}（{{ $user->email }}）</h2>
+            <h2>編輯使用者：{{ $user->name }}（{{ $user->account }}）</h2>
         </div>
 
         <div class="user-edit-wrap">

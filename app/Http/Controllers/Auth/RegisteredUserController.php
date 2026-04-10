@@ -4,10 +4,8 @@ namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
 use App\Models\User;
-use Illuminate\Auth\Events\Registered;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\Rules;
 use Illuminate\View\View;
@@ -42,7 +40,8 @@ class RegisteredUserController extends Controller
     {
         $validated = $request->validate([
             'name'    => ['required', 'string', 'max:255'],
-            'email'   => ['required', 'string', 'lowercase', 'email', 'max:255', 'unique:' . User::class],
+            'account' => ['required', 'string', 'max:50', 'alpha_dash', 'unique:' . User::class . ',account'],
+            'email'   => ['nullable', 'string', 'lowercase', 'email', 'max:255', 'unique:' . User::class . ',email'],
 
             'role'   => ['required', 'in:資料管理員,計畫主持人,研究助理'],
             'site_id' => [
@@ -84,7 +83,8 @@ class RegisteredUserController extends Controller
 
         $user = User::create([
             'name'     => $validated['name'],
-            'email'    => $validated['email'],
+            'account'  => $validated['account'],
+            'email'    => $validated['email'] ?? null,
             'unit'     => $validated['unit'] ?? null,
             'site_id'  => $validated['site_id'],
             'role'     => $role,
@@ -92,13 +92,6 @@ class RegisteredUserController extends Controller
             'status'   => 'pending',
         ]);
 
-        event(new Registered($user));
-        // //自動登入
-        //         Auth::login($user);
-        // //導入信箱驗證頁面
-        //         return redirect()->intended(route('verification.notice'));
-        // 不要自動登入，改成導回提示頁
-        //註冊成功，請先至信箱點擊驗證連結，通過後等待管理員審核。
         return redirect()->route('login')
             ->with('status', '註冊成功，請等待管理員審核。');
     }

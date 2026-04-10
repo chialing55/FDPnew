@@ -47,6 +47,8 @@
                         <thead>
                             <tr style="background: rgba(0,0,0,.04);">
                                 <th style="padding: 12px 10px; text-align:left; border-bottom:1px solid rgba(0,0,0,.08);">
+                                    帳號</th>
+                                <th style="padding: 12px 10px; text-align:left; border-bottom:1px solid rgba(0,0,0,.08);">
                                     Email</th>
                                 <th style="padding: 12px 10px; text-align:left; border-bottom:1px solid rgba(0,0,0,.08);">姓名
                                 </th>
@@ -89,6 +91,8 @@
                                 @endphp
 
                                 <tr>
+                                    <td style="padding:10px; border-bottom:1px solid rgba(0,0,0,.06);">{{ $u->account }}
+                                    </td>
                                     <td style="padding:10px; border-bottom:1px solid rgba(0,0,0,.06);">{{ $u->email }}
                                     </td>
                                     <td style="padding:10px; border-bottom:1px solid rgba(0,0,0,.06);">{{ $u->name }}
@@ -204,7 +208,7 @@
                                         @if (!$u->is_admin)
                                             <form method="POST" action="{{ route('admin.users.destroy', $u) }}"
                                                 style="display:inline-block; margin-left:8px;"
-                                                onsubmit="return confirm('確定要刪除使用者：{{ $u->name }}（{{ $u->email }}）嗎？\n此操作會同時刪除其權限範圍（user_scope）。');">
+                                                onsubmit="return confirm('確定要刪除使用者：{{ $u->name }}（{{ $u->account }}）嗎？\n此操作會同時刪除其權限範圍（user_scope）。');">
                                                 @csrf
                                                 @method('DELETE')
                                                 <button type="submit"
@@ -224,7 +228,7 @@
                                 </tr>
                             @empty
                                 <tr>
-                                    <td colspan="9" style="padding: 18px; text-align:center; opacity:.8;">
+                                    <td colspan="10" style="padding: 18px; text-align:center; opacity:.8;">
                                         目前沒有使用者
                                     </td>
                                 </tr>
