@@ -173,6 +173,10 @@ Route::middleware(['auth'])->prefix('admin')->name('admin.')->group(function () 
                 ->defaults('site', 'fushan')
                 ->name('doc');
 
+            Route::get('/note', [MortalityController::class, 'note'])
+                ->defaults('site', 'fushan')
+                ->name('note');
+
             Route::get('/entry', [MortalityController::class, 'entry'])
                 ->defaults('site', 'fushan')->defaults('entry', '1')
                 ->name('entry');
@@ -184,6 +188,26 @@ Route::middleware(['auth'])->prefix('admin')->name('admin.')->group(function () 
             Route::get('/entry2', [MortalityController::class, 'entry'])
                 ->defaults('site', 'fushan')->defaults('entry', '2')
                 ->name('entry.2');
+
+            Route::post('/entry/generate', [MortalityController::class, 'generateMortalityEntryTables'])
+                ->defaults('site', 'fushan')
+                ->name('entry.generate');
+
+            Route::get('/census', [MortalityController::class, 'censusPage'])
+                ->defaults('site', 'fushan')
+                ->name('census');
+
+            Route::post('/census', [MortalityController::class, 'saveCensusPage'])
+                ->defaults('site', 'fushan')
+                ->name('census.save');
+
+            Route::get('/survey-import', [MortalityController::class, 'surveyImport'])
+                ->defaults('site', 'fushan')
+                ->name('survey-import');
+
+            Route::post('/survey-import', [MortalityController::class, 'uploadSurveyImport'])
+                ->defaults('site', 'fushan')
+                ->name('survey-import.upload');
 
             Route::get('/record', [MortalityController::class, 'record'])
                 ->defaults('site', 'fushan')
@@ -200,6 +224,50 @@ Route::middleware(['auth'])->prefix('admin')->name('admin.')->group(function () 
             Route::get('/dataviewer', [MortalityController::class, 'dataviewer'])
                 ->defaults('site', 'fushan')
                 ->name('dataviewer');
+
+            Route::get('/process', [MortalityController::class, 'process'])
+                ->defaults('site', 'fushan')
+                ->name('process');
+
+            Route::post('/process/basic', [MortalityController::class, 'runBasicProcess'])
+                ->defaults('site', 'fushan')
+                ->name('process.basic');
+
+            Route::post('/process/tree-individuals', [MortalityController::class, 'runTreeIndividualsProcess'])
+                ->defaults('site', 'fushan')
+                ->name('process.tree-individuals');
+
+            Route::post('/process/people', [MortalityController::class, 'runPeopleProcess'])
+                ->defaults('site', 'fushan')
+                ->name('process.people');
+
+            Route::post('/process/comments', [MortalityController::class, 'runCommentProcess'])
+                ->defaults('site', 'fushan')
+                ->name('process.comments');
+
+            Route::post('/process/census-records', [MortalityController::class, 'runCensusRecordImport'])
+                ->defaults('site', 'fushan')
+                ->name('process.census-records');
+
+            Route::get('/process/comments/review', [MortalityController::class, 'commentReview'])
+                ->defaults('site', 'fushan')
+                ->name('process.comments.review');
+
+            Route::get('/process/comment-other/review', [MortalityController::class, 'commentOtherReview'])
+                ->defaults('site', 'fushan')
+                ->name('process.comment-other.review');
+
+            Route::post('/process/comments/options', [MortalityController::class, 'storeCommentOption'])
+                ->defaults('site', 'fushan')
+                ->name('process.comments.options.store');
+
+            Route::post('/process/comments/review', [MortalityController::class, 'saveCommentReviewPage'])
+                ->defaults('site', 'fushan')
+                ->name('process.comments.review.save');
+
+            Route::post('/process/comment-other/review', [MortalityController::class, 'saveCommentOtherReviewPage'])
+                ->defaults('site', 'fushan')
+                ->name('process.comment-other.review.save');
         });
 
         // ===== Tree pages =====

@@ -15,6 +15,7 @@ class CensusRecord extends Model
     protected $fillable = [
         'stemid',
         'census',
+        'map',
         'date',
         'dbh',
         'status',

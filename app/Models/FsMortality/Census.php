@@ -16,6 +16,7 @@ class Census extends Model
         'census',
         'survey_year',
         'has_dbh',
+        'dbh_census',
         'data_batch',
     ];
 

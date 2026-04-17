@@ -33,16 +33,20 @@
         <div class='list list1 listlink' type='doc'>相關文件<hr></div>
         <div class='list list4 listlink'>資料輸入<hr></div>
         <div class='list list2 listlink' type='dataviewer'>資料檢視<hr></div>
+        <div class='list list3 listlink' type='process'>資料處理<hr></div>
     </div>
 @endsection
 
 @section('headerListinner')
     <div class='listinner list4inner'>
-        <li class='innerlist list41 listlink' type='entry1'>第一次輸入</li>
-        <li class='innerlist list42 listlink' type='entry2'>第二次輸入</li>
-        <li class='innerlist list43 listlink' type='record'>調查紀錄</li>
-        <li class='innerlist list44 listlink' type='compare'>資料比對</li>
-        <li class='innerlist list45 listlink' type='import'>將資料匯入大表<hr></li>
+        <li class='innerlist list41 listlink' type='census'>調查年度</li>
+        <li class='innerlist list42 listlink' type='survey-import'>匯入調查資料</li>
+        <li class='innerlist list43 listlink' type='note'>輸入注意事項</li>
+        <li class='innerlist list44 listlink' type='entry1'>第一次輸入</li>
+        <li class='innerlist list45 listlink' type='entry2'>第二次輸入</li>
+        <li class='innerlist list46 listlink' type='record'>調查紀錄</li>
+        <li class='innerlist list47 listlink' type='compare'>資料比對</li>
+        <li class='innerlist list48 listlink' type='import'>將資料匯入大表<hr></li>
     </div>
 @endsection
 
