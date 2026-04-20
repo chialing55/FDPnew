@@ -1,5 +1,42 @@
 <div id="mortality-entry-root">
-    <div style="width:min(1500px, 98vw); margin:0 auto; text-align:left;">
+    <style>
+        .right {
+            margin: 0 16px;
+        }
+
+        #mortality-entry-root {
+            width: 100%;
+            margin: 0 auto;
+        }
+
+        #mortality-entry-root .mortality-entry-shell {
+            width: min(1500px, 98vw);
+            margin: 0 auto;
+            text-align: left;
+        }
+
+        #mortality-entry-hot-shell {
+            overflow-x: auto;
+        }
+
+        @media (max-width: 1500px) {
+            .right {
+                margin: 0;
+                padding-left: 10px;
+                padding-right: 10px;
+            }
+
+            #mortality-entry-root {
+                margin: 0 auto;
+            }
+
+            #mortality-entry-root .mortality-entry-shell {
+                margin: 0 auto;
+            }
+        }
+    </style>
+
+    <div class="mortality-entry-shell">
         <h2>{{ $surveyYear ?? '—' }} 年 第 {{ $currentCensus ?? '—' }} 次調查 - 第 {{ $entry }} 次資料輸入</h2>
 
         <div style="margin-top:10px;">
@@ -16,47 +53,55 @@
             <div style="display:flex; gap:12px; align-items:center; flex-wrap:wrap; margin-top:18px;">
                 <span style="font-weight:700;">選擇要輸入的 map</span>
                 <span style="font-weight:700;">
-                    <select id="mortality-entry-page" wire:model="selectedMapSort"
-                        wire:change="loadMapSort($event.target.value)"
+                    <select id="mortality-entry-page" wire:model.live="selectedMapKey"
+                        onchange="if (window.mortalitySelectFallback) { window.mortalitySelectFallback(this); }"
                         style="min-width:72px; height:32px; padding:4px 8px;">
                         <option value=""> </option>
                         @foreach ($mapOptions as $option)
-                            <option value="{{ $option['map_sort'] }}">{{ $option['map'] }}</option>
+                            <option value="{{ $option['key'] }}" @selected((string) $selectedMapKey === (string) $option['key'])>
+                                {{ $option['map'] }}
+                            </option>
                         @endforeach
                     </select>
                 </span>
 
-                @if (!empty($completionHint))
-                    <span style="font-weight:700; color:#374151;">{{ $completionHint }}</span>
-                @elseif ($selectedMapSort !== null)
+
+
+                @if ($selectedMapSort !== null && $selectedMap !== null)
                     <span style="display:inline-flex; gap:20px; min-width:140px; margin-left:12px; font-weight:700;">
                         <span style="display:inline-block; min-width:52px;">
-                            @if ($previousMapSort !== null)
-                                <a href="#" wire:click.prevent="loadMapSort({{ $previousMapSort }})"
+                            @if ($previousMapKey !== null)
+                                <a href="#" wire:click.prevent="loadMapSort('{{ $previousMapKey }}')"
                                     style="color:#374151; text-decoration:none;">上一個</a>
                             @endif
                         </span>
                         <span style="display:inline-block; min-width:52px;">
-                            @if ($nextMapSort !== null)
-                                <a href="#" wire:click.prevent="loadMapSort({{ $nextMapSort }})"
+                            @if ($nextMapKey !== null)
+                                <a href="#" wire:click.prevent="loadMapSort('{{ $nextMapKey }}')"
                                     style="color:#374151; text-decoration:none;">下一個</a>
                             @endif
                         </span>
                     </span>
-                @elseif ($suggestedMapSort !== null)
+                @endif
+
+            </div>
+            <div style='margin:10px 0'>
+                @if (!empty($completionHint))
+                    <span style="font-weight:700; color:#374151;">{{ $completionHint }}</span>
+                @elseif ($suggestedMapKey !== null)
                     <span style="color:#475569;">建議從目前第一個未完成的 map 開始。</span>
                 @endif
             </div>
         @else
             <div style="margin-top:14px; color:#475569;">
-                目前尚無可輸入資料，請先建立 `record_1` / `record_2`。
+                目前尚無可輸入資料，請先建立 `record1` / `record2`。
             </div>
         @endif
 
     </div>
 
-    @if ($selectedMapSort !== null)
-        <div class='text_box' style="width:min(1500px, 98vw); margin:20px auto 0; text-align:left;">
+    @if ($selectedMapSort !== null && $selectedMap !== null)
+        <div class='text_box mortality-entry-shell' style="margin:20px auto 0;">
             <form wire:submit.prevent="saveSurveyMeta"
                 style="display:flex; flex-direction:column; gap:12px; margin-bottom:14px; color:#334155; line-height:1.8;">
                 <div style="display:flex; align-items:center; gap:12px; flex-wrap:wrap;">
@@ -94,9 +139,11 @@
                             </button>
                         </span>
                     </div>
-                    <div><p style='font-size:14px; color:#64748b; margin:0;'>* 可選調查團隊或自行新增團隊 - 填入調查人員組合即會自動新增團隊。</p></div>
-                </div>
 
+                </div>
+                <div>
+                    <p style='font-size:14px; color:#64748b; margin:0;'>* 可選調查團隊或自行新增團隊 - 填入調查人員組合即會自動新增團隊。</p>
+                </div>
                 @error('surveyDate')
                     <div style="color:#b91c1c;">{{ $message }}</div>
                 @enderror
@@ -108,7 +155,7 @@
                 @endif
             </form>
         </div>
-        <div class='text_box' style="width:min(1500px, 98vw); margin:20px auto 0; text-align:left;">
+        <div class='text_box mortality-entry-shell' style="margin:20px auto 0;">
 
             <div style="margin-top:12px; color:#475569; line-height:1.8;">
                 {{-- <div>目前排序序號：{{ $selectedMapSort }}</div> --}}
@@ -165,8 +212,7 @@
     @endif
 
     @if ($commentsModalOpen)
-        <div
-            style="position:fixed; inset:0; background:rgba(15,23,42,.42); z-index:1200; padding:24px; overflow:auto;">
+        <div style="position:fixed; inset:0; background:rgba(15,23,42,.42); z-index:1200; padding:24px; overflow:auto;">
             <div
                 style="width:min(980px, 96vw); margin:0 auto; background:#fff; border-radius:10px; box-shadow:0 20px 60px rgba(15,23,42,.22); overflow:hidden;">
                 <div
@@ -182,7 +228,8 @@
                 </div>
 
                 <form wire:submit.prevent="saveCommentsEditor" style="padding:18px;">
-                    <div style="display:grid; grid-template-columns:minmax(320px, 1fr) minmax(260px, 360px); gap:18px; align-items:start;">
+                    <div
+                        style="display:grid; grid-template-columns:minmax(320px, 1fr) minmax(260px, 360px); gap:18px; align-items:start;">
                         <div>
                             <div style="font-size:12px; color:#64748b; margin-bottom:8px;">Comments</div>
                             <div style="display:flex; flex-direction:column; gap:8px;">
@@ -195,7 +242,8 @@
                                             <option value="">選擇 option</option>
                                             @foreach ($commentOptions as $optionIndex => $option)
                                                 @if (!empty($option['is_divider']))
-                                                    <option value="__divider_{{ $optionIndex }}" disabled>──────────</option>
+                                                    <option value="__divider_{{ $optionIndex }}" disabled>──────────
+                                                    </option>
                                                 @else
                                                     <option value="{{ $option['id'] }}"
                                                         data-full-label="{{ $option['label'] }}"
@@ -205,7 +253,8 @@
                                                 @endif
                                             @endforeach
                                         </select>
-                                        <input type="text" wire:model.defer="commentItems.{{ $itemIndex }}.text"
+                                        <input type="text"
+                                            wire:model.defer="commentItems.{{ $itemIndex }}.text"
                                             placeholder="note"
                                             style="width:100%; height:40px; padding:8px 10px; border:1px solid #b6c2bf; border-radius:4px; box-sizing:border-box;">
                                     </div>
@@ -224,7 +273,8 @@
                             @if ($showCommentOptionForm)
                                 <div
                                     style="margin-top:12px; padding:12px; border:1px solid rgba(0,0,0,.08); border-radius:8px; background:#f8fafc;">
-                                    <div style="display:grid; grid-template-columns:120px 1fr; gap:10px; align-items:center;">
+                                    <div
+                                        style="display:grid; grid-template-columns:120px 1fr; gap:10px; align-items:center;">
                                         <div>中文</div>
                                         <input type="text" wire:model.defer="newCommentOption.comment_zh"
                                             style="width:100%; height:36px; padding:6px 10px; border:1px solid #cbd5e1; border-radius:6px; box-sizing:border-box;">
@@ -284,7 +334,8 @@
                                                 <option value="{{ $fieldValue }}">{{ $fieldLabel }}</option>
                                             @endforeach
                                         </select>
-                                        <input type="text" wire:model.defer="stemCorrectionItems.{{ $itemIndex }}.text"
+                                        <input type="text"
+                                            wire:model.defer="stemCorrectionItems.{{ $itemIndex }}.text"
                                             placeholder="text"
                                             style="width:112px; height:40px; padding:8px 10px; border:1px solid #b6c2bf; border-radius:4px; box-sizing:border-box;">
                                     </div>
@@ -343,12 +394,12 @@
             }
 
             #mortality-entry-hot .mortality-error-cell {
-                background:#fee2e2 !important;
+                background: #fee2e2 !important;
             }
 
             #mortality-entry-hot .mortality-error-row-header {
-                background:#fecaca !important;
-                color:#991b1b !important;
+                background: #fecaca !important;
+                color: #991b1b !important;
             }
 
             .handsontableEditor.listbox .wtHolder {
@@ -379,6 +430,31 @@
                 let errorRecordIds = [];
                 const pageSize = 20;
                 const paginationThreshold = 25;
+                const findMortalityComponentId = (startElement = null) => {
+                    let node = startElement instanceof Element ? startElement : document.getElementById(
+                        'mortality-entry-root');
+
+                    while (node) {
+                        if (typeof node.getAttribute === 'function') {
+                            const wireId = node.getAttribute('wire:id');
+                            if (wireId) {
+                                return wireId;
+                            }
+                        }
+                        node = node.parentElement;
+                    }
+
+                    const root = document.getElementById('mortality-entry-root');
+                    if (root) {
+                        const nestedComponent = root.querySelector('[wire\\:id]');
+                        if (nestedComponent) {
+                            return nestedComponent.getAttribute('wire:id');
+                        }
+                    }
+
+                    const anyComponent = document.querySelector('[wire\\:id]');
+                    return anyComponent ? anyComponent.getAttribute('wire:id') : null;
+                };
                 const integerRangeValidator = (min, max) => function(value, callback) {
                     if (value === null || value === undefined || value === '') {
                         callback(true);
@@ -474,7 +550,7 @@
                         data: 'leaning',
                         type: 'numeric',
                         allowInvalid: false,
-                        validator: integerRangeValidator(15, 150)
+                        validator: integerRangeValidator(10, 150)
                     },
                     {
                         data: 'liana',
@@ -485,7 +561,7 @@
                     {
                         data: 'fungi',
                         type: 'dropdown',
-                        source: ['', '0', '1'],
+                        source: ['', '1'],
                         allowInvalid: false
                     },
                     {
@@ -515,7 +591,7 @@
                     {
                         data: 'leaf_damage',
                         type: 'dropdown',
-                        source: ['', '0', '1'],
+                        source: ['', '1'],
                         allowInvalid: false
                     },
                     {
@@ -565,9 +641,9 @@
                             return;
                         }
 
-                        option.textContent = option.selected
-                            ? (option.dataset.shortLabel || option.dataset.fullLabel)
-                            : option.dataset.fullLabel;
+                        option.textContent = option.selected ?
+                            (option.dataset.shortLabel || option.dataset.fullLabel) :
+                            option.dataset.fullLabel;
                     });
                 }
 
@@ -599,6 +675,10 @@
                     return ['A', 'OK'].includes(normalizeStatus(status));
                 }
 
+                function statusAllowsWoundedAndRotten(status) {
+                    return ['A', 'OK', 'D'].includes(normalizeStatus(status));
+                }
+
                 function statusAllowsMode(status) {
                     const normalized = normalizeStatus(status);
                     return normalized !== '' && !['OK', 'NF'].includes(normalized);
@@ -622,11 +702,14 @@
 
                     if (!statusAllowsDetails(status)) {
                         record.illumination = null;
-                        record.wounded_stem = null;
                         record.deformity = null;
-                        record.rotten = null;
                         record.leaves = null;
                         record.leaf_damage = null;
+                    }
+
+                    if (!statusAllowsWoundedAndRotten(status)) {
+                        record.wounded_stem = null;
+                        record.rotten = null;
                     }
 
                     const normalizedMode = normalizeMode(record.mode);
@@ -664,8 +747,7 @@
                 }
 
                 function openCommentsEditor(source) {
-                    const root = document.getElementById('mortality-entry-root');
-                    const componentId = root ? root.getAttribute('wire:id') : null;
+                    const componentId = findMortalityComponentId(container);
 
                     if (!componentId || !window.Livewire || typeof window.Livewire.find !== 'function') {
                         return;
@@ -895,7 +977,8 @@
                     });
 
                     window.Livewire.on('mortality-entry-save-result', (payload) => {
-                        errorRecordIds = (payload && payload.errorRecordIds ? payload.errorRecordIds : []).map((id) => Number(id));
+                        errorRecordIds = (payload && payload.errorRecordIds ? payload.errorRecordIds : []).map((
+                            id) => Number(id));
                         setTimeout(() => {
                             renderMortalityHot();
                         }, 0);
@@ -903,7 +986,8 @@
 
                     window.Livewire.on('mortality-entry-comment-saved', (payload) => {
                         const recordId = Number(payload && payload.recordId ? payload.recordId : 0);
-                        errorRecordIds = (payload && payload.errorRecordIds ? payload.errorRecordIds : []).map((id) => Number(id));
+                        errorRecordIds = (payload && payload.errorRecordIds ? payload.errorRecordIds : []).map((
+                            id) => Number(id));
 
                         if (recordId > 0) {
                             currentRecords = currentRecords.map((record) => {
@@ -923,6 +1007,7 @@
                             renderMortalityHot();
                         }, 0);
                     });
+
                 }
 
                 bindLivewireListener();
@@ -940,14 +1025,23 @@
                 };
 
                 window.mortalitySavePage = function() {
-                    const root = document.getElementById('mortality-entry-root');
-                    const componentId = root ? root.getAttribute('wire:id') : null;
+                    const componentId = findMortalityComponentId(document.getElementById('mortality-entry-hot-shell'));
 
                     if (!componentId || !window.Livewire || typeof window.Livewire.find !== 'function') {
                         return;
                     }
 
                     window.Livewire.find(componentId).call('saveEntryRecords', currentRecords);
+                };
+
+                window.mortalitySelectFallback = function(selectEl) {
+                    const componentId = findMortalityComponentId(selectEl);
+
+                    if (!selectEl || !componentId || !window.Livewire || typeof window.Livewire.find !== 'function') {
+                        return;
+                    }
+
+                    window.Livewire.find(componentId).call('loadMapSort', selectEl.value);
                 };
 
                 document.addEventListener('DOMContentLoaded', () => {

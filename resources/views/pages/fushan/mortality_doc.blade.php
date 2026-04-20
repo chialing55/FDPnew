@@ -18,7 +18,6 @@
                 <li><a href="{{ route('admin.fushan.mortality.note') }}">輸入注意事項</a></li>
                 <li><a href="{{ route('admin.fushan.mortality.entry.1') }}">第一次輸入</a></li>
                 <li><a href="{{ route('admin.fushan.mortality.entry.2') }}">第二次輸入</a></li>
-                <li><a href="{{ route('admin.fushan.mortality.record') }}">調查紀錄</a></li>
             </ol>
         </div>
 
@@ -34,11 +33,11 @@
                 <li>如需進一步整理資料，可到<a href="{{ route('admin.fushan.mortality.process') }}">資料處理</a>頁面。</li>
             </ol>
         </div>
-
+{{-- 
         <div class='text_box'>
             <h2>後續待補</h2>
             <hr>
             <p>這一套頁面目前先完成骨架。接下來可以依死亡率調查的實際欄位與流程，把表格、驗證、匯入與查詢邏輯逐步補上。</p>
-        </div>
+        </div> --}}
     </div>
 @endsection

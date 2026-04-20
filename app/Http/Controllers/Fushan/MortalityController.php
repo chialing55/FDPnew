@@ -28,6 +28,11 @@ use League\Csv\Reader;
 
 class MortalityController extends Controller
 {
+    private function ensureProcessAdmin(Request $request): void
+    {
+        abort_unless($request->user()?->is_admin, 403);
+    }
+
     public function mortality(Request $request)
     {
         $user = $request->user();
@@ -328,7 +333,7 @@ class MortalityController extends Controller
         if ($entryContext['recordTablesMatchTargetCensus']) {
             return redirect()
                 ->route('admin.fushan.mortality.entry.1')
-                ->with('status', "record_1 與 record_2 已是 census {$targetCensus} 的資料，可以直接開始輸入。");
+                ->with('status', "record1 與 record2 已是 census {$targetCensus} 的資料，可以直接開始輸入。");
         }
 
         $connection = DB::connection('fs_mortality');
@@ -357,7 +362,7 @@ class MortalityController extends Controller
             ->all();
         $insertColumns = array_values(array_unique(array_merge(['census'], $sourceColumns)));
 
-        $recordTables = ['record_1', 'record_2'];
+        $recordTables = ['record1', 'record2'];
 
         // CREATE TABLE causes an implicit commit in MySQL, so do DDL before the transaction.
         foreach ($recordTables as $recordTable) {
@@ -379,7 +384,7 @@ class MortalityController extends Controller
 
         $year = $entryContext['nextCensus']->survey_year ?? '—';
         $census = $entryContext['nextCensus']->census ?? '—';
-        $status = "已先同步 tree_individuals（新增 {$treeIndividualSyncSummary['created_count']}、更新 {$treeIndividualSyncSummary['updated_count']}、停用 {$treeIndividualSyncSummary['deactivated_count']}），再更新 census {$census}（{$year} 年）的輸入表單資料：record_1 / record_2。";
+        $status = "已先同步 tree_individuals（新增 {$treeIndividualSyncSummary['created_count']}、更新 {$treeIndividualSyncSummary['updated_count']}、停用 {$treeIndividualSyncSummary['deactivated_count']}），再更新 census {$census}（{$year} 年）的輸入表單資料：record1 / record2。";
 
         return redirect()
             ->route('admin.fushan.mortality.entry.1')
@@ -446,20 +451,20 @@ class MortalityController extends Controller
     {
         $surveyImportContext = $this->getSurveyImportContext();
         $targetCensus = $surveyImportContext['nextCensus']?->census;
-        $record1Exists = Schema::connection('fs_mortality')->hasTable('record_1');
-        $record2Exists = Schema::connection('fs_mortality')->hasTable('record_2');
+        $record1Exists = Schema::connection('fs_mortality')->hasTable('record1');
+        $record2Exists = Schema::connection('fs_mortality')->hasTable('record2');
         $record1HasData = $record1Exists
-            ? DB::connection('fs_mortality')->table('record_1')->exists()
+            ? DB::connection('fs_mortality')->table('record1')->exists()
             : false;
         $record2HasData = $record2Exists
-            ? DB::connection('fs_mortality')->table('record_2')->exists()
+            ? DB::connection('fs_mortality')->table('record2')->exists()
             : false;
         $recordTablesReady = $record1HasData && $record2HasData;
         $record1CensusValues = $record1HasData
-            ? DB::connection('fs_mortality')->table('record_1')->select('census')->distinct()->orderBy('census')->pluck('census')->map(fn($value) => (int) $value)->all()
+            ? DB::connection('fs_mortality')->table('record1')->select('census')->distinct()->orderBy('census')->pluck('census')->map(fn($value) => (int) $value)->all()
             : [];
         $record2CensusValues = $record2HasData
-            ? DB::connection('fs_mortality')->table('record_2')->select('census')->distinct()->orderBy('census')->pluck('census')->map(fn($value) => (int) $value)->all()
+            ? DB::connection('fs_mortality')->table('record2')->select('census')->distinct()->orderBy('census')->pluck('census')->map(fn($value) => (int) $value)->all()
             : [];
         $record1MatchesTargetCensus = $record1HasData
             && $targetCensus !== null
@@ -687,18 +692,6 @@ class MortalityController extends Controller
         return $content;
     }
 
-    public function record(Request $request)
-    {
-        $user = $request->user();
-        $site = $request->route('site');
-
-        return view('pages/fushan/mortality_record', [
-            'site' => $site,
-            'project' => '死亡率調查',
-            'user' => $user->name,
-        ]);
-    }
-
     public function compare(Request $request)
     {
         $user = $request->user();
@@ -737,6 +730,8 @@ class MortalityController extends Controller
 
     public function process(Request $request)
     {
+        $this->ensureProcessAdmin($request);
+
         $user = $request->user();
         $site = $request->route('site');
         $basicProcessed = DB::connection('fs_mortality')
@@ -815,6 +810,8 @@ class MortalityController extends Controller
 
     public function runBasicProcess(Request $request)
     {
+        $this->ensureProcessAdmin($request);
+
         $alreadyProcessed = DB::connection('fs_mortality')
             ->table('import_stage')
             ->whereNotNull('qx')
@@ -909,6 +906,8 @@ class MortalityController extends Controller
 
     public function runPeopleProcess(Request $request)
     {
+        $this->ensureProcessAdmin($request);
+
         $validated = $request->validate([
             'census' => ['required', 'integer', 'min:1'],
         ], [
@@ -1053,6 +1052,8 @@ class MortalityController extends Controller
 
     public function runTreeIndividualsProcess(Request $request)
     {
+        $this->ensureProcessAdmin($request);
+
         $basicProcessed = DB::connection('fs_mortality')
             ->table('import_stage')
             ->whereNotNull('qx')
@@ -1199,6 +1200,8 @@ class MortalityController extends Controller
 
     public function runCommentProcess(Request $request)
     {
+        $this->ensureProcessAdmin($request);
+
         $redirectRoute = $request->input('return_to') === 'review'
             ? 'admin.fushan.mortality.process.comments.review'
             : 'admin.fushan.mortality.process';
@@ -1283,6 +1286,8 @@ class MortalityController extends Controller
 
     public function runCensusRecordImport(Request $request)
     {
+        $this->ensureProcessAdmin($request);
+
         $validated = $request->validate([
             'census' => ['required', 'integer', 'min:1'],
         ], [
@@ -1556,6 +1561,8 @@ class MortalityController extends Controller
 
     public function commentReview(Request $request)
     {
+        $this->ensureProcessAdmin($request);
+
         $user = $request->user();
         $site = $request->route('site');
 
@@ -1615,6 +1622,8 @@ class MortalityController extends Controller
 
     public function storeCommentOption(Request $request)
     {
+        $this->ensureProcessAdmin($request);
+
         $validated = $request->validate([
             'code' => ['nullable', 'string', 'max:50', 'alpha_dash', 'unique:fs_mortality.comment_options,code'],
             'comment_en' => ['required', 'string', 'max:255'],
@@ -1659,6 +1668,8 @@ class MortalityController extends Controller
 
     public function saveCommentReviewPage(Request $request)
     {
+        $this->ensureProcessAdmin($request);
+
         $records = $request->input('records', []);
         $savedCount = 0;
 
@@ -1695,6 +1706,8 @@ class MortalityController extends Controller
 
     public function commentOtherReview(Request $request)
     {
+        $this->ensureProcessAdmin($request);
+
         $user = $request->user();
         $site = $request->route('site');
 
@@ -1739,6 +1752,8 @@ class MortalityController extends Controller
 
     public function saveCommentOtherReviewPage(Request $request)
     {
+        $this->ensureProcessAdmin($request);
+
         $records = $request->input('records', []);
         $savedCount = 0;
 

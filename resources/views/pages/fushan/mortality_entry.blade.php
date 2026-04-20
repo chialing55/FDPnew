@@ -30,8 +30,8 @@
             <div style="line-height:1.8;">
                 <div>本次預計輸入：census {{ $nextCensus?->census ?? '—' }}，{{ $nextCensus?->survey_year ?? '—' }} 年資料</div>
                 <div>來源資料表：{{ $targetTable ?? '—' }}</div>
-                {{-- <div>`record_1` 目前 census：{{ empty($record1CensusValues) ? '無資料' : implode(', ', $record1CensusValues) }}</div>
-                <div>`record_2` 目前 census：{{ empty($record2CensusValues) ? '無資料' : implode(', ', $record2CensusValues) }}</div> --}}
+                {{-- <div>`record1` 目前 census：{{ empty($record1CensusValues) ? '無資料' : implode(', ', $record1CensusValues) }}</div>
+                <div>`record2` 目前 census：{{ empty($record2CensusValues) ? '無資料' : implode(', ', $record2CensusValues) }}</div> --}}
             </div>
 
             <div style="margin-top:14px; color:{{ $recordTablesNeedRefresh ? '#9a3412' : '#475569' }};">

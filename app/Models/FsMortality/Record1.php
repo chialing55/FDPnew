@@ -9,7 +9,7 @@ class Record1 extends Model
 {
     use HasFactory;
 
-    protected $table = 'record_1';
+    protected $table = 'record1';
     protected $connection = 'fs_mortality';
 
     protected $fillable = [
@@ -53,8 +53,8 @@ class Record1 extends Model
         'dbh1' => 'decimal:2',
         'dbh2' => 'decimal:2',
         'living_length' => 'decimal:2',
-        'fungi' => 'boolean',
-        'leaf_damage' => 'boolean',
+        'fungi' => 'integer',
+        'leaf_damage' => 'integer',
         'comments_json' => 'array',
         'stem_corrections_json' => 'array',
     ];

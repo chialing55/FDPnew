@@ -20,9 +20,13 @@ class MortalityShowentry extends Component
     public $entry;
     public $user;
     public $site;
+    public $selectedMapKey;
     public $selectedMapSort;
+    public $selectedMap;
     public $mapOptions = [];
     public $records = [];
+    public $suggestedMapKey;
+    public $firstPendingMapKey;
     public $suggestedMapSort;
     public $firstPendingMapSort;
     public $entryCompleted = false;
@@ -33,6 +37,8 @@ class MortalityShowentry extends Component
     public $surveyYear;
     public $inputDate;
     public $completionHint;
+    public $previousMapKey;
+    public $nextMapKey;
     public $previousMapSort;
     public $nextMapSort;
     public $surveyDate;
@@ -78,7 +84,9 @@ class MortalityShowentry extends Component
         $this->site = $site;
         $this->inputDate = now()->toDateString();
         $this->surveyDate = now()->toDateString();
+        $this->selectedMapKey = null;
         $this->selectedMapSort = null;
+        $this->selectedMap = null;
         $this->surveyPersonnel = array_fill(0, self::DEFAULT_PERSONNEL_SLOTS, '');
 
         $this->refreshEntryState();
@@ -86,13 +94,23 @@ class MortalityShowentry extends Component
 
     public function loadMapSort($value): void
     {
-        $this->selectedMapSort = $value !== null && $value !== '' ? (int) $value : null;
+        [$mapSort, $map] = $this->parseMapSelectionValue($value);
+        $this->selectedMapKey = $mapSort !== null && $map !== null
+            ? $this->buildMapOptionKey($mapSort, $map)
+            : null;
+        $this->selectedMapSort = $mapSort;
+        $this->selectedMap = $map;
         $this->entrySaveMessage = null;
         $this->entrySaveErrors = [];
         $this->entrySaveErrorRecordIds = [];
         $this->mainStatusMessage = null;
         $this->refreshEntryState();
         $this->dispatchEntryGridEvent();
+    }
+
+    public function updatedSelectedMapKey($value): void
+    {
+        $this->loadMapSort($value);
     }
 
     public function updatedSelectedTeamId($value): void
@@ -310,7 +328,7 @@ class MortalityShowentry extends Component
 
     public function saveSurveyMeta(): void
     {
-        if ($this->selectedMapSort === null) {
+        if ($this->selectedMapSort === null || $this->selectedMap === null) {
             return;
         }
 
@@ -355,8 +373,7 @@ class MortalityShowentry extends Component
             return $this->resolveTeamId($personNames);
         });
 
-        $modelClass::query()
-            ->where('map_sort', $this->selectedMapSort)
+        $this->scopeSelectedMap($modelClass::query())
             ->update([
                 'date' => $this->surveyDate,
                 'team_id' => $teamId,
@@ -372,7 +389,7 @@ class MortalityShowentry extends Component
 
     public function saveEntryRecords(array $records): void
     {
-        if ($this->selectedMapSort === null) {
+        if ($this->selectedMapSort === null || $this->selectedMap === null) {
             return;
         }
 
@@ -396,7 +413,7 @@ class MortalityShowentry extends Component
             return;
         }
 
-        $this->entrySaveMessage = '目前沒有可儲存的資料，請先修正錯誤。';
+        $this->entrySaveMessage = '目前沒有可儲存的資料。';
         $this->dispatch('mortality-entry-save-result', errorRecordIds: $this->entrySaveErrorRecordIds);
     }
 
@@ -411,10 +428,12 @@ class MortalityShowentry extends Component
             ->where('map', '!=', '')
             ->distinct()
             ->orderBy('map_sort')
+            ->orderBy('map')
             ->get()
             ->map(fn ($row) => [
+                'key' => $this->buildMapOptionKey((int) $row->map_sort, (string) $row->map),
                 'map_sort' => (int) $row->map_sort,
-                'map' => (string) $row->map,
+                'map' => trim((string) $row->map),
             ])
             ->all();
 
@@ -465,39 +484,56 @@ class MortalityShowentry extends Component
                 ->all()
             : [];
 
-        $this->firstPendingMapSort = (clone $baseQuery)
+        $firstPendingRow = (clone $baseQuery)
+            ->select('map_sort', 'map')
             ->where(function ($query) {
                 $query->whereNull('status')
                     ->orWhere('status', '');
             })
             ->orderBy('map_sort')
+            ->orderBy('map')
             ->orderBy('id')
-            ->value('map_sort');
-        $mapSortOptions = array_map(fn ($row) => (int) $row['map_sort'], $this->mapOptions);
-        $this->suggestedMapSort = $this->firstPendingMapSort !== null
-            ? (int) $this->firstPendingMapSort
-            : ($mapSortOptions[0] ?? null);
+            ->first();
+        $this->firstPendingMapKey = $firstPendingRow
+            ? $this->buildMapOptionKey((int) $firstPendingRow->map_sort, (string) $firstPendingRow->map)
+            : null;
+        $this->firstPendingMapSort = $firstPendingRow ? (int) $firstPendingRow->map_sort : null;
+        $mapOptionKeys = array_map(fn ($row) => (string) $row['key'], $this->mapOptions);
+        $this->suggestedMapKey = $this->firstPendingMapKey ?? ($mapOptionKeys[0] ?? null);
+        $this->suggestedMapSort = $this->firstPendingMapSort ?? (!empty($this->mapOptions) ? (int) $this->mapOptions[0]['map_sort'] : null);
 
         $this->entryCompleted = !$this->hasPendingStatus(clone $baseQuery);
 
-        if ($this->selectedMapSort !== null && !in_array((int) $this->selectedMapSort, $mapSortOptions, true)) {
+        $selectedMapKey = $this->buildCurrentSelectedMapKey();
+
+        if ($selectedMapKey !== null && !in_array($selectedMapKey, $mapOptionKeys, true)) {
+            $this->selectedMapKey = null;
             $this->selectedMapSort = null;
+            $this->selectedMap = null;
         }
 
+        if ($selectedMapKey !== null && in_array($selectedMapKey, $mapOptionKeys, true)) {
+            $this->selectedMapKey = $selectedMapKey;
+        }
+
+        $this->previousMapKey = null;
+        $this->nextMapKey = null;
         $this->previousMapSort = null;
         $this->nextMapSort = null;
 
-        if ($this->selectedMapSort !== null) {
-            $currentIndex = array_search((int) $this->selectedMapSort, $mapSortOptions, true);
+        if ($selectedMapKey !== null) {
+            $currentIndex = array_search($selectedMapKey, $mapOptionKeys, true);
 
             if ($currentIndex !== false) {
-                $this->previousMapSort = $currentIndex > 0 ? $mapSortOptions[$currentIndex - 1] : null;
-                $this->nextMapSort = $currentIndex < count($mapSortOptions) - 1 ? $mapSortOptions[$currentIndex + 1] : null;
+                $this->previousMapKey = $currentIndex > 0 ? $mapOptionKeys[$currentIndex - 1] : null;
+                $this->nextMapKey = $currentIndex < count($mapOptionKeys) - 1 ? $mapOptionKeys[$currentIndex + 1] : null;
+                $this->previousMapSort = $currentIndex > 0 ? (int) $this->mapOptions[$currentIndex - 1]['map_sort'] : null;
+                $this->nextMapSort = $currentIndex < count($mapOptionKeys) - 1 ? (int) $this->mapOptions[$currentIndex + 1]['map_sort'] : null;
             }
         }
 
-        $pageQuery = $this->selectedMapSort !== null
-            ? (clone $baseQuery)->where('map_sort', $this->selectedMapSort)->orderBy('id')
+        $pageQuery = $this->selectedMapSort !== null && $this->selectedMap !== null
+            ? $this->scopeSelectedMap(clone $baseQuery)->orderBy('id')
             : null;
 
         $this->records = $pageQuery
@@ -528,7 +564,15 @@ class MortalityShowentry extends Component
                 'stem_corrections_json',
                 'date',
                 'team_id',
-            ])->toArray()
+            ])->map(function ($record) {
+                $record->fungi = $record->fungi !== null ? (int) $record->fungi : null;
+                $record->wounded_stem = $record->wounded_stem !== null ? (int) $record->wounded_stem : null;
+                $record->deformity = $record->deformity !== null ? (int) $record->deformity : null;
+                $record->rotten = $record->rotten !== null ? (int) $record->rotten : null;
+                $record->leaf_damage = $record->leaf_damage !== null ? (int) $record->leaf_damage : null;
+
+                return $record->toArray();
+            })->all()
             : [];
 
         $firstRecord = $this->records[0] ?? null;
@@ -610,10 +654,45 @@ class MortalityShowentry extends Component
         $this->dispatch(
             'mortality-entry-data',
             records: $this->records,
-            enabled: $this->selectedMapSort !== null && !empty($this->records),
+            enabled: $this->selectedMapSort !== null && $this->selectedMap !== null && !empty($this->records),
             mapSort: $this->selectedMapSort,
+            map: $this->selectedMap,
             entry: $this->entry
         );
+    }
+
+    private function parseMapSelectionValue($value): array
+    {
+        if ($value === null || $value === '') {
+            return [null, null];
+        }
+
+        $parts = explode('|', (string) $value, 2);
+        $mapSort = isset($parts[0]) && $parts[0] !== '' ? (int) $parts[0] : null;
+        $map = isset($parts[1]) && $parts[1] !== '' ? $parts[1] : null;
+
+        return [$mapSort, $map];
+    }
+
+    private function buildMapOptionKey(int $mapSort, string $map): string
+    {
+        return $mapSort . '|' . trim($map);
+    }
+
+    private function buildCurrentSelectedMapKey(): ?string
+    {
+        if ($this->selectedMapSort === null || $this->selectedMap === null || $this->selectedMap === '') {
+            return null;
+        }
+
+        return $this->buildMapOptionKey((int) $this->selectedMapSort, (string) $this->selectedMap);
+    }
+
+    private function scopeSelectedMap($query)
+    {
+        return $query
+            ->where('map_sort', $this->selectedMapSort)
+            ->where('map', $this->selectedMap);
     }
 
     private function ensureMinimumPersonnelSlots(): void
@@ -711,6 +790,7 @@ class MortalityShowentry extends Component
         $existingRecords = $modelClass::query()
             ->whereIn('id', $recordIds)
             ->where('map_sort', $this->selectedMapSort)
+            ->where('map', $this->selectedMap)
             ->get()
             ->keyBy('id');
 
@@ -739,7 +819,7 @@ class MortalityShowentry extends Component
 
             if (!empty($validated['errors'])) {
                 $label = trim((string) ($record->stemid ?: $record->id));
-                $errors[] = '第 ' . ($index + 1) . ' 筆（' . $label . '）：' . implode('；', $validated['errors']);
+                $errors[] = '第 ' . ($index + 1) . ' 筆（' . $label . '）：' . implode(' | ', $validated['errors']);
                 $errorRecordIds[] = $recordId;
                 continue;
             }
@@ -917,6 +997,12 @@ class MortalityShowentry extends Component
             ?? (is_array($payload['comments_json'] ?? null)
                 ? $payload['comments_json']
                 : (is_array($record->comments_json) ? $record->comments_json : []));
+        $hasDbhShrinkComment = collect((array) $commentsJson)
+            ->contains(function ($item) {
+                $commentId = (int) ($item['comment_id'] ?? 0);
+
+                return in_array($commentId, [21, 2], true);
+            });
 
         $dbh1 = $record->dbh1 !== null ? (float) $record->dbh1 : null;
         $dbh2Raw = $this->blankToNull($payload['dbh2'] ?? null);
@@ -934,23 +1020,36 @@ class MortalityShowentry extends Component
         $leavesRaw = $this->blankToNull($payload['leaves'] ?? null);
         $leafDamageRaw = $this->blankToNull($payload['leaf_damage'] ?? null);
 
-        if ($dbh2Raw === null || !is_numeric($dbh2Raw)) {
-            $errors[] = 'DBH(new) 必須為數字。';
-            $dbh2 = null;
-        } else {
-            $dbh2 = round((float) $dbh2Raw, 2);
-
-            if ($dbh1 !== null && $dbh2 <= $dbh1 && empty($commentsJson)) {
-                $errors[] = 'DBH(new) 需大於 DBH(old)，若未大於需先填寫備註。';
-            }
-        }
-
         $allowedStatuses = ['OK', 'A', 'D', 'X', 'NF'];
         if ($status === '' || !in_array($status, $allowedStatuses, true)) {
             $errors[] = 'status 必須填入 OK、A、D、X 或 NF。';
         }
 
         $statusAllowsDetails = in_array($status, ['A', 'OK'], true);
+        $statusAllowsWoundedAndRotten = in_array($status, ['A', 'OK', 'D'], true);
+
+        if ($dbh2Raw !== null) {
+            if (!is_numeric($dbh2Raw)) {
+                $errors[] = 'DBH(new) 必須為數字。';
+                $dbh2 = null;
+            } else {
+                $dbh2 = round((float) $dbh2Raw, 2);
+
+                if ($dbh1 !== null && $dbh2 < $dbh1 && !$hasDbhShrinkComment) {
+                    $errors[] = 'DBH(new) 需大於等於 DBH(old)，若小於請填寫備註: 確認縮水 或 DBH shrink。';
+                }
+            }
+        } else {
+            $dbh2 = null;
+        }
+
+        if (!$statusAllowsDetails && $dbh2 !== null) {
+            $errors[] = '只有 status 為 A 或 OK 時才可填寫 DBH(new)。';
+        }
+
+        if ($status === 'OK' && $dbh2 === null) {
+            $errors[] = 'status 為 OK 時必須填寫 DBH(new)。';
+        }
 
         if (in_array($status, ['OK', 'NF'], true) && $modeRaw !== '') {
             $errors[] = 'status 為 OK 或 NF 時不可填寫 mode。';
@@ -977,13 +1076,19 @@ class MortalityShowentry extends Component
             $livingLength = null;
         }
 
-        if (str_contains($modeRaw, 'B') && $livingLength === null) {
-            $errors[] = 'mode 包含 B 時必須填寫 Living length。';
+        if ($status === 'A' && str_contains($modeRaw, 'B') && $livingLength === null) {
+            $errors[] = 'status 為 A 且 mode 包含 B 時必須填寫 Living length。若缺乏調查資料請填 -1。';
         }
 
+        $dbhDependencyExemptForShortLivingLength = $status === 'A'
+            && $livingLength !== null
+            && $livingLength < 1.3;
+
+        $branchesInvalid = false;
         if ($branchesRaw !== null) {
-            if (!ctype_digit((string) $branchesRaw) || (int) $branchesRaw < 1 || (int) $branchesRaw > 100) {
-                $errors[] = 'branches 必須為 1 到 100 的整數。';
+            if (!ctype_digit((string) $branchesRaw) || (int) $branchesRaw < 0 || (int) $branchesRaw > 100) {
+                $errors[] = 'branches 必須為 0 到 100 的整數。';
+                $branchesInvalid = true;
                 $branches = null;
             } else {
                 $branches = (int) $branchesRaw;
@@ -992,8 +1097,25 @@ class MortalityShowentry extends Component
             $branches = null;
         }
 
-        if ($status === 'A' && $branches === null) {
-            $errors[] = 'status 為 A 時必須填寫 branches。';
+        if (!$branchesInvalid && $status === 'A' && $dbh2 !== null) {
+            if ($branches === null || $branches < 1 || $branches > 100) {
+                $errors[] = 'status 為 A 且有 DBH(new) 時，branches 必須為 1 到 100。';
+            }
+        }
+
+        if (!$branchesInvalid && $status === 'A' && $dbh2 !== null && $branches === null) {
+            $errors[] = 'status 為 A 且有 DBH(new) 時必須填寫 branches。';
+        }
+
+        if (
+            !$branchesInvalid
+            && $status === 'A'
+            && $dbh2 === null
+            && !$dbhDependencyExemptForShortLivingLength
+            && $branches !== null
+            && $branches !== 0
+        ) {
+            $errors[] = 'status 為 A 且有填寫 branches 時必須填寫 DBH(new)。';
         }
 
         if ($status !== 'A' && $branches !== null) {
@@ -1001,8 +1123,8 @@ class MortalityShowentry extends Component
         }
 
         if ($illuminationRaw !== null) {
-            if (!ctype_digit((string) $illuminationRaw) || (int) $illuminationRaw < 1 || (int) $illuminationRaw > 5) {
-                $errors[] = 'illumination 必須為 1 到 5。';
+            if (!ctype_digit((string) $illuminationRaw) || (int) $illuminationRaw < 0 || (int) $illuminationRaw > 5) {
+                $errors[] = 'illumination 必須為 0 到 5。';
                 $illumination = null;
             } else {
                 $illumination = (int) $illuminationRaw;
@@ -1011,8 +1133,24 @@ class MortalityShowentry extends Component
             $illumination = null;
         }
 
-        if (in_array($status, ['A', 'OK'], true) && $illumination === null) {
-            $errors[] = 'status 為 A 或 OK 時必須填寫 illumination。';
+        if ($status === 'A' && $dbh2 !== null) {
+            if ($illumination === null || $illumination < 1 || $illumination > 5) {
+                $errors[] = 'status 為 A 且有 DBH(new) 時，illumination 必須為 1 到 5。';
+            }
+        }
+
+        if ($status === 'A' && $dbh2 === null && $branches === 0 && $illumination !== null && $illumination !== 0) {
+            $errors[] = 'status 為 A 且未填 DBH(new)、branches 為 0 時，illumination 需為 0。';
+        }
+
+        if (
+            $status === 'A'
+            && $dbh2 === null
+            && !$dbhDependencyExemptForShortLivingLength
+            && $illumination !== null
+            && $illumination !== 0
+        ) {
+            $errors[] = 'status 為 A 且有填寫 illumination 時必須填寫 DBH(new)。';
         }
 
         if (!in_array($status, ['A', 'OK'], true) && $illumination !== null) {
@@ -1020,8 +1158,8 @@ class MortalityShowentry extends Component
         }
 
         if ($leaningRaw !== null) {
-            if (!is_numeric($leaningRaw) || (float) $leaningRaw < 15 || (float) $leaningRaw > 150) {
-                $errors[] = 'leaning 必須為 15 到 150。';
+            if (!is_numeric($leaningRaw) || (float) $leaningRaw < 10 || (float) $leaningRaw > 150) {
+                $errors[] = 'leaning 必須為 10 到 150。';
                 $leaning = null;
             } else {
                 $leaning = (int) round((float) $leaningRaw);
@@ -1039,11 +1177,11 @@ class MortalityShowentry extends Component
             $errors[] = 'liana 只能填 L、S 或 LS。';
         }
 
-        $fungi = $this->validateOptionalDiscrete($fungiRaw, ['0', '1'], 'fungi', $errors);
+        $fungi = $this->validateOptionalDiscrete($fungiRaw, ['1'], 'fungi', $errors);
         $woundedStem = $this->validateOptionalDiscrete($woundedStemRaw, ['1', '2', '3'], 'wounded_stem', $errors);
         $deformity = $this->validateOptionalDiscrete($deformityRaw, ['1', '2', '3'], 'deformity', $errors);
         $rotten = $this->validateOptionalDiscrete($rottenRaw, ['1', '2', '3'], 'rotten', $errors);
-        $leafDamage = $this->validateOptionalDiscrete($leafDamageRaw, ['0', '1'], 'leaf_damage', $errors);
+        $leafDamage = $this->validateOptionalDiscrete($leafDamageRaw, ['1'], 'leaf_damage', $errors);
 
         if ($leavesRaw !== null) {
             if (!ctype_digit((string) $leavesRaw) || (int) $leavesRaw < 0 || (int) $leavesRaw > 100) {
@@ -1056,10 +1194,12 @@ class MortalityShowentry extends Component
             $leaves = null;
         }
 
-        if (!$statusAllowsDetails) {
-            if ($woundedStem !== null || $deformity !== null || $rotten !== null || $leaves !== null || $leafDamage !== null) {
-                $errors[] = '只有 status 為 A 或 OK 時才可填寫 wounded_stem、deformity、rotten、leaves、leaf_damage。';
-            }
+        if (!$statusAllowsWoundedAndRotten && ($woundedStem !== null || $rotten !== null)) {
+            $errors[] = '只有 status 為 A、OK 或 D 時才可填寫 wounded_stem、rotten。';
+        }
+
+        if (!$statusAllowsDetails && ($deformity !== null || $leaves !== null || $leafDamage !== null)) {
+            $errors[] = '只有 status 為 A 或 OK 時才可填寫 deformity、leaves、leaf_damage。';
         }
 
         return [

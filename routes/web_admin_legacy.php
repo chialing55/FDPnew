@@ -209,10 +209,6 @@ Route::middleware(['auth'])->prefix('admin')->name('admin.')->group(function () 
                 ->defaults('site', 'fushan')
                 ->name('survey-import.upload');
 
-            Route::get('/record', [MortalityController::class, 'record'])
-                ->defaults('site', 'fushan')
-                ->name('record');
-
             Route::get('/compare', [MortalityController::class, 'compare'])
                 ->defaults('site', 'fushan')
                 ->name('compare');
