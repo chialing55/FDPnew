@@ -2,8 +2,6 @@
 
 namespace App\Http\Livewire\Fushan;
 
-use Illuminate\Http\Request;
-use Illuminate\Support\Facades\App;
 use Livewire\Component;
 use Livewire\WithPagination;
 use Illuminate\Support\Facades\DB;
@@ -47,6 +45,9 @@ class SeedlingShowentry extends Component
     public $seedlingsavenote = '';
 
     public $recordDate;
+    public $trapOptions = [];
+    public $previousTrap = null;
+    public $nextTrap = null;
 
     use WithPagination;
 
@@ -61,20 +62,21 @@ class SeedlingShowentry extends Component
         $firsttrap = '';
         // $sustrap='';
 
-        if ($this->entry == '1') {
-            $table = new FsSeedlingSlrecord1;
-            $tablecov = new FsSeedlingSlcov1;
-            $tableroll = new FsSeedlingSlroll1;
-            $entryother = '2';
-        } else {
-            $table = new FsSeedlingSlrecord2;
-            $tablecov = new FsSeedlingSlcov2;
-            $tableroll = new FsSeedlingSlroll2;
-            $entryother = '1';
-        }
+        [$table, $tablecov] = $this->resolveEntryTables();
+        $entryother = $this->entry == '1' ? '2' : '1';
+        $this->trapOptions = $this->loadTrapOptions();
 
 
         $census = FsSeedlingSlrecord1::first();
+        if (!$census) {
+            $this->entrynote = '目前尚未建立小苗輸入表單資料。';
+            $this->record = null;
+            $this->covs = [];
+            $this->roll = [];
+
+            return;
+        }
+
         $maxid = FsSeedlingSlrecord::count();
         $this->census = $census['census'];
         $this->year = $census['year'];
@@ -107,6 +109,8 @@ class SeedlingShowentry extends Component
             // $this->selectTrap='1';
         }
 
+        $this->refreshTrapNavigation();
+
         // dd($this->selectTrap);
     }
 
@@ -117,26 +121,16 @@ class SeedlingShowentry extends Component
     public $covs;
 
     //選擇輸入樣區
-    public function searchtrap(Request $request, $selectTrap)
+    public function searchtrap($selectTrap)
     {
         // $selectTrap=$selectTrap3;
         // dd($selectTrap3);
 
-        if ($this->entry == '1') {
-            $table = new FsSeedlingSlrecord1;
-            $tablecov = new FsSeedlingSlcov1;
-            $tableroll = new FsSeedlingSlroll1;
-            $entryother = '2';
-        } else {
-            $table = new FsSeedlingSlrecord2;
-            $tablecov = new FsSeedlingSlcov2;
-            $tableroll = new FsSeedlingSlroll2;
-            $entryother = '1';
-        }
+        [$table, $tablecov, $tableroll] = $this->resolveEntryTables(true);
 
         $slrecord = $table::where('trap', 'like', $selectTrap)->orderBy('plot', 'asc')->orderBy('tag', 'asc')->get();
         $slcov = $tablecov::where('trap', 'like', $selectTrap)->orderBy('plot', 'asc')->get();
-        $slroll = $tableroll::orderBy('trap', 'asc')->orderBy('plot', 'asc')->orderBy('tag', 'asc')->get();
+        $slroll = $tableroll::where('trap', 'like', $selectTrap)->orderBy('plot', 'asc')->orderBy('tag', 'asc')->get();
         // $slrecord
 
 
@@ -150,9 +144,7 @@ class SeedlingShowentry extends Component
             $slrecord1 = $ob_redata->addbutton($slrecord, $this->entry);
         }
 
-        $scsplist = $request->session()->get('scsplist', function () {
-            return 'no';
-        });
+        $scsplist = session()->get('scsplist', 'no');
 
         if ($scsplist == 'no') {
             $scsplist = [];
@@ -163,7 +155,7 @@ class SeedlingShowentry extends Component
                 $scsplist[] = $scsplist1[$i]['csp'];
             }
 
-            $request->session()->put('scsplist', $scsplist);
+            session()->put('scsplist', $scsplist);
         }
 
 
@@ -185,6 +177,7 @@ class SeedlingShowentry extends Component
         $this->covs = $slcov;
         $this->roll = $slroll;
         $this->selectTrap = $selectTrap;
+        $this->refreshTrapNavigation();
         $this->covsavenote = '';
         $this->seedlingsavenote = '';
         //recruittable
@@ -230,5 +223,59 @@ class SeedlingShowentry extends Component
     {
         return view('livewire.fushan.seedling-showentry');
         // $this->dispatchBrowserEvent('jquery');
+    }
+
+    private function resolveEntryTables(bool $withRoll = false): array
+    {
+        if ($this->entry == '1') {
+            $tables = [new FsSeedlingSlrecord1, new FsSeedlingSlcov1];
+            if ($withRoll) {
+                $tables[] = new FsSeedlingSlroll1;
+            }
+
+            return $tables;
+        }
+
+        $tables = [new FsSeedlingSlrecord2, new FsSeedlingSlcov2];
+        if ($withRoll) {
+            $tables[] = new FsSeedlingSlroll2;
+        }
+
+        return $tables;
+    }
+
+    private function loadTrapOptions(): array
+    {
+        [, $tablecov] = $this->resolveEntryTables();
+
+        return $tablecov::query()
+            ->select('trap')
+            ->whereNotNull('trap')
+            ->distinct()
+            ->orderBy('trap')
+            ->pluck('trap')
+            ->map(fn ($trap) => (int) $trap)
+            ->values()
+            ->all();
+    }
+
+    private function refreshTrapNavigation(): void
+    {
+        $this->previousTrap = null;
+        $this->nextTrap = null;
+
+        if ($this->selectTrap === null || $this->selectTrap === '' || empty($this->trapOptions)) {
+            return;
+        }
+
+        $currentTrap = (int) $this->selectTrap;
+        $currentIndex = array_search($currentTrap, $this->trapOptions, true);
+
+        if ($currentIndex === false) {
+            return;
+        }
+
+        $this->previousTrap = $currentIndex > 0 ? $this->trapOptions[$currentIndex - 1] : null;
+        $this->nextTrap = $currentIndex < count($this->trapOptions) - 1 ? $this->trapOptions[$currentIndex + 1] : null;
     }
 }

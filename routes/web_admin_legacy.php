@@ -602,7 +602,7 @@ Route::middleware(['auth'])->prefix('admin')->name('admin.')->group(function () 
 
         // delete alter
         // 舊：GET /fsseedling/deletealter/{stemid}/{entry}/{thispage}
-        Route::delete('/alter/{stemid}/{entry}/{thispage}', [SeedlingSaveController::class, 'deletealter'])
+        Route::match(['post', 'delete'], '/alter/{stemid}/{entry}/{thispage}', [SeedlingSaveController::class, 'deletealter'])
             ->name('alter.delete');
 
         // finish

@@ -193,6 +193,36 @@ select {
   font-weight: 800;
 }
 
+.app-feedback-note {
+  display: block;
+  width: fit-content;
+  max-width: min(100%, 960px);
+  margin: 0 0 8px 0;
+  padding: 8px 12px;
+  border: 1px solid #e7c79a;
+  border-radius: 8px;
+  background-color: #fff3df;
+  color: #8a2f00;
+  line-height: 1.6;
+  box-sizing: border-box;
+}
+
+.app-feedback-note:empty {
+  display: none;
+}
+
+.app-feedback-note--success {
+  border-color: #b7d7b0;
+  background-color: #eef8ea;
+  color: #1f5d2f;
+}
+
+.app-feedback-note--error {
+  border-color: #e7c79a;
+  background-color: #fff3df;
+  color: #8a2f00;
+}
+
 
 /* colors */
 .bg-g1{

@@ -32,19 +32,16 @@ class SeedlingAddButton
             $tag = $records[$q]['tag'];
             $entry = $entry;
 
-            if ($q==0){ $thispage=1;} else { $thispage=ceil($q/20);}
-
 
             // HTML 輸出編碼
             $escapedTag = htmlspecialchars($tag);
             $escapedEntry = htmlspecialchars($entry);
-            $escapedThispage = htmlspecialchars($thispage);
             $maxid=FsSeedlingSlrecord::count();
             $records[$q]['alternotetable']=$records[$q]['alternote'];
 
             // 生成 HTML 按鈕元素
-            $button1 = "<button name='deletedata' onclick='deleteid(\"$escapedTag\", \"$escapedEntry\", \"$escapedThispage\")')><i class='fa-solid fa-xmark'></button>";
-            $button2 = "<button name='alternoteshow{$escapedTag} '  onclick='alternote(\"$escapedTag\", \"$escapedEntry\", \"$escapedThispage\", event)' class='alternotehover'><i class='fa-regular fa-note-sticky'></i></button> ";
+            $button1 = "<button type='button' name='deletedata' onclick='deleteid(\"$escapedTag\", \"$escapedEntry\")')><i class='fa-solid fa-xmark'></button>";
+            $button2 = "<button type='button' name='alternoteshow{$escapedTag} '  onclick='alternote(\"$escapedTag\", \"$escapedEntry\", null, event)' class='alternotehover'><i class='fa-regular fa-note-sticky'></i></button> ";
 
 
            

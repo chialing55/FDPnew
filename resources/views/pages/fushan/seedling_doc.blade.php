@@ -41,12 +41,12 @@ $('.list1 hr').css('color', '#91A21C');
         <div class='' style='margin-top: 20px'>
                 <p>選擇固定輸出範圍的檔案：</p>
                 <ul>
-                    <li><a href="/fsseedling/record-pdf/1/32" target="_blank">1-32</a></li>
-                    <li><a href="/fsseedling/record-pdf/33/44" target="_blank">33-44</a></li>
-                    <li><a href="/fsseedling/ecord-pdf/45/60" target="_blank">45-60</a></li>
-                    <li><a href="/fsseedling/record-pdf/61/88" target="_blank">61-88</a></li>
-                    <li><a href="/fsseedling/record-pdf/89/99" target="_blank">89-99</a></li>
-                    <li><a href="/fsseedling/record-pdf/100/107" target="_blank">100-107</a></li>
+                    <li><a href="{{ route('admin.fushan.seedling.pdf.record', ['start' => 1, 'end' => 32]) }}" target="_blank">1-32</a></li>
+                    <li><a href="{{ route('admin.fushan.seedling.pdf.record', ['start' => 33, 'end' => 44]) }}" target="_blank">33-44</a></li>
+                    <li><a href="{{ route('admin.fushan.seedling.pdf.record', ['start' => 45, 'end' => 60]) }}" target="_blank">45-60</a></li>
+                    <li><a href="{{ route('admin.fushan.seedling.pdf.record', ['start' => 61, 'end' => 88]) }}" target="_blank">61-88</a></li>
+                    <li><a href="{{ route('admin.fushan.seedling.pdf.record', ['start' => 89, 'end' => 99]) }}" target="_blank">89-99</a></li>
+                    <li><a href="{{ route('admin.fushan.seedling.pdf.record', ['start' => 100, 'end' => 107]) }}" target="_blank">100-107</a></li>
                 </ul>
 
         </div>

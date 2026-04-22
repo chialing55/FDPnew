@@ -78,7 +78,7 @@
                         'label' => '福山 小苗',
                     ],
                     'fushan.mortality' => [
-                        'img' => asset('/images/research/seedling.png'),
+                        'img' => asset('/images/research/fs_mortality.jpg'),
                         'class' => 'box1',
                         'label' => '福山 死亡率調查',
                     ],

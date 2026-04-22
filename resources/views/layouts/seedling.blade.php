@@ -23,10 +23,9 @@
 {{-- <script src="{{asset('/js/jquery.jqGrid.min.js')}}"></script>
 <script src="{{asset('/js/grid.locale-en.js')}}"></script> --}}
 {{-- <script src="{{asset('/js/jquery.caret-1.5.2.min.js')}}"></script> --}}
+ @yield('pagejs')
 <script src="{{asset('/js/create-handsontable.js')}}"></script>
 <script src="{{asset('/js/seedling.js')}}"></script>
-
- @yield('pagejs')
 
 @endsection
 
@@ -53,7 +52,7 @@
           <li class='innerlist list42 listlink' type='entry1' >第一次輸入</li>
           <li class='innerlist list43 listlink' type='entry2' >第二次輸入</li>
           <li class='innerlist list44 listlink' type='compare'>資料比對<hr></li>
-      @if($user=='呂佳陵')
+      @if(auth()->user()?->is_admin)
           <li class='innerlist list45 listlink' type='import'>將資料匯入大表<hr></li>
       @endif
 

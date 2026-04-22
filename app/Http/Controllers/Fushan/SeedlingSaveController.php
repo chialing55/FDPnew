@@ -6,6 +6,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\App;
 use Illuminate\Support\Facades\Schema;
+use Illuminate\Support\Facades\Log;
 // use Illuminate\Support\Facades\Input;
 use App\Http\Controllers\Controller;
 
@@ -271,8 +272,15 @@ class SeedlingSaveController extends Controller
         $recruit = $data['data'];
         $entry = $data['entry'];
         $user = $data['user'];
+        $pps = (int) ($data['pps'] ?? 20);
+        if (!in_array($pps, [20, 40], true)) {
+            $pps = 20;
+        }
         $recruitsavenote = '';
         $nonsavelist = [];
+        $appendRecruitNote = function (string $message) use (&$recruitsavenote) {
+            $recruitsavenote .= ($recruitsavenote === '' ? '' : '<br>') . $message;
+        };
 
 
         $table = $this->getTableInstance($entry);
@@ -295,7 +303,7 @@ class SeedlingSaveController extends Controller
                 $recruit[$i]['tag'] = strtoupper($recruit[$i]['tag']); //轉為大寫
 
                 if ($recruit[$i]['plot'] == '' || $recruit[$i]['csp'] == '' || $recruit[$i]['ht'] == '' || $recruit[$i]['leafno'] == '') {
-                    $recruitsavenote = $recruitsavenote . "<br>第" . ($i + 1) . '筆資料 資料不完整';
+                    $appendRecruitNote('第' . ($i + 1) . '筆資料 資料不完整');
                     $nonsavelist[$i] = $recruit[$i];
                     continue;
                 }
@@ -311,7 +319,7 @@ class SeedlingSaveController extends Controller
                     //找舊資料
                     $seedling = FsSeedlingData::where('tag', 'like', $recruit[$i]['tag'])->orderBy('census', 'DESC')->get();
                     if ($seedling->isEmpty()) {
-                        $datacheck['datasavenote'] = $datacheck['datasavenote'] . "<br>第" . ($i + 1) . '筆 查無舊資料';
+                        $datacheck['datasavenote'] = ($datacheck['datasavenote'] === '' ? '' : '<br>') . '第' . ($i + 1) . '筆 查無舊資料';
                         $datacheck['pass'] = "0";
                     } else {
 
@@ -330,7 +338,7 @@ class SeedlingSaveController extends Controller
 
                             if (in_array($key, $includeKeys)) {
                                 if ($seedling[0][$key] != $value) {
-                                    $recruitsavenote = $recruitsavenote . "<br>" . $recruit[$i]['tag'] . ' 漏資料，但基本資料 ' . $key . ' 與原始資料不符。以舊資料儲存，如需修改，請填寫特殊修改。';
+                                    $appendRecruitNote($recruit[$i]['tag'] . ' 漏資料，但基本資料 ' . $key . ' 與原始資料不符。以舊資料儲存，如需修改，請填寫特殊修改。');
                                     $recruit[$i][$key] = $seedling[0][$key];
                                 }
                             }
@@ -402,9 +410,9 @@ class SeedlingSaveController extends Controller
 
                     $table::insert($insert2);
 
-                    $recruitsavenote = $recruitsavenote . "<br>第" . ($i + 1) . '筆資料已儲存';
+                    $appendRecruitNote('第' . ($i + 1) . '筆資料已儲存');
                 } else {  // $datacheck['pass']!=1
-                    $recruitsavenote = $recruitsavenote . "<br>" . $datacheck['datasavenote'];
+                    $appendRecruitNote($datacheck['datasavenote']);
                     $nonsavelist[$i] = $recruit[$i];
                     // break;
 
@@ -421,7 +429,7 @@ class SeedlingSaveController extends Controller
         $redata = $this->getRedata($entry, $recruit[0]['trap']);
         foreach ($redata as $key => $value) {
             if ($value['tag'] == $recruit[0]['tag']) {
-                $thispage = ceil(($key + 1) / 20);
+                $thispage = (string) ceil(($key + 1) / $pps);
                 break;
             }
         }
@@ -554,7 +562,7 @@ class SeedlingSaveController extends Controller
 
         // //重新載入資料
 
-        $slroll = $tableroll::orderBy('trap', 'asc')->orderBy('plot', 'asc')->orderBy('tag', 'asc')->get();
+        $slroll = $tableroll::where('trap', 'like', $trap)->orderBy('plot', 'asc')->orderBy('tag', 'asc')->get();
 
 
 
@@ -594,7 +602,7 @@ class SeedlingSaveController extends Controller
         // 重新載入資料
 
 
-        $slroll = $tableroll::orderBy('trap', 'asc')->orderBy('plot', 'asc')->orderBy('tag', 'asc')->get();
+        $slroll = $tableroll::where('trap', 'like', $trap)->orderBy('plot', 'asc')->orderBy('tag', 'asc')->get();
 
 
         if (!$slroll->isEmpty()) {
@@ -629,34 +637,66 @@ class SeedlingSaveController extends Controller
         $data = $data_all['data'][0];
         $entry = $data_all['entry'];
         $thispage = $data_all['thispage'];
-        $uplist = [];
-        $user = $data_all['user'];
-        //將data資料變為string
+        $authUser = $request->user();
+        $user = $authUser?->name
+            ?? $authUser?->account
+            ?? ($authUser?->id ? (string) $authUser->id : null)
+            ?? ($data_all['user'] ?? '');
         $datasavenote = '';
-        $data2 = array_filter($data);
-        unset($data2['id']);
+        $table = $this->getTableInstance($entry);
+        $olddata = $table::where('id', 'like', $data['id'])->first();
 
-        if (!empty($data2)) {
+        if (!$olddata) {
+            Log::warning('seedling.savealternote.not_found', [
+                'entry' => $entry,
+                'thispage' => $thispage,
+                'record_id' => $data['id'] ?? null,
+                'payload' => $data,
+            ]);
 
-            // 轉換為 JSON 字串
-            $alterdata = json_encode($data2, JSON_UNESCAPED_UNICODE);
-
-            $table = $this->getTableInstance($entry);
-
-            $olddata = $table::where('id', 'like', $data['id'])->get()->toArray();
-
-            if ($olddata[0]['alternote'] != $alterdata) {
-                $uplist['alternote'] = $alterdata;
-                $uplist['updated_id'] = $user;
-                $table::where('id', 'like', $data['id'])->update($uplist);
-            }
-            $datasavenote = '資料已儲存';
+            return response()->json([
+                'result' => 'error',
+                'datasavenote' => '找不到要儲存特殊修改的小苗資料。',
+            ], 404);
         }
+
+        $data2 = array_filter($data, function ($value, $key) {
+            return $key !== 'id' && $value !== null && $value !== '';
+        }, ARRAY_FILTER_USE_BOTH);
+
+        $alterdata = !empty($data2)
+            ? json_encode($data2, JSON_UNESCAPED_UNICODE)
+            : '';
+
+        $affectedRows = 0;
+
+        if ($olddata->alternote != $alterdata) {
+            $uplist = ['alternote' => $alterdata];
+
+            $uplist['updated_id'] = $user !== ''
+                ? $user
+                : ($olddata->updated_id ?: 'system');
+
+            $affectedRows = $table::where('id', 'like', $data['id'])->update($uplist);
+        }
+
+        $datasavenote = '資料已儲存';
+
+        Log::info('seedling.savealternote.result', [
+            'entry' => $entry,
+            'thispage' => $thispage,
+            'record_id' => $data['id'] ?? null,
+            'tag' => $olddata->tag ?? null,
+            'trap' => $olddata->trap ?? null,
+            'user' => $user,
+            'affected_rows' => $affectedRows,
+            'alterdata' => $alterdata,
+        ]);
 
         //重新載入資料
         $maxid = FsSeedlingSlrecord::count();
 
-        $redata = $this->getRedata($entry, $olddata[0]['trap']);
+        $redata = $this->getRedata($entry, $olddata->trap);
 
 
         return [
@@ -673,7 +713,13 @@ class SeedlingSaveController extends Controller
     //刪除特殊修改
     public function deletealter(Request $request, $tag, $entry, $thispage)
     {
-
+        Log::info('seedling.deletealter.start', [
+            'tag' => $tag,
+            'entry' => $entry,
+            'thispage' => $thispage,
+            'method' => $request->method(),
+            'user' => $request->user()?->name,
+        ]);
 
         $table = $this->getTableInstance($entry);
 
@@ -687,6 +733,17 @@ class SeedlingSaveController extends Controller
 
         //重新載入資料
         $olddata = $table::where('tag', 'like', $tag)->get()->toArray();
+        if (empty($olddata)) {
+            Log::warning('seedling.deletealter.not_found', [
+                'tag' => $tag,
+                'entry' => $entry,
+            ]);
+
+            return response()->json([
+                'result' => 'error',
+                'datasavenote' => '找不到要刪除特殊修改的小苗資料。',
+            ], 404);
+        }
         $maxid = FsSeedlingSlrecord::count();
 
         // $redata='1';

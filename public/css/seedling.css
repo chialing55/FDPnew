@@ -111,6 +111,12 @@
 	color: red;
 }
 
+.app-feedback-note.savenote {
+	margin-left: 0;
+	font-size: 90%;
+	color: #8a2f00;
+}
+
 .prev,
 .next {
 	margin-left: 20px;
@@ -123,4 +129,72 @@
 
 .fsSeedlingTagtable {
 	margin: 20px 20px;
+}
+
+.alternotetalbeouter.seedling-alternote-panel {
+	display: none;
+	position: fixed;
+	top: 50%;
+	left: 50%;
+	transform: translate(-50%, -50%);
+	z-index: 3000;
+	width: min(620px, calc(100vw - 32px));
+	max-height: calc(100vh - 48px);
+	overflow: auto;
+	background-color: floralwhite;
+	box-shadow: 0 20px 60px rgba(15, 23, 42, .22), 0 0 0 100vmax rgba(15, 23, 42, .35);
+}
+
+.alternotetalbeouter.seedling-alternote-panel .close {
+	position: absolute;
+	top: 18px;
+	right: 18px;
+	width: auto;
+	padding: 8px 12px;
+	border: 1px solid rgba(0, 0, 0, .15);
+	border-radius: 6px;
+	background: #fff;
+	cursor: pointer;
+}
+
+.alternotetalbeouter.seedling-alternote-panel #alternotetable {
+	width: 100%;
+	min-width: 680px;
+}
+
+.alternotetalbeouter.seedling-alternote-panel .seedling-alternote-form-row {
+	display: grid;
+	grid-template-columns: 150px minmax(140px, 1fr) 44px;
+	gap: 10px;
+	align-items: center;
+}
+
+.alternotetalbeouter.seedling-alternote-panel .seedling-alternote-form-row select,
+.alternotetalbeouter.seedling-alternote-panel .seedling-alternote-form-row input {
+	width: 100%;
+	height: 40px;
+	padding: 8px 10px;
+	border: 1px solid #b6c2bf;
+	border-radius: 4px;
+	box-sizing: border-box;
+	background: #fff;
+}
+
+.alternotetalbeouter.seedling-alternote-panel .seedling-alternote-remove {
+	width: 40px;
+	height: 40px;
+	border: 1px solid rgba(0, 0, 0, .15);
+	border-radius: 6px;
+	background: #fff;
+	cursor: pointer;
+}
+
+.alternotetalbeouter.seedling-alternote-panel .seedling-alternote-remove.is-hidden {
+	visibility: hidden;
+	pointer-events: none;
+}
+
+.alternotehover:hover::before {
+	display: none;
+	content: none;
 }

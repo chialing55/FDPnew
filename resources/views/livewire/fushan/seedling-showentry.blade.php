@@ -17,14 +17,9 @@
              <option value=""> 
                 
             </option>
-            @for ($i=1; $i<108;$i++)
-              @if($i==42)continue;
-              @else
-            <option value="{{$i}}">{{$i}} 
-                
-            </option>
-            @endif
-             @endfor
+            @foreach ($trapOptions as $trapOption)
+            <option value="{{$trapOption}}">{{$trapOption}}</option>
+            @endforeach
         
             </select>
 
@@ -35,21 +30,22 @@
         @if (!$record)
         <span style='padding-left:20px'>*{{$entrynote}}</span>
         @else
-            @if($selectTrap>1)
-                @if($selectTrap==43)
-                <span style='padding-left:20px'><a class='a_' wire:click="searchtrap({{($selectTrap-2)}})">上一個</a></span>
-                @else
-                <span style='padding-left:20px'><a class='a_' wire:click="searchtrap({{($selectTrap-1)}})">上一個</a></span>
-                @endif
-            @endif
-            @if($selectTrap<107)
-                @if($selectTrap==41)
-                <span style='padding-left:20px'><a class='a_' wire:click="searchtrap({{($selectTrap+2)}})">下一個</a></span>
-                @else
-                <span style='padding-left:20px'><a class='a_' wire:click="searchtrap({{($selectTrap+1)}})">下一個</a></span>
-                @endif
-              
-            @endif  
+            <span style='display:inline-flex; align-items:center; padding-left:20px; gap:20px;'>
+                <span style='display:inline-block; min-width:48px;'>
+                    @if(!is_null($previousTrap))
+                        <a class='a_' wire:click="searchtrap({{$previousTrap}})">上一個</a>
+                    @else
+                        <span style='visibility:hidden;'>上一個</span>
+                    @endif
+                </span>
+                <span style='display:inline-block; min-width:48px;'>
+                    @if(!is_null($nextTrap))
+                        <a class='a_' wire:click="searchtrap({{$nextTrap}})">下一個</a>
+                    @else
+                        <span style='visibility:hidden;'>下一個</span>
+                    @endif
+                </span>
+            </span>
         @endif
 
         </p>
@@ -71,11 +67,9 @@
         </ul>
     </div>
 
-    <div class='entrytablediv'>
+    <div class='entrytablediv seedling-cov-panel' data-seedling-cov-site='{{$covs[0]['trap']}}'>
         {{-- <h2>測試</h2> --}}
-        <span class='covsavenote savenote'>
-            
-       </span>
+        <span class='covsavenote savenote app-feedback-note'></span>
         <div id='covtable{{$covs[0]['trap']}}' class='test fs100' ></div>
         <p style='margin-top:5px; text-align: center'><button name='covsave{{$covs[0]['trap']}}' class='datasavebutton' style='width:550px'>儲存</button></p>
     </div>
@@ -111,7 +105,7 @@ $alterOtherNote="";
            <div style='margin:20px 0'><p>沒有舊資料</p></div>
         
         @else
-    <div class='entrytablediv'>
+    <div class='entrytablediv seedling-data-panel' data-seedling-data-site='{{$tableVar}}'>
 
 @include('includes.str-main-entrytable')        
         {{-- <h2>測試</h2> --}}
@@ -149,7 +143,10 @@ $alterOtherNote="";
 <div style='margin-left: 30px;'> 
     <button class='recruit recruitbutton' onclick="$('.recruittableout').toggle();">新增苗</button> 
     <button name='sroll' class="rollbutton" onclick="$('.slrolltableout').toggle();">撿到環</button>
-@if($selectTrap=='107')
+@php
+    $lastTrap = !empty($trapOptions) ? (string) $trapOptions[array_key_last($trapOptions)] : null;
+@endphp
+@if((string) $selectTrap === $lastTrap)
 
 <div style='margin-top: 20px;'>
 <button class='finish finishbutton' onclick="finish({{$entry}})">輸入完成</button>
@@ -162,7 +159,7 @@ $alterOtherNote="";
 
 
 
-<div class='recruittableout text_box' style='margin-top: 20px;'>
+<div class='recruittableout text_box seedling-recruit-panel' data-seedling-recruit-site='{{$covs[0]['trap']}}' style='margin-top: 20px;'>
    <h6>新增苗</h6>
    <hr>
    <div id='simplenote' class='text_box2'>
@@ -178,26 +175,26 @@ $alterOtherNote="";
     </ul>
     </div>
     <div class='entrytablediv'>
-        <p class='recruitsavenote savenote'></p>
+        <p class='recruitsavenote savenote app-feedback-note'></p>
         
         
         <div id='recruittable{{$covs[0]['trap']}}' style='margin-top: 10px;'></div>
         <p style='text-align: center'><button name='recruitsave{{$covs[0]['trap']}}' class=" datasavebutton">儲存</button></p>
-        <p class='recruitsavenote savenote'></p>
+        <p class='recruitsavenote savenote app-feedback-note'></p>
         <p style='margin-top:5px;'><button name='clearrecruittable'>清空新增表單</button></p>
     </div>
 </div>
     
-<div class='slrolltableout text_box' style='margin-top: 20px;'>
+<div class='slrolltableout text_box seedling-roll-panel' data-seedling-roll-site='{{$covs[0]['trap']}}' style='margin-top: 20px;'>
 
     <h6>撿到環</h6>
     <hr>
     <div class='entrytablediv'>
-        <p class='slrollsavenote savenote'></p>
+        <p class='slrollsavenote savenote app-feedback-note'></p>
         
         
         <div id='slrolltable{{$covs[0]['trap']}}' style='margin-top: 10px;'></div>
-        <p style='text-align: center'><span class='slrollsavenote savenote'></span><button name='slrollsave{{$covs[0]['trap']}}' class="datasavebutton" style='width: 400px;'>儲存</button></p>
+        <p style='text-align: center'><span class='slrollsavenote savenote app-feedback-note'></span><button name='slrollsave{{$covs[0]['trap']}}' class="datasavebutton" style='width: 400px;'>儲存</button></p>
         </div>
 </div>
    @endif
