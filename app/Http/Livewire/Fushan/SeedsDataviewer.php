@@ -39,75 +39,69 @@ class SeedsDataviewer extends Component
             $request->session()->forget('unk');
         }
 
-        $this->traps=FsSeedsFulldata::select('trap')->groupBy('trap')->get()->toArray();
+        $this->traps=FsSeedsFulldata::select('trap')->groupBy('trap')->orderBy('trap')->get()->toArray();
     }
 
-    public function search($year, $month, $trap, $species, $code){
-        $year2=$year;
-        $month2=$month;
-        $trap2=$trap;
-        if($year=='all' || $year=='each'){ $year='%';}
-        if($month=='all' || $month=='each'){ $month='%';}
-        if($trap=='all' || $trap=='each'){ $trap='%';} else {
-            $trap = str_pad($trap, 3, '0', STR_PAD_LEFT);
-        }
-        if($species=='' ){$species='%';}
-        if($code=='all'){ $code='%';}
+    public function search($year = null, $month = null, $trap = null, $species = null, $code = null){
+        $year = $year ?? $this->year;
+        $month = $month ?? $this->month;
+        $trap = $trap ?? $this->trap;
+        $species = $species ?? $this->species;
+        $code = $code ?? $this->code;
 
+        $this->year = $year;
+        $this->month = $month;
+        $this->trap = $trap;
+        $this->species = $species;
+        $this->code = $code;
+
+        $year2 = $year;
+        $month2 = $month;
+        $trap2 = $trap;
+        $trapValue = ($trap === 'all' || $trap === 'each') ? null : str_pad($trap, 3, '0', STR_PAD_LEFT);
+        $speciesValue = trim($species);
+        $codeValue = $code === 'all' ? null : $code;
 
         $alldata = FsSeedsFulldata::join('dateinfo', 'fulldata.census', '=', 'dateinfo.census')
             ->select('fulldata.census', 'fulldata.trap', 'fulldata.sp', 'fulldata.csp', 'fulldata.code','fulldata.identified', 'dateinfo.year', 'dateinfo.month')
-            ->where('year', 'like', $year)
-            ->where('csp', 'like', '%'.$species.'%')
-            ->where('trap', 'like', $trap)
-            ->where('month', 'like', $month)
-            ->where(function ($query) use ($code) {
-        // If $code is '%', retrieve all codes, else retrieve the specific code
-                    $query->where('code', 'like', $code);
-                })
+            ->when($year !== 'all' && $year !== 'each', fn ($query) => $query->where('dateinfo.year', $year))
+            ->when($month !== 'all' && $month !== 'each', fn ($query) => $query->where('dateinfo.month', $month))
+            ->when($trapValue !== null, fn ($query) => $query->where('fulldata.trap', $trapValue))
+            ->when($speciesValue !== '', fn ($query) => $query->where('fulldata.csp', 'like', '%'.$speciesValue.'%'))
+            ->when($codeValue !== null, fn ($query) => $query->where('fulldata.code', $codeValue))
             ->where('csp', 'not like', 'nothing')
             ->get()
             ->toArray();
 
-       // dd($alldata);
-         
-
-         $comb=[];
-         $comb1=[];
-         $datacomb=[];
+         $comb = [];
+         $comb1 = [];
+         $datacomb = [];
          foreach($alldata as $data){
-            if ($year2=='all'){$data['year']='-';}
-            if ($month2=='all'){$data['month']='-';}
-            if ($trap2=='all'){$data['trap']='-';}
+            if ($year2 == 'all') {$data['year'] = '-';}
+            if ($month2 == 'all') {$data['month'] = '-';}
+            if ($trap2 == 'all') {$data['trap'] = '-';}
 
-            $comb_1=$data['year'].$data['month'].$data['trap'].$data['csp'].$data['code'];
-            $comb_2=$data['year'].$data['month'].$data['trap'].$data['csp'];
-            if (in_array($comb_1, $comb)){
+            $comb_1 = $data['year'].$data['month'].$data['trap'].$data['csp'].$data['code'];
+            $comb_2 = $data['year'].$data['month'].$data['trap'].$data['csp'];
+            if (in_array($comb_1, $comb, true)) {
                 continue;
-            } else {
-
-                $comb[]=$comb_1;
-
-                if (!in_array($comb_2, $comb1)){
-                    $comb1[]=$comb_2;
-                    $datacomb[$comb_2]=$data;
-                } 
-                $datacomb[$comb_2]['codecomb'][]=$data['code'];
-                
             }
 
+            $comb[] = $comb_1;
+
+            if (!in_array($comb_2, $comb1, true)) {
+                $comb1[] = $comb_2;
+                $datacomb[$comb_2] = $data;
+                $datacomb[$comb_2]['codecomb'] = [];
+            }
+
+            $datacomb[$comb_2]['codecomb'][] = $data['code'];
          }
 
+        $datacomb = array_values($datacomb);
         usort($datacomb, function ($a, $b) {
-            return strcmp($a['csp'], $b['csp']);
-        });
-
-        usort($datacomb, function ($a, $b) {
-            return strcmp($a['trap'], $b['trap']);
-        });
-
-        usort($datacomb, function ($a, $b) {
-            return strcmp($a['year'], $b['year']);
+            return [$a['year'], $a['month'], $a['trap'], $a['csp']]
+                <=> [$b['year'], $b['month'], $b['trap'], $b['csp']];
         });
 
          $this->data=$datacomb;

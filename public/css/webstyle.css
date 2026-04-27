@@ -89,9 +89,9 @@ select {
 }
 
 .app-feedback-note--success {
-	border-color: #b7d7b0;
-	background-color: #eef8ea;
-	color: #1f5d2f;
+	border: 1px solid rgba(34, 197, 94, .35);
+	background: rgba(34, 197, 94, .12);
+	color: #14532d;
 }
 
 .app-feedback-note--error {

@@ -3,7 +3,6 @@
 namespace App\Http\Livewire\Fushan;
 
 use Livewire\Component;
-use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\App;
 use Livewire\WithPagination;
@@ -29,25 +28,37 @@ class SeedlingDataviewer extends Component
     public $lastCensus;
     public $tableTag;
 
-    public function mount(Request $request)
+    public function mount()
     {
-        $lastCensus=FsSeedlingSlrecord1::first();
-        $this->lastCensus=$lastCensus['census'];
+        $lastCensus = FsSeedlingSlrecord1::first();
+        $this->lastCensus = $lastCensus['census'] ?? null;
+        $this->resultnote = '';
+        $this->basedata = null;
+        $this->result = [];
     }
 
 
 
-    public function submitTagForm(Request $request)
+    public function submitTagForm()
     {
      //   dd($this->allB);
-        $this->serachTag($request, $this->tag, $this->allB);
+        $this->serachTag($this->tag, $this->allB);
     }
 
 //以小苗編號尋找資料
-    public function serachTag(Request $request, $tag, $allB)
+    public function serachTag($tag, $allB)
     {
         // dd($tag);
         // $this->tag=$tag;
+        $tag = strtoupper(trim((string) $tag));
+
+        if ($tag === '') {
+            $this->resultnote = '請輸入小苗編號';
+            $this->basedata = null;
+            $this->result = [];
+            return;
+        }
+
         $tag = str_pad($tag, 4, '0', STR_PAD_LEFT);
         $mtag = explode('.', $tag)[0];
         if (isset(explode('.', $tag)[1])){
@@ -72,24 +83,35 @@ class SeedlingDataviewer extends Component
             if ($resultRecord1!=[]){
                 $result=$resultRecord1;
                 $result2=FsSeedlingSlrecord1::where('mtag', 'like', $mtag)->get()->toArray();
-                $basedata=FsSeedlingSlrecord1::where('mtag','like', $mtag)->first();
+                $basedata=FsSeedlingSlrecord1::where('mtag','like', $mtag)->first()?->toArray();
             } else if ($resultRecord2!=[]){
                 $result=$resultRecord2;
                 $result2=FsSeedlingSlrecord2::where('mtag', 'like', $mtag)->get()->toArray();
-                $basedata=FsSeedlingSlrecord2::where('mtag','like', $mtag)->first();
+                $basedata=FsSeedlingSlrecord2::where('mtag','like', $mtag)->first()?->toArray();
             } 
         } else {
             $q=count($result);
             $result2=FsSeedlingData::where('mtag', 'like', $mtag)->orderBy('census', 'ASC')->get()->toArray();
-            $basedata=FsSeedlingBase::where('mtag','like', $mtag)->first();
+            $basedata=FsSeedlingBase::where('mtag','like', $mtag)->first()?->toArray();
 
-            if ($resultRecord1!=[]){
+            if ($resultRecord1 != [] || $resultRecord2 != []){
+                $sourceRecord = null;
 
-                $sourceRecord = $resultRecord1[0]['updated_at'] != '' ? $resultRecord1[0] : $resultRecord2[0];
+                if ($resultRecord1 != [] && $resultRecord1[0]['updated_at'] != '') {
+                    $sourceRecord = $resultRecord1[0];
+                } elseif ($resultRecord2 != [] && $resultRecord2[0]['updated_at'] != '') {
+                    $sourceRecord = $resultRecord2[0];
+                } elseif ($resultRecord1 != []) {
+                    $sourceRecord = $resultRecord1[0];
+                } elseif ($resultRecord2 != []) {
+                    $sourceRecord = $resultRecord2[0];
+                }
 
-                foreach ($result[0] as $key => $value) {
-                    $result[$q][$key] = $sourceRecord[$key];
-                    $result[$q]['note']=$sourceRecord['note']." ".$sourceRecord['alternote'];
+                if ($sourceRecord) {
+                    foreach ($result[0] as $key => $value) {
+                        $result[$q][$key] = $sourceRecord[$key] ?? '';
+                    }
+                    $result[$q]['note'] = trim(($sourceRecord['note'] ?? '')." ".($sourceRecord['alternote'] ?? ''));
                 }
             }
 
@@ -120,8 +142,16 @@ class SeedlingDataviewer extends Component
 
 
             // dd($basedata);
+            if (!$basedata) {
+                $basedata = [
+                    'trap' => $result[0]['trap'] ?? '',
+                    'plot' => $result[0]['plot'] ?? '',
+                    'x' => '',
+                    'y' => '',
+                ];
+            }
             $basedata['maxb']=$b;
-            $basedata['csp']=$result[0]['csp'];
+            $basedata['csp']=$result[0]['csp'] ?? '';
 
             $this->basedata=$basedata;
 

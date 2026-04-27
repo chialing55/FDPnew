@@ -27,9 +27,9 @@
 
     {{-- <script src="{{asset('/js/jquery.caret-1.5.2.min.js')}}"></script> --}}
     @yield('pagejs')
-    <script src="{{ asset('/js/fancybox.umd.js') }}"></script>
-    <script src="{{ asset('/js/create-handsontable.js') }}"></script>
-    <script src="{{ asset('/js/seeds.js') }}"></script>
+    <script src="{{ asset('/js/fancybox.umd.js') }}?v={{ filemtime(public_path('js/fancybox.umd.js')) }}"></script>
+    <script src="{{ asset('/js/create-handsontable.js') }}?v={{ filemtime(public_path('js/create-handsontable.js')) }}"></script>
+    <script src="{{ asset('/js/seeds.js') }}?v={{ filemtime(public_path('js/seeds.js')) }}"></script>
 
 
 

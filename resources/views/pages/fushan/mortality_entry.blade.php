@@ -15,15 +15,15 @@
 
 @section('rightbox')
     @if (session('status'))
-        <div class='text_box' style="width:min(960px, 92vw); text-align:left; margin-bottom:16px;">
-            <div style="padding:10px 12px; border:1px solid rgba(34,197,94,.35); background:rgba(34,197,94,.12); color:#14532d; border-radius:6px;">
+        <div class='text_box mortality-entry-shell' style="margin-bottom:16px;">
+            <div class="app-feedback-note app-feedback-note--success" style="margin:0;">
                 {{ session('status') }}
             </div>
         </div>
     @endif
 
     @if ($entry === '1' && !$recordTablesMatchTargetCensus)
-        <div class='text_box' style="width:min(960px, 92vw); text-align:left; margin-bottom:16px;">
+        <div class='text_box mortality-entry-shell' style="margin-bottom:16px;">
             <h2>第一次輸入表單準備</h2>
             <hr>
 

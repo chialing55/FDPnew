@@ -21,25 +21,25 @@ function deepCopy(obj) {
 }
 
 function getPageContext() {
-  const seedlingPage = window.seedlingPage || {};
-  const context = seedlingPage.context || {};
-  const state = seedlingPage.state || {};
+  const appPage = window.seedlingPage || window.seedsPage || {};
+  const context = appPage.context || {};
+  const state = appPage.state || {};
 
   return {
-    entry: context.entry ?? (typeof entry !== 'undefined' ? entry : null),
-    user: context.user ?? (typeof user !== 'undefined' ? user : ''),
+    entry: context.entry ?? null,
+    user: context.user ?? '',
     plotType: context.plotType ?? (typeof plotType !== 'undefined' ? plotType : ''),
     maxid: state.maxid ?? (typeof maxid !== 'undefined' ? maxid : null),
     pps: state.pps ?? (typeof ppsall !== 'undefined' ? ppsall : null),
     realemptytable: state.realemptytable ?? (typeof realemptytable !== 'undefined' ? realemptytable : []),
-    setNote: typeof seedlingPage.setNote === 'function'
-      ? seedlingPage.setNote.bind(seedlingPage)
+    setNote: typeof appPage.setNote === 'function'
+      ? appPage.setNote.bind(appPage)
       : (selector, message) => $(selector).html(message || ''),
-    clearNotes: typeof seedlingPage.clearNotes === 'function'
-      ? seedlingPage.clearNotes.bind(seedlingPage)
+    clearNotes: typeof appPage.clearNotes === 'function'
+      ? appPage.clearNotes.bind(appPage)
       : () => $('.savenote').html(''),
-    syncState: typeof seedlingPage.syncState === 'function'
-      ? seedlingPage.syncState.bind(seedlingPage)
+    syncState: typeof appPage.syncState === 'function'
+      ? appPage.syncState.bind(appPage)
       : () => {},
   };
 }
@@ -94,13 +94,26 @@ function makeAjaxRequest(url, requestData, requstType, successCallback, errorCal
       if (res.result === 'ok') {
         successCallback(res);
       } else {
-        console.log('Save error');
+        const detail = res?.message || res?.datasavenote || res?.error || 'Save error';
+        if (errorCallback) {
+          errorCallback({ error: detail, xhr: null, status: 'application', response: res });
+        } else {
+          console.log(detail);
+        }
       }
     },
     error: function (xhr, status, error) {
       console.log('Save error. '+url);
       if (errorCallback) {
-        errorCallback({ error: 'Save error', xhr: xhr, status: status, error: error });
+        const response = xhr?.responseJSON || {};
+        const detail = response?.message
+          || response?.datasavenote
+          || response?.seedssavenote
+          || response?.finishnote
+          || xhr?.responseText
+          || error
+          || 'Save error';
+        errorCallback({ error: detail, xhr: xhr, status: status, response: response });
       }
     },
 
@@ -170,6 +183,7 @@ function buildSeedlingRollDisplayRows(rows, trap, blankCount = 5) {
 function createHandsontable(container, columns, sourceData, saveButtonName, saveUrl, tableType, colWidths, hiddenColumns, colHeaders, thispage) {
   var cellChanges = [];
   var parent = container.parent();
+  const pageContext = getPageContext();
 
 
   container.handsontable({
@@ -187,6 +201,44 @@ function createHandsontable(container, columns, sourceData, saveButtonName, save
     hiddenColumns: hiddenColumns,
     cells: function (row, col, prop) {
       return cellfunction(tableType, container, row, col, prop);
+    },
+    afterCreateRow: function (index, amount, source) {
+      if (
+        pageContext.plotType === 'fsseeds'
+        && (tableType === 'data' || tableType === 'addseedsdata')
+      ) {
+        const tableData = container.handsontable('getSourceData') || [];
+        const sampleRow = tableData.find((row) => row && `${row.census ?? ''}` !== '') || {};
+
+        for (let offset = 0; offset < amount; offset += 1) {
+          const targetIndex = index + offset;
+          const targetRow = tableData[targetIndex];
+
+          if (!targetRow || typeof targetRow !== 'object') {
+            continue;
+          }
+
+          targetRow.id = '';
+          targetRow.census = sampleRow.census ?? '';
+          targetRow.trap = targetRow.trap ?? '';
+          targetRow.csp = targetRow.csp ?? '';
+          targetRow.code = targetRow.code ?? '';
+          targetRow.count = targetRow.count ?? '';
+          targetRow.seeds = targetRow.seeds ?? '';
+          targetRow.viability = targetRow.viability ?? '';
+          targetRow.fragments = targetRow.fragments ?? '';
+          targetRow.sex = targetRow.sex ?? '';
+          targetRow.identifier = targetRow.identifier ?? sampleRow.identifier ?? '';
+          targetRow.note = targetRow.note ?? '';
+
+          if (tableType === 'data') {
+            targetRow.checknote = '';
+            targetRow.d = '';
+          }
+        }
+
+        container.handsontable('render');
+      }
     },
 
     afterChange: function (changes, source) {
@@ -239,6 +291,21 @@ function createHandsontable(container, columns, sourceData, saveButtonName, save
     });
   }
 
+  if (pageContext.plotType === 'fsseeds' && (tableType === 'data' || tableType === 'addseedsdata')) {
+    container.handsontable('updateSettings', {
+      contextMenu: {
+        items: {
+          row_above: {
+            name: '上方插入一列',
+          },
+          row_below: {
+            name: '下方插入一列',
+          },
+        },
+      },
+    });
+  }
+
   if (tableType === 'roll') {
     container.handsontable('updateSettings', {
       minSpareRows: 0,
@@ -260,6 +327,7 @@ function createHandsontable(container, columns, sourceData, saveButtonName, save
           entry: pageContext.entry,
           user: pageContext.user,
           plotType: pageContext.plotType,
+          currentCensus: typeof currentCensus !== 'undefined' ? currentCensus : null,
           thispage: thispage,
           pps: pageContext.pps,
         };
@@ -270,7 +338,22 @@ function createHandsontable(container, columns, sourceData, saveButtonName, save
       function(res) {
         handleSuccessAllTable(res, tableType, handsontable);
       },
-      function () {}
+      function (err) {
+        const noteSelector = pageContext.plotType === 'fsseeds'
+          ? '.seedssavenote'
+          : `.${noteProperty}`;
+        const detail = err?.response?.[noteProperty]
+          || err?.response?.seedssavenote
+          || err?.response?.datasavenote
+          || err?.response?.message
+          || err?.error
+          || '儲存失敗';
+        const tone = err?.response?.[`${noteProperty}_type`]
+          || err?.response?.seedssavenote_type
+          || err?.response?.datasavenote_type
+          || 'error';
+        pageContext.setNote(noteSelector, detail, tone);
+      }
     );
 
   });
@@ -348,7 +431,12 @@ function handleAlternote(stemid, entry, thispage, saveUrl) {
     function handleSuccess(res) {
           if (res.datasavenote !=''){
             if (pageContext.plotType === 'fsseedling' && window.seedlingPage?.setScopedNote) {
-              window.seedlingPage.setScopedNote('data', window.seedlingPage.currentSite(), res.datasavenote);
+              window.seedlingPage.setScopedNote(
+                'data',
+                window.seedlingPage.currentSite(),
+                res.datasavenote,
+                res.datasavenote_type || '',
+              );
             } else {
               pageContext.setNote('.datasavenote', res.datasavenote);
             }
@@ -383,7 +471,7 @@ function handleAlternote(stemid, entry, thispage, saveUrl) {
           || err?.xhr?.responseText
           || `${err?.status || ''} ${err?.error || '讀取失敗'}`;
         if (pageContext.plotType === 'fsseedling' && window.seedlingPage?.setScopedNote) {
-          window.seedlingPage.setScopedNote('alternote', window.seedlingPage.currentSite(), detail);
+          window.seedlingPage.setScopedNote('alternote', window.seedlingPage.currentSite(), detail, 'error');
         } else {
           pageContext.setNote('.altersavenote', detail);
         }
@@ -426,7 +514,12 @@ function handleDeleteAlternote(stemid, plotType, saveUrl){
       function handleSuccess(res) {
           if (res.datasavenote !=''){
             if (plotType === 'fsseedling' && window.seedlingPage?.setScopedNote) {
-              window.seedlingPage.setScopedNote('alternote', window.seedlingPage.currentSite(), res.datasavenote);
+              window.seedlingPage.setScopedNote(
+                'alternote',
+                window.seedlingPage.currentSite(),
+                res.datasavenote,
+                res.datasavenote_type || '',
+              );
             } else {
               pageContext.setNote('.altersavenote', res.datasavenote);
             }
@@ -458,7 +551,7 @@ function handleDeleteAlternote(stemid, plotType, saveUrl){
             || err?.xhr?.responseText
             || `${err?.status || ''} ${err?.error || '刪除失敗'}`;
           if (plotType === 'fsseedling' && window.seedlingPage?.setScopedNote) {
-            window.seedlingPage.setScopedNote('alternote', window.seedlingPage.currentSite(), detail);
+            window.seedlingPage.setScopedNote('alternote', window.seedlingPage.currentSite(), detail, 'error');
           } else {
             pageContext.setNote('.altersavenote', detail);
           }

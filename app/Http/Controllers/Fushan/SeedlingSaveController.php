@@ -30,6 +30,22 @@ use App\Jobs\SeedlingAddButton;
 
 class SeedlingSaveController extends Controller
 {
+    private function noteTypeFromMessage(string $message, bool $hasError = false): string
+    {
+        if ($message === '') {
+            return '';
+        }
+
+        return $hasError ? 'error' : 'success';
+    }
+
+    private function noteField(string $name, string $message, bool $hasError = false): array
+    {
+        return [
+            $name => $message,
+            $name . '_type' => $this->noteTypeFromMessage($message, $hasError),
+        ];
+    }
 
     public function getTableInstance($entry)
     {
@@ -112,7 +128,7 @@ class SeedlingSaveController extends Controller
         return [
             'result' => 'ok',
             'pass' => $pass,
-            'finishnote' => $finishnote
+            ...$this->noteField('finishnote', $finishnote, $pass !== '1')
         ];
     }
     //地被資料儲存
@@ -126,6 +142,7 @@ class SeedlingSaveController extends Controller
         $entry = $data_all['entry'];
 
         $covsavenote = '';
+        $hasCovError = false;
 
         $tablecov = $this->getTableInstanceCov($entry);
 
@@ -137,16 +154,19 @@ class SeedlingSaveController extends Controller
             //地被資料基本檢查
             if ($savecov[$i]['date'] == '0000-00-00') {
                 $covsavenote = '需有日期資料';
+                $hasCovError = true;
                 break;
             }
 
             if ($savecov[$i]['canopy'] == '' || $savecov[$i]['date'] == '' || $savecov[$i]['cov'] == '') {
                 $covsavenote = '資料有空白值';
+                $hasCovError = true;
                 break;
             }
 
             if ($savecov[$i]['cov'] < 0 || $savecov[$i]['cov'] > 100) {
                 $covsavenote = '覆蓋度資料有誤';
+                $hasCovError = true;
                 break;
             } else {
 
@@ -163,7 +183,7 @@ class SeedlingSaveController extends Controller
         return [
             'result' => 'ok',
             // 'covs' => $slcov,
-            'covsavenote' => $covsavenote
+            ...$this->noteField('covsavenote', $covsavenote, $hasCovError),
 
         ];
     }
@@ -182,6 +202,7 @@ class SeedlingSaveController extends Controller
         // // $temp=[];
         // $list='';
         $datasavenote = '';
+        $hasDataError = false;
 
         $table = $this->getTableInstance($entry);
 
@@ -201,16 +222,24 @@ class SeedlingSaveController extends Controller
 
             //修改tag  //如果是修改新增小苗的號碼，則mtag也要一起修改
             $alterdata = [];
-            $slrecord = $table::where('id', 'like', $data[$i]['id'])->get();
+            $slrecord = $table::where('id', 'like', $data[$i]['id'])->first();
 
-            if ($data[$i]['tag'] != $slrecord[0]['tag']) {
+            if (!$slrecord) {
+                $datasavenote = '找不到要儲存的小苗資料。';
+                $hasDataError = true;
+                break;
+            }
+
+            $slrecord = $slrecord->toArray();
+
+            if ($data[$i]['tag'] != $slrecord['tag']) {
                 $data[$i]['tag'] = strtoupper($data[$i]['tag']);
                 $mtag = explode('.', trim($data[$i]['tag']));
                 $data[$i]['mtag'] = $mtag[0];
             }
             //如果原本的status是N，後來不是N (A, G, D)，新增alternote說明
             //echo 'recruit: '.$data[$i]['recruit'];
-            if ($slrecord[0]['recruit'] == 'N' && $data[$i]['status'] != 'N') {
+            if ($slrecord['recruit'] == 'N' && $data[$i]['status'] != 'N') {
 
                 if ($data[$i]['alternote'] != '') {
                     $alterdata = json_decode($data[$i]['alternote'], true);  //把json轉array
@@ -220,7 +249,7 @@ class SeedlingSaveController extends Controller
                 $data[$i]['alternote'] = json_encode($alterdata, JSON_UNESCAPED_UNICODE);  //把array轉json
             }
 
-            // if ($data[$i]['ht'] !='-2' && $slrecord[0]['ht']!='-2'){
+            // if ($data[$i]['ht'] !='-2' && $slrecord['ht']!='-2'){
             //     $data[$i]['recruit'] ='S';
             // }
 
@@ -229,7 +258,7 @@ class SeedlingSaveController extends Controller
                 foreach ($data[$i] as $key => $value) {
                     // dd($key);
                     if (!in_array($key, ['user', 'entry', 'updated_at', 'updated_id', 'alternotetable'])) {
-                        if ($slrecord[0][$key] != $value) {
+                        if ($slrecord[$key] != $value) {
                             $uplist[$key] = trim($value);
                         }
                     }
@@ -246,6 +275,7 @@ class SeedlingSaveController extends Controller
                 }
             } else {
                 $datasavenote = $datacheck['datasavenote'];
+                $hasDataError = true;
                 break;
             }
         } //最外層
@@ -258,7 +288,7 @@ class SeedlingSaveController extends Controller
             // 'uplist' => $uplist,
             'data' => $redata,
             // 'list' => $list,
-            'datasavenote' => $datasavenote
+            ...$this->noteField('datasavenote', $datasavenote, $hasDataError)
 
         ];
     }
@@ -277,10 +307,13 @@ class SeedlingSaveController extends Controller
             $pps = 20;
         }
         $recruitsavenote = '';
+        $hasRecruitError = false;
         $nonsavelist = [];
         $appendRecruitNote = function (string $message) use (&$recruitsavenote) {
             $recruitsavenote .= ($recruitsavenote === '' ? '' : '<br>') . $message;
         };
+        $savedRecruitTag = null;
+        $savedRecruitTrap = null;
 
 
         $table = $this->getTableInstance($entry);
@@ -304,6 +337,7 @@ class SeedlingSaveController extends Controller
 
                 if ($recruit[$i]['plot'] == '' || $recruit[$i]['csp'] == '' || $recruit[$i]['ht'] == '' || $recruit[$i]['leafno'] == '') {
                     $appendRecruitNote('第' . ($i + 1) . '筆資料 資料不完整');
+                    $hasRecruitError = true;
                     $nonsavelist[$i] = $recruit[$i];
                     continue;
                 }
@@ -321,6 +355,7 @@ class SeedlingSaveController extends Controller
                     if ($seedling->isEmpty()) {
                         $datacheck['datasavenote'] = ($datacheck['datasavenote'] === '' ? '' : '<br>') . '第' . ($i + 1) . '筆 查無舊資料';
                         $datacheck['pass'] = "0";
+                        $hasRecruitError = true;
                     } else {
 
                         if ($recruit[$i]['x'] == '') {
@@ -339,6 +374,7 @@ class SeedlingSaveController extends Controller
                             if (in_array($key, $includeKeys)) {
                                 if ($seedling[0][$key] != $value) {
                                     $appendRecruitNote($recruit[$i]['tag'] . ' 漏資料，但基本資料 ' . $key . ' 與原始資料不符。以舊資料儲存，如需修改，請填寫特殊修改。');
+                                    $hasRecruitError = true;
                                     $recruit[$i][$key] = $seedling[0][$key];
                                 }
                             }
@@ -411,8 +447,11 @@ class SeedlingSaveController extends Controller
                     $table::insert($insert2);
 
                     $appendRecruitNote('第' . ($i + 1) . '筆資料已儲存');
+                    $savedRecruitTag = $recruit[$i]['tag'];
+                    $savedRecruitTrap = $recruit[$i]['trap'];
                 } else {  // $datacheck['pass']!=1
                     $appendRecruitNote($datacheck['datasavenote']);
+                    $hasRecruitError = true;
                     $nonsavelist[$i] = $recruit[$i];
                     // break;
 
@@ -426,11 +465,14 @@ class SeedlingSaveController extends Controller
         //重新載入資料
         $thispage = '1';
 
-        $redata = $this->getRedata($entry, $recruit[0]['trap']);
-        foreach ($redata as $key => $value) {
-            if ($value['tag'] == $recruit[0]['tag']) {
-                $thispage = (string) ceil(($key + 1) / $pps);
-                break;
+        $resultTrap = $savedRecruitTrap ?? ($recruit[0]['trap'] ?? null);
+        $redata = $resultTrap ? $this->getRedata($entry, $resultTrap) : [];
+        if ($savedRecruitTag !== null) {
+            foreach ($redata as $key => $value) {
+                if ($value['tag'] == $savedRecruitTag) {
+                    $thispage = (string) ceil(($key + 1) / $pps);
+                    break;
+                }
             }
         }
 
@@ -443,7 +485,7 @@ class SeedlingSaveController extends Controller
             'maxid' => $maxid,
             'nonsavelist' => $nonsavelist,
             // 'temp' => $temp,
-            'recruitsavenote' => $recruitsavenote
+            ...$this->noteField('recruitsavenote', $recruitsavenote, $hasRecruitError)
             // 'insert' => $insert2
 
 
@@ -478,7 +520,7 @@ class SeedlingSaveController extends Controller
             'thispage' => $thispage,
             'recruit' => $redata,
             'maxid' => $maxid,
-            'datasavenote' => $datasavenote
+            ...$this->noteField('datasavenote', $datasavenote)
         ];
     }
 
@@ -489,7 +531,9 @@ class SeedlingSaveController extends Controller
         $user = $request->user();
 
         $tableroll = $this->getTableInstanceRoll($entry);
+        $tablecov = $this->getTableInstanceCov($entry);
         $slrollsavenote = '';
+        $hasRollError = false;
         $slrolldata = request()->all();
         $slrollnew = $slrolldata['data'];
 
@@ -500,10 +544,20 @@ class SeedlingSaveController extends Controller
 
 
             if ($slrollnew[$i]['date'] == '') {
+                if (
+                    ($slrollnew[$i]['plot'] ?? '') !== ''
+                    || ($slrollnew[$i]['tag'] ?? '') !== ''
+                    || ($slrollnew[$i]['note'] ?? '') !== ''
+                ) {
+                    $slrollsavenote = '撿到環資料需填寫日期。';
+                    $hasRollError = true;
+                }
                 break;
             }
 
             if ($slrollnew[$i]['trap'] == '' || $slrollnew[$i]['plot'] == '' || $slrollnew[$i]['tag'] == '') {
+                $slrollsavenote = '撿到環資料有空白值。';
+                $hasRollError = true;
                 break;
             }
 
@@ -534,7 +588,12 @@ class SeedlingSaveController extends Controller
                 $insertvalue = '';
                 $insert2 = [];
                 $slrollnew[$i]['updated_at'] = date("Y-m-d H:i:s");
-                $cov = FsSeedlingSlcov1::first();
+                $cov = $tablecov::first();
+                if (!$cov) {
+                    $slrollsavenote = '找不到本次輸入對應的環境資料，無法儲存撿到環。';
+                    $hasRollError = true;
+                    break;
+                }
                 // 存檔
                 $slrollnew[$i]['month'] = $cov['month'];
                 $slrollnew[$i]['year'] = $cov['year'];
@@ -583,7 +642,7 @@ class SeedlingSaveController extends Controller
             'data' => $slroll,
             'text' => $slrollnew,
             'trap' => $trap,
-            'slrollsavenote' => $slrollsavenote
+            ...$this->noteField('slrollsavenote', $slrollsavenote, $hasRollError)
 
         ];
     }
@@ -621,7 +680,7 @@ class SeedlingSaveController extends Controller
             'result' => 'ok',
             'data' => $slroll,
             'trap' => $trap,
-            'slrollsavenote' => $slrollsavenote
+            ...$this->noteField('slrollsavenote', $slrollsavenote)
         ];
     }
 
@@ -657,6 +716,7 @@ class SeedlingSaveController extends Controller
             return response()->json([
                 'result' => 'error',
                 'datasavenote' => '找不到要儲存特殊修改的小苗資料。',
+                'datasavenote_type' => 'error',
             ], 404);
         }
 
@@ -701,7 +761,7 @@ class SeedlingSaveController extends Controller
 
         return [
             'result' => 'ok',
-            'datasavenote' => $datasavenote,
+            ...$this->noteField('datasavenote', $datasavenote),
             'data' => $redata,
             'maxid' => $maxid,
             'thispage' => $thispage
@@ -742,6 +802,7 @@ class SeedlingSaveController extends Controller
             return response()->json([
                 'result' => 'error',
                 'datasavenote' => '找不到要刪除特殊修改的小苗資料。',
+                'datasavenote_type' => 'error',
             ], 404);
         }
         $maxid = FsSeedlingSlrecord::count();
@@ -764,7 +825,7 @@ class SeedlingSaveController extends Controller
             'realterdata' => $realterdata,
             'havedata' => $havedata,
 
-            'datasavenote' => $datasavenote
+            ...$this->noteField('datasavenote', $datasavenote)
         ];
     }
 }

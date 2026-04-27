@@ -1,31 +1,25 @@
 @extends('layouts/seedling') 
 @section('pagejs')
-@php 
-
-echo "<script>
-const entry = ".$entry.";
-const user = '".$user."';
+<script>
 window.seedlingConfig = {
-  entry: ".$entry.",
-  user: ".json_encode($user).",
+  entry: @json($entry),
+  user: @json($user),
   plotType: 'fsseedling'
 };
 window.seedlingRoutes = {
-  base: ".json_encode(url('/admin/fushan/seedling')).",
-  recordPdfBase: ".json_encode(url('/admin/fushan/seedling/pdf/record')).",
-  saveCov: ".json_encode(route('admin.fushan.seedling.cov.save')).",
-  saveData: ".json_encode(route('admin.fushan.seedling.data.save')).",
-  saveRecruit: ".json_encode(route('admin.fushan.seedling.recruit.save')).",
-  alternoteSave: ".json_encode(route('admin.fushan.seedling.alternote.save')).",
-  finishBase: ".json_encode(url('/admin/fushan/seedling/finish')).",
-  slrollBase: ".json_encode(url('/admin/fushan/seedling/slroll')).",
-  dataDeleteBase: ".json_encode(url('/admin/fushan/seedling/data')).",
-  alternoteBase: ".json_encode(url('/admin/fushan/seedling/alternote')).",
-  alterDeleteBase: ".json_encode(url('/admin/fushan/seedling/alter'))."
+  base: @json(url('/admin/fushan/seedling')),
+  recordPdfBase: @json(url('/admin/fushan/seedling/pdf/record')),
+  saveCov: @json(route('admin.fushan.seedling.cov.save')),
+  saveData: @json(route('admin.fushan.seedling.data.save')),
+  saveRecruit: @json(route('admin.fushan.seedling.recruit.save')),
+  alternoteSave: @json(route('admin.fushan.seedling.alternote.save')),
+  finishBase: @json(url('/admin/fushan/seedling/finish')),
+  slrollBase: @json(url('/admin/fushan/seedling/slroll')),
+  dataDeleteBase: @json(url('/admin/fushan/seedling/data')),
+  alternoteBase: @json(url('/admin/fushan/seedling/alternote')),
+  alterDeleteBase: @json(url('/admin/fushan/seedling/alter'))
 };
-</script>";
-
-@endphp
+</script>
 
 <script>
   // var element = document.getElementById("#list1");

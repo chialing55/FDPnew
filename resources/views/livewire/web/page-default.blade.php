@@ -69,6 +69,33 @@
                 @endif
             </div>
         @endforeach
+
+        @if (($slug ?? null) === 'plants')
+            <div class="m-2 scroll-mt-24">
+                <div class="rounded-md border border-gray-300 bg-white px-6 py-4">
+                    <div class="items-start gap-6 md:grid md:grid-cols-[auto_1px_minmax(0,1fr)]">
+                        <div class="mb-2 flex items-start pr-4">
+                            <div class="mr-2 w-1 self-stretch bg-yellow-400"></div>
+                            <div class="min-w-[6rem] max-w-[10rem] whitespace-normal font-semibold leading-relaxed text-gray-800">
+                                福山樣區植物名錄
+                            </div>
+                        </div>
+
+                        <div class="mx-auto hidden h-full w-px bg-gray-300 md:block"></div>
+
+                        <div class="space-y-4">
+                            <div class="prose prose-sm max-w-none">
+                                <p>
+                                    <a href="{{ url('/web/splist') }}" target="_blank" rel="noopener">
+                                        前往福山樣區植物名錄
+                                    </a>
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        @endif
     </section>
 
 </div>

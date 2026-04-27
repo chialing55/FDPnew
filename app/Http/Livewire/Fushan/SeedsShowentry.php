@@ -197,7 +197,7 @@ class SeedsShowentry extends Component
     
     public function createTable($census){
 
-        $entrytable1=FsSeedsRecord1::query()->orderBy('trap', 'asc')->orderBy('csp', 'asc')->orderBy('code', 'asc')->get()->toArray();
+        $entrytable1=FsSeedsRecord1::query()->orderBy('id', 'asc')->get()->toArray();
 
         $ob_table = new SeedsAddButton;
         $entrytable=$ob_table->addbutton($entrytable1, 'record');

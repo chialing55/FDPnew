@@ -2,7 +2,6 @@
 
 namespace App\Http\Livewire\Fushan;
 
-use Illuminate\Http\Request;
 use Livewire\Component;
 use Livewire\WithPagination;
 use Illuminate\Support\Facades\DB;
@@ -22,7 +21,7 @@ class SeedlingCompare extends Component
 
 //小苗輸入完成後比對
     public $comnote;
-    public $compare;
+    public $statusNote;
     public $cov1=[];
     public $cov2=[];
 
@@ -58,13 +57,18 @@ class SeedlingCompare extends Component
 
        }
 
-       $this->compare=$comnote;
+       $this->statusNote=$comnote;
 
     }
 
 //輸入完成比對
-    public function compare(Request $request){
+    public function compare(){
         $comnote='';
+        $cov11 = [];
+        $cov21 = [];
+        $roll1 = [];
+        $roll2 = [];
+        $tagroll1 = [];
 
 
         //比對環境資料
@@ -84,16 +88,17 @@ class SeedlingCompare extends Component
             $pass1='1';
             $array=['year', 'month', 'date', 'cov', 'ht', 'canopy', 'note'];
             for ($j = 1; $j < 108; $j++) {
-                if ($j==42) continue;
+                if ($j==42 || !isset($cov11[$j]) || !isset($cov21[$j])) continue;
+
                 for ($i = 1; $i < (count($cov11[$j])+1); $i++) {
-                    
-                    foreach ($cov11[$j][$i] as $key => $value) {
-                        if (in_array($key, $array)){
-                            if ($cov21[$j][$i][$key] != $value) {
-                                $comnote.= '環境資料比對: 樣站 ' . $j . ' 有資料不合。<br>';
-                                $pass1 = '0';
-                                break 2; // 跳出兩層迴圈
-                            }
+                    if (!isset($cov11[$j][$i]) || !isset($cov21[$j][$i])) {
+                        continue;
+                    }
+
+                    foreach ($array as $key) {
+                        if (($cov21[$j][$i][$key] ?? null) != ($cov11[$j][$i][$key] ?? null)) {
+                            $comnote .= '環境資料比對: 樣站 ' . $j . ' plot ' . $i . ' 的 ' . $key . ' 資料不合。<br>';
+                            $pass1 = '0';
                         }
                     }
                 }
@@ -118,7 +123,6 @@ class SeedlingCompare extends Component
                     $record['id']='';
                     $record['updated_at']='';
                     $record['updated_id']='';
-                    $record['recruit']='';
                     $tag1[]=$record['tag'];
                     $record1[$record['tag']]=$record;
                 }
@@ -131,7 +135,6 @@ class SeedlingCompare extends Component
                     $record['id']='';
                     $record['updated_at']='';
                     $record['updated_id']='';
-                    $record['recruit']='';
                     $tag1[]=$record['tag'];
                     $record2[$record['tag']]=$record;
                 }
@@ -204,6 +207,7 @@ class SeedlingCompare extends Component
                     $comnote=$comnote.'小苗資料比對: 樣站 '.$note['trap']. ' tag '.$note['tag']." ".$note['note']."<br>";
                 }
 
+                $comnote .= "<br>";
 
                 
             }
@@ -242,19 +246,18 @@ class SeedlingCompare extends Component
             sort($tagroll2);
 //                     //比對
             $pass3='1';
+            $rollCompareFields = ['date', 'trap', 'plot', 'tag'];
 
             for ($i=0; $i<count($tagroll2);$i++){
                 if (isset($roll1[$tagroll2[$i]])){
                     if (isset($roll2[$tagroll2[$i]])){  //12都有
-                        foreach ($roll1[$tagroll2[$i]] as $key => $value){
-                            if ($roll2[$tagroll2[$i]][$key]!=$value){
+                        foreach ($rollCompareFields as $key){
+                            if (($roll2[$tagroll2[$i]][$key] ?? null) != ($roll1[$tagroll2[$i]][$key] ?? null)){
 
-                                $add3=" [".$key.", (".$value."), (".$roll2[$tagroll2[$i]][$key].")]";  
+                                $add3="[".$key."]";  
                                 // $add3='['.$key.']';
                                 $comnote=$comnote.'撿到環資料比對: 樣站 '.$roll1[$tagroll2[$i]]['trap'].' tag '.$roll1[$tagroll2[$i]]['tag'].' 的 '.$add3.' 資料不合。<br>';
                                 $pass3='0';
-                                break 2;
-
                             }
                         }
 
@@ -274,7 +277,7 @@ class SeedlingCompare extends Component
       
 
         $this->comnote=$comnote;
-        $request->session()->put('comnote', $comnote);
+        session()->put('comnote', $comnote);
         // dd('q');
     }
 

@@ -1,10 +1,5 @@
 @extends('layouts/seedling') 
 @section('pagejs')
-@php 
-
-
-@endphp
-
 <script>
   // var element = document.getElementById("#list1");
   // element.classList.add("now");

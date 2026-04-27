@@ -1,5 +1,5 @@
 @php
-    $personlist = ['', '黃小俊'];
+    $personlist = ['', '黃小俊', '張楊家豪'];
 
 @endphp
 
@@ -122,6 +122,7 @@
         <div id='simplenote' class='text_box2'>
             <ul>
                 <li><b>輸入資料後需按 <button class='datasavebutton' style='width: auto;'>儲存</button> ，才能確實將資料儲存。</b></li>
+                <li>在欄位中按右鍵可以新增一列，亦可直接點選 <button class='datasavebutton' style='width: auto;'>開啟新空白頁</button> 來新增資料。</li>
                 <li>Trap欄位會自動在左側補0。</li>
                 <li>若出現新增種類，請洽管理員更新物種名單。</li>
                 <li>不確定種類，一律輸入「<b>UNKUNK</b>」，並將疑似種類名稱寫在 note。</li>
@@ -129,7 +130,7 @@
                 <li>不需記錄種子數、活性、碎片3數量時，可填入 0 或保留空白(系統會自動補 0)。</li>
                 <li><span class='line'>長葉木薑子</span>的花，需記錄性別 F / M / MF。</li>
                 <li>若不符合規則，會在檢查欄位顯示錯誤之處，若未更改，將無法完成輸入。</li>
-                <li><b>輸入完成後請按下<button class='datasavebutton' style='width: auto;'>輸入完成</button></b>，檢查通過後，即會將資料匯入大表。
+                <li><b>輸入完成後請按下 <button class='datasavebutton' style='width: auto;'>輸入完成</button></b>，檢查通過後，即會將資料匯入大表。
                 </li>
             </ul>
         </div>
@@ -143,13 +144,20 @@
                     <div class='pagenote'></div>
                     <div class='prev'>上一頁</div>
                     <div class='next'>下一頁</div>
+                    <div style='margin-left: 20px; display:flex; align-items:center; gap:8px;'>
+                        <label for='seeds-sort-mode'>排序方式</label>
+                        <select id='seeds-sort-mode' data-seeds-sort-select>
+                            <option value='input' selected>輸入順序</option>
+                            <option value='trap'>Trap / csp / code</option>
+                        </select>
+                    </div>
                     <div style='margin-left: 20px;'><button name='creattable'>開啟新空白頁</button></div>
                 </div>
-                <div class='seedssavenote savenote'></div>
+                <div class='seedssavenote app-feedback-note'></div>
                 <p style='margin-button:5px; text-align: center'><button name='datasave{{ $thiscensus }}'
                         class='datasavebutton' style='width:550px'>儲存</button></p>
                 <div id='datatable{{ $thiscensus }}' class='fs100'></div>
-                <div class='seedssavenote savenote'></div>
+                <div class='seedssavenote app-feedback-note'></div>
                 <p style='margin-top:5px; text-align: center'><button name='datasave{{ $thiscensus }}'
                         class='datasavebutton' style='width:550px'>儲存</button></p>
             </div>
@@ -162,7 +170,7 @@
                 <div id='seedstable_empty{{ $thiscensus }}' class='fs100'>
 
                 </div>
-                <div class='seedssavenote savenote'></div>
+                <div class='seedssavenote app-feedback-note'></div>
                 <p style='margin-top:5px; text-align: center'><button name='newdatasave{{ $thiscensus }}'
                         class='datasavebutton' style='width:550px'>儲存</button></p>
             </div>
@@ -170,7 +178,7 @@
         </div>
         <div style='margin-top: 20px;'>
             <button class='finish finishbutton' onclick="finish()">輸入完成</button>
-            <span class='finishnote savenote'></span>
+            <span class='finishnote app-feedback-note'></span>
 
 
         </div>

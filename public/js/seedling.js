@@ -15,20 +15,12 @@ const resolveSeedlingEntry = () => {
         }
     }
 
-    if (typeof entry !== "undefined" && entry !== null && entry !== "") {
-        return `${entry}`;
-    }
-
     return null;
 };
 
 const resolveSeedlingUser = () => {
     if (seedlingConfig.user !== undefined && seedlingConfig.user !== null) {
         return seedlingConfig.user;
-    }
-
-    if (typeof user !== "undefined") {
-        return user;
     }
 
     return "";
@@ -135,12 +127,25 @@ const seedlingPage = (window.seedlingPage = window.seedlingPage || {
             ? "success"
             : "error";
     },
-    applyNoteTone(target, message) {
+    resolveNoteTone(message, explicitTone = "") {
+        if (explicitTone === "success" || explicitTone === "error") {
+            return explicitTone;
+        }
+
+        return this.noteTone(message);
+    },
+    notePayload(response, fieldName) {
+        return {
+            message: response?.[fieldName] || "",
+            tone: response?.[`${fieldName}_type`] || "",
+        };
+    },
+    applyNoteTone(target, message, explicitTone = "") {
         if (!target || !target.length) {
             return;
         }
 
-        const tone = this.noteTone(message);
+        const tone = this.resolveNoteTone(message, explicitTone);
         target.removeClass("app-feedback-note--success app-feedback-note--error");
 
         if (tone === "success") {
@@ -154,10 +159,10 @@ const seedlingPage = (window.seedlingPage = window.seedlingPage || {
         notes.html("");
         notes.removeClass("app-feedback-note--success app-feedback-note--error");
     },
-    setNote(selector, message) {
+    setNote(selector, message, tone = "") {
         const target = $(selector);
         target.html(message || "");
-        this.applyNoteTone(target, message);
+        this.applyNoteTone(target, message, tone);
     },
     currentSite() {
         return (
@@ -203,11 +208,11 @@ const seedlingPage = (window.seedlingPage = window.seedlingPage || {
 
         return scope.find(noteClassMap[type]);
     },
-    setScopedNote(type, site, message) {
+    setScopedNote(type, site, message, tone = "") {
         const target = this.scopedNoteSelector(type, site);
         if (target.length) {
             target.html(message || "");
-            this.applyNoteTone(target, message);
+            this.applyNoteTone(target, message, tone);
             return;
         }
 
@@ -219,7 +224,7 @@ const seedlingPage = (window.seedlingPage = window.seedlingPage || {
             alternote: ".altersavenote",
             finish: ".finishnote",
         };
-        this.setNote(fallbackClassMap[type] || "", message);
+        this.setNote(fallbackClassMap[type] || "", message, tone);
     },
     paginationElements(site = null) {
         const scope = this.scope("data", site);
@@ -260,17 +265,65 @@ const seedlingPage = (window.seedlingPage = window.seedlingPage || {
     },
 });
 
-const urlbase = seedlingPage.routes.base;
 var plotType = seedlingPage.context.plotType;
 var thispage = seedlingPage.state.thispage;
 
 $(".button1")
     .off("click.seedling")
-    .on("click.seedling", function () {
-    var start = $("#start").val();
-    var end = $("#end").val();
+    .on("click.seedling", function (event) {
+    event.preventDefault();
 
-    location.href = seedlingPage.route("recordPdf", start, end);
+    const startRaw = `${$("#start").val() ?? ""}`.trim();
+    const endRaw = `${$("#end").val() ?? ""}`.trim();
+
+    if (startRaw === "" || endRaw === "") {
+        alert("請輸入起始與結束樣站。");
+        if (startRaw === "") {
+            $("#start").trigger("focus");
+        } else {
+            $("#end").trigger("focus");
+        }
+        return;
+    }
+
+    if (!/^\d+$/.test(startRaw) || !/^\d+$/.test(endRaw)) {
+        alert("樣站範圍請輸入正整數。");
+        if (!/^\d+$/.test(startRaw)) {
+            $("#start").trigger("focus");
+        } else {
+            $("#end").trigger("focus");
+        }
+        return;
+    }
+
+    const start = Number(startRaw);
+    const end = Number(endRaw);
+
+    if (start < 1 || end < 1) {
+        alert("樣站範圍需大於 0。");
+        if (start < 1) {
+            $("#start").trigger("focus");
+        } else {
+            $("#end").trigger("focus");
+        }
+        return;
+    }
+
+    if (start > end) {
+        alert("起始樣站不可大於結束樣站。");
+        $("#start").trigger("focus");
+        return;
+    }
+
+    const url = seedlingPage.route("recordPdf", start, end);
+    const link = document.createElement("a");
+    link.href = url;
+    link.target = "_blank";
+    link.rel = "noopener";
+    link.style.display = "none";
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
     });
 
 $(".listlink")
@@ -285,9 +338,6 @@ $(".listlink")
 // 使用
 handleHoverEvents(".list4", ".list4inner");
 // handleHoverEvents('.list6', '.list6inner');
-
-var plotType = "fsseedling";
-var thispage = 1;
 
 document.addEventListener("livewire:init", () => {
     if (window.__boundSeedlingEvents) return;
@@ -320,9 +370,6 @@ document.addEventListener("livewire:init", () => {
                 csplist,
                 thispage: 1,
             });
-            window.maxid = maxid;
-            window.csplist = csplist;
-
             // $(".save2").unbind();
             $(".save2").off(); // 建議用 off()（jQuery 新寫法）
 
@@ -340,6 +387,7 @@ document.addEventListener("livewire:init", () => {
 
 function handleSuccessAllTable(res, tableType, handsontable) {
     var noteProperty = `${tableType}savenote`;
+    const notePayload = seedlingPage.notePayload(res, noteProperty);
     const site =
         res?.trap ||
         res?.data?.[0]?.trap ||
@@ -347,7 +395,7 @@ function handleSuccessAllTable(res, tableType, handsontable) {
         res?.covs?.[0]?.trap ||
         seedlingPage.currentSite();
 
-    if (res[noteProperty] != "") {
+    if (notePayload.message != "") {
         const noteTypeMap = {
             cov: "cov",
             data: "data",
@@ -357,9 +405,9 @@ function handleSuccessAllTable(res, tableType, handsontable) {
         };
         const mappedType = noteTypeMap[tableType];
         if (mappedType) {
-            seedlingPage.setScopedNote(mappedType, site, res[noteProperty]);
+            seedlingPage.setScopedNote(mappedType, site, notePayload.message, notePayload.tone);
         } else {
-            seedlingPage.setNote(`.${noteProperty}`, res[noteProperty]);
+            seedlingPage.setNote(`.${noteProperty}`, notePayload.message, notePayload.tone);
         }
     }
 
@@ -368,16 +416,18 @@ function handleSuccessAllTable(res, tableType, handsontable) {
     } else if (tableType === "recruit") {
         handsontable.updateData(res.nonsavelist);
         if (res.recruit.length != 0) {
-            fsseedlingtableupdate(
+            reloadSeedlingDataTable(
                 res.recruit,
                 res.thispage,
                 seedlingPage.state.pps,
                 res.maxid,
+                true,
             );
         }
     } else if (tableType === "alternote") {
-        if (res.datasavenote != "") {
-            seedlingPage.setScopedNote("alternote", site, res.datasavenote);
+        const alternotePayload = seedlingPage.notePayload(res, "datasavenote");
+        if (alternotePayload.message != "") {
+            seedlingPage.setScopedNote("alternote", site, alternotePayload.message, alternotePayload.tone);
         }
         seedlingPage.setScopedNote("data", site, "");
         fsseedlingtableupdate(
@@ -416,6 +466,112 @@ function cellfunction(tableType, container, row, col, prop) {
         return cellProperties;
     }
 }
+
+function reloadSeedlingDataTable(data, thispage, pps, maxid, forceRebuild = false) {
+    if (!Array.isArray(data) || data.length === 0) {
+        return;
+    }
+
+    const site = `${data[0].trap}`;
+    const panel = seedlingPage.scope("data", site);
+    const container = $(`#datatable${site}`);
+    const emptyNote = panel.find(".seedling-empty-note").first();
+    const tableShell = panel.find(".seedling-data-table-shell").first();
+
+    if (emptyNote.length) {
+        emptyNote.hide();
+    }
+
+    if (tableShell.length) {
+        tableShell.show();
+    }
+
+    if (!forceRebuild && container.length && container.data("handsontable")) {
+        fsseedlingtableupdate(data, thispage, pps, maxid);
+        return;
+    }
+
+    if (container.length && container.handsontable("getInstance")) {
+        container.handsontable("destroy");
+    }
+
+    requestAnimationFrame(() => {
+        fsseedlingtable(data, thispage, pps, maxid);
+    });
+}
+
+function showSeedlingEmptyState(site) {
+    const panel = seedlingPage.scope("data", site);
+    const container = $(`#datatable${site}`);
+    const emptyNote = panel.find(".seedling-empty-note").first();
+    const tableShell = panel.find(".seedling-data-table-shell").first();
+    const pagination = seedlingPage.paginationElements(site);
+
+    if (container.length && container.handsontable("getInstance")) {
+        container.handsontable("destroy");
+    }
+
+    if (tableShell.length) {
+        tableShell.hide();
+    }
+
+    if (emptyNote.length) {
+        emptyNote.show();
+    }
+
+    pagination.totalnum.html("");
+    pagination.pagenote.hide().html("");
+    pagination.prev.hide().removeAttr("thispage");
+    pagination.next.hide().removeAttr("thispage");
+    pagination.pageSize.hide();
+    pagination.pages.hide();
+
+    seedlingPage.syncState({
+        record: [],
+        thispage: 1,
+    });
+}
+
+function toggleSeedlingRecruitPanel(site = null) {
+    const resolvedSite = site ?? seedlingPage.currentSite();
+    const panel = seedlingPage.scope("recruit", resolvedSite);
+
+    if (!panel.length) {
+        $(".recruittableout").toggle();
+        return;
+    }
+
+    const willOpen = !panel.is(":visible");
+    panel.toggle();
+
+    if (!willOpen) {
+        return;
+    }
+
+    seedlingPage.setScopedNote("recruit", resolvedSite, "");
+}
+
+function toggleSeedlingRollPanel(site = null) {
+    const resolvedSite = site ?? seedlingPage.currentSite();
+    const panel = seedlingPage.scope("roll", resolvedSite);
+
+    if (!panel.length) {
+        $(".slrolltableout").toggle();
+        return;
+    }
+
+    const willOpen = !panel.is(":visible");
+    panel.toggle();
+
+    if (!willOpen) {
+        return;
+    }
+
+    seedlingPage.setScopedNote("roll", resolvedSite, "");
+}
+
+window.toggleSeedlingRecruitPanel = toggleSeedlingRecruitPanel;
+window.toggleSeedlingRollPanel = toggleSeedlingRollPanel;
 
 function fscovtable(covs) {
     // console.log(covs);
@@ -459,7 +615,7 @@ function fscovtable(covs) {
         columns,
         covs,
         saveButtonName,
-        seedlingRoutes.saveCov || `${urlbase}/cov`,
+        seedlingPage.route("saveCov"),
         tableType,
         colWidths,
         hiddenColumns,
@@ -485,12 +641,19 @@ function deleteid(tag, entry, thispage) {
         var ajaxType = "post";
 
         function handleSuccess(res) {
-            if (res.datasavenote != "") {
+            const notePayload = seedlingPage.notePayload(res, "datasavenote");
+            if (notePayload.message != "") {
                 seedlingPage.setScopedNote(
                     "data",
                     res?.recruit?.[0]?.trap || site,
-                    res.datasavenote,
+                    notePayload.message,
+                    notePayload.tone,
                 );
+            }
+
+            if (!Array.isArray(res.recruit) || res.recruit.length === 0) {
+                showSeedlingEmptyState(site);
+                return;
             }
 
             fsseedlingtableupdate(
@@ -519,8 +682,6 @@ function fsseedlingtable(data, thispage, pps, maxid) {
     var site = `${data[0].trap}`;
     const pagination = seedlingPage.paginationElements(site);
     pagination.totalnum.html(`共有 ${data.length} 筆資料。`);
-
-    totalpage = Math.ceil(data.length / 20);
 
     var container = $(`#datatable${site}`);
     $(`button[name=datasave${site}]`).off();
@@ -610,8 +771,18 @@ function fsseedlingtable(data, thispage, pps, maxid) {
 
 function fsseedlingtableupdate(data, thispage, pps, maxid) {
     seedlingPage.setScopedNote("finish", null, "");
+    if (!Array.isArray(data) || data.length === 0) {
+        return;
+    }
+
     var site = `${data[0].trap}`;
     seedlingPage.syncState({ thispage, pps, maxid, record: data });
+    var container = $(`#datatable${site}`);
+
+    if (!container.length || !container.data("handsontable")) {
+        reloadSeedlingDataTable(data, thispage, pps, maxid, true);
+        return;
+    }
 
     var tableType = "data";
     dataTableUpdate(data, thispage, pps, plotType, tableType, site);
@@ -728,8 +899,9 @@ function deleteroll(tag, id, entry, trap) {
         var ajaxType = "post";
 
         function handleSuccess(res) {
-            if (res.slrollsavenote != "") {
-                seedlingPage.setScopedNote("roll", res.trap || trap, res.slrollsavenote);
+            const notePayload = seedlingPage.notePayload(res, "slrollsavenote");
+            if (notePayload.message != "") {
+                seedlingPage.setScopedNote("roll", res.trap || trap, notePayload.message, notePayload.tone);
             }
             fsrolltableupdate(res.data, res.trap);
         }
@@ -813,8 +985,8 @@ function openSeedlingAlternote(tag, entry, thispage) {
 }
 
 function canOpenSeedlingAlternoteAfterDataSave(res) {
-    const note = `${res?.datasavenote || ""}`.trim();
-    return note === "" || note === "資料已儲存";
+    const notePayload = seedlingPage.notePayload(res, "datasavenote");
+    return notePayload.tone !== "error";
 }
 
 function saveSeedlingDataBeforeAlternote(tag, entry, thispage) {
@@ -865,7 +1037,8 @@ function saveSeedlingDataBeforeAlternote(tag, entry, thispage) {
                 || err?.xhr?.responseJSON?.message
                 || err?.xhr?.responseText
                 || `${err?.status || ""} ${err?.error || "儲存失敗"}`;
-            seedlingPage.setScopedNote("data", currentSite, detail);
+            const tone = err?.xhr?.responseJSON?.datasavenote_type || "error";
+            seedlingPage.setScopedNote("data", currentSite, detail, tone);
         },
     );
 }
@@ -1160,7 +1333,12 @@ function finish(entry) {
 
     function handleSuccess(res) {
         if (res.finishnote != "") {
-            seedlingPage.setScopedNote("finish", null, res.finishnote);
+            seedlingPage.setScopedNote(
+                "finish",
+                null,
+                res.finishnote,
+                res.finishnote_type || "",
+            );
         }
     }
     makeAjaxRequest(saveUrl, ajaxData, ajaxType, handleSuccess, function () {});

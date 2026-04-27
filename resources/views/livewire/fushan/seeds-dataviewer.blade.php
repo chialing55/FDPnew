@@ -5,7 +5,11 @@
     </div>
         <h2>歷年種子資料檢視<span style="margin-left: 20px ; font-weight: 500; font-size: 70%;"> - : 所有資料</span></h2>
         <hr>
-        <table id='sptable' class='tablesorter'>
+        <table
+            id='sptable'
+            class='tablesorter'
+            wire:key="seeds-dataviewer-table-{{ $year }}-{{ $month }}-{{ $trap }}-{{ $code }}-{{ md5($species) }}-{{ count($data) }}"
+        >
             <thead>
                 <tr>
                     <th>year</th>
@@ -17,7 +21,7 @@
                 </tr>
                 <tr>
                     <td>
-                        <select name="year" class="fs100"  wire:model='year' wire:change="search($event.target.value, '{{$month}}', '{{$trap}}', '{{$species}}', '{{$code}}')">
+                        <select name="year" class="fs100"  wire:model='year' wire:change="search">
                             <option value="all"> - </option>
                             <option value="each"> 分年 </option>
                             @for ($i=2002; $i<=date('Y');$i++)
@@ -26,7 +30,7 @@
                         </select>
                     </td>
                     <td>
-                        <select name="year" class="fs100"  wire:model='month' wire:change="search('{{$year}}',$event.target.value,  '{{$trap}}', '{{$species}}', '{{$code}}')">
+                        <select name="month" class="fs100"  wire:model='month' wire:change="search">
                             <option value="all"> - </option>
                             <option value="each"> 分月 </option>
                             @for ($i=1; $i<=12;$i++)
@@ -35,19 +39,19 @@
                         </select>
                     </td>
                     <td>
-                        <select name="year" class="fs100"  wire:model='trap' wire:change="search('{{$year}}',  '{{$month}}',$event.target.value, '{{$species}}', '{{$code}}')">
+                        <select name="trap" class="fs100"  wire:model='trap' wire:change="search">
                             <option value="all"> - </option>
                             <option value="each" @if($trap=='each') selected=select  @endif> 分網 </option>
-                            @for ($i=1; $i<count($traps);$i++)
-                            <option value="{{$i}}">{{$i}} </option>
-                            @endfor
+                            @foreach($traps as $trapItem)
+                            <option value="{{$trapItem['trap']}}">{{$trapItem['trap']}} </option>
+                            @endforeach
                         </select>
                     </td>
                     <td>
-                        <input type="text" class="fs100" style='width: 100px;' wire:model='species' wire:change="search('{{$year}}', '{{$month}}', '{{$trap}}', $event.target.value, '{{$code}}')">
+                        <input type="text" class="fs100" style='width: 100px;' wire:model='species' wire:change="search">
                     </td>
                     <td>
-                        <select name="year" class="fs100"  wire:model='code' wire:change="search('{{$year}}', '{{$month}}','{{$trap}}', '{{$species}}',$event.target.value)">
+                        <select name="code" class="fs100"  wire:model='code' wire:change="search">
                             <option value="all"> - </option>
 @php 
  $codelist=[ '1' => '果', '2' => '種子', '3' => '附屬物', '4' => '碎片', '5' => '未熟果', '6' => '花', ];
@@ -66,9 +70,9 @@
             <tbody>
                 @foreach($data as $list)
                 @if($list['identified']=='Y')
-                    <tr onclick="window.open('/web/species/{{$list['sp']}}', '_blank')" style="cursor: pointer">
+                    <tr wire:key="seeds-viewer-{{ $list['year'] }}-{{ $list['month'] }}-{{ $list['trap'] }}-{{ md5($list['csp']) }}" onclick="window.open('/web/species/{{$list['sp']}}', '_blank')" style="cursor: pointer">
                 @else
-                    <tr wire:click="openUnknown('/fushan/seeds/unknown', '{{$list['sp']}}')" style="cursor: pointer">
+                    <tr wire:key="seeds-viewer-{{ $list['year'] }}-{{ $list['month'] }}-{{ $list['trap'] }}-{{ md5($list['csp']) }}" wire:click="openUnknown('/fushan/seeds/unknown', '{{$list['sp']}}')" style="cursor: pointer">
                 @endif
                     <td>{{$list['year']}}</td>
                     <td>{{$list['month']}}</td>

@@ -1,4 +1,5 @@
 @extends('layouts/webpage')
+@section('title', '福山樣區植物名錄')
 @section('pagejs')
     <script>
         // var element = document.getElementById("#list1");

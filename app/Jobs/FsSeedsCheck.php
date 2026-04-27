@@ -9,13 +9,22 @@ class FsSeedsCheck
 {
     protected array $specialCSP = ['九芎', '凹葉越橘', '五節芒', 'UNKCOM1', 'UNKCOM2', 'UNKCOM3'];
 
-    public function check($record, $spinfo, $existingSigns = [])
+    public function check($record, $spinfo, $existingSigns = [], $originalSign = '')
     {
         $trap = intval($record['trap']);
         if ($trap < 1 || $trap > 107 || $trap == 42) return $this->fail($record, 'Trap 不正確');
         if ($record['csp'] == 'nothing') return $this->pass($record);
         if ($record['count'] == 0) return $this->fail($record, '數量 不得為 0。');
         if ($record['csp'] == '') return $this->fail($record, '種類 不得為 空白。');
+
+        $checksign = $record['census'] . $record['trap'] . $record['csp'] . $record['code'];
+        $duplicateCount = $existingSigns[$checksign] ?? 0;
+        if ($originalSign !== '' && $originalSign === $checksign) {
+            $duplicateCount -= 1;
+        }
+        if ($duplicateCount > 0) {
+            return $this->fail($record, '重複。');
+        }
 
         if (in_array($record['csp'], ['栲屬', '薹屬']) && $record['code'] != '6') {
             return $this->fail($record, '該種類之類別欄位應為 6。');
@@ -31,11 +40,6 @@ class FsSeedsCheck
             case '6': return $this->checkCode6($record);
             default: return $this->fail($record, '未知的類別。');
         }
-        $checksign = $record['census'] . $record['trap'] . $record['csp'] . $record['code'];
-        if (in_array($checksign, $existingSigns)) {
-            return $this->fail($record, '重複。');
-        }
-        return $this->pass($record);
     }
 
     protected function checkCode1(&$r, $spinfo)

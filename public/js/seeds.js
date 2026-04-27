@@ -1,15 +1,171 @@
 // console.log(type);
 //重新選擇工作項目
-let urlbase = '/admin/fsseeds';
+const seedsConfig = window.seedsConfig || {};
+const seedsRoutes = window.seedsRoutes || {};
+const urlbase = seedsRoutes.base || '/admin/fushan/seeds';
+const sectionBase = seedsRoutes.sectionBase || urlbase;
+const saveDataBase = seedsRoutes.saveDataBase || `${urlbase}/data`;
+const saveData1Base = seedsRoutes.saveData1Base || `${urlbase}/data1`;
+const deleteDataBase = seedsRoutes.deleteDataBase || `${urlbase}/data`;
+const finishUrl = seedsRoutes.finish || `${urlbase}/finish`;
+const currentUser = seedsConfig.user || '';
+const isAdmin = Boolean(seedsConfig.isAdmin);
+const defaultSeedsSortMode = seedsConfig.defaultSort === 'trap' ? 'trap' : 'input';
+
+let fdata = [];
+let seedsEmptyTable = [];
+let realemptytable = [];
+let seedsCsplist = [];
+let currentCensus = null;
+let ppsall = 29;
+const seedIdentifierOptions = ['黃小俊', '張楊家豪'];
+let seedsSortMode = defaultSeedsSortMode;
+let seedsInsertedHighlightIds = [];
+
+const seedsPage = {
+  context: {
+    entry: 1,
+    user: currentUser,
+    plotType: 'fsseeds',
+  },
+  state: {
+    pps: ppsall,
+    realemptytable,
+  },
+  noteTone(message, explicitTone = '') {
+    if (explicitTone === 'success' || explicitTone === 'error') {
+      return explicitTone;
+    }
+    return '';
+  },
+  applyNoteTone(target, message, explicitTone = '') {
+    if (!target || !target.length) {
+      return;
+    }
+
+    const tone = this.noteTone(message, explicitTone);
+    target.removeClass('app-feedback-note--success app-feedback-note--error');
+
+    if (tone === 'success') {
+      target.addClass('app-feedback-note--success');
+    } else if (tone === 'error') {
+      target.addClass('app-feedback-note--error');
+    }
+  },
+  clearNotes() {
+    const notes = $('.seedssavenote, .finishnote');
+    notes.html('');
+    notes.removeClass('app-feedback-note--success app-feedback-note--error');
+  },
+  setNote(selector, message, tone = '') {
+    const target = $(selector);
+    target.html(message || '');
+    this.applyNoteTone(target, message, tone);
+  },
+  syncState(nextState = {}) {
+    this.state = {
+      ...this.state,
+      ...nextState,
+    };
+  },
+};
+
+window.seedsPage = seedsPage;
+
+function normalizeSeedsSortValue(value) {
+  return `${value ?? ''}`.trim();
+}
+
+function compareSeedsNumericText(a, b) {
+  const textA = normalizeSeedsSortValue(a);
+  const textB = normalizeSeedsSortValue(b);
+  const numA = Number(textA);
+  const numB = Number(textB);
+  const isNumA = textA !== '' && Number.isFinite(numA);
+  const isNumB = textB !== '' && Number.isFinite(numB);
+
+  if (isNumA && isNumB && numA !== numB) {
+    return numA - numB;
+  }
+
+  return textA.localeCompare(textB, 'zh-Hant');
+}
+
+function getSeedsDisplayData() {
+  if (seedsSortMode !== 'trap') {
+    return [...fdata];
+  }
+
+  return [...fdata].sort((left, right) => {
+    const trapCompare = compareSeedsNumericText(left?.trap, right?.trap);
+    if (trapCompare !== 0) {
+      return trapCompare;
+    }
+
+    const cspCompare = compareSeedsNumericText(left?.csp, right?.csp);
+    if (cspCompare !== 0) {
+      return cspCompare;
+    }
+
+    return compareSeedsNumericText(left?.code, right?.code);
+  });
+}
+
+function setSeedsInsertedHighlights(ids = []) {
+  seedsInsertedHighlightIds = Array.isArray(ids)
+    ? ids.map((id) => `${id}`).filter((id) => id !== '')
+    : [];
+}
+
+function resolveSeedsTargetPage(displayData, insertedIds = [], fallbackPage = 1, pps = 29) {
+  const normalizedIds = Array.isArray(insertedIds)
+    ? insertedIds.map((id) => `${id}`).filter((id) => id !== '')
+    : [];
+
+  if (!normalizedIds.length) {
+    return fallbackPage;
+  }
+
+  const firstMatchIndex = displayData.findIndex((row) => normalizedIds.includes(`${row?.id ?? ''}`));
+  if (firstMatchIndex === -1) {
+    return fallbackPage;
+  }
+
+  return Math.floor(firstMatchIndex / pps) + 1;
+}
+
+function updateSeedsSortButtons() {
+  $('[data-seeds-sort-select]').val(seedsSortMode);
+}
+
+function renderSeedsTable(page = 1) {
+  const displayData = getSeedsDisplayData();
+  seedstable(displayData, page, 29, seedsEmptyTable);
+  updateSeedsSortButtons();
+}
+
+function currentSeedsPage() {
+  const current = Number($('.next').first().attr('thispage') || $('.prev').first().attr('thispage') || 1);
+  return Number.isFinite(current) && current > 0 ? current : 1;
+}
+
+function clampSeedsPage(dataLength, requestedPage, pps = 29) {
+  const totalPages = Math.max(1, Math.ceil((dataLength || 0) / pps));
+  const page = Number(requestedPage);
+  if (!Number.isFinite(page) || page < 1) {
+    return 1;
+  }
+
+  return Math.min(page, totalPages);
+}
 
 $('.listlink').on('click', function () {
   let type = $(this).attr('type');
-  console.log(type);
   if (typeof type != 'undefined') {
     if (type == 'websplist') {
       window.open('/web/splist', '_blank');
     } else {
-      location.href = (`/admin/fushan/seeds/${type}`);
+      location.href = `${sectionBase}/${type}`;
     }
 
   }
@@ -17,7 +173,20 @@ $('.listlink').on('click', function () {
 })
 
 
-$("#sptable").tablesorter();
+function refreshSeedsDataViewerTable() {
+  const $table = $("#sptable");
+  if (!$table.length) {
+    return;
+  }
+
+  if ($table.hasClass('tablesorter')) {
+    $table.trigger('destroy');
+  }
+
+  $table.tablesorter();
+}
+
+refreshSeedsDataViewerTable();
 
 //unknown照片顯示
 Fancybox.bind('[data-fancybox="gallery"]', {
@@ -43,14 +212,25 @@ var entry = 1;
 $(document).on('click', 'button[name=creattable]', function () {
   $('#seedstableout').hide();
   $('#seedstableout_empty').show();
-  $('.seedssavenote').html('');
+  seedsPage.setNote('.seedssavenote', '');
 });
 
 $(document).on('click', 'button[name=show_seedstable]', function () {
 
   $('#seedstableout').show();
   $('#seedstableout_empty').hide();
-  seedstable(fdata, 1, 29, emptytable);
+  renderSeedsTable(1);
+});
+
+$(document).on('change', '[data-seeds-sort-select]', function () {
+  const requestedMode = $(this).val();
+  if (!requestedMode || requestedMode === seedsSortMode) {
+    updateSeedsSortButtons();
+    return;
+  }
+
+  seedsSortMode = requestedMode;
+  renderSeedsTable(1);
 });
 
 
@@ -58,32 +238,48 @@ document.addEventListener('livewire:init', () => {
   if (window.__boundSeedsDataEvent) return;
   window.__boundSeedsDataEvent = true;
 
-  Livewire.on('data', ({ record, emptytable, census, csplist }) => {
+  Livewire.on('data', ({ record, emptytable: eventEmptytable, census: eventCensus, csplist: eventCsplist }) => {
     $('.entrytableout').show();
     $('.keepenter').hide();
     $('.dateinfo').hide();
 
     fdata = record;
-    emptytable = emptytable;
-    census = census;
-    csplist = csplist;
+    seedsEmptyTable = eventEmptytable;
+    currentCensus = eventCensus;
+    seedsCsplist = eventCsplist;
 
-    realemptytable = deepCopy(emptytable);
+    realemptytable = deepCopy(eventEmptytable);
+    seedsPage.syncState({
+      pps: ppsall,
+      realemptytable,
+    });
 
     if (fdata.length > 0) {
-      console.log('1');
       $('#seedstableout').show();
       $('#seedstableout_empty').hide();
 
-      seedstable(fdata, 1, 29, emptytable);
-      emptyseedstable(emptytable);
+      renderSeedsTable(1);
+      emptyseedstable(seedsEmptyTable);
     } else {
       $('#seedstableout').hide();
       $('#seedstableout_empty').show();
 
-      seedstable(fdata, 1, 29, emptytable);
-      emptyseedstable(emptytable);
+      renderSeedsTable(1);
+      emptyseedstable(seedsEmptyTable);
     }
+  });
+});
+
+document.addEventListener('livewire:initialized', () => {
+  if (!window.Livewire || typeof window.Livewire.hook !== 'function' || window.__boundSeedsViewerTableHook) {
+    return;
+  }
+
+  window.__boundSeedsViewerTableHook = true;
+  window.Livewire.hook('message.processed', () => {
+    requestAnimationFrame(() => {
+      refreshSeedsDataViewerTable();
+    });
   });
 });
 
@@ -93,16 +289,15 @@ function handleSuccessAllTable(res, tableType, handsontable) {
   var noteProperty = `${tableType}savenote`;
 
   if (res[noteProperty] != '') {
-    $(`.${noteProperty}`).html(res[noteProperty]);
+    seedsPage.setNote(`.${noteProperty}`, res[noteProperty], res[`${noteProperty}_type`] || '');
   }
 
   if (tableType === 'addseedsdata') {
     if (res.seedssavenote != '') {
-      $('.seedssavenote').html(res.seedssavenote);
+      seedsPage.setNote('.seedssavenote', res.seedssavenote, res.seedssavenote_type || '');
     }
     // console.log(emptytable);
     emptytable2 = deepCopy(realemptytable);
-    console.log(emptytable2);
     handsontable.updateData(emptytable2);
 
     totalpage = Math.ceil(res.data.length / 29);
@@ -110,15 +305,25 @@ function handleSuccessAllTable(res, tableType, handsontable) {
     $('#seedstableout').show();
     $('#seedstableout_empty').hide();
 
-    fsseedstableupdate(res.data, totalpage, 29);
     fdata = res.data;
+    setSeedsInsertedHighlights(res.inserted_ids || []);
+    const displayData = getSeedsDisplayData();
+    const targetPage = seedsSortMode === 'trap'
+      ? resolveSeedsTargetPage(displayData, res.inserted_ids, totalpage, 29)
+      : 1;
+    fsseedstableupdate(displayData, targetPage, 29);
   } else if (tableType == 'data') {
     if (res.seedssavenote != '') {
-      $('.seedssavenote').html(res.seedssavenote);
+      seedsPage.setNote('.seedssavenote', res.seedssavenote, res.seedssavenote_type || '');
     }
-    fsseedstableupdate(res.data, res.thispage, 29);
-    // console.log(thispage);
     fdata = res.data;
+    setSeedsInsertedHighlights(res.inserted_ids || []);
+    const displayData = getSeedsDisplayData();
+    const hasInsertedRows = Array.isArray(res.inserted_ids) && res.inserted_ids.length > 0;
+    const targetPage = (seedsSortMode === 'trap' && hasInsertedRows)
+      ? resolveSeedsTargetPage(displayData, res.inserted_ids, currentSeedsPage(), 29)
+      : currentSeedsPage();
+    fsseedstableupdate(displayData, targetPage, 29);
   }
 }
 
@@ -140,8 +345,15 @@ const sexValidator = (value, callback) => {
 
 function cellfunction(tableType, container, row, col, prop) {
   var cellProperties = {};
+  const classNames = [];
 
   if (tableType === 'data') {
+    const rowData = container.handsontable('getSourceDataAtRow', row);
+    const rowId = `${rowData?.id ?? ''}`;
+    if (seedsInsertedHighlightIds.includes(rowId)) {
+      classNames.push('seeds-new-row-highlight');
+    }
+
     var data = container.handsontable('getData');
 
     // 安全防呆檢查
@@ -149,8 +361,12 @@ function cellfunction(tableType, container, row, col, prop) {
       var curData = data[row][12];
 
       if (curData !== '') {
-        cellProperties.className = 'text-red-500';
+        classNames.push('text-red-500');
       }
+    }
+
+    if (classNames.length) {
+      cellProperties.className = classNames.join(' ');
     }
 
     return cellProperties;
@@ -159,8 +375,9 @@ function cellfunction(tableType, container, row, col, prop) {
 
 
 function emptyseedstable(emptytable) {
-
-  console.log(emptytable);
+  if (!Array.isArray(emptytable) || emptytable.length === 0) {
+    return;
+  }
 
   const site = emptytable[0]['census'];
   $(`button[name=newdatasave${site}]`).off();
@@ -172,7 +389,7 @@ function emptyseedstable(emptytable) {
     { data: "id" },
     { data: "census" },
     { data: "trap", allowInvalid: false },
-    { data: "csp", type: 'autocomplete', source: csplist, strict: true, visibleRows: 10, allowInvalid: false },
+    { data: "csp", type: 'autocomplete', source: seedsCsplist, strict: true, visibleRows: 10, allowInvalid: false },
     { data: "code", type: 'numeric', allowInvalid: false, validator: codeValidator },
     { data: "count", type: 'numeric', allowInvalid: false },
     { data: "seeds" },
@@ -180,7 +397,7 @@ function emptyseedstable(emptytable) {
     { data: "fragments", type: 'numeric', allowInvalid: false },
 
     { data: "sex", allowInvalid: false, validator: sexValidator },
-    { data: "identifier", type: 'autocomplete', source: ['蔡佳秀', '張楊家豪'], allowInvalid: true, visibleRows: 40 },
+    { data: "identifier", type: 'autocomplete', source: seedIdentifierOptions, allowInvalid: true, visibleRows: 20 },
     { data: "note" },
 
   ];
@@ -191,19 +408,20 @@ function emptyseedstable(emptytable) {
   var hiddenColumns = {
     columns: [0, 1],
   };
-  var handsontable = createHandsontable(container, columns, emptytable, saveButtonName, `${urlbase}/savedata1/record`, tableType, colWidths, hiddenColumns, colHeaders, thispage);
+  var handsontable = createHandsontable(container, columns, emptytable, saveButtonName, `${saveData1Base}/record`, tableType, colWidths, hiddenColumns, colHeaders, thispage);
 
 
   //更新大表
   container.parent().find(`button[name=newdatasave2${site}]`).click(function () {
-    $('.seedssavenote').html('');
+    seedsPage.clearNotes();
 
-    saveUrl2 = `${urlbase}/savedata1/fulldata`;
+    const saveUrl2 = `${saveData1Base}/fulldata`;
     var ajaxData = {
       data: handsontable.getSourceData(),
       entry: entry,
-      user: user,
+      user: currentUser,
       plotType: plotType,
+      currentCensus: currentCensus,
       thispage: thispage,
     };
     var ajaxType = 'post';
@@ -213,7 +431,14 @@ function emptyseedstable(emptytable) {
       function (res) {
         handleSuccessAllTable(res, tableType, handsontable);
       },
-      function () { }
+      function (err) {
+        const detail = err?.response?.seedssavenote
+          || err?.response?.message
+          || err?.error
+          || '儲存失敗';
+        const tone = err?.response?.seedssavenote_type || 'error';
+        seedsPage.setNote('.seedssavenote', detail, tone);
+      }
     );
 
   });
@@ -224,6 +449,9 @@ function emptyseedstable(emptytable) {
 
 
 function seedstable(data, thispage, pps, emptytable) {
+  if (!Array.isArray(emptytable) || emptytable.length === 0) {
+    return;
+  }
 
   // console.log(data);
   // const census=data[0]['census'];
@@ -243,7 +471,7 @@ function seedstable(data, thispage, pps, emptytable) {
     { data: "id" },
     { data: "census" },
     { data: "trap", allowInvalid: false },
-    { data: "csp", type: 'autocomplete', source: csplist, strict: true, visibleRows: 10, allowInvalid: false },
+    { data: "csp", type: 'autocomplete', source: seedsCsplist, strict: true, visibleRows: 10, allowInvalid: false },
     { data: "code", type: 'numeric', allowInvalid: false, validator: codeValidator },
     { data: "count", type: 'numeric', allowInvalid: false },
     { data: "seeds" },
@@ -251,7 +479,7 @@ function seedstable(data, thispage, pps, emptytable) {
     { data: "fragments", type: 'numeric', allowInvalid: false },
 
     { data: "sex", allowInvalid: false, validator: sexValidator },
-    { data: "identifier", type: 'autocomplete', source: ['蔡佳秀', '張楊家豪'], allowInvalid: true, visibleRows: 40 },
+    { data: "identifier", type: 'autocomplete', source: seedIdentifierOptions, allowInvalid: true, visibleRows: 20 },
     { data: "note" },
     { data: "checknote", readOnly: true },
     { data: "d", readOnly: true, renderer: "html" }
@@ -265,24 +493,22 @@ function seedstable(data, thispage, pps, emptytable) {
     columns: [0, 1],
   };
 
-  var handsontable = createHandsontable(container, columns, data2, saveButtonName, `${urlbase}/savedata/record`, tableType, colWidths, hiddenColumns, colHeaders, thispage);
+  var handsontable = createHandsontable(container, columns, data2, saveButtonName, `${saveDataBase}/record`, tableType, colWidths, hiddenColumns, colHeaders, thispage);
 
 
 
   //更新大表
   container.parent().find(`button[name=datasave2${site}]`).click(function () {
 
+    seedsPage.clearNotes();
 
-
-
-    $('.seedssavenote').html('');
-
-    saveUrl2 = `${urlbase}/savedata/fulldata`;
+    const saveUrl2 = `${saveDataBase}/fulldata`;
     var ajaxData = {
       data: handsontable.getSourceData(),
       entry: entry,
-      user: user,
+      user: currentUser,
       plotType: plotType,
+      currentCensus: currentCensus,
       thispage: thispage,
     };
     var ajaxType = 'post';
@@ -292,7 +518,14 @@ function seedstable(data, thispage, pps, emptytable) {
       function (res) {
         handleSuccessAllTable(res, tableType, handsontable);
       },
-      function () { }
+      function (err) {
+        const detail = err?.response?.seedssavenote
+          || err?.response?.message
+          || err?.error
+          || '儲存失敗';
+        const tone = err?.response?.seedssavenote_type || 'error';
+        seedsPage.setNote('.seedssavenote', detail, tone);
+      }
     );
 
   });
@@ -332,23 +565,33 @@ function fsseedstableupdate(data, thispage, pps) {
 function deleteid(id, info, thispage, type) {
 
   if (confirm('確定刪除 ' + info + ' 種子雨資料??')) {
-    $('.seedssavenote').html('');
+    seedsPage.clearNotes();
 
-    var saveUrl = `${urlbase}/deletedata/${id}/${info}/${thispage}/${type}`;
-    var ajaxData = {};
-    var ajaxType = 'get';
+    var saveUrl = `${deleteDataBase}/${id}/${info}/${thispage}/${type}`;
+    var ajaxData = { _method: 'DELETE' };
+    var ajaxType = 'post';
 
     function handleSuccess(res) {
       if (res.seedssavenote != '') {
-        $('.seedssavenote').html(res.seedssavenote);
+        seedsPage.setNote('.seedssavenote', res.seedssavenote, res.seedssavenote_type || '');
       }
-      fsseedstableupdate(res.data, res.thispage, 29);
+      setSeedsInsertedHighlights([]);
       fdata = res.data;
+      const displayData = getSeedsDisplayData();
+      const targetPage = clampSeedsPage(displayData.length, currentSeedsPage(), 29);
+      fsseedstableupdate(displayData, targetPage, 29);
     }
     makeAjaxRequest(
       saveUrl, ajaxData, ajaxType,
       handleSuccess,
-      function () { }
+      function (err) {
+        const detail = err?.response?.seedssavenote
+          || err?.response?.message
+          || err?.error
+          || '刪除失敗';
+        const tone = err?.response?.seedssavenote_type || 'error';
+        seedsPage.setNote('.seedssavenote', detail, tone);
+      }
     );
   }
 }
@@ -359,29 +602,34 @@ function deleteid(id, info, thispage, type) {
 function finish() {
   // console.log(entry);
 
-  var saveUrl = `${urlbase}/finish`;
+  var saveUrl = finishUrl;
   var ajaxData = {};
-  var ajaxType = 'get';
+  var ajaxType = 'post';
+  seedsPage.setNote('.finishnote', '');
 
   function handleSuccess(res) {
     if (res.finishnote != '') {
-      $('.finishnote').html(res.finishnote);
+      seedsPage.setNote('.finishnote', res.finishnote, res.finishnote_type || '');
     } else {
-      location.href = '/fushan/seeds/entry';
+      location.href = `${urlbase}/entry`;
     }
   }
   makeAjaxRequest(
     saveUrl, ajaxData, ajaxType,
     handleSuccess,
-    function () { }
+    function (err) {
+      const detail = err?.response?.finishnote
+        || err?.response?.message
+        || err?.error
+        || '輸入完成檢查失敗';
+      const tone = err?.response?.finishnote_type || 'error';
+      seedsPage.setNote('.finishnote', detail, tone);
+    }
   );
 }
 
 
-var userlist = ['chialing'];
-
-if (userlist.includes(user)) {
-  console.log(user);
+if (isAdmin) {
   $(".editunkDesShow").show();
   $(".editDesShow").show();
 }

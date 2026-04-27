@@ -114,6 +114,15 @@
 .app-feedback-note.savenote {
 	margin-left: 0;
 	font-size: 90%;
+	margin-top: 10px;
+	margin-bottom: 10px;
+}
+
+.app-feedback-note.savenote.app-feedback-note--success {
+	color: #14532d;
+}
+
+.app-feedback-note.savenote.app-feedback-note--error {
 	color: #8a2f00;
 }
 

@@ -5,11 +5,10 @@ use App\Http\Controllers\Web\WebIndexController;
 use App\Http\Controllers\Web\PageController;
 use App\Http\Controllers\Web\ResearchOutputController;
 
-// Route::prefix('web')->group(function () {
-//     Route::get('/splist', [WebIndexController::class, 'splist']);
-//     Route::get('/species/{spcode}', [WebIndexController::class, 'species']);
-//     Route::get('/taitest', [WebIndexController::class, 'taitest']);
-// });
+Route::prefix('web')->group(function () {
+    Route::get('/splist', [WebIndexController::class, 'splist'])->name('front.splist.legacy');
+    Route::get('/species/{spcode}', [WebIndexController::class, 'species'])->name('front.species.legacy');
+});
 
 
 // === 前台公開頁面 ===

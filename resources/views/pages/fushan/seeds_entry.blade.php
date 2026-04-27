@@ -1,13 +1,19 @@
 @extends('layouts/seeds') 
 @section('pagejs')
-@php 
-
-echo "<script>
-
-const user = '".$user."';
-</script>";
-
-@endphp
+<script>
+window.seedsConfig = {
+  user: @json($user),
+  isAdmin: @json((bool) auth()->user()?->is_admin)
+};
+window.seedsRoutes = {
+  base: @json(url('/admin/fushan/seeds')),
+  sectionBase: @json(url('/admin/fushan/seeds')),
+  saveDataBase: @json(url('/admin/fushan/seeds/data')),
+  saveData1Base: @json(url('/admin/fushan/seeds/data1')),
+  deleteDataBase: @json(url('/admin/fushan/seeds/data')),
+  finish: @json(url('/admin/fushan/seeds/finish'))
+};
+</script>
 
 <script>
   // var element = document.getElementById("#list1");

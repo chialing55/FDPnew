@@ -30,14 +30,14 @@
             <li>不確定種類，一律輸入「<b>UNKUNK</b>」，並將疑似種類名稱寫在 note。</li>
             <li>若為小種子植物的果實或種子，無法計算種子數量，種子數及活性欄位皆填NA。</li>
             <li>不需記錄種子數、活性、碎片3數量時，可填入 0 或保留空白(系統會自動補 0)。</li>
-            <li><span class='line'>長葉木薑子</span>的花，需記錄性別 F / M。</li>
+            <li><span class='line'>長葉木薑子</span>的花，需記錄性別 F / M / MF。</li>
             <li>若不符合規則，會在檢查欄位顯示錯誤之處。</li>
             <li><b>更新資料即為更新大表，請小心謹慎。</b></li>
             </ul>
         </div>
         <div class='entrytablediv'>
             {{-- <h2>測試</h2> --}}
-            <span class='seedssavenote savenote'></span>
+            <div class='seedssavenote app-feedback-note'></div>
            <div id='seedstableout' class='seedstable fs100'>
                 <div class='pages'>
                     <div class='totalnum'></div>
@@ -48,7 +48,7 @@
                 </div>
 
                 <div id='datatable{{$selectCensus}}' class='fs100' >
-                    <span class='datasavenote savenote'></span>
+                    <div class='seedssavenote app-feedback-note'></div>
                     <p style='margin-top:5px; text-align: center'><button name='datasave2{{$selectCensus}}' class='datasavebutton' style='width:550px'>儲存</button></p>
 
                 </div>
@@ -58,6 +58,7 @@
                     <button name='show_seedstable'>檢視輸入資料</button>
                 </div>
                 <div id='seedstable_empty{{$selectCensus}}' class='fs100' >
+                    <div class='seedssavenote app-feedback-note'></div>
                      
                     <p style='margin-top:5px; text-align: center'><button name='newdatasave2{{$selectCensus}}' class='datasavebutton' style='width:550px'>儲存</button></p>
 

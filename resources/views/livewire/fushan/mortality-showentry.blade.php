@@ -1,42 +1,5 @@
 <div id="mortality-entry-root">
-    <style>
-        .right {
-            margin: 0 16px;
-        }
-
-        #mortality-entry-root {
-            width: 100%;
-            margin: 0 auto;
-        }
-
-        #mortality-entry-root .mortality-entry-shell {
-            width: min(1500px, 98vw);
-            margin: 0 auto;
-            text-align: left;
-        }
-
-        #mortality-entry-hot-shell {
-            overflow-x: auto;
-        }
-
-        @media (max-width: 1500px) {
-            .right {
-                margin: 0;
-                padding-left: 10px;
-                padding-right: 10px;
-            }
-
-            #mortality-entry-root {
-                margin: 0 auto;
-            }
-
-            #mortality-entry-root .mortality-entry-shell {
-                margin: 0 auto;
-            }
-        }
-    </style>
-
-    <div class="mortality-entry-shell">
+    <div>
         <h2>{{ $surveyYear ?? '—' }} 年 第 {{ $currentCensus ?? '—' }} 次調查 - 第 {{ $entry }} 次資料輸入</h2>
 
         <div style="margin-top:10px;">
@@ -101,7 +64,7 @@
     </div>
 
     @if ($selectedMapSort !== null && $selectedMap !== null)
-        <div class='text_box mortality-entry-shell' style="margin:20px auto 0;">
+        <div class='text_box'>
             <form wire:submit.prevent="saveSurveyMeta"
                 style="display:flex; flex-direction:column; gap:12px; margin-bottom:14px; color:#334155; line-height:1.8;">
                 <div style="display:flex; align-items:center; gap:12px; flex-wrap:wrap;">
@@ -155,45 +118,45 @@
                 @endif
             </form>
         </div>
-        <div class='text_box mortality-entry-shell' style="margin:20px auto 0;">
+        <div class='text_box '>
 
-            <div style="margin-top:12px; color:#475569; line-height:1.8;">
-                {{-- <div>目前排序序號：{{ $selectedMapSort }}</div> --}}
-                <div style="display:flex; gap:16px; align-items:center; flex-wrap:wrap;">
-                    <span>共有 {{ $recordCount }} 筆資料。</span>
-                    <span id="mortality-page-note"></span>
-                    <span style="display:inline-block; min-width:52px;">
-                        <a href="#" id="mortality-page-prev"
-                            onclick="window.mortalityPrevPage && window.mortalityPrevPage(); return false;"
-                            style="visibility:hidden; color:#374151; text-decoration:none;">上一頁</a>
-                    </span>
-                    <span style="display:inline-block; min-width:52px;">
-                        <a href="#" id="mortality-page-next"
-                            onclick="window.mortalityNextPage && window.mortalityNextPage(); return false;"
-                            style="visibility:hidden; color:#374151; text-decoration:none;">下一頁</a>
-                    </span>
-                </div>
-                @if (!empty($entrySaveMessage))
-                    <div style="margin-top:8px; color:#166534;">{{ $entrySaveMessage }}</div>
-                @endif
-                @if (!empty($mainStatusMessage))
-                    <div style="margin-top:8px; color:#166534;">{{ $mainStatusMessage }}</div>
-                @endif
-                @if (!empty($entrySaveErrors))
-                    <div style="margin-top:8px; color:#b91c1c;">
-                        @foreach ($entrySaveErrors as $saveError)
-                            <div>{{ $saveError }}</div>
-                        @endforeach
+            <div id="mortality-entry-hot-shell" style="display:inline-flex; flex-direction:column; margin-top:12px;">
+                <div style="color:#475569; line-height:1.8; margin-bottom:12px;">
+                    {{-- <div>目前排序序號：{{ $selectedMapSort }}</div> --}}
+                    <div style="display:flex; gap:16px; align-items:center; flex-wrap:wrap;">
+                        <span>共有 {{ $recordCount }} 筆資料。</span>
+                        <span id="mortality-page-note"></span>
+                        <span style="display:inline-block; min-width:52px;">
+                            <a href="#" id="mortality-page-prev"
+                                onclick="window.mortalityPrevPage && window.mortalityPrevPage(); return false;"
+                                style="visibility:hidden; color:#374151; text-decoration:none;">上一頁</a>
+                        </span>
+                        <span style="display:inline-block; min-width:52px;">
+                            <a href="#" id="mortality-page-next"
+                                onclick="window.mortalityNextPage && window.mortalityNextPage(); return false;"
+                                style="visibility:hidden; color:#374151; text-decoration:none;">下一頁</a>
+                        </span>
                     </div>
-                @endif
-                {{-- <div>本頁尚未填寫 status 筆數：{{ $pendingCount }}</div>
-                <div>本頁輸入狀態：{{ $currentPageCompleted ? '已完成' : '尚未完成' }}</div> --}}
-            </div>
-            <div id="mortality-entry-hot-shell">
+                    @if (!empty($entrySaveMessage))
+                        <div style="margin-top:8px; color:#166534;">{{ $entrySaveMessage }}</div>
+                    @endif
+                    @if (!empty($mainStatusMessage))
+                        <div style="margin-top:8px; color:#166534;">{{ $mainStatusMessage }}</div>
+                    @endif
+                    @if (!empty($entrySaveErrors))
+                        <div style="margin-top:8px; color:#b91c1c;">
+                            @foreach ($entrySaveErrors as $saveError)
+                                <div>{{ $saveError }}</div>
+                            @endforeach
+                        </div>
+                    @endif
+                    {{-- <div>本頁尚未填寫 status 筆數：{{ $pendingCount }}</div>
+                    <div>本頁輸入狀態：{{ $currentPageCompleted ? '已完成' : '尚未完成' }}</div> --}}
+                </div>
                 @if (empty($records))
                     <div style="color:#475569;">這個 map 目前沒有資料。</div>
                 @else
-                    <div id="mortality-entry-hot" wire:ignore style="margin-top:10px;"></div>
+                    <div id="mortality-entry-hot" wire:ignore></div>
                     <p style="margin-top:5px; text-align:center;">
                         <button type="button" class="datasavebutton"
                             onclick="window.mortalitySavePage && window.mortalitySavePage(); return false;">
@@ -413,6 +376,21 @@
                 color: #334155;
                 cursor: pointer;
             }
+
+            #mortality-entry-hot .mortality-note-cell {
+                display: flex;
+                align-items: center;
+                gap: 6px;
+                min-width: 0;
+            }
+
+            #mortality-entry-hot .mortality-note-summary {
+                overflow: hidden;
+                text-overflow: ellipsis;
+                white-space: nowrap;
+                color: #334155;
+                font-size: 12px;
+            }
         </style>
 
         <script>
@@ -625,7 +603,11 @@
                     'Animal, other factors,<br> comments',
                 ];
 
-                const colWidths = [44, 54, 54, 86, 120, 60, 60, 70, 60, 72, 64, 64, 58, 68, 52, 66, 72, 62, 58, 68, 132];
+                const colWidths = [44, 54, 54, 86, 120, 60, 60, 58, 48, 58, 52, 52, 48, 54, 42, 54, 58, 52, 48, 54, 200];
+                const hiddenColumnIndexes = [0];
+                const visibleTableWidth = colWidths.reduce((total, width, index) => {
+                    return hiddenColumnIndexes.includes(index) ? total : total + width;
+                }, 38);
 
                 function expandMortalityCommentOptionSelect(select) {
                     Array.from(select.options).forEach((option) => {
@@ -731,23 +713,40 @@
                     Handsontable.renderers.TextRenderer.apply(this, arguments);
                     const source = instance.getSourceDataAtRow(row) || {};
                     td.innerHTML = '';
+                    const wrapper = document.createElement('div');
+                    wrapper.className = 'mortality-note-cell';
                     const button = document.createElement('button');
                     button.type = 'button';
-                    button.textContent = source.comments_json && source.comments_json.length ? '編輯備註' : '新增備註';
+                    button.innerHTML = "<i class='fa-regular fa-note-sticky'></i>";
+                    button.title = source.comments_json && source.comments_json.length ? '編輯備註' : '新增備註';
+                    button.setAttribute('aria-label', button.title);
                     button.className = 'mortality-note-button';
-                    button.style.width = '88px';
+                    button.style.width = '32px';
                     button.style.padding = '6px 8px';
                     button.addEventListener('click', (event) => {
                         event.preventDefault();
-                        openCommentsEditor(source);
+                        event.stopPropagation();
+                        openCommentsEditor(source, button);
                     });
-                    td.appendChild(button);
-                    td.style.textAlign = 'center';
+
+                    wrapper.appendChild(button);
+
+                    if (source.comments_summary) {
+                        const summary = document.createElement('span');
+                        summary.className = 'mortality-note-summary';
+                        summary.textContent = source.comments_summary;
+                        summary.title = source.comments_summary;
+                        wrapper.appendChild(summary);
+                    }
+
+                    td.appendChild(wrapper);
+                    td.style.textAlign = 'left';
                     return td;
                 }
 
-                function openCommentsEditor(source) {
-                    const componentId = findMortalityComponentId(container);
+                function openCommentsEditor(source, triggerElement = null) {
+                    const componentId = findMortalityComponentId(triggerElement || document.getElementById(
+                        'mortality-entry-root'));
 
                     if (!componentId || !window.Livewire || typeof window.Livewire.find !== 'function') {
                         return;
@@ -883,14 +882,14 @@
                         rowHeaders: true,
                         rowHeaderWidth: 38,
                         columnHeaderHeight: 138,
-                        width: '100%',
+                        width: visibleTableWidth,
                         height: 'auto',
                         stretchH: 'none',
                         manualColumnResize: true,
                         manualRowResize: true,
                         fixedColumnsStart: 0,
                         hiddenColumns: {
-                            columns: [0],
+                            columns: hiddenColumnIndexes,
                             indicators: false,
                         },
                         autoWrapRow: false,
@@ -953,6 +952,7 @@
                             return props;
                         },
                     });
+
                 }
 
                 function bindLivewireListener() {
@@ -999,6 +999,7 @@
                                     ...record,
                                     comments_json: payload.commentsJson || [],
                                     stem_corrections_json: payload.stemCorrectionsJson || [],
+                                    comments_summary: payload.commentsSummary || '',
                                 };
                             });
                         }

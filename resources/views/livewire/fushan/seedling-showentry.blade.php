@@ -23,9 +23,6 @@
         
             </select>
 
-            
-            
-
 
         @if (!$record)
         <span style='padding-left:20px'>*{{$entrynote}}</span>
@@ -87,9 +84,10 @@
         <li>狀態：<b>A</b>: 存活，<b>G</b>: 見環不見苗，<b>D</b>: 死亡，<b>N</b>: 消失。</li>
         <li>note：統一使用「中文」標點符號。「半形」英文符號。「半形」阿拉伯數字，數字後留一格空白。先確認原始 note，加「。」，再輸入本次note。不同類型 note 間用「。」分隔。暫時註記的內容(需特殊修改或撿到環等)，不需填入。</li>
         <li>特殊修改：如需要更正 Trap, Plot, Tag, 種類, 原長度和原葉片數，請點選「特殊修改 <i class='fa-regular fa-note-sticky'></i>」 填寫。</li>
+        <li>按「<i class='fa-regular fa-note-sticky'></i>」後，會先儲存資料，若有資料錯誤，請先修改後再填寫特殊修改。</li>
         <li>請參考輸入說明之特殊情況處理。</li>
         <li>需後端特殊處理的資料，請填寫 <a href='https://docs.google.com/spreadsheets/d/14MX9HtYQLqpHa5iQ9PBnJDfC1Qf5n4mio-wzF_k7MBU/edit?usp=sharing' target="_blank">福山小苗調查待後端更正的資料</a></li>
-        <li>資料輸入完成至Trap=107時，請按<button class='datasavebutton' style='width: auto;'>輸入完成</button>，以做最後檢查。</li>
+        <li>資料輸入完成至 Trap=107 時，請按<button class='datasavebutton' style='width: auto;'>輸入完成</button>，以做最後檢查。</li>
     </ul>
 </div>
 
@@ -100,14 +98,14 @@ $tableVar=$selectTrap;
 $alterOtherNote="";
 @endphp
 
-
-        @if($record[0]['tag']=='無')
-           <div style='margin:20px 0'><p>沒有舊資料</p></div>
-        
-        @else
     <div class='entrytablediv seedling-data-panel' data-seedling-data-site='{{$tableVar}}'>
+        @if($record[0]['tag']=='無')
+           <div class='seedling-empty-note' style='margin:20px 0'><p>沒有舊資料</p></div>
+        @endif
 
-@include('includes.str-main-entrytable')        
+        <div class='seedling-data-table-shell' @if($record[0]['tag']=='無') style='display:none;' @endif>
+@include('includes.str-main-entrytable')
+        </div>
         {{-- <h2>測試</h2> --}}
 {{--         <span class='seedlingsavenote savenote'></span>
        <div class='pages'> 
@@ -134,15 +132,14 @@ $alterOtherNote="";
         </div> --}}
 
     </div>
-        @endif   
 </div>            
 {{-- @include('livewire.'.$site.'.seedling-seedling-entry') --}}
 
         
 
 <div style='margin-left: 30px;'> 
-    <button class='recruit recruitbutton' onclick="$('.recruittableout').toggle();">新增苗</button> 
-    <button name='sroll' class="rollbutton" onclick="$('.slrolltableout').toggle();">撿到環</button>
+    <button class='recruit recruitbutton' onclick="toggleSeedlingRecruitPanel('{{$covs[0]['trap']}}')">新增苗</button> 
+    <button name='sroll' class="rollbutton" onclick="toggleSeedlingRollPanel('{{$covs[0]['trap']}}')">撿到環</button>
 @php
     $lastTrap = !empty($trapOptions) ? (string) $trapOptions[array_key_last($trapOptions)] : null;
 @endphp
@@ -150,7 +147,7 @@ $alterOtherNote="";
 
 <div style='margin-top: 20px;'>
 <button class='finish finishbutton' onclick="finish({{$entry}})">輸入完成</button>
-<span class='finishnote savenote'></span>
+<span class='finishnote savenote app-feedback-note'></span>
 
 
 </div>

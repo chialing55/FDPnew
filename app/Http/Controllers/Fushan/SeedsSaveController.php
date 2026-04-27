@@ -21,6 +21,98 @@ use App\Jobs\SeedsAddButton;
 
 class SeedsSaveController extends Controller
 {
+    protected function resolveSeedsPageById(array $rows, $targetId, int $perPage = 29): int
+    {
+        if (!$targetId || empty($rows)) {
+            return 1;
+        }
+
+        foreach ($rows as $index => $row) {
+            if (($row['id'] ?? null) == $targetId) {
+                return (int) floor($index / $perPage) + 1;
+            }
+        }
+
+        return 1;
+    }
+
+    protected function resolveSeedsCensus(string $type, array $row, ?string $fallbackCensus = null): string
+    {
+        if (($row['census'] ?? '') !== '') {
+            return $row['census'];
+        }
+
+        if (($fallbackCensus ?? '') !== '') {
+            return $fallbackCensus;
+        }
+
+        if ($type === 'record') {
+            return (string) (FsSeedsRecord1::query()->value('census') ?? '');
+        }
+
+        return (string) (FsSeedsFulldata::query()->value('census') ?? '');
+    }
+
+    protected function prepareInsertRow(array $row, array $spinfo, array $existingSigns, string $type, string $updatedBy, ?string $fallbackCensus = null): array
+    {
+        $row['census'] = $this->resolveSeedsCensus($type, $row, $fallbackCensus);
+        $row['trap'] = str_pad($row['trap'] ?? '', 3, '0', STR_PAD_LEFT);
+        if (($row['code'] ?? '') === '') {
+            $row['code'] = '0';
+        }
+        if (($row['count'] ?? '') === '') {
+            $row['count'] = '0';
+        }
+
+        unset($row['d']);
+
+        foreach ($row as $key => $val) {
+            if (is_string($val)) {
+                $row[$key] = trim($val);
+            }
+        }
+
+        $checker = new \App\Jobs\FsSeedsCheck;
+        $result = $checker->check($row, $spinfo, $existingSigns);
+        $checkedRow = $result['result'];
+        $checknote = $result['checknote'];
+
+        $inlist = [];
+        foreach ($checkedRow as $key => $value) {
+            if ($key === 'd') {
+                continue;
+            }
+            if ($value === null) {
+                $value = '';
+            }
+            if ($key === 'id') {
+                $value = '0';
+            }
+            $inlist[$key] = $value;
+        }
+
+        $inlist['checknote'] = $checknote;
+        $inlist['updated_id'] = $updatedBy;
+        $inlist['updated_at'] = now();
+
+        if ($type === 'fulldata') {
+            $inlist['id'] = '0';
+            if (isset($spinfo[$inlist['csp']])) {
+                $inlist['sp'] = $spinfo[$inlist['csp']]['sp'];
+                $inlist['identified'] = $spinfo[$inlist['csp']]['identified'];
+            } else {
+                $inlist['sp'] = '';
+                $inlist['identified'] = 'N';
+            }
+
+            FsSeedsFulldata::where('trap', $inlist['trap'])
+                ->where('csp', 'nothing')
+                ->where('census', $inlist['census'])
+                ->delete();
+        }
+
+        return $inlist;
+    }
 
 
     public function getTableInstance($type)
@@ -50,7 +142,7 @@ class SeedsSaveController extends Controller
     public function getRedata()
     {
 
-        $data1 = FsSeedsRecord1::query()->get()->toArray();
+        $data1 = FsSeedsRecord1::query()->orderBy('id')->get()->toArray();
         $ob_table = new SeedsAddButton;
         $redata = $ob_table->addbutton($data1, 'record');
 
@@ -60,7 +152,7 @@ class SeedsSaveController extends Controller
     public function getRedata2($census)
     {
 
-        $data1 = FsSeedsFulldata::where('census', 'like', $census)->orderby('trap')->get()->toArray();
+        $data1 = FsSeedsFulldata::where('census', 'like', $census)->orderBy('id')->get()->toArray();
         $ob_table = new SeedsAddButton;
         $redata = $ob_table->addbutton($data1, 'fulldata');
 
@@ -73,10 +165,11 @@ class SeedsSaveController extends Controller
         $table = $this->getTableInstance($type);
         $data_all = $request->all();
         $data = $data_all['data'];
-        $user = $data_all['user'];
+        $user = $request->user()?->name ?? '';
         $datasavenote = '';
 
         $spinfo = $this->spinfo();
+        $requestCensus = (string) ($request->input('currentCensus') ?? '');
         $ids = collect($data)->pluck('id')->filter()->unique()->toArray();
 
         // 一次取得舊資料，用 id 建立 map
@@ -84,20 +177,53 @@ class SeedsSaveController extends Controller
 
         // 一次建立所有 checksign（重複比對用）
         $census = $data[0]['census'] ?? '';
-        $existingSigns = ($type === 'record')
-            ? \App\Models\FsSeedsRecord1::selectRaw("CONCAT(census, trap, csp, code) AS sign")->pluck('sign')->toArray()
-            : \App\Models\FsSeedsFulldata::where('census', $census)
-            ->selectRaw("CONCAT(census, trap, csp, code) AS sign")->pluck('sign')->toArray();
+        $existingSigns = array_count_values(
+            ($type === 'record')
+                ? \App\Models\FsSeedsRecord1::selectRaw("CONCAT(census, trap, csp, code) AS sign")->pluck('sign')->toArray()
+                : \App\Models\FsSeedsFulldata::where('census', $census)
+                    ->selectRaw("CONCAT(census, trap, csp, code) AS sign")->pluck('sign')->toArray()
+        );
 
         $checker = new \App\Jobs\FsSeedsCheck;
         $lastUpdatedId = null;
+        $hasUpdatedRows = false;
+        $hasInsertedRows = false;
+        $insertedIds = [];
 
         foreach ($data as $item) {
             $id = $item['id'];
-            if (!isset($existingRows[$id])) continue;
+            if (!isset($existingRows[$id])) {
+                if (trim((string)($item['trap'] ?? '')) === '') {
+                    continue;
+                }
+
+                $inlist = $this->prepareInsertRow($item, $spinfo, $existingSigns, $type, $user, $requestCensus);
+                $newId = $table::insertGetId($inlist);
+                $lastUpdatedId = $newId;
+                $hasInsertedRows = true;
+                $insertedIds[] = $newId;
+
+                if ($type === 'fulldata') {
+                    $updatedes = [
+                        'trap' => $inlist['trap'],
+                        'csp' => $inlist['csp'],
+                        'code' => $inlist['code']
+                    ];
+                    \App\Models\FsSeedsFixlog::insert([
+                        'id' => 0,
+                        'type' => 'insert',
+                        'census' => $inlist['census'],
+                        'descript' => json_encode($updatedes, JSON_UNESCAPED_UNICODE),
+                        'updated_id' => $user,
+                        'updated_at' => now()
+                    ]);
+                }
+                continue;
+            }
 
             $original = $existingRows[$id];
             $item['trap'] = str_pad($item['trap'], 3, '0', STR_PAD_LEFT);
+            $originalSign = ($original['census'] ?? '') . ($original['trap'] ?? '') . ($original['csp'] ?? '') . ($original['code'] ?? '');
 
             $excludeFields = ['checknote', 'updated_at', 'updated_id'];
             $hasChange = false;
@@ -118,7 +244,7 @@ class SeedsSaveController extends Controller
                 }
             }
 
-            $result = $checker->check($item, $spinfo, $existingSigns);
+            $result = $checker->check($item, $spinfo, $existingSigns, $originalSign);
             $updated = $result['result'];
             $checknote = $result['checknote'];
 
@@ -132,7 +258,7 @@ class SeedsSaveController extends Controller
             $uplist['updated_id'] = $user;
 
             $table::where('id', $id)->update($uplist);
-            $datasavenote = '已更新資料';
+            $hasUpdatedRows = true;
             $lastUpdatedId = $id;
 
             if ($type === 'fulldata' && !empty($updatedes)) {
@@ -148,14 +274,21 @@ class SeedsSaveController extends Controller
             }
         }
 
+        if ($hasUpdatedRows && $hasInsertedRows) {
+            $datasavenote = '已更新並新增資料';
+        } elseif ($hasInsertedRows) {
+            $datasavenote = '已新增資料';
+        } elseif ($hasUpdatedRows) {
+            $datasavenote = '已更新資料';
+        }
+
         // 回傳更新後頁面與資料
         if ($type === 'record') {
             $redata = $this->getRedata();
-            $thispage = ceil($lastUpdatedId / 29);
+            $thispage = $this->resolveSeedsPageById($redata, $lastUpdatedId);
         } else {
             $redata = $this->getRedata2($data[0]['census']);
-            $k = ($lastUpdatedId - $redata[0]['id']) + 1;
-            $thispage = ceil($k / 29);
+            $thispage = $this->resolveSeedsPageById($redata, $lastUpdatedId);
         }
         if ($lastUpdatedId === null) {
             $thispage = 1; // 如果沒有更新，則回到第一頁
@@ -164,7 +297,9 @@ class SeedsSaveController extends Controller
             'result' => 'ok',
             'data' => $redata,
             'thispage' => $thispage,
-            'seedssavenote' => $datasavenote
+            'seedssavenote' => $datasavenote,
+            'seedssavenote_type' => $datasavenote !== '' ? 'success' : '',
+            'inserted_ids' => $insertedIds,
         ];
     }
 
@@ -174,6 +309,7 @@ class SeedsSaveController extends Controller
         $table = $this->getTableInstance($type);
         $data_all = $request->all();
         $data = $data_all['data'];
+        $requestCensus = (string) ($request->input('currentCensus') ?? '');
 
         $user = $request->user();
 
@@ -183,65 +319,27 @@ class SeedsSaveController extends Controller
         // 取得該 census 下所有現有資料（避免重複）
         $census = $data[0]['census'];
         if ($type === 'record') {
-            $existingSigns = FsSeedsRecord1::selectRaw("CONCAT(census, trap, csp, code) AS sign")->pluck('sign')->toArray();
+            $existingSigns = array_count_values(
+                FsSeedsRecord1::selectRaw("CONCAT(census, trap, csp, code) AS sign")->pluck('sign')->toArray()
+            );
         } else {
-            $existingSigns = FsSeedsFulldata::where('census', $census)
-                ->selectRaw("CONCAT(census, trap, csp, code) AS sign")
-                ->pluck('sign')
-                ->toArray();
+            $existingSigns = array_count_values(
+                FsSeedsFulldata::where('census', $census)
+                    ->selectRaw("CONCAT(census, trap, csp, code) AS sign")
+                    ->pluck('sign')
+                    ->toArray()
+            );
         }
 
-        $insertList = [];
+        $insertedIds = [];
         $fixlogList = [];
-        $checker = new \App\Jobs\FsSeedsCheck;
 
         foreach ($data as $row) {
             if (trim($row['trap']) === '') continue;
+            $inlist = $this->prepareInsertRow($row, $spinfo, $existingSigns, $type, $user->name, $requestCensus);
 
-            // 預設欄位處理
-            $row['trap'] = str_pad($row['trap'], 3, '0', STR_PAD_LEFT);
-            if ($row['code'] === '') $row['code'] = '0';
-            if ($row['count'] === '') $row['count'] = '0';
-            foreach ($row as $key => $val) {
-                if (is_string($val)) {
-                    $row[$key] = trim($val);
-                }
-            }
-            $result = $checker->check($row, $spinfo, $existingSigns);
-            $checkedRow = $result['result'];
-            $checknote = $result['checknote'];
-
-            // 組合 insert 資料
-            $inlist = [];
-            foreach ($checkedRow as $key => $value) {
-                if ($value === null) $value = '';
-                if ($key === 'id') $value = '0';
-                $inlist[$key] = $value;
-            }
-
-            $inlist['checknote'] = $checknote;
-            $inlist['updated_id'] = $user->name;
-            $inlist['updated_at'] = now();
-
-            // 補足物種資訊（fulldata）
-            if ($type === 'fulldata') {
-                $inlist['id'] = '0';
-                if (isset($spinfo[$inlist['csp']])) {
-                    $inlist['sp'] = $spinfo[$inlist['csp']]['sp'];
-                    $inlist['identified'] = $spinfo[$inlist['csp']]['identified'];
-                } else {
-                    $inlist['sp'] = '';
-                    $inlist['identified'] = 'N';
-                }
-
-                // 若有 nothing 資料，清掉
-                FsSeedsFulldata::where('trap', $inlist['trap'])
-                    ->where('csp', 'nothing')
-                    ->where('census', $inlist['census'])
-                    ->delete();
-            }
-
-            $insertList[] = $inlist;
+            $newId = $table::insertGetId($inlist);
+            $insertedIds[] = $newId;
 
             // 紀錄 fixlog（fulldata）
             if ($type === 'fulldata') {
@@ -255,15 +353,10 @@ class SeedsSaveController extends Controller
                     'type' => 'insert',
                     'census' => $inlist['census'],
                     'descript' => json_encode($updatedes, JSON_UNESCAPED_UNICODE),
-                    'updated_id' => $user,
+                    'updated_id' => $user->name,
                     'updated_at' => now()
                 ];
             }
-        }
-
-        // 寫入資料
-        if (!empty($insertList)) {
-            $table::insert($insertList);
         }
 
         if ($type === 'fulldata' && !empty($fixlogList)) {
@@ -294,7 +387,9 @@ class SeedsSaveController extends Controller
             'result' => 'ok',
             'data' => $redata,
             'emptytable' => $emptytable,
-            'seedssavenote' => '已新增資料'
+            'seedssavenote' => '已新增資料',
+            'seedssavenote_type' => 'success',
+            'inserted_ids' => $insertedIds,
         ];
     }
 
@@ -315,6 +410,7 @@ class SeedsSaveController extends Controller
             return [
                 'result' => 'error',
                 'message' => '指定資料不存在',
+                'seedssavenote_type' => 'error',
             ];
         }
 
@@ -384,8 +480,9 @@ class SeedsSaveController extends Controller
         return [
             'result' => 'ok',
             'data' => $redata,
-            'thispage' => 1,
+            'thispage' => $thispage,
             'seedssavenote' => $datasavenote,
+            'seedssavenote_type' => 'success',
         ];
     }
 
@@ -405,6 +502,7 @@ class SeedsSaveController extends Controller
             return [
                 'result' => 'ok',
                 'finishnote' => '有資料錯誤未更正',
+                'finishnote_type' => 'error',
             ];
         }
 
@@ -414,6 +512,7 @@ class SeedsSaveController extends Controller
             return [
                 'result' => 'ok',
                 'finishnote' => '無可匯入資料',
+                'finishnote_type' => 'error',
             ];
         }
 
@@ -494,6 +593,7 @@ class SeedsSaveController extends Controller
         return [
             'result' => 'ok',
             'finishnote' => '',
+            'finishnote_type' => '',
         ];
     }
 }

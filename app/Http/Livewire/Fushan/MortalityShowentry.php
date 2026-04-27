@@ -322,6 +322,7 @@ class MortalityShowentry extends Component
             recordId: $this->editingCommentRecordId,
             commentsJson: $commentsJson,
             stemCorrectionsJson: $stemCorrectionsJson,
+            commentsSummary: $this->summarizeComments($commentsJson),
             errorRecordIds: $draftResult['errorRecordIds']
         );
     }
@@ -570,6 +571,7 @@ class MortalityShowentry extends Component
                 $record->deformity = $record->deformity !== null ? (int) $record->deformity : null;
                 $record->rotten = $record->rotten !== null ? (int) $record->rotten : null;
                 $record->leaf_damage = $record->leaf_damage !== null ? (int) $record->leaf_damage : null;
+                $record->comments_summary = $this->summarizeComments(is_array($record->comments_json) ? $record->comments_json : []);
 
                 return $record->toArray();
             })->all()
@@ -967,6 +969,44 @@ class MortalityShowentry extends Component
         }
 
         return $payload;
+    }
+
+    private function summarizeComments(array $commentsJson): string
+    {
+        if (empty($commentsJson)) {
+            return '';
+        }
+
+        $commentIds = collect($commentsJson)
+            ->map(fn ($item) => (int) ($item['comment_id'] ?? 0))
+            ->filter()
+            ->unique()
+            ->values()
+            ->all();
+
+        $commentLabels = !empty($commentIds)
+            ? CommentOption::query()
+                ->whereIn('id', $commentIds)
+                ->pluck('comment_zh', 'id')
+                ->all()
+            : [];
+
+        return collect($commentsJson)
+            ->map(function ($item) use ($commentLabels) {
+                $text = trim((string) ($item['text'] ?? ''));
+                $commentId = (int) ($item['comment_id'] ?? 0);
+                $label = $commentId > 0
+                    ? trim((string) ($commentLabels[$commentId] ?? ''))
+                    : '';
+
+                if ($label !== '' && $text !== '') {
+                    return $label . '：' . $text;
+                }
+
+                return $label !== '' ? $label : $text;
+            })
+            ->filter(fn ($text) => trim((string) $text) !== '')
+            ->implode('；');
     }
 
     private function buildStemCorrectionPayload(array $items): array

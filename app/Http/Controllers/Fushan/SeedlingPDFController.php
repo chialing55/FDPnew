@@ -19,98 +19,210 @@ use App\Models\FsSeedlingData;
 class SeedlingPDFController extends Controller
 {
     public function record($start, $end){
-        // echo '1';
-        $slplot1=array();
+        $start = (int) $start;
+        $end = (int) $end;
 
-        // $slplot=FsSeedlingData::select('trap', 'plot')->whereBetween('trap', [$start, $end])->groupBy('trap', 'plot')->get();
-        // for($i=0; $i<count($slplot);$i++){
-        //     $slplot1[]=$slplot[$i]['trap']."-".$slplot[$i]['plot'];
-        // }
-
-        for ($i=$start; $i<$end+1; $i++){
-            for($j=1;$j<4; $j++){
-                $slplot1[]=$i."-".$j;
-            }
+        if ($start < 1 || $end < 1 || $start > $end) {
+            return redirect()->back()->with('alert', '請輸入正確的樣站範圍。');
         }
 
-        // print_r($slplot1);
-        // $starttp = array_search ($start."-1", $slplot1);
-        // $endtp = array_search ($end."-3", $slplot1);
+        $rangeData = $this->buildRangeData($start, $end);
 
-        $slrecord=FsSeedlingSlrecord::whereBetween('trap', [$start, $end])->orderBy('trap','asc')->orderBy('plot','asc')->orderBy('tag','asc')->get();
-        for($i=0; $i<count($slrecord);$i++){
-            $plot=$slrecord[$i]['trap']."-".$slrecord[$i]['plot'];
-            $slrecord[$i]['TP']=$plot;
-            $slrecord2[$plot][]=$slrecord[$i];
-            
+        if ($rangeData['record']->isEmpty()) {
+            return redirect()->back()->with('alert', '此範圍沒有可輸出的紀錄紙資料。');
         }
-        $length=count($slrecord)+count($slplot1);
-        $totalpage=ceil($length/31);
-        // print_r($slrecord2);
-//最大分支號
-        $maxbtable=FsSeedlingData::select('mtag', DB::raw('MAX(CAST(SUBSTRING_INDEX(tag, ".", -1) AS DECIMAL)) AS max_b'))->where('sprout', 'like', 'TRUE')->groupBy('mtag')->get();
-                   
-            
-        $maxb=[];
-        for($i=0; $i<count($maxbtable);$i++){
-            if ($maxbtable[$i]['max_b']!='0' && $maxbtable[$i]['max_b']<200){
-                $maxb[$maxbtable[$i]['mtag']]=$maxbtable[$i]['max_b'];
-            }
-        }
-// dd($slrecord);
-        if ($length>750){
-            return redirect()->back() ->with('alert', '資料過多，請重新選擇範圍');
 
-        } else {
+        $chunks = $this->buildSafeChunks($start, $end);
 
-            if ($slrecord[0]['census']%2==1){
-                $month='八';
-            } else { $month = '二';}
-            
-            $data = [
-                'title' => date('Y').' 年'.$month.'月第 '.$slrecord[0]['census'].' 次福山喬木小苗調查 ('.$start."-".$end.")",
-                'record' => $slrecord2,
-                'maxb' => $maxb,
-                'plot' => $slplot1,
-                'numPagesTotal' => $totalpage,
+        if (count($chunks) > 1) {
+            return view('pages.fushan.seedling_record_split', [
+                'site' => 'fushan',
+                'project' => '小苗',
+                'user' => auth()->user()?->name ?? '',
+                'title' => '小苗紀錄紙分段下載',
                 'start' => $start,
-                'end' => $end
-            ];
-
-
-            $pdf = PDF::loadView('pages.fushan.seedling_record', $data)->setPaper('A4', 'landscape');
-            $pdf ->set_option( 'isFontSubsettingEnabled' , true );
-            // $options = [
-            //     'margin-top' => 10,    // 上邊界
-            //     'margin-right' => 10,  // 右邊界
-            //     'margin-bottom' => 20, // 下邊界
-            //     'margin-left' => 10,   // 左邊界
-            // ];
-
-            // $pdf->setOptions($options);
-
-        // return $dompdf->output();
-            return $pdf->stream($data['title'].".pdf");   
-            // return $pdf->download($data['title'].".pdf");      
-            // return $pdf;
-
-            // return view('includes.fushan.seedling_record', $data);
-
+                'end' => $end,
+                'chunks' => $chunks,
+                'metrics' => $rangeData['metrics'],
+            ]);
         }
 
+        return $this->streamRecordPdf($rangeData);
+    }
 
+    protected function buildRangeData(int $start, int $end): array
+    {
+        $plots = [];
+        for ($trap = $start; $trap <= $end; $trap++) {
+            for ($plot = 1; $plot < 4; $plot++) {
+                $plots[] = $trap . "-" . $plot;
+            }
+        }
+
+        $record = FsSeedlingSlrecord::whereBetween('trap', [$start, $end])
+            ->orderBy('trap', 'asc')
+            ->orderBy('plot', 'asc')
+            ->orderBy('tag', 'asc')
+            ->get();
+
+        $groupedRecord = [];
+        foreach ($record as $item) {
+            $plot = $item['trap'] . "-" . $item['plot'];
+            $item['TP'] = $plot;
+            $groupedRecord[$plot][] = $item;
+        }
+
+        $recordCount = $record->count();
+        $noteCharCount = $record->sum(function ($item) {
+            return mb_strlen((string) ($item['note'] ?? ''));
+        });
+        $longNoteCount = $record->filter(function ($item) {
+            return mb_strlen((string) ($item['note'] ?? '')) > 35;
+        })->count();
+        $trapSpan = ($end - $start) + 1;
+        $estimatedPages = (int) ceil(($recordCount + count($plots)) / 31);
+
+        return [
+            'start' => $start,
+            'end' => $end,
+            'plot' => $plots,
+            'record' => $record,
+            'groupedRecord' => $groupedRecord,
+            'metrics' => [
+                'record_count' => $recordCount,
+                'note_char_count' => $noteCharCount,
+                'long_note_count' => $longNoteCount,
+                'trap_span' => $trapSpan,
+                'estimated_pages' => $estimatedPages,
+            ],
+        ];
+    }
+
+    protected function shouldSplitRange(array $rangeData): bool
+    {
+        $metrics = $rangeData['metrics'];
+
+        return $metrics['record_count'] > 600
+            || $metrics['estimated_pages'] > 20
+            || $metrics['note_char_count'] > 3200
+            || $metrics['long_note_count'] > 20;
+    }
+
+    protected function buildSafeChunks(int $start, int $end): array
+    {
+        $rangeData = $this->buildRangeData($start, $end);
+
+        if ($start === $end || !$this->shouldSplitRange($rangeData)) {
+            return [[
+                'start' => $start,
+                'end' => $end,
+                'metrics' => $rangeData['metrics'],
+            ]];
+        }
+
+        $chunks = [];
+        $chunkStart = $start;
+        $trap = $start;
+
+        while ($trap <= $end) {
+            $candidateRangeData = $this->buildRangeData($chunkStart, $trap);
+
+            if (!$this->shouldSplitRange($candidateRangeData)) {
+                $trap++;
+                continue;
+            }
+
+            if ($trap === $chunkStart) {
+                $chunks[] = [
+                    'start' => $trap,
+                    'end' => $trap,
+                    'metrics' => $candidateRangeData['metrics'],
+                ];
+                $chunkStart = $trap + 1;
+                $trap = $chunkStart;
+                continue;
+            }
+
+            $safeRangeData = $this->buildRangeData($chunkStart, $trap - 1);
+            $chunks[] = [
+                'start' => $chunkStart,
+                'end' => $trap - 1,
+                'metrics' => $safeRangeData['metrics'],
+            ];
+            $chunkStart = $trap;
+        }
+
+        if ($chunkStart <= $end) {
+            $safeRangeData = $this->buildRangeData($chunkStart, $end);
+            $chunks[] = [
+                'start' => $chunkStart,
+                'end' => $end,
+                'metrics' => $safeRangeData['metrics'],
+            ];
+        }
+
+        return $chunks;
+    }
+
+    protected function streamRecordPdf(array $rangeData)
+    {
+        $record = $rangeData['record'];
+        $start = $rangeData['start'];
+        $end = $rangeData['end'];
+
+        $mtags = $record->pluck('mtag')->filter()->unique()->values();
+        $maxbtable = FsSeedlingData::select('mtag', DB::raw('MAX(CAST(SUBSTRING_INDEX(tag, ".", -1) AS DECIMAL)) AS max_b'))
+            ->where('sprout', 'like', 'TRUE')
+            ->when($mtags->isNotEmpty(), function ($query) use ($mtags) {
+                $query->whereIn('mtag', $mtags);
+            })
+            ->groupBy('mtag')
+            ->get();
+
+        $maxb = [];
+        foreach ($maxbtable as $item) {
+            if ($item['max_b'] != '0' && $item['max_b'] < 200) {
+                $maxb[$item['mtag']] = $item['max_b'];
+            }
+        }
+
+        $firstRecord = $record->first();
+        $fileYear = date('Y');
+        $census = $firstRecord['census'];
+        $month = ((int) $firstRecord['census'] % 2 === 1) ? '八' : '二';
+        $title = $fileYear . ' 年' . $month . '月第 ' . $census . ' 次福山喬木小苗調查 (' . $start . "-" . $end . ")";
+        $filename = $fileYear . '_' . $census . '_seedling_record_' . $start . '-' . $end . '.pdf';
+
+        $data = [
+            'title' => $title,
+            'record' => $rangeData['groupedRecord'],
+            'maxb' => $maxb,
+            'plot' => $rangeData['plot'],
+            'numPagesTotal' => $rangeData['metrics']['estimated_pages'],
+            'start' => $start,
+            'end' => $end,
+        ];
+
+        ini_set('memory_limit', '512M');
+        @set_time_limit(180);
+
+        $pdf = PDF::loadView('pages.fushan.seedling_record', $data)->setPaper('A4', 'landscape');
+        $pdf->set_option('isFontSubsettingEnabled', true);
+
+        return $pdf->stream($filename);
     }
 
 
     public function compare(Request $request){
         $comnote = $request->session()->get('comnote');
-        $html="<style>body { font-family: msjh; }</style><p style='font-family: msjh'>".$comnote."</p>";
+        $data = [
+            'title' => '福山小苗資料比對結果',
+            'comnote' => $comnote ?: '目前沒有可匯出的比對結果。',
+        ];
 
-
-        
-        // print_r($comnote);
-        $pdf= PDF::loadHtml($html)->setPaper('A4');
-        // $pdf ->set_option( 'isFontSubsettingEnabled' , true );
+        $pdf = PDF::loadView('pages.fushan.seedling_compare_pdf', $data)->setPaper('A4');
+        $pdf->set_option('isFontSubsettingEnabled', true);
+        $pdf->set_option('defaultFont', 'msjh');
         return $pdf->stream("seedling_compare.pdf");
 
 

@@ -1,6 +1,6 @@
 <div>
     <div class='text_box'>
-        <h2>資料匯入</h2>
+        <h2>資料匯入 (限管理者)</h2>
         <hr>
         <p style='margin: 10px 0; font-weight: 800;'>{{ $importNote }}</p>
         <ol>

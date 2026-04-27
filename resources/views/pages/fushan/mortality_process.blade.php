@@ -70,7 +70,7 @@
         <hr>
 
         @if (session('status'))
-            <div style="margin:14px 0; padding:10px 12px; border:1px solid rgba(34,197,94,.35); background:rgba(34,197,94,.12); color:#14532d; border-radius:6px;">
+            <div class="app-feedback-note app-feedback-note--success" style="margin:14px 0;">
                 {{ session('status') }}
             </div>
         @endif

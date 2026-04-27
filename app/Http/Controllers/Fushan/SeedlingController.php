@@ -25,6 +25,182 @@ use App\Models\FsSeedlingSlroll2;
 
 class SeedlingController extends Controller
 {
+    private function quoteIdentifier(string $identifier): string
+    {
+        return '`' . str_replace('`', '``', $identifier) . '`';
+    }
+
+    private function truncateTable(string $table): void
+    {
+        DB::connection('mysql3')->statement('TRUNCATE TABLE ' . $this->quoteIdentifier($table));
+    }
+
+    private function insertTableFromTable(string $targetTable, string $sourceTable): void
+    {
+        $targetColumns = Schema::connection('mysql3')->getColumnListing($targetTable);
+        $sourceColumns = Schema::connection('mysql3')->getColumnListing($sourceTable);
+        $sourceColumnMap = array_flip($sourceColumns);
+
+        $insertColumns = [];
+        $selectColumns = [];
+
+        foreach ($targetColumns as $column) {
+            $insertColumns[] = $this->quoteIdentifier($column);
+
+            if (isset($sourceColumnMap[$column])) {
+                $selectColumns[] = $this->quoteIdentifier($sourceTable) . '.' . $this->quoteIdentifier($column);
+            } else {
+                $selectColumns[] = "''";
+            }
+        }
+
+        DB::connection('mysql3')->statement(
+            'INSERT INTO ' . $this->quoteIdentifier($targetTable) .
+            ' (' . implode(', ', $insertColumns) . ') SELECT ' . implode(', ', $selectColumns) .
+            ' FROM ' . $this->quoteIdentifier($sourceTable)
+        );
+    }
+
+    private function prepareSeedlingWorkTables(int $maxCensus): void
+    {
+        if (!Schema::connection('mysql3')->hasTable('slrecord')) {
+            DB::connection('mysql3')->statement(
+                "CREATE TABLE slrecord ENGINE = MyISAM AS SELECT seedling.*, base.x, base.y FROM seedling LEFT JOIN base ON seedling.mtag = base.mtag WHERE seedling.census LIKE ? AND (seedling.status LIKE 'A' OR seedling.status LIKE 'N') ORDER BY seedling.trap, seedling.plot, seedling.tag",
+                [$maxCensus]
+            );
+            Schema::connection('mysql3')->table('slrecord', function ($table) {
+                $table->string('updated_at');
+            });
+        } else {
+            $this->truncateTable('slrecord');
+
+            if (!Schema::connection('mysql3')->hasColumn('slrecord', 'updated_at')) {
+                Schema::connection('mysql3')->table('slrecord', function ($table) {
+                    $table->string('updated_at');
+                });
+            }
+
+            $seedlingColumns = Schema::connection('mysql3')->getColumnListing('seedling');
+            $seedlingColumnMap = array_flip($seedlingColumns);
+            $insertColumns = Schema::connection('mysql3')->getColumnListing('slrecord');
+            $selectColumns = array_map(function ($column) use ($seedlingColumnMap) {
+                if (isset($seedlingColumnMap[$column])) {
+                    return 'seedling.' . $this->quoteIdentifier($column);
+                }
+
+                if ($column === 'x' || $column === 'y') {
+                    return 'base.' . $this->quoteIdentifier($column);
+                }
+
+                return "''";
+            }, $insertColumns);
+
+            DB::connection('mysql3')->statement(
+                'INSERT INTO slrecord (' . implode(', ', array_map([$this, 'quoteIdentifier'], $insertColumns)) . ') SELECT ' .
+                implode(', ', $selectColumns) .
+                " FROM seedling LEFT JOIN base ON seedling.mtag = base.mtag WHERE seedling.census LIKE ? AND (seedling.status LIKE 'A' OR seedling.status LIKE 'N') ORDER BY seedling.trap, seedling.plot, seedling.tag",
+                [$maxCensus]
+            );
+        }
+
+        if (!Schema::connection('mysql3')->hasColumn('slrecord', 'updated_at')) {
+            Schema::connection('mysql3')->table('slrecord', function ($table) {
+                $table->string('updated_at');
+            });
+        }
+
+        DB::connection('mysql3')->statement("DELETE FROM slrecord WHERE ht = '-7' AND sprout = 'True'");
+        DB::connection('mysql3')->statement("DELETE FROM slrecord WHERE ht = '-2' AND sprout = 'True'");
+
+        FsSeedlingSlrecord::query()->update(['id' => '0', 'census' => $maxCensus + 1, 'year' => '0', 'month' => '0', 'date' => '0000-00-00']);
+        FsSeedlingSlrecord::where('recruit', 'R')->update(['recruit' => 'O']);
+        FsSeedlingSlrecord::where('status', 'N')->update(['recruit' => 'N']);
+
+        if (!Schema::connection('mysql3')->hasTable('slrecord1')) {
+            DB::connection('mysql3')->statement("CREATE  TABLE  `fs_seedling`.`slrecord1` (  `id` int( 11  )  NOT  NULL AUTO_INCREMENT,  `census` int( 3  )  NOT  NULL ,  `year` int( 4  )  NOT  NULL ,  `month` int( 2  )  NOT  NULL ,  `date` char( 10  )  NOT  NULL ,  `trap` int( 3  )  NOT  NULL ,  `plot` int( 1  )  NOT  NULL ,  `tag` char( 12  )  NOT  NULL ,  `mtag` char( 12  )  NOT  NULL ,  `csp` char( 20  )  NOT  NULL ,    `ht` float ,  `cotno` int( 2  )  , `leafno` int( 2  )   ,  `ind` int( 3  )  NOT  NULL default  '1',  `note` varchar( 255  )  NOT  NULL ,`recruit` char( 2  )  NOT  NULL ,`status` char( 2  )  NOT  NULL ,`sprout` char( 5  )  NOT  NULL , `x` int( 3  )  NOT  NULL , `y` int( 3  )  NOT  NULL , `updated_at` varchar(255) , `alternote` VARCHAR( 255 ) NOT NULL, `updated_id` char(20) not null, PRIMARY KEY (  `id` ) , index(  trap  )  ) ENGINE  =  MyISAM  DEFAULT CHARSET  = utf8");
+        } else {
+            $this->truncateTable('slrecord1');
+        }
+
+        if (!Schema::connection('mysql3')->hasColumn('slrecord1', 'alternote')) {
+            DB::connection('mysql3')->statement("ALTER TABLE `slrecord1` ADD `alternote` VARCHAR(255) NOT NULL");
+        }
+
+        if (!Schema::connection('mysql3')->hasColumn('slrecord1', 'updated_id')) {
+            DB::connection('mysql3')->statement("ALTER TABLE `slrecord1` ADD `updated_id` char(20) NOT NULL");
+        }
+
+        $this->insertTableFromTable('slrecord1', 'slrecord');
+
+        $census = FsSeedlingSlrecord1::first();
+        $month = ((int) ($census['census'] ?? ($maxCensus + 1)) % 2 === 0) ? '2' : '8';
+
+        FsSeedlingSlrecord1::query()->update(['year' => date('Y'), 'month' => $month]);
+        FsSeedlingSlrecord1::where('ht', '>=', '-1')->update(['ht' => NULL, 'cotno' => NULL, 'leafno' => NULL]);
+        FsSeedlingSlrecord1::query()->update(['updated_at' => '', 'alternote' => '', 'updated_id' => '']);
+
+        if (!Schema::connection('mysql3')->hasTable('slrecord2')) {
+            DB::connection('mysql3')->statement("CREATE TABLE slrecord2 LIKE slrecord1");
+        } else {
+            $this->truncateTable('slrecord2');
+        }
+
+        $this->insertTableFromTable('slrecord2', 'slrecord1');
+
+        if (!Schema::connection('mysql3')->hasTable('slcov1')) {
+            DB::connection('mysql3')->statement("CREATE TABLE `fs_seedling`.`slcov1` ( `id` int (11) NOT  NULL AUTO_INCREMENT, `year` int( 4  ) ,  `month` int( 2  ) ,  `date` char( 10  ) ,  `trap` int( 3  ),  `plot` int( 1  ) , `cov` float,`canopy` char (2) ,  `note` varchar( 255  ), `updated_at` varchar(255), `updated_id` char(20), PRIMARY KEY (  `id` ) , index(  trap  ) )ENGINE  =  MyISAM  DEFAULT CHARSET  = utf8");
+        } else {
+            $this->truncateTable('slcov1');
+        }
+
+        for ($x = 1; $x < 108; $x++) {
+            if ($x != 42) {
+                for ($y = 1; $y < 4; $y++) {
+                    DB::connection('mysql3')->statement("INSERT INTO fs_seedling.slcov1 (trap, plot) values (?, ?)", [$x, $y]);
+                }
+            }
+        }
+
+        DB::connection('mysql3')->statement("DELETE FROM fs_seedling.slcov1 WHERE trap = 33 AND plot = 3");
+        FsSeedlingSlcov1::query()->update(['year' => date('Y'), 'month' => $month, 'date' => '0000-00-00', 'updated_at' => '']);
+
+        if (!Schema::connection('mysql3')->hasTable('slcov2')) {
+            DB::connection('mysql3')->statement("CREATE TABLE slcov2 LIKE slcov1");
+        } else {
+            $this->truncateTable('slcov2');
+        }
+
+        $this->insertTableFromTable('slcov2', 'slcov1');
+
+        if (!Schema::connection('mysql3')->hasTable('slroll1')) {
+            DB::connection('mysql3')->statement("CREATE TABLE `fs_seedling`.`slroll1` ( `id` int (11) NOT  NULL AUTO_INCREMENT,  `year` int( 4  )  NOT  NULL ,  `month` int( 2  )  NOT  NULL , `date` char( 10  )  NOT  NULL ,  `trap` int( 3  )  NOT  NULL ,  `plot` int( 1  )  NOT  NULL , `tag` char(12) not null,  `note` varchar( 255  ), `updated_at` varchar(255) not null, `updated_id` char(20) not null,PRIMARY KEY (  `id` ) , index(  trap  ) )ENGINE  =  MyISAM  DEFAULT CHARSET  = utf8");
+        } else {
+            $this->truncateTable('slroll1');
+        }
+
+        if (!Schema::connection('mysql3')->hasTable('slroll2')) {
+            DB::connection('mysql3')->statement("CREATE TABLE slroll2 LIKE slroll1");
+        } else {
+            $this->truncateTable('slroll2');
+        }
+    }
+
+    private function shouldPrepareSeedlingWorkTables(int $maxCensus): bool
+    {
+        foreach (['slrecord', 'slrecord1', 'slrecord2', 'slcov1', 'slcov2', 'slroll1', 'slroll2'] as $table) {
+            if (!Schema::connection('mysql3')->hasTable($table)) {
+                return true;
+            }
+        }
+
+        $slrecordMaxCensus = FsSeedlingSlrecord::max('census');
+
+        if ($slrecordMaxCensus === null) {
+            return true;
+        }
+
+        return (int) $slrecordMaxCensus < $maxCensus;
+    }
 
 
     public function seedling(Request $request)
@@ -36,86 +212,8 @@ class SeedlingController extends Controller
         $maxCensus = FsSeedlingData::max('census');
 
 
-        //檢查是否有紀錄紙資料表
-
-        if (Schema::connection('mysql3')->hasTable('slrecord')) {
-
-            //有紀錄紙
-
-        } else {
-            //沒有紀錄紙，建一個新表
-            // echo 'n';
-            $c_table = DB::connection('mysql3')->select("create table slrecord ENGINE = MyISAM as select seedling.*, base.x,base.y from seedling left join base on seedling.mtag = base.mtag where seedling.census like ? and (seedling.status like 'A' or seedling.status like 'N') order by seedling.trap, seedling.plot, seedling.tag", [$maxCensus]);
-            //刪除死亡的萌蘗苗(個體未死)  高度 = -7, sprout = True
-            $d_record = DB::connection('mysql3')->select("delete from slrecord where ht = '-7' and sprout ='True'");
-            //刪除-2的萌蘗苗(個體DBH>1)  高度 = -2, sprout = True
-            //             - -2
-            // - 若為主幹，則保留，不論是否有分支，以期待有新分支出現
-            // - 若為分支，則刪除
-            $d_record = DB::connection('mysql3')->select("delete from slrecord where ht = '-2' and sprout ='True'");
-
-
-            Schema::connection('mysql3')->table('slrecord', function ($table) {
-                $table->string('updated_at');
-            });
-
-            //將欄位變空白
-            $u_record = FsSeedlingSlrecord::query()->update(['id' => '0', 'census' => $maxCensus + 1, 'year' => '0', 'month' => '0', 'date' => '0000-00-00']);
-            //將 recruit =R 變成 O, status = N 的 recruit 變成 N 
-            $u_record = FsSeedlingSlrecord::where('recruit', 'R')->update(['recruit' => 'O']);
-            $u_record = FsSeedlingSlrecord::where('status', 'N')->update(['recruit' => 'N']);
-
-
-
-
-            //建立輸入表單1&2
-
-
-            $c_table1 = DB::connection('mysql3')->select("CREATE  TABLE  `fs_seedling`.`slrecord1` (  `id` int( 11  )  NOT  NULL AUTO_INCREMENT,  `census` int( 3  )  NOT  NULL ,  `year` int( 4  )  NOT  NULL ,  `month` int( 2  )  NOT  NULL ,  `date` char( 10  )  NOT  NULL ,  `trap` int( 3  )  NOT  NULL ,  `plot` int( 1  )  NOT  NULL ,  `tag` char( 12  )  NOT  NULL ,  `mtag` char( 12  )  NOT  NULL ,  `csp` char( 20  )  NOT  NULL ,    `ht` float ,  `cotno` int( 2  )  , `leafno` int( 2  )   ,  `ind` int( 3  )  NOT  NULL default  '1',  `note` varchar( 255  )  NOT  NULL ,`recruit` char( 2  )  NOT  NULL ,`status` char( 2  )  NOT  NULL ,`sprout` char( 5  )  NOT  NULL , `x` int( 3  )  NOT  NULL , `y` int( 3  )  NOT  NULL , `updated_at` varchar(255) ,  PRIMARY KEY (  `id` ) , index(  trap  )  ) ENGINE  =  MyISAM  DEFAULT CHARSET  = utf8");
-            $i_table1 = DB::connection('mysql3')->select("INSERT INTO fs_seedling.slrecord1 SELECT * FROM fs_seedling.slrecord");
-            $a_table1 = DB::connection('mysql3')->select("ALTER TABLE  `slrecord1` ADD  (`alternote` VARCHAR( 255 ) NOT NULL, `updated_id` char(20) not null)");
-
-            $census = FsSeedlingSlrecord1::first();
-
-            if ($census['census'] % 2 == 0) {
-                $month = '2';
-            } else {
-                $month = '8';
-            }
-
-
-            $u_record = FsSeedlingSlrecord1::query()->update(['year' => date('Y'), 'month' => $month]);
-            $u_record = FsSeedlingSlrecord1::where('ht', '>=', '-1')->update(['ht' => NULL, 'cotno' => NULL, 'leafno' => NULL]);
-            $u_record = FsSeedlingSlrecord1::query()->update(['updated_at' => '']);
-
-            //輸入表單2
-            $c_table2 = DB::connection('mysql3')->select("CREATE TABLE slrecord2 LIKE slrecord1");
-
-            $i_table1 = DB::connection('mysql3')->select("INSERT INTO fs_seedling.slrecord2 SELECT * FROM fs_seedling.slrecord1");
-
-            //cov
-            $c_cov1 = DB::connection('mysql3')->select("create table `fs_seedling`.`slcov1` ( `id` int (11) NOT  NULL AUTO_INCREMENT, `year` int( 4  ) ,  `month` int( 2  ) ,  `date` char( 10  ) ,  `trap` int( 3  ),  `plot` int( 1  ) , `cov` float,`canopy` char (2) ,  `note` varchar( 255  ), `updated_at` varchar(255), `updated_id` char(20), PRIMARY KEY (  `id` ) , index(  trap  ) )ENGINE  =  MyISAM  DEFAULT CHARSET  = utf8");
-
-            for ($x = 1; $x < 108; $x++) {
-                if ($x != 42) {
-                    for ($y = 1; $y < 4; $y++) {
-                        $i_table1 = DB::connection('mysql3')->select("INSERT INTO fs_seedling.slcov1 (trap, plot) values ('$x', '$y')");
-                    }
-                }
-            }
-
-            $d_table1 = DB::connection('mysql3')->select("delete from fs_seedling.slcov1 where trap = 33 and plot = 3");
-
-            $u_cov = FsSeedlingSlcov1::query()->update(['year' => date('Y'), 'month' => $month, 'date' => '0000-00-00']);
-
-            $u_cov = FsSeedlingSlcov1::query()->update(['updated_at' => '']);
-
-            $c_cov2 = DB::connection('mysql3')->select("CREATE TABLE slcov2 LIKE slcov1");
-
-            $i_table2 = DB::connection('mysql3')->select("INSERT INTO fs_seedling.slcov2 SELECT * FROM fs_seedling.slcov1");
-
-            $c_roll = DB::connection('mysql3')->select("create table `fs_seedling`.`slroll1` ( `id` int (11) NOT  NULL AUTO_INCREMENT,  `year` int( 4  )  NOT  NULL ,  `month` int( 2  )  NOT  NULL , `date` char( 10  )  NOT  NULL ,  `trap` int( 3  )  NOT  NULL ,  `plot` int( 1  )  NOT  NULL , `tag` char(12) not null,  `note` varchar( 255  ), `updated_at` varchar(255) not null, `updated_id` char(20) not null,PRIMARY KEY (  `id` ) , index(  trap  ) )ENGINE  =  MyISAM  DEFAULT CHARSET  = utf8");
-            $c_roll = DB::connection('mysql3')->select("CREATE TABLE slroll2 LIKE slroll1");
+        if ($this->shouldPrepareSeedlingWorkTables((int) $maxCensus)) {
+            $this->prepareSeedlingWorkTables((int) $maxCensus);
         }
 
         // $slrecord=FsSeedlingSlrecord::all();

@@ -28,13 +28,13 @@
                 
                 <thead >
                     <tr style="text-align: center;">
-                        <th>trap</th>
-                        <th>plot</th>
-                        <th>tag</th>
-                        <th>種類</th>
-                        <th>x</th>
-                        <th>y</th>
-                        <th>最大分支號</th>
+                        <th style="text-align: center;">trap</th>
+                        <th style="text-align: center;">plot</th>
+                        <th style="text-align: center;">tag</th>
+                        <th style="text-align: center;">種類</th>
+                        <th style="text-align: center;">x</th>
+                        <th style="text-align: center;">y</th>
+                        <th style="text-align: center;">最大分支號</th>
                         
                     </tr>
                 </thead>
@@ -58,14 +58,15 @@
                 <table id='progressTable{{$tableTag}}' class='tablesorter'>
                     <thead>
                         <tr style="text-align: center;">
-                            <th width='60px'>census</th>
-                            <th width='50px'>長度</th>
-                            <th width='50px'>子葉數</th>
-                            <th width='50px'>葉片數</th>
-                            <th width='50px'>狀態</th>
-                            <th width='50px'>新舊</th>
-                            <th width='50px'>萌櫱</th>
-                            <th>note</th>
+                            <th width='60px' style="text-align: center;">census</th>
+                            <th width='90px' style="text-align: center;">年月</th>
+                            <th width='50px' style="text-align: center;">長度</th>
+                            <th width='50px' style="text-align: center;">子葉數</th>
+                            <th width='50px' style="text-align: center;">葉片數</th>
+                            <th width='50px' style="text-align: center;">狀態</th>
+                            <th width='50px' style="text-align: center;">新舊</th>
+                            <th width='50px' style="text-align: center;">萌櫱</th>
+                            <th style="text-align: center;">note</th>
 
                             
                         </tr>
@@ -82,6 +83,7 @@
                     @endphp
                         <tr {{$trstyle}}>
                             <td>{{$pre['census']}}</td>
+                            <td>{{ isset($pre['year'], $pre['month']) ? $pre['year'].'-'.str_pad((string) $pre['month'], 2, '0', STR_PAD_LEFT) : '' }}</td>
                             <td>{{$pre['ht']}}</td>
                             <td>{{$pre['cotno']}}</td>
                             <td>{{$pre['leafno']}}</td>
