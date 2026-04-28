@@ -4,7 +4,6 @@ namespace App\Http\Livewire\Fushan;
 
 use App\Models\FsWebUnk;
 use App\Models\FsWebUnkPhoto;
-use Illuminate\Http\Request;
 use Illuminate\Support\Facades\File;
 use Livewire\Component;
 use Livewire\WithFileUploads;
@@ -43,8 +42,10 @@ class SeedsUnknown extends Component
         '6' => '花',
     ];
 
-    public function mount(Request $request): void
+    public function mount($user = null, $site = null): void
     {
+        $this->user = $user;
+        $request = request();
 
         $unkParam = $request->hasSession()
             ? $request->session()->get('unk', 'no')
@@ -58,7 +59,8 @@ class SeedsUnknown extends Component
         $this->reloadData();
     }
 
-    public function openData(Request $request, $url, $unk){
+    public function openData($url, $unk){
+        $request = request();
         $request->session()->put('unk', $unk);
 
         return redirect()->to($url);
