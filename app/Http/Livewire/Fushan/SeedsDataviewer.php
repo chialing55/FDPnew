@@ -28,9 +28,9 @@ class SeedsDataviewer extends Component
 
     public function mount(Request $request){
 
-        $unkParam = $request->session()->get('unk', function () {
-            return 'no';
-        });
+        $unkParam = $request->hasSession()
+            ? $request->session()->get('unk', 'no')
+            : 'no';
 
         if ($unkParam!='no'){
             $this->species=$unkParam;

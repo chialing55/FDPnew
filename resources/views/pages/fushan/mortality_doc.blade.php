@@ -29,8 +29,10 @@
                 <li>再到<a href="{{ route('admin.fushan.mortality.survey-import') }}">匯入調查資料</a>準備輸入資料。</li>
                 <li>正式輸入前，先閱讀<a href="{{ route('admin.fushan.mortality.note') }}">輸入注意事項</a>。</li>
                 <li>完成兩次輸入後，到<a href="{{ route('admin.fushan.mortality.compare') }}">資料比對</a>確認差異。</li>
-                <li>確認無誤後，再到<a href="{{ route('admin.fushan.mortality.import') }}">將資料匯入大表</a>。</li>
-                <li>如需進一步整理資料，可到<a href="{{ route('admin.fushan.mortality.process') }}">資料處理</a>頁面。</li>
+                @if((int) (auth()->user()?->is_admin ?? 0) === 1)
+                    <li>確認無誤後，再到<a class="admin-only-body-link" href="{{ route('admin.fushan.mortality.import') }}">將資料匯入大表</a>。</li>
+                    <li>如需進一步整理資料，可到<a class="admin-only-body-link" href="{{ route('admin.fushan.mortality.process') }}">資料處理</a>頁面。</li>
+                @endif
             </ol>
         </div>
 {{-- 

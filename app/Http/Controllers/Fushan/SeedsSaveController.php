@@ -42,6 +42,10 @@ class SeedsSaveController extends Controller
             return $row['census'];
         }
 
+        if ($fallbackCensus === '__require_census__') {
+            return '';
+        }
+
         if (($fallbackCensus ?? '') !== '') {
             return $fallbackCensus;
         }
@@ -159,6 +163,23 @@ class SeedsSaveController extends Controller
         return $redata;
     }
 
+    public function getUnknownRedata(string $unk): array
+    {
+        $data = FsSeedsFulldata::query()
+            ->where(function ($query) use ($unk) {
+                $query->where('csp', $unk)
+                    ->orWhere('sp', $unk);
+            })
+            ->orderBy('census')
+            ->orderBy('trap')
+            ->orderBy('code')
+            ->orderBy('id')
+            ->get()
+            ->toArray();
+
+        return (new SeedsAddButton)->addbutton($data, 'fulldata');
+    }
+
     //已輸入資料的修改與儲存
     public function savedata(Request $request, $type)
     {
@@ -177,10 +198,18 @@ class SeedsSaveController extends Controller
 
         // 一次建立所有 checksign（重複比對用）
         $census = $data[0]['census'] ?? '';
+        $requestCensuses = collect($data)
+            ->pluck('census')
+            ->filter(fn ($value) => trim((string) $value) !== '')
+            ->unique()
+            ->values()
+            ->toArray();
         $existingSigns = array_count_values(
             ($type === 'record')
                 ? \App\Models\FsSeedsRecord1::selectRaw("CONCAT(census, trap, csp, code) AS sign")->pluck('sign')->toArray()
-                : \App\Models\FsSeedsFulldata::where('census', $census)
+                : \App\Models\FsSeedsFulldata::query()
+                    ->when($requestCensuses !== [], fn ($query) => $query->whereIn('census', $requestCensuses))
+                    ->when($requestCensuses === [], fn ($query) => $query->where('census', $census))
                     ->selectRaw("CONCAT(census, trap, csp, code) AS sign")->pluck('sign')->toArray()
         );
 
@@ -323,8 +352,16 @@ class SeedsSaveController extends Controller
                 FsSeedsRecord1::selectRaw("CONCAT(census, trap, csp, code) AS sign")->pluck('sign')->toArray()
             );
         } else {
+            $requestCensuses = collect($data)
+                ->pluck('census')
+                ->filter(fn ($value) => trim((string) $value) !== '')
+                ->unique()
+                ->values()
+                ->toArray();
             $existingSigns = array_count_values(
-                FsSeedsFulldata::where('census', $census)
+                FsSeedsFulldata::query()
+                    ->when($requestCensuses !== [], fn ($query) => $query->whereIn('census', $requestCensuses))
+                    ->when($requestCensuses === [], fn ($query) => $query->where('census', $census))
                     ->selectRaw("CONCAT(census, trap, csp, code) AS sign")
                     ->pluck('sign')
                     ->toArray()
@@ -484,6 +521,73 @@ class SeedsSaveController extends Controller
             'seedssavenote' => $datasavenote,
             'seedssavenote_type' => 'success',
         ];
+    }
+
+    public function saveUnknownData(Request $request, string $unk, string $type)
+    {
+        abort_unless((bool) $request->user()?->is_admin, 403);
+        if ($errorResponse = $this->rejectUnknownRowsWithoutCensus($request)) {
+            return $errorResponse;
+        }
+        $request->merge(['currentCensus' => '__require_census__']);
+
+        $response = $this->savedata($request, $type);
+
+        return $this->hydrateUnknownSaveResponse($response, $unk);
+    }
+
+    public function saveNewUnknownData(Request $request, string $unk, string $type)
+    {
+        abort_unless((bool) $request->user()?->is_admin, 403);
+        if ($errorResponse = $this->rejectUnknownRowsWithoutCensus($request)) {
+            return $errorResponse;
+        }
+        $request->merge(['currentCensus' => '__require_census__']);
+
+        $response = $this->savedata1($request, $type);
+
+        return $this->hydrateUnknownSaveResponse($response, $unk);
+    }
+
+    public function deleteUnknownData(Request $request, string $unk, $id, $info, $thispage, $type)
+    {
+        abort_unless((bool) $request->user()?->is_admin, 403);
+
+        $response = $this->deletedata($request, $id, $info, $thispage, $type);
+
+        return $this->hydrateUnknownSaveResponse($response, $unk);
+    }
+
+    private function rejectUnknownRowsWithoutCensus(Request $request): ?array
+    {
+        foreach ((array) $request->input('data', []) as $row) {
+            $hasContent = trim((string) ($row['trap'] ?? '')) !== ''
+                || trim((string) ($row['code'] ?? '')) !== ''
+                || trim((string) ($row['count'] ?? '')) !== ''
+                || trim((string) ($row['note'] ?? '')) !== '';
+
+            if ($hasContent && trim((string) ($row['census'] ?? '')) === '') {
+                return [
+                    'result' => 'error',
+                    'message' => '新增 UNKNOWN 資料時，census 不得為空白。',
+                    'seedssavenote' => '新增 UNKNOWN 資料時，census 不得為空白。',
+                    'seedssavenote_type' => 'error',
+                ];
+            }
+        }
+
+        return null;
+    }
+
+    private function hydrateUnknownSaveResponse($response, string $unk)
+    {
+        if (!is_array($response) || !isset($response['data'])) {
+            return $response;
+        }
+
+        $response['data'] = $this->getUnknownRedata($unk);
+
+        return $response;
     }
 
 

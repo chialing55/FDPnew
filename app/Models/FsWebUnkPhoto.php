@@ -8,6 +8,9 @@ use Illuminate\Database\Eloquent\Model;
 class FsWebUnkPhoto extends Model
 {
     use HasFactory;
+
     protected $table = "unkphoto";
     protected $connection = 'mysql6';
+    public $timestamps = false;
+    protected $guarded = [];
 }

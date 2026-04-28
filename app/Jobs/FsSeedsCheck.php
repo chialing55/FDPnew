@@ -11,6 +11,7 @@ class FsSeedsCheck
 
     public function check($record, $spinfo, $existingSigns = [], $originalSign = '')
     {
+        if (trim((string) ($record['census'] ?? '')) === '') return $this->fail($record, 'census 不得為 空白。');
         $trap = intval($record['trap']);
         if ($trap < 1 || $trap > 107 || $trap == 42) return $this->fail($record, 'Trap 不正確');
         if ($record['csp'] == 'nothing') return $this->pass($record);

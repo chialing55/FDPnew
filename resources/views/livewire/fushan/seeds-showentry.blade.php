@@ -154,7 +154,7 @@
                     <div style='margin-left: 20px;'><button name='creattable'>開啟新空白頁</button></div>
                 </div>
                 <div class='seedssavenote app-feedback-note'></div>
-                <p style='margin-button:5px; text-align: center'><button name='datasave{{ $thiscensus }}'
+                <p style='margin-bottom:5px; text-align: center'><button name='datasave{{ $thiscensus }}'
                         class='datasavebutton' style='width:550px'>儲存</button></p>
                 <div id='datatable{{ $thiscensus }}' class='fs100'></div>
                 <div class='seedssavenote app-feedback-note'></div>

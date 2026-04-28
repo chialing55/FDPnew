@@ -658,7 +658,7 @@
                 }
 
                 function statusAllowsWoundedAndRotten(status) {
-                    return ['A', 'OK', 'D'].includes(normalizeStatus(status));
+                    return statusAllowsDetails(status);
                 }
 
                 function statusAllowsMode(status) {

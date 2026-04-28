@@ -1,82 +1,60 @@
-<div style='display: flex; align-items: center;flex-direction: column;'>
+<div class="seeds-unknown-page">
     <div class="loading-container" wire:loading.class="visible">
         <div class="loading-spinner"></div>
     </div>
-        <h2>UNKNOWN</h2>
+    <h2>UNKNOWN</h2>
 
-        <div style='margin-top:20px'>
-            <select name="unk" class="fs100"  wire:model='unk' wire:change="search">
-                <option value="%"> - </option>
-                
-                @for ($i=0; $i<count($unklist);$i++)
-                <option value="{{$unklist[$i]}}">{{$unklist[$i]}} </option>
-                @endfor
-            </select>
-        </div>
-    <div  style=''>
+    <div class="unknown-toolbar">
+        <select name="unk" class="fs100" wire:model='unk' wire:change="search">
+            <option value="%">全部種類</option>
+            @foreach ($unklist as $unkOption)
+                <option value="{{ $unkOption }}">{{ $unkOption }}</option>
+            @endforeach
+        </select>
 
-@php 
- $codelist=[ '1' => '果', '2' => '種子', '3' => '附屬物', '4' => '碎片', '5' => '未熟果', '6' => '花', ];
+        <button type="button" class="datasavebutton unknown-action-button" wire:click="openCreateUnknown">
+            新增 UNKNOWN
+        </button>
+    </div>
 
-@endphp  
-        <div  style='display: flex; flex-wrap: wrap; justify-content: center;'>
+    @include('livewire.fushan.partials.unknown-editor-panel')
+
+    <div class="unknown-list-section">
+        <div class="unknown-card-grid unknown-original-grid">
             @foreach($unkdes as $unk)
-            <div class='photocombo text_box' >
+            <div class='photocombo text_box unknown-card unknown-original-card {{ $editingUnkName === $unk['unkname'] ? 'is-active' : '' }}' wire:key="unknown-card-{{ $unk['unkname'] }}">
                 <h6>{{$unk['unkname']}} 
-                    <span wire:click="openData('/fushan/seeds/showdata', '{{$unk['unkname']}}')" style="cursor: pointer; margin-left: 20px; font-size: 80%;">檢視資料</span>
+                    @if((int) (auth()->user()?->is_admin ?? 0) === 1)
+                        <a class="unknown-card-button admin-only-body-link" href="{{ route('admin.fushan.seeds.unknown.data', ['unk' => $unk['unkname']]) }}">檢視資料</a>
+                    @endif
+                    <button type="button" class="unknown-card-button" wire:click="openEditor('{{ $unk['unkname'] }}')">編輯說明</button>
                 </h6>
                 <hr>
-                <div class='unkDes{{$unk['unkname']}}'>{{$unk['des']}}
-                    <button name='editunkDesShow'  onclick="$('.unkDes{{$unk['unkname']}}').hide();$('.editUnkDes{{$unk['unkname']}}').show();"><i class='fa-solid fa-pen-to-square'></i></button>
-                </div>
-                <div class='editUnkDes{{$unk['unkname']}}' style='display: none;'>
-                    <form wire:submit.prevent="submitUnkEditForm" method="POST">
-                        物種描述: <input type='text' id=='editUnkDes' value='{{$unk['des']}}'>
+                <div class='unknown-description'>{{$unk['des']}}</div>
 
-                        <button type='submit' style='margin-left:20px'>輸入</button>
-
-                    </form>
-                </div>
-                @foreach($unkphoto[$unk['unkname']] as $photo)
-                <div style='display: inline-flex;'>
-                <div class='photocombo' style=''>
-                    <div class='photo'>
-                        <a href='{{ asset("FDPfiles/splist/photo/unknown/{$photo['unkname']}/{$photo['filename']}") }}' data-fancybox="gallery" data-caption="{{$unk['unkname']}}<br> 類型: {{$codelist[$photo['code']]}}<br>photo by: {{$photo['photoby']}}@if($photo['des']!='')<br>{{$photo['des']}}
+                <div class="unknown-photo-row">
+                    @forelse(($unkphoto[$unk['unkname']] ?? []) as $photo)
+                    <div class="unknown-photo-item" wire:key="unknown-photo-{{ $photo['id'] }}">
+                        <div class='photocombo'>
+                            <div class='photo'>
+                                <a href='{{ asset("FDPfiles/splist/photo/unknown/{$photo['unkname']}/{$photo['filename']}") }}' data-fancybox="gallery" data-caption="{{$unk['unkname']}}<br> 類型: {{$codelist[$photo['code']] ?? ''}}@if($photo['des']!='')<br>{{$photo['des']}}
                         @endif" >
-                        <img src="{{ asset("FDPfiles/splist/photo/unknown/{$photo['unkname']}/s_{$photo['filename']}") }}" width="230">
-                    </a>
+                                    <img src="{{ asset("FDPfiles/splist/photo/unknown/{$photo['unkname']}/s_{$photo['filename']}") }}" width="230">
+                                </a>
+                            </div>
 
+                            <div>
+                                類型: {{$codelist[$photo['code']] ?? ''}}
+                                @if($photo['des']!='')
+                                    <br>{{$photo['des']}}
+                                @endif
+                            </div>
+                        </div>
                     </div>
-                  
-                    <div class='photodes{{$photo['id']}}'>
-                        類型: {{$codelist[$photo['code']]}} <br>
-                        photo by: {{$photo['photoby']}}
-                        @if($photo['des']!='')
-                            <br>{{$photo['des']}}
-                        @endif
-                        <button name='editShow' onclick="$('.photodes{{$photo['id']}}').hide();$('.editDes{{$photo['id']}}').show();"><i class='fa-solid fa-pen-to-square'></i></button>
-                    </div>
-                    <div class='editDes{{$photo['id']}}' style='display: none;'>
-                        <form wire:submit.prevent="submitEditForm" method="POST">
-
-                            類型: 
-                            <select id="editType">
-                                @foreach($codelist as $key => $value)
-                                    <option value="{{ $key }}" {{ $photo['code'] == $key ? 'selected' : '' }}>{{ $value }}</option>
-                                @endforeach
-                            </select><br>
-                            photo by: <input type='text' id=='editPhotoBy' value='{{$photo['photoby']}}'><br>
-                            相片描述: <input type='text' id=='editPhotoDes' value='{{$photo['des']}}'>
-                            <input type='hidden' id=='editPhotoId'><br>
-
-                            <button type='submit'>輸入</button>
-
-                        </form>
-                        
-                    </div>
+                    @empty
+                        <p class="unknown-empty-note">尚無照片</p>
+                    @endforelse
                 </div>
-                </div>
-                @endforeach
             </div>
             @endforeach
         </div>
@@ -85,3 +63,16 @@
     </div>
     
 </div>
+
+@script
+<script>
+    $wire.on('unknown-editor-opened', () => {
+        setTimeout(() => {
+            document.getElementById('unknown-editor-panel')?.scrollIntoView({
+                behavior: 'smooth',
+                block: 'start'
+            });
+        }, 80);
+    });
+</script>
+@endscript

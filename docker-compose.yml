@@ -28,6 +28,8 @@ services:
       - "8080:80"
     volumes:
       - .:/app
+      - ../FDPfiles:/app/public/FDPfiles
+      - ../SSPfiles:/app/public/SSPfiles
       - ./nginx/default.conf:/etc/nginx/conf.d/default.conf
     depends_on:
       - app

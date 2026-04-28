@@ -706,6 +706,8 @@ class MortalityController extends Controller
 
     public function import(Request $request)
     {
+        $this->ensureProcessAdmin($request);
+
         $user = $request->user();
         $site = $request->route('site');
 

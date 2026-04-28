@@ -8,6 +8,9 @@ use Illuminate\Database\Eloquent\Model;
 class FsWebUnk extends Model
 {
     use HasFactory;
+
     protected $table = "unknown";
     protected $connection = 'mysql6';
+    public $timestamps = false;
+    protected $guarded = [];
 }

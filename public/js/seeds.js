@@ -11,6 +11,7 @@ const finishUrl = seedsRoutes.finish || `${urlbase}/finish`;
 const currentUser = seedsConfig.user || '';
 const isAdmin = Boolean(seedsConfig.isAdmin);
 const defaultSeedsSortMode = seedsConfig.defaultSort === 'trap' ? 'trap' : 'input';
+const isUnknownAllView = seedsConfig.viewMode === 'unknown-all';
 
 let fdata = [];
 let seedsEmptyTable = [];
@@ -97,6 +98,13 @@ function getSeedsDisplayData() {
   }
 
   return [...fdata].sort((left, right) => {
+    if (isUnknownAllView) {
+      const censusCompare = compareSeedsNumericText(left?.census, right?.census);
+      if (censusCompare !== 0) {
+        return censusCompare;
+      }
+    }
+
     const trapCompare = compareSeedsNumericText(left?.trap, right?.trap);
     if (trapCompare !== 0) {
       return trapCompare;
@@ -140,7 +148,15 @@ function updateSeedsSortButtons() {
 
 function renderSeedsTable(page = 1) {
   const displayData = getSeedsDisplayData();
-  seedstable(displayData, page, 29, seedsEmptyTable);
+  const site = seedsTableSite(seedsEmptyTable);
+  const container = $(`#datatable${site}`);
+
+  if (container.length && container.data('handsontable')) {
+    fsseedstableupdate(displayData, page, 29);
+  } else {
+    seedstable(displayData, page, 29, seedsEmptyTable);
+  }
+
   updateSeedsSortButtons();
 }
 
@@ -157,6 +173,14 @@ function clampSeedsPage(dataLength, requestedPage, pps = 29) {
   }
 
   return Math.min(page, totalPages);
+}
+
+function seedsTableSite(emptytable = []) {
+  if (isUnknownAllView) {
+    return currentCensus || 'unknown';
+  }
+
+  return emptytable?.[0]?.census ?? '';
 }
 
 $('.listlink').on('click', function () {
@@ -254,18 +278,22 @@ document.addEventListener('livewire:init', () => {
       realemptytable,
     });
 
-    if (fdata.length > 0) {
+    if (fdata.length > 0 || isUnknownAllView) {
       $('#seedstableout').show();
       $('#seedstableout_empty').hide();
 
       renderSeedsTable(1);
-      emptyseedstable(seedsEmptyTable);
+      if (!isUnknownAllView) {
+        emptyseedstable(seedsEmptyTable);
+      }
     } else {
       $('#seedstableout').hide();
       $('#seedstableout_empty').show();
 
       renderSeedsTable(1);
-      emptyseedstable(seedsEmptyTable);
+      if (!isUnknownAllView) {
+        emptyseedstable(seedsEmptyTable);
+      }
     }
   });
 });
@@ -379,7 +407,7 @@ function emptyseedstable(emptytable) {
     return;
   }
 
-  const site = emptytable[0]['census'];
+  const site = seedsTableSite(emptytable);
   $(`button[name=newdatasave${site}]`).off();
   var container = $(`#seedstable_empty${site}`);
   var saveButtonName = `newdatasave${site}`;
@@ -406,13 +434,13 @@ function emptyseedstable(emptytable) {
   var colHeaders = ["id", "census", "Trap", "種類", "類別", "數量", "種子數", "活性", "碎片3數量", "性別", "鑑定者", "備註"];
 
   var hiddenColumns = {
-    columns: [0, 1],
+    columns: isUnknownAllView ? [0] : [0, 1],
   };
   var handsontable = createHandsontable(container, columns, emptytable, saveButtonName, `${saveData1Base}/record`, tableType, colWidths, hiddenColumns, colHeaders, thispage);
 
 
   //更新大表
-  container.parent().find(`button[name=newdatasave2${site}]`).click(function () {
+  container.parent().find(`button[name=newdatasave2${site}]`).off('click.seedsSaveNewFullData').on('click.seedsSaveNewFullData', function () {
     seedsPage.clearNotes();
 
     const saveUrl2 = `${saveData1Base}/fulldata`;
@@ -421,7 +449,7 @@ function emptyseedstable(emptytable) {
       entry: entry,
       user: currentUser,
       plotType: plotType,
-      currentCensus: currentCensus,
+      currentCensus: isUnknownAllView ? null : currentCensus,
       thispage: thispage,
     };
     var ajaxType = 'post';
@@ -459,7 +487,7 @@ function seedstable(data, thispage, pps, emptytable) {
   totalpage = Math.ceil(data.length / pps);
   $('.totalnum').html(`共有 ${data.length} 筆資料。`);
 
-  var site = emptytable[0]['census'];
+  var site = seedsTableSite(emptytable);
   var container = $(`#datatable${site}`);
 
   var saveButtonName = `datasave${site}`;
@@ -486,11 +514,13 @@ function seedstable(data, thispage, pps, emptytable) {
 
   ];
 
-  var colWidths = [30, 40, 50, 120, 50, 50, 60, 50, 70, 40, 100, 160, 200, 40];
+  var colWidths = isUnknownAllView
+    ? [30, 60, 60, 150, 50, 50, 60, 50, 90, 50, 120, 180, 220, 40]
+    : [30, 40, 50, 120, 50, 50, 60, 50, 70, 40, 100, 160, 200, 40];
   var colHeaders = ["id", "census", "Trap", "種類", "類別", "數量", "種子數", "活性", "碎片3數量", "性別", "鑑定者", "備註", "檢查", ""];
 
   var hiddenColumns = {
-    columns: [0, 1],
+    columns: isUnknownAllView ? [0] : [0, 1],
   };
 
   var handsontable = createHandsontable(container, columns, data2, saveButtonName, `${saveDataBase}/record`, tableType, colWidths, hiddenColumns, colHeaders, thispage);
@@ -498,7 +528,7 @@ function seedstable(data, thispage, pps, emptytable) {
 
 
   //更新大表
-  container.parent().find(`button[name=datasave2${site}]`).click(function () {
+  container.parent().find(`button[name=datasave2${site}]`).off('click.seedsSaveFullData').on('click.seedsSaveFullData', function () {
 
     seedsPage.clearNotes();
 
@@ -508,7 +538,7 @@ function seedstable(data, thispage, pps, emptytable) {
       entry: entry,
       user: currentUser,
       plotType: plotType,
-      currentCensus: currentCensus,
+      currentCensus: isUnknownAllView ? null : currentCensus,
       thispage: thispage,
     };
     var ajaxType = 'post';
@@ -537,7 +567,7 @@ function seedstable(data, thispage, pps, emptytable) {
 function fsseedstableupdate(data, thispage, pps) {
 
 
-  var site = data[0]['census'];
+  var site = isUnknownAllView ? (currentCensus || 'unknown') : (data[0]?.census || seedsTableSite(seedsEmptyTable));
 
 
   var tableType = 'data';

@@ -29,12 +29,13 @@
 @endsection
 
 @section('headerList')
+    @php($isAdmin = (int) (auth()->user()?->is_admin ?? 0) === 1)
     <div class='headerlist iflex'>
         <div class='list list1 listlink' type='doc'>相關文件<hr></div>
         <div class='list list4 listlink'>資料輸入<hr></div>
         <div class='list list2 listlink' type='dataviewer'>資料檢視<hr></div>
-        @if (auth()->user()?->is_admin)
-            <div class='list list3 listlink' type='process'>資料處理<hr></div>
+        @if ($isAdmin)
+            <div class='list list3 listlink admin-only-link' type='process'>資料處理<hr></div>
         @endif
     </div>
 @endsection
@@ -47,7 +48,9 @@
         <li class='innerlist list44 listlink' type='entry1'>第一次輸入</li>
         <li class='innerlist list45 listlink' type='entry2'>第二次輸入</li>
         <li class='innerlist list47 listlink' type='compare'>資料比對</li>
-        <li class='innerlist list48 listlink' type='import'>將資料匯入大表<hr></li>
+        @if ((int) (auth()->user()?->is_admin ?? 0) === 1)
+            <li class='innerlist list48 listlink admin-only-link' type='import'>將資料匯入大表<hr></li>
+        @endif
     </div>
 @endsection
 

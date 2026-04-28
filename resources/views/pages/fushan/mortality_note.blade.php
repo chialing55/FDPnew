@@ -146,8 +146,7 @@
                             <li><b>Liana</b> 只能填 <b>L</b>、<b>S</b>、<b>LS</b> 或空白。</li>
                             <li><b>Fungi</b> 只能填 <b>1</b> 或空白。</li>
                             <li><b>Leaf damage</b> 只能填 <b>1</b> 或空白。</li>
-                            <li><b>Wounded stem</b>、<b>Rotten</b> 只能在 <b>Status = A / OK / D</b> 時填寫。</li>
-                            <li><b>Deformity</b>、<b>Leaves</b>、<b>Leaf damage</b> 只能在 <b>Status = A / OK</b> 時填寫。</li>
+                            <li><b>Wounded stem</b>、<b>Rotten</b>、<b>Deformity</b>、<b>Leaves</b>、<b>Leaf damage</b> 只能在 <b>Status = A / OK</b> 時填寫。</li>
                             <li><b>Wounded stem</b>、<b>Deformity</b>、<b>Rotten</b> 只能填 1、2、3 或空白。</li>
                             <li><b>Leaves</b> 只能填 0 到 100 的整數。</li>
                         </ol>

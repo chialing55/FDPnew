@@ -1066,7 +1066,6 @@ class MortalityShowentry extends Component
         }
 
         $statusAllowsDetails = in_array($status, ['A', 'OK'], true);
-        $statusAllowsWoundedAndRotten = in_array($status, ['A', 'OK', 'D'], true);
 
         if ($dbh2Raw !== null) {
             if (!is_numeric($dbh2Raw)) {
@@ -1234,8 +1233,8 @@ class MortalityShowentry extends Component
             $leaves = null;
         }
 
-        if (!$statusAllowsWoundedAndRotten && ($woundedStem !== null || $rotten !== null)) {
-            $errors[] = '只有 status 為 A、OK 或 D 時才可填寫 wounded_stem、rotten。';
+        if (!$statusAllowsDetails && ($woundedStem !== null || $rotten !== null)) {
+            $errors[] = '只有 status 為 A 或 OK 時才可填寫 wounded_stem、rotten。';
         }
 
         if (!$statusAllowsDetails && ($deformity !== null || $leaves !== null || $leafDamage !== null)) {

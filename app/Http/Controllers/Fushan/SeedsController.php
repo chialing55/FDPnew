@@ -117,6 +117,21 @@ class SeedsController extends Controller
         ]);
     }
 
+    public function unknownData(Request $request, string $unk)
+    {
+        abort_unless((bool) $request->user()?->is_admin, 403);
+
+        $user = $request->user();
+        $site = $request->route('site');
+
+        return view('pages/fushan/seeds_unknown_data', [
+            'site' => $site,
+            'project' => '種子雨',
+            'user' => $user->name,
+            'unk' => $unk,
+        ]);
+    }
+
     public function updateBackData(Request $request)
     {
 

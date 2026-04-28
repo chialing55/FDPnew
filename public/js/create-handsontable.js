@@ -291,7 +291,12 @@ function createHandsontable(container, columns, sourceData, saveButtonName, save
     });
   }
 
-  if (pageContext.plotType === 'fsseeds' && (tableType === 'data' || tableType === 'addseedsdata')) {
+  if (window.seedsConfig?.viewMode === 'unknown-all' && tableType === 'data') {
+    container.handsontable('updateSettings', {
+      contextMenu: false,
+      allowInsertRow: false,
+    });
+  } else if (pageContext.plotType === 'fsseeds' && (tableType === 'data' || tableType === 'addseedsdata')) {
     container.handsontable('updateSettings', {
       contextMenu: {
         items: {
@@ -317,7 +322,7 @@ function createHandsontable(container, columns, sourceData, saveButtonName, save
   // var noteClass=`${tableType}savenote`;
   
 // console.log(tableType);
-  container.parent().find(`button[name=${saveButtonName}]`).click(function () {
+  container.parent().find(`button[name=${saveButtonName}]`).off('click.createHandsontableSave').on('click.createHandsontableSave', function () {
     const pageContext = getPageContext();
     pageContext.clearNotes();
     let requestRows = handsontable.getSourceData();
@@ -327,7 +332,9 @@ function createHandsontable(container, columns, sourceData, saveButtonName, save
           entry: pageContext.entry,
           user: pageContext.user,
           plotType: pageContext.plotType,
-          currentCensus: typeof currentCensus !== 'undefined' ? currentCensus : null,
+          currentCensus: window.seedsConfig?.viewMode === 'unknown-all'
+            ? null
+            : (typeof currentCensus !== 'undefined' ? currentCensus : null),
           thispage: thispage,
           pps: pageContext.pps,
         };

@@ -221,49 +221,51 @@ Route::middleware(['auth'])->prefix('admin')->name('admin.')->group(function () 
                 ->defaults('site', 'fushan')
                 ->name('dataviewer');
 
-            Route::get('/process', [MortalityController::class, 'process'])
-                ->defaults('site', 'fushan')
-                ->name('process');
+            Route::middleware('admin')->group(function () {
+                Route::get('/process', [MortalityController::class, 'process'])
+                    ->defaults('site', 'fushan')
+                    ->name('process');
 
-            Route::post('/process/basic', [MortalityController::class, 'runBasicProcess'])
-                ->defaults('site', 'fushan')
-                ->name('process.basic');
+                Route::post('/process/basic', [MortalityController::class, 'runBasicProcess'])
+                    ->defaults('site', 'fushan')
+                    ->name('process.basic');
 
-            Route::post('/process/tree-individuals', [MortalityController::class, 'runTreeIndividualsProcess'])
-                ->defaults('site', 'fushan')
-                ->name('process.tree-individuals');
+                Route::post('/process/tree-individuals', [MortalityController::class, 'runTreeIndividualsProcess'])
+                    ->defaults('site', 'fushan')
+                    ->name('process.tree-individuals');
 
-            Route::post('/process/people', [MortalityController::class, 'runPeopleProcess'])
-                ->defaults('site', 'fushan')
-                ->name('process.people');
+                Route::post('/process/people', [MortalityController::class, 'runPeopleProcess'])
+                    ->defaults('site', 'fushan')
+                    ->name('process.people');
 
-            Route::post('/process/comments', [MortalityController::class, 'runCommentProcess'])
-                ->defaults('site', 'fushan')
-                ->name('process.comments');
+                Route::post('/process/comments', [MortalityController::class, 'runCommentProcess'])
+                    ->defaults('site', 'fushan')
+                    ->name('process.comments');
 
-            Route::post('/process/census-records', [MortalityController::class, 'runCensusRecordImport'])
-                ->defaults('site', 'fushan')
-                ->name('process.census-records');
+                Route::post('/process/census-records', [MortalityController::class, 'runCensusRecordImport'])
+                    ->defaults('site', 'fushan')
+                    ->name('process.census-records');
 
-            Route::get('/process/comments/review', [MortalityController::class, 'commentReview'])
-                ->defaults('site', 'fushan')
-                ->name('process.comments.review');
+                Route::get('/process/comments/review', [MortalityController::class, 'commentReview'])
+                    ->defaults('site', 'fushan')
+                    ->name('process.comments.review');
 
-            Route::get('/process/comment-other/review', [MortalityController::class, 'commentOtherReview'])
-                ->defaults('site', 'fushan')
-                ->name('process.comment-other.review');
+                Route::get('/process/comment-other/review', [MortalityController::class, 'commentOtherReview'])
+                    ->defaults('site', 'fushan')
+                    ->name('process.comment-other.review');
 
-            Route::post('/process/comments/options', [MortalityController::class, 'storeCommentOption'])
-                ->defaults('site', 'fushan')
-                ->name('process.comments.options.store');
+                Route::post('/process/comments/options', [MortalityController::class, 'storeCommentOption'])
+                    ->defaults('site', 'fushan')
+                    ->name('process.comments.options.store');
 
-            Route::post('/process/comments/review', [MortalityController::class, 'saveCommentReviewPage'])
-                ->defaults('site', 'fushan')
-                ->name('process.comments.review.save');
+                Route::post('/process/comments/review', [MortalityController::class, 'saveCommentReviewPage'])
+                    ->defaults('site', 'fushan')
+                    ->name('process.comments.review.save');
 
-            Route::post('/process/comment-other/review', [MortalityController::class, 'saveCommentOtherReviewPage'])
-                ->defaults('site', 'fushan')
-                ->name('process.comment-other.review.save');
+                Route::post('/process/comment-other/review', [MortalityController::class, 'saveCommentOtherReviewPage'])
+                    ->defaults('site', 'fushan')
+                    ->name('process.comment-other.review.save');
+            });
         });
 
         // ===== Tree pages =====
@@ -370,6 +372,10 @@ Route::middleware(['auth'])->prefix('admin')->name('admin.')->group(function () 
             Route::get('/unknown', [SeedsController::class, 'unknown'])
                 ->defaults('site', 'fushan')
                 ->name('unknown');
+
+            Route::get('/unknown/{unk}/data', [SeedsController::class, 'unknownData'])
+                ->defaults('site', 'fushan')
+                ->name('unknown.data');
 
             // 舊：/admin/fushan/seeds/updateBackData
             Route::get('/update-back-data', [SeedsController::class, 'updateBackData'])
@@ -624,9 +630,18 @@ Route::middleware(['auth'])->prefix('admin')->name('admin.')->group(function () 
         Route::post('/data1/{type}', [SeedsSaveController::class, 'savedata1'])
             ->name('data1.save');
 
+        Route::post('/unknown/{unk}/data/{type}', [SeedsSaveController::class, 'saveUnknownData'])
+            ->name('unknown.data.save');
+
+        Route::post('/unknown/{unk}/data1/{type}', [SeedsSaveController::class, 'saveNewUnknownData'])
+            ->name('unknown.data1.save');
+
         // 舊：GET /fsseeds/deletedata/{id}/{info}/{thispage}/{type}
         Route::delete('/data/{id}/{info}/{thispage}/{type}', [SeedsSaveController::class, 'deletedata'])
             ->name('data.delete');
+
+        Route::delete('/unknown/{unk}/data/{id}/{info}/{thispage}/{type}', [SeedsSaveController::class, 'deleteUnknownData'])
+            ->name('unknown.data.delete');
 
         // 舊：GET /fsseeds/finish
         Route::post('/finish', [SeedsSaveController::class, 'finishnote'])

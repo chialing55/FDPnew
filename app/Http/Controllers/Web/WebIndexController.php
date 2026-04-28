@@ -20,7 +20,7 @@ class WebIndexController extends Controller
     public function index(Request $request)
     {
 
-        $user = $request->user()->name;
+        $user = $request->user()?->name;
 
         // if ($user=='no'){
         //     return view('login1', [
@@ -45,7 +45,7 @@ class WebIndexController extends Controller
     public function species(Request $request, $spcode)
     {
 
-        $user = $request->user()->name;
+        $user = $request->user()?->name;
 
         return view('pages/web/species', [
             'spcode' => $spcode,
@@ -57,7 +57,7 @@ class WebIndexController extends Controller
     public function splist(Request $request)
     {
 
-        $user = $request->user()->name;
+        $user = $request->user()?->name;
 
 
         return view('pages/web/splist', [
