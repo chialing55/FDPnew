@@ -8,17 +8,13 @@ use Illuminate\Support\Facades\App;
 use Livewire\Component;
 use Livewire\WithPagination;
 use Illuminate\Support\Facades\File;
+use Illuminate\Support\Facades\Schema;
 
 use App\Models\FsBaseSpinfo;
-use App\Models\FsWebPhoto;
-use App\Models\FsWebDisNote;
+use App\Models\FsTreeCensuses;
+use App\Models\Web\Photo;
+use App\Models\Web\DisNote;
 
-use App\Models\FsTreeCensus1;
-use App\Models\FsTreeCensus2;
-use App\Models\FsTreeCensus3;
-use App\Models\FsTreeCensus4;
-use App\Models\FsTreeCensus5;
-use App\Models\FsTreeBase;
 use App\Models\FsSeedlingData;
 
 use App\Models\FsSeedsDateinfo;
@@ -40,14 +36,25 @@ class Showspecies extends Component
     public $leafphoto = 'no';
     public $treeinfo;
     public $groupConditions;
+    public $researches = [];
+    public $latestTreeCensus = 5;
+    public $latestTreeCensusYear = '2024';
 
     public function mount($spcode)
     {
         $this->treeinfo = '';
 
-        $this->photoinfo = FsWebPhoto::where('spcode', 'like', $spcode)->orderBy('type2')->get()->toArray();
+        $photoQuery = Photo::where('spcode', $spcode);
+
+        if (! auth()->check() && Schema::connection('mysql_web')->hasColumn('photo', 'is_public')) {
+            $photoQuery->where('is_public', true);
+        }
+
+        $this->photoinfo = $photoQuery->orderBy('type2')->get()->toArray();
         // dd($photoinfo);
-        $desinfo = FsWebDisNote::where('spcode', 'like', $spcode)->orderBy('type2')->get()->toArray();
+        $desinfo = auth()->check()
+            ? DisNote::where('spcode', $spcode)->orderBy('type2')->get()->toArray()
+            : [];
 
         $des = [];
 
@@ -66,15 +73,21 @@ class Showspecies extends Component
 
         $this->desinfo = $des;
 
-        $this->speciesinfo = FsBaseSpinfo::where('spcode', 'like', $spcode)->first()->toArray();
+        $this->speciesinfo = FsBaseSpinfo::where('spcode', $spcode)->first()->toArray();
         $this->spcode = $spcode;
+        $this->researches = $this->speciesResearchFlags($spcode);
+        [$this->latestTreeCensus, $this->latestTreeCensusYear] = $this->latestTreeCensusInfo();
 
-        $this->countInd = FsTreeCensus4::select('base.*', 'census4.*')->join('base', 'base.tag', '=', 'census4.tag')->where('base.spcode', 'like', $spcode)->where('branch', 'like', '0')->count();
-        $this->countB = FsTreeCensus4::select('base.*', 'census4.*')->join('base', 'base.tag', '=', 'census4.tag')->where('base.spcode', 'like', $spcode)->where('branch', 'not like', '0')->count();
-        $this->maxDBH = FsTreeCensus4::select('base.*', 'census4.*')->join('base', 'base.tag', '=', 'census4.tag')->where('base.spcode', 'like', $spcode)->where('branch', 'like', '0')->max('dbh');
-        $this->countSeeds = FsSeedsFulldata::where('sp', 'like', $spcode)->sum('seeds');
-        $this->countFlower = FsSeedsFulldata::where('sp', 'like', $spcode)->where('code', 'like', '6')->count();
-        $this->countSeedlings = FsSeedlingData::where('csp', 'like', $this->speciesinfo['csp'])->whereColumn('tag', 'mtag')->sum('ind');
+        $latestTreeTable = $this->treeCensusTable($this->latestTreeCensus);
+        $latestTreeBase = $this->treeCensusQuery($this->latestTreeCensus)
+            ->where('base.spcode', $spcode);
+
+        $this->countInd = (clone $latestTreeBase)->where($latestTreeTable . '.branch', '0')->count();
+        $this->countB = (clone $latestTreeBase)->where($latestTreeTable . '.branch', '!=', '0')->count();
+        $this->maxDBH = (clone $latestTreeBase)->where($latestTreeTable . '.branch', '0')->max($latestTreeTable . '.dbh');
+        $this->countSeeds = FsSeedsFulldata::where('sp', $spcode)->sum('seeds');
+        $this->countFlower = FsSeedsFulldata::where('sp', $spcode)->where('code', '6')->count();
+        $this->countSeedlings = FsSeedlingData::where('csp', $this->speciesinfo['csp'])->whereColumn('tag', 'mtag')->sum('ind');
 
         // dd($this->treeinfo);
         // $this->showdata($spcode);
@@ -85,38 +98,146 @@ class Showspecies extends Component
         }
     }
 
+    private function treeCensusYears(): array
+    {
+        if (Schema::connection('mysql1')->hasTable('censuses')) {
+            $yearColumn = Schema::connection('mysql1')->hasColumn('censuses', 'year') ? 'year' : 'survey_year';
+
+            return FsTreeCensuses::query()
+                ->orderBy('census')
+                ->pluck($yearColumn, 'census')
+                ->map(fn ($year) => (string) $year)
+                ->all();
+        }
+
+        return [
+            1 => '2004',
+            2 => '2009',
+            3 => '2014',
+            4 => '2019',
+            5 => '2024',
+        ];
+    }
+
+    private function latestTreeCensusInfo(): array
+    {
+        $censuses = $this->treeCensusYears();
+
+        krsort($censuses);
+
+        foreach ($censuses as $census => $year) {
+            if (Schema::connection('mysql1')->hasTable($this->treeCensusTable((int) $census))) {
+                return [(int) $census, (string) $year];
+            }
+        }
+
+        return [5, '2024'];
+    }
+
+    private function treeCensusTable(int $census): string
+    {
+        return 'census' . $census;
+    }
+
+    private function treeCensusQuery(int $census)
+    {
+        $table = $this->treeCensusTable($census);
+
+        return DB::connection('mysql1')
+            ->table($table)
+            ->join('base', 'base.tag', '=', $table . '.tag');
+    }
+
+    private function speciesResearchFlags(string $spcode): array
+    {
+        $fallback = [
+            'tree' => (int) ($this->speciesinfo['tree'] ?? 0),
+            'seed' => (int) ($this->speciesinfo['seed'] ?? 0),
+            'seedling' => (int) ($this->speciesinfo['seedling'] ?? 0),
+            'mortality' => 0,
+        ];
+
+        if (!Schema::connection('mysql4')->hasTable('species_research_links')) {
+            return $fallback;
+        }
+
+        $linkedCodes = DB::connection('mysql4')
+            ->table('species_research_links')
+            ->where('spcode', $spcode)
+            ->pluck('research_code')
+            ->all();
+
+        if ($linkedCodes === []) {
+            return $fallback;
+        }
+
+        return collect($linkedCodes)
+            ->mapWithKeys(fn ($researchCode) => [$researchCode => 1])
+            ->union($fallback)
+            ->all();
+    }
+
     public $censusA;
+
+    public function loadChartData()
+    {
+        if ($this->countInd > 0) {
+            $this->fig1data();
+            $this->fig2data();
+            $this->fig3data();
+        }
+
+        if ($this->countFlower > 0) {
+            $this->fig4data();
+        }
+
+        if ($this->countSeeds > 0) {
+            $this->fig5data();
+        }
+
+        if ($this->countSeedlings > 0) {
+            $this->fig6data();
+        }
+    }
 
     // 各次調查植株數量圖
     public function fig1data()
     {
         $spcode = $this->spcode;
+        $censusA = [];
+        $censusR = [];
+        $censusD = [];
+
         //censusA: 活著的樹  censusR:新增的樹  censusD:死掉的樹
-        $census1 = FsTreeCensus1::select('base.*', 'census1.*')->join('base', 'base.tag', '=', 'census1.tag')->where('base.spcode', 'like', $spcode)->where('branch', 'like', '0')->count();
+        foreach ($this->treeCensusYears() as $i => $year) {
+            $table = $this->treeCensusTable((int) $i);
 
-        $censusA['census1'] = $census1;
-        $censusR['census1'] = '';
-        $censusD['census1'] = '';
-
-        for ($i = 2; $i < 5; $i++) {
-            switch ($i) {
-                case '2':
-                    $table = new FsTreeCensus2;
-                    break;
-                case '3':
-                    $table = new FsTreeCensus3;
-                    break;
-                case '4':
-                    $table = new FsTreeCensus4;
-                    break;
-                case '5':
-                    $table = new FsTreeCensus5;
-                    break;
+            if (!Schema::connection('mysql1')->hasTable($table)) {
+                continue;
             }
 
-            $censusA['census' . $i] = $table::select('base.*', 'census' . $i . '.*')->join('base', 'base.tag', '=', 'census' . $i . '.tag')->where('base.spcode', 'like', $spcode)->where('status', 'not like', '0')->where('status', 'not like', '-9')->where('date', 'not like', '0000-00-00')->where('branch', 'like', '0')->count();
-            $censusR['census' . $i] = $table::select('base.*', 'census' . $i . '.*')->join('base', 'base.tag', '=', 'census' . $i . '.tag')->where('base.spcode', 'like', $spcode)->where('status', 'like', '-9')->where('branch', 'like', '0')->count();
-            $censusD['census' . $i] = $table::select('base.*', 'census' . $i . '.*')->join('base', 'base.tag', '=', 'census' . $i . '.tag')->where('base.spcode', 'like', $spcode)->where('status', 'like', '0')->where('date', 'not like', '0000-00-00')->where('branch', 'like', '0')->count();
+            $censusQuery = $this->treeCensusQuery((int) $i)
+                ->where('base.spcode', $spcode)
+                ->where($table . '.branch', '0');
+
+            if ((int) $i === 1) {
+                $censusA[$year] = (clone $censusQuery)->count();
+                $censusR[$year] = '';
+                $censusD[$year] = '';
+                continue;
+            }
+
+            $counts = $censusQuery
+                ->selectRaw("
+                    SUM(CASE WHEN {$table}.status != '0' AND {$table}.status != '-9' AND {$table}.date != '0000-00-00' THEN 1 ELSE 0 END) as alive_count,
+                    SUM(CASE WHEN {$table}.status = '-9' THEN 1 ELSE 0 END) as recruit_count,
+                    SUM(CASE WHEN {$table}.status = '0' AND {$table}.date != '0000-00-00' THEN 1 ELSE 0 END) as dead_count
+                ")
+                ->first();
+
+            $censusA[$year] = (int) ($counts->alive_count ?? 0);
+            $censusR[$year] = (int) ($counts->recruit_count ?? 0);
+            $censusD[$year] = (int) ($counts->dead_count ?? 0);
         }
 
         // dd($censusA);
@@ -176,36 +297,28 @@ class Showspecies extends Component
 
         $this->groupConditions = $groupConditions;
     }
-    //第四次調查徑級結構
+    // 最新一次調查徑級結構
     public function fig2data()
     {
 
 
         $spcode = $this->spcode;
-        $census4 = FsTreeCensus4::select('base.*', 'census4.*')->join('base', 'base.tag', '=', 'census4.tag')->where('base.spcode', 'like', $spcode)->where('dbh', 'not like', '0')->where('branch', 'like', '0')->get()->toArray();
-
         // 準備分群條件
         $this->groupConditions();
         $groupConditions = $this->groupConditions;
 
+        $latestTreeTable = $this->treeCensusTable($this->latestTreeCensus);
+        $latestCensusQuery = $this->treeCensusQuery($this->latestTreeCensus)
+            ->where('base.spcode', $spcode)
+            ->where($latestTreeTable . '.dbh', '!=', '0')
+            ->where($latestTreeTable . '.branch', '0');
 
         // 初始化統計結果陣列
         $groupedCounts = [];
 
         // 根據每個分群條件進行計算
         foreach ($groupConditions as $groupName => $groupRange) {
-            // 使用 where 條件過濾出符合該分群條件的記錄
-            $count = count(array_filter($census4, function ($item) use ($groupRange) {
-                // 檢查 dbh 是否在指定範圍內
-                if (is_array($groupRange)) {
-                    return $item['dbh'] >= $groupRange[0] && $item['dbh'] < $groupRange[1];
-                } else {
-                    return $item['dbh'] > $groupRange;
-                }
-            }));
-
-            // 將計算結果存入統計結果陣列
-            $groupedCounts[$groupName] = $count;
+            $groupedCounts[$groupName] = $this->applyDbhGroup(clone $latestCensusQuery, $groupRange, $latestTreeTable . '.dbh')->count();
         }
 
 
@@ -220,13 +333,29 @@ class Showspecies extends Component
             groupedCounts: $groupedCounts
         );
     }
-    //第四次調查植株位置分布
+    // 最新一次調查植株位置分布
     public function fig3data()
     {
 
         $spcode = $this->spcode;
-        $census4A = FsTreeCensus4::select('base.*', 'census4.*')->join('base', 'base.tag', '=', 'census4.tag')->where('base.spcode', 'like', $spcode)->where('dbh', 'not like', '0')->where('branch', 'like', '0')->get()->toArray();
-        // $census4D=FsTreeCensus4::select('base.*', 'census4.*')->join('base', 'base.tag', '=', 'census4.tag')->where('base.spcode', 'like', $spcode)->where('dbh', 'like', '0')->where('branch', 'like', '0')->get()->toArray();
+        $latestTreeTable = $this->treeCensusTable($this->latestTreeCensus);
+        $latestCensusA = $this->treeCensusQuery($this->latestTreeCensus)
+            ->select(
+                $latestTreeTable . '.tag',
+                $latestTreeTable . '.dbh',
+                'base.plotx',
+                'base.ploty',
+                'base.qx',
+                'base.qy',
+                'base.sqx',
+                'base.sqy'
+            )
+            ->where('base.spcode', $spcode)
+            ->where($latestTreeTable . '.dbh', '!=', '0')
+            ->where($latestTreeTable . '.branch', '0')
+            ->get()
+            ->map(fn ($row) => (array) $row)
+            ->toArray();
 
         // 準備分群條件
         $this->groupConditions();
@@ -238,7 +367,7 @@ class Showspecies extends Component
         // 根據每個分群條件進行計算
         foreach ($groupConditions as $groupName => $groupRange) {
             // 使用 where 條件過濾出符合該分群條件的記錄
-            $filteredData = array_filter($census4A, function ($item) use ($groupRange) {
+            $filteredData = array_filter($latestCensusA, function ($item) use ($groupRange) {
                 // 檢查 dbh 是否在指定範圍內
                 if (is_array($groupRange)) {
                     return $item['dbh'] >= $groupRange[0] && $item['dbh'] < $groupRange[1];
@@ -255,10 +384,8 @@ class Showspecies extends Component
         // 現在 $group 就包含了每個分群的記錄
 
         // 將結果傳遞給前端
-        // $this->dispatchBrowserEvent('fig3', ['census4A' => $census4A, 'group' => $group]);
         $this->dispatch(
             'fig3',
-            census4A: $census4A,
             group: $group
         );
     }
@@ -271,14 +398,14 @@ class Showspecies extends Component
     //census261 / 2007.09.01 / key=60 開始為 106個網子，之前是87
     public function fig4data()
     {
-        if ($this->timeSeries == []) {
+        if (empty($this->timeSeries)) {
             $this->getTimeSeries();
         }
 
         $flowerTraps = [];
         $flowerSeries = [];
 
-        foreach ($this->timeSeries['6'] as $item) {
+        foreach (($this->timeSeries['6'] ?? []) as $item) {
             $date = $item['date1'];
             $count = $item['count'];
 
@@ -314,14 +441,14 @@ class Showspecies extends Component
     //結果量時間變化
     public function fig5data()
     {
-        if ($this->timeSeries == []) {
+        if (empty($this->timeSeries)) {
             $this->getTimeSeries();
         }
 
         $fruitsTraps = [];
         $fruitsSeries = [];
 
-        foreach ($this->timeSeries['1'] as $item) {
+        foreach (($this->timeSeries['1'] ?? []) as $item) {
             $date = $item['date1'];
             $count = $item['seeds'];
 
@@ -334,7 +461,7 @@ class Showspecies extends Component
             $fruitsTraps[$date] += $count;
         }
 
-        foreach ($this->timeSeries['2'] as $item) {
+        foreach (($this->timeSeries['2'] ?? []) as $item) {
             $date = $item['date1'];
             $count = $item['seeds'];
 
@@ -412,7 +539,6 @@ class Showspecies extends Component
         }
         // dd($seedlingSeries);
 
-        $this->dispatchBrowserEvent('fig6', ['seedlingSeries' => $seedlingSeries]);
         $this->dispatch(
             'fig6',
             seedlingSeries: $seedlingSeries
@@ -421,7 +547,20 @@ class Showspecies extends Component
 
     public function getTimeSeries()
     {
-        $timeSeries = FsSeedsFulldata::select('fulldata.*', 'dateinfo.*')->join('dateinfo', 'dateinfo.census', '=', 'fulldata.census')->where('fulldata.sp', 'like', $this->spcode)->get()->toArray();
+        $timeSeries = FsSeedsFulldata::select(
+                'fulldata.code',
+                'dateinfo.date1',
+                DB::raw('SUM(fulldata.seeds) as seeds'),
+                DB::raw('COUNT(*) as count'),
+                DB::raw('MIN(dateinfo.census) as first_census')
+            )
+            ->join('dateinfo', 'dateinfo.census', '=', 'fulldata.census')
+            ->where('fulldata.sp', $this->spcode)
+            ->whereIn('fulldata.code', ['1', '2', '6'])
+            ->groupBy('fulldata.code', 'dateinfo.date1')
+            ->orderBy('first_census')
+            ->get()
+            ->toArray();
 
         $groupedItems = [];
 
@@ -445,6 +584,15 @@ class Showspecies extends Component
         // dd($dateSeries);
         $this->dateCounts = $dateCounts;
         $this->dateSeries = $dateSeries;
+    }
+
+    private function applyDbhGroup($query, $groupRange, string $dbhColumn = 'dbh')
+    {
+        if (is_array($groupRange)) {
+            return $query->where($dbhColumn, '>=', $groupRange[0])->where($dbhColumn, '<', $groupRange[1]);
+        }
+
+        return $query->where($dbhColumn, '>', $groupRange);
     }
 
     public function render()

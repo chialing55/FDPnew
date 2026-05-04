@@ -30,6 +30,7 @@
     <div class='headerlist iflex'>
         <div class='list list1 listlink' type='doc'>相關文件<hr></div>
         <div class='list list2 listlink' type='dataviewer'>資料檢視<hr></div>
+        <div class='list list3 listlink' type='download'>資料下載<hr></div>
     </div>
 @endsection
 

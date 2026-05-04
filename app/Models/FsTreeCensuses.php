@@ -5,9 +5,10 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-class FsWebPhoto extends Model
+class FsTreeCensuses extends Model
 {
     use HasFactory;
-    protected $table = "photo";
-    protected $connection = 'mysql6';
+
+    protected $table = "censuses";
+    protected $connection = 'mysql1';
 }

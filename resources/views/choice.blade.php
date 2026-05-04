@@ -35,7 +35,7 @@
         }
 
         .choice-card--box4 {
-            background-color: #e9f3c0dc;
+            background-color: #e5efd2dc;
         }
 
         .choice-card .boxtext {
@@ -113,6 +113,15 @@
                         'style' => 'box3',
                         'new_tab' => true,
                     ],
+                    [
+                        'key' => 'plant.photos',
+                        'label' => '植物照片編輯',
+                        'url' => route('admin.plant-photos.index'),
+                        'img' => asset('/images/research/毬蘭_03.JPG'),
+                        'style' => 'box3',
+                        'new_tab' => false,
+                    ],
+
                 ];
 
                 if (auth()->user()?->is_admin) {

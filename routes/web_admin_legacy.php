@@ -84,6 +84,13 @@ Route::middleware(['auth'])->prefix('admin')->name('admin.')->group(function () 
     Route::get('/choice', [ChoiceController::class, 'check'])
         ->name('choice');
 
+    Route::view('/plant-photos', 'pages.plant-photos.index')
+        ->name('plant-photos.index');
+
+    Route::get('/plant-photos/{spcode}', function (string $spcode) {
+        return view('pages.plant-photos.edit', ['spcode' => $spcode]);
+    })->name('plant-photos.edit');
+
     Route::get('/profile', [ProfileController::class, 'edit'])
         ->name('profile.edit');
 
@@ -397,6 +404,18 @@ Route::middleware(['auth'])->prefix('admin')->name('admin.')->group(function () 
             Route::get('/dataviewer', [NanjenshanSeedlingController::class, 'dataviewer'])
                 ->defaults('site', 'nanjenshan')
                 ->name('dataviewer');
+
+            Route::get('/download', [NanjenshanSeedlingController::class, 'download'])
+                ->defaults('site', 'nanjenshan')
+                ->name('download');
+
+            Route::get('/download/all-data', [NanjenshanSeedlingController::class, 'downloadAllData'])
+                ->defaults('site', 'nanjenshan')
+                ->name('download.all-data');
+
+            Route::get('/download/quadrats', [NanjenshanSeedlingController::class, 'downloadQuadrats'])
+                ->defaults('site', 'nanjenshan')
+                ->name('download.quadrats');
         });
     });
 

@@ -51,7 +51,9 @@
                 @forelse($editingPhotos as $photoId => $photo)
                     <form wire:submit.prevent="savePhoto({{ $photoId }})" class="unknown-photo-editor" wire:key="unknown-photo-editor-{{ $photoId }}">
                         <div class="unknown-photo-editor-image">
-                            <img src="{{ asset("FDPfiles/splist/photo/unknown/{$editingUnkName}/s_{$photo['filename']}") }}" alt="{{ $photo['filename'] }}">
+                            <a href="{{ asset("FDPfiles/splist/photo/unknown/{$editingUnkName}/{$photo['filename']}") }}" target="_blank" rel="noopener">
+                                <img src="{{ asset("FDPfiles/splist/photo/unknown/{$editingUnkName}/s_{$photo['filename']}") }}" alt="{{ $photo['filename'] }}">
+                            </a>
                             <span>{{ $photo['filename'] }}</span>
                         </div>
 

@@ -1,16 +1,16 @@
 <?php
 
-namespace App\Models;
+namespace App\Models\Web;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-class FsWebUnk extends Model
+class DisNote extends Model
 {
     use HasFactory;
 
-    protected $table = "unknown";
-    protected $connection = 'mysql6';
+    protected $table = 'dis_note';
+    protected $connection = 'mysql_web';
     public $timestamps = false;
     protected $guarded = [];
 }

@@ -5,12 +5,12 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-class FsWebUnkPhoto extends Model
+class FsSeedsUnk extends Model
 {
     use HasFactory;
 
-    protected $table = "unkphoto";
-    protected $connection = 'mysql6';
+    protected $table = 'unknown';
+    protected $connection = 'mysql2';
     public $timestamps = false;
     protected $guarded = [];
 }

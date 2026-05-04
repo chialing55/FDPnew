@@ -37,7 +37,7 @@
                     <div class="unknown-photo-item" wire:key="unknown-photo-{{ $photo['id'] }}">
                         <div class='photocombo'>
                             <div class='photo'>
-                                <a href='{{ asset("FDPfiles/splist/photo/unknown/{$photo['unkname']}/{$photo['filename']}") }}' data-fancybox="gallery" data-caption="{{$unk['unkname']}}<br> 類型: {{$codelist[$photo['code']] ?? ''}}@if($photo['des']!='')<br>{{$photo['des']}}
+                                <a href='{{ asset("FDPfiles/splist/photo/unknown/{$photo['unkname']}/{$photo['filename']}") }}' target="_blank" rel="noopener" data-fancybox="gallery" data-caption="{{$unk['unkname']}}<br> 類型: {{$codelist[$photo['code']] ?? ''}}@if($photo['des']!='')<br>{{$photo['des']}}
                         @endif" >
                                     <img src="{{ asset("FDPfiles/splist/photo/unknown/{$photo['unkname']}/s_{$photo['filename']}") }}" width="230">
                                 </a>

@@ -7,6 +7,7 @@ $("#spTable").tablesorter({
             3: customFilterFunction,
             4: customFilterFunction,
             5: customFilterFunction,
+            6: customFilterFunction,
         },
     },
     textExtraction: {
@@ -19,6 +20,10 @@ $("#spTable").tablesorter({
             return $(node).attr("data-value") || $(node).text();
         },
         5: function (node, table, cellIndex) {
+            // 提取 data-value 屬性的值
+            return $(node).attr("data-value") || $(node).text();
+        },
+        6: function (node, table, cellIndex) {
             // 提取 data-value 屬性的值
             return $(node).attr("data-value") || $(node).text();
         },
@@ -38,7 +43,7 @@ function customFilterFunction(e, n, f, i, $r, c, data) {
 $("input[data-column=0]").attr("placeholder", "keyword");
 $("input[data-column=1]").css("width", "200px").attr("placeholder", "keyword");
 $("input[data-column=2]").css("width", "100px").attr("placeholder", "keyword");
-$('input[data-column="3"], input[data-column="4"], input[data-column="5"]')
+$('input[data-column="3"], input[data-column="4"], input[data-column="5"], input[data-column="6"]')
     .css("width", "40px")
     .attr("placeholder", "1/0");
 
@@ -55,28 +60,63 @@ let fig5;
 let fig6;
 
 function figtoggle(k) {
-    $(`.fig${k}creat`).hide();
-    $(`.fig${k}show`).show();
-    $(`.fig${k}`).show();
+    $(`.fig${k}`).show().addClass("is-ready");
+}
 
-    for (let i = 1; i < 7; i++) {
-        let fig = eval(`fig${i}`);
-        if (i == k) continue;
-        if (fig == "yes") {
-            $(`.fig${i}creat`).hide();
-            $(`.fig${i}show`).show();
-            $(`.fig${i}`).show();
-            // console.log(i);
+async function startSpeciesChartQueue() {
+    const root = document.querySelector("[data-species-chart-root]");
+    if (!root || root.dataset.chartQueueStarted === "yes" || !window.Livewire) {
+        return;
+    }
+
+    const componentEl = root.closest("[wire\\:id]");
+    if (!componentEl) {
+        return;
+    }
+
+    let chartMethods = [];
+
+    try {
+        chartMethods = JSON.parse(root.dataset.chartMethods || "[]");
+    } catch (error) {
+        chartMethods = [];
+    }
+
+    if (chartMethods.length === 0) {
+        return;
+    }
+
+    const wire = Livewire.find(componentEl.getAttribute("wire:id"));
+    if (!wire) {
+        return;
+    }
+
+    root.dataset.chartQueueStarted = "yes";
+
+    for (const method of chartMethods) {
+        try {
+            if (typeof wire[method] === "function") {
+                await wire[method]();
+            }
+        } catch (error) {
+            console.error(`Failed to load chart method: ${method}`, error);
         }
     }
 }
+
+document.addEventListener("livewire:initialized", () => {
+    startSpeciesChartQueue();
+});
+
+document.addEventListener("DOMContentLoaded", () => {
+    setTimeout(startSpeciesChartQueue, 0);
+});
 
 document.addEventListener('livewire:init', () => {
   if (window.__boundFig1Event) return;
   window.__boundFig1Event = true;
 
   Livewire.on('fig1', ({ censusA, censusR, censusD }) => {
-    console.log(censusA);
     drawChart1(censusA, censusR, censusD);
     figtoggle(1);
   });
@@ -111,6 +151,7 @@ function drawChart1(censusA, censusR, censusD) {
             ],
         },
         options: {
+            animation: false,
             plugins: {
                 legend: {
                     align: "end",
@@ -136,7 +177,7 @@ document.addEventListener('livewire:init', () => {
 });
 
 
-//第四次調查徑級結構
+// 最新一次調查徑級結構
 function drawChart2(groupedCounts) {
     var ctx2 = $("#myChartFig2");
     var previousChart = Chart.getChart(ctx2);
@@ -155,6 +196,7 @@ function drawChart2(groupedCounts) {
             ],
         },
         options: {
+            animation: false,
             plugins: {
                 legend: {
                     display: false, // 禁用图例
@@ -173,14 +215,14 @@ document.addEventListener('livewire:init', () => {
   if (window.__boundFig3Event) return;
   window.__boundFig3Event = true;
 
-  Livewire.on('fig3', ({ census4A, group }) => {
-    drawChart3(census4A, group);
+  Livewire.on('fig3', ({ group }) => {
+    drawChart3(group);
     figtoggle(3);
   });
 });
 
-//第四次調查植株位置分布
-function drawChart3(census4A, group) {
+// 最新一次調查植株位置分布
+function drawChart3(group) {
     var ctx3 = $("#myChartFig3");
     var previousChart = Chart.getChart(ctx3);
     if (previousChart) {
@@ -253,6 +295,7 @@ function drawChart3(census4A, group) {
         },
         plugins: [chartAreaPlugins],
         options: {
+            animation: false,
             aspectRatio: 1,
             maintainAspectRatio: true,
             scales: {
@@ -359,6 +402,7 @@ function drawChart4(flowerSeries) {
             ],
         },
         options: {
+            animation: false,
             plugins: {
                 legend: {
                     display: false, // 禁用图例
@@ -385,8 +429,8 @@ document.addEventListener('livewire:init', () => {
   if (window.__boundFig5Event) return;
   window.__boundFig5Event = true;
 
-  Livewire.on('fig5', ({ flowerSeries }) => {
-    drawChart5(fruitsSeries);
+  Livewire.on('fig5', (payload) => {
+    drawChart5(payload?.fruitsSeries || {});
     figtoggle(5);
   });
 });
@@ -419,6 +463,7 @@ function drawChart5(fruitsSeries) {
             ],
         },
         options: {
+            animation: false,
             plugins: {
                 legend: {
                     display: false, // 禁用图例
@@ -428,7 +473,7 @@ function drawChart5(fruitsSeries) {
                 y: {
                     title: {
                         display: true,
-                        text: "種子密度(種子數/m2)", // y 轴的标签
+                        text: "種子密度(種子數/m²)", // y 轴的标签
                     },
                 },
             },
@@ -473,6 +518,7 @@ function drawChart6(seedlingSeries) {
             ],
         },
         options: {
+            animation: false,
             plugins: {
                 legend: {
                     display: false, // 禁用图例
@@ -482,7 +528,7 @@ function drawChart6(seedlingSeries) {
                 y: {
                     title: {
                         display: true,
-                        text: "小苗密度(小苗數/m2)", // y 轴的标签
+                        text: "小苗密度(小苗數/m²)", // y 轴的标签
                     },
                 },
             },

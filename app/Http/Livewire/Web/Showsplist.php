@@ -3,11 +3,7 @@
 namespace App\Http\Livewire\Web;
 
 use Livewire\Component;
-use Illuminate\Http\Request;
-use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\App;
-use Illuminate\Http\Response;
-use Livewire\WithPagination;
+use Illuminate\Support\Facades\Schema;
 
 use App\Models\FsBaseSpinfo;
 use App\Http\Controllers\UpdateController;
@@ -18,27 +14,60 @@ class Showsplist extends Component
     public $user;
     public $splist;
 
-    public function mount(Request $request){
+    public function mount()
+    {
+        $request = request();
 
-        $lasterUpdate=$request->session()->get('lasterUpdate', function () {
+        $latestUpdate = $request->session()->get('latest_update', function () {
             return 'no';
-
         });
 
-        if ($lasterUpdate=='no'){
-            $lasterUpdate='';
+        if ($latestUpdate === 'no') {
             $ob_update = new UpdateController;
-            $lasterUpdate=$ob_update->latestUpdates();
+            $latestUpdate = $ob_update->latestUpdates();
           
-            $request->session()->put('latest_update', $lasterUpdate);
+            $request->session()->put('latest_update', $latestUpdate);
         }
 
 
-        $this->splist = FsBaseSpinfo::select('fs_base.spinfo.*', DB::raw('(EXISTS (SELECT 1 FROM fs_web.photo WHERE fs_base.spinfo.spcode = fs_web.photo.spcode)) as has_photo'))->get()->toArray();
+        $researchLinks = $this->speciesResearchLinks();
 
-        // dd($this->splist);
+        $this->splist = FsBaseSpinfo::query()
+            ->orderBy('apgfamily')
+            ->orderBy('now_simname')
+            ->get()
+            ->map(function ($species) use ($researchLinks) {
+                $row = $species->toArray();
+                $row['researches'] = $researchLinks[$species->spcode] ?? $this->legacyResearchFlags($row);
+                return $row;
+            })
+            ->toArray();
+    }
 
+    private function speciesResearchLinks(): array
+    {
+        if (!Schema::connection('mysql4')->hasTable('species_research_links')) {
+            return [];
+        }
 
+        return collect(\DB::connection('mysql4')->table('species_research_links')->select('spcode', 'research_code')->get())
+            ->groupBy('spcode')
+            ->map(function ($links) {
+                return $links->pluck('research_code')
+                    ->mapWithKeys(fn ($researchCode) => [$researchCode => 1])
+                    ->all();
+            })
+            ->all();
+    }
+
+    private function legacyResearchFlags(array $species): array
+    {
+        return [
+            'tree' => (int) ($species['tree'] ?? 0),
+            'seed' => (int) ($species['seed'] ?? 0),
+            'seedling' => (int) ($species['seedling'] ?? 0),
+            'mortality' => 0,
+        ];
     }
 
 

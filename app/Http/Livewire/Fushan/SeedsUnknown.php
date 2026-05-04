@@ -2,8 +2,9 @@
 
 namespace App\Http\Livewire\Fushan;
 
-use App\Models\FsWebUnk;
-use App\Models\FsWebUnkPhoto;
+use App\Models\FsSeedsUnk;
+use App\Models\FsSeedsUnkPhoto;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\File;
 use Livewire\Component;
 use Livewire\WithFileUploads;
@@ -85,7 +86,7 @@ class SeedsUnknown extends Component
     {
         $this->resetEditorState();
 
-        $unk = FsWebUnk::query()->where('unkname', $unkname)->first();
+        $unk = FsSeedsUnk::query()->where('unkname', $unkname)->first();
 
         if (!$unk) {
             $this->editorMessage = "找不到 {$unkname}。";
@@ -95,7 +96,7 @@ class SeedsUnknown extends Component
         $this->editorMode = 'edit';
         $this->editingUnkName = $unk->unkname;
         $this->editingUnkDes = $unk->des ?? '';
-        $this->editingPhotos = FsWebUnkPhoto::query()
+        $this->editingPhotos = FsSeedsUnkPhoto::query()
             ->where('unkname', $unkname)
             ->orderBy('id')
             ->get()
@@ -134,12 +135,12 @@ class SeedsUnknown extends Component
 
         $name = strtoupper(trim($this->newUnkName));
 
-        if (FsWebUnk::query()->where('unkname', $name)->exists()) {
+        if (FsSeedsUnk::query()->where('unkname', $name)->exists()) {
             $this->addError('newUnkName', "{$name} 已存在。");
             return;
         }
 
-        FsWebUnk::query()->create([
+        FsSeedsUnk::query()->create([
             'unkname' => $name,
             'des' => $this->newUnkDes ?? '',
             'updated_id' => $this->userName(),
@@ -160,7 +161,7 @@ class SeedsUnknown extends Component
             'editingUnkDes' => '物種描述',
         ]);
 
-        FsWebUnk::query()
+        FsSeedsUnk::query()
             ->where('unkname', $this->editingUnkName)
             ->update([
                 'des' => $this->editingUnkDes ?? '',
@@ -187,7 +188,7 @@ class SeedsUnknown extends Component
 
         $photo = $this->editingPhotos[$photoId];
 
-        FsWebUnkPhoto::query()
+        FsSeedsUnkPhoto::query()
             ->where('id', $photoId)
             ->update([
                 'code' => $photo['code'],
@@ -206,7 +207,7 @@ class SeedsUnknown extends Component
 
     public function deletePhoto(int $photoId): void
     {
-        $photo = FsWebUnkPhoto::query()
+        $photo = FsSeedsUnkPhoto::query()
             ->where('id', $photoId)
             ->where('unkname', $this->editingUnkName)
             ->first();
@@ -246,7 +247,7 @@ class SeedsUnknown extends Component
 
         $filename = $this->storeUnknownPhoto($this->editingUnkName);
 
-        FsWebUnkPhoto::query()->create([
+        FsSeedsUnkPhoto::query()->create([
             'unkname' => $this->editingUnkName,
             'code' => '1',
             'censustime' => '',
@@ -278,19 +279,19 @@ class SeedsUnknown extends Component
 
     private function reloadData(): void
     {
-        $this->unklist = FsWebUnk::query()
+        $this->unklist = FsSeedsUnk::query()
             ->orderBy('unkname')
             ->pluck('unkname')
             ->toArray();
 
-        $this->unkdes = FsWebUnk::query()
+        $this->unkdes = FsSeedsUnk::query()
             ->where('unkname', 'like', $this->unk)
             ->orderBy('unkname')
             ->get()
             ->toArray();
 
         $this->unkphoto = [];
-        FsWebUnkPhoto::query()
+        FsSeedsUnkPhoto::query()
             ->orderBy('unkname')
             ->orderBy('id')
             ->get()
@@ -340,42 +341,40 @@ class SeedsUnknown extends Component
             $filename = sprintf('fs_%s_%05d.jpg', $unkname, random_int(0, 99999));
         }
 
-        $image = imagecreatefromstring(file_get_contents($this->newPhotoFile->getRealPath()));
+        $image = \imagecreatefromstring(file_get_contents($this->newPhotoFile->getRealPath()));
 
         if (!$image) {
             $this->addError('newPhotoFile', '無法讀取這張照片。');
             throw new \RuntimeException('Unable to read uploaded unknown photo.');
         }
 
-        imagejpeg($image, "{$directory}/{$filename}", 90);
+        \imagejpeg($image, "{$directory}/{$filename}", 90);
         $this->saveThumbnail($image, "{$directory}/s_{$filename}", 500);
-        imagedestroy($image);
 
         return $filename;
     }
 
     private function saveThumbnail($source, string $targetPath, int $maxWidth): void
     {
-        $width = imagesx($source);
-        $height = imagesy($source);
+        $width = \imagesx($source);
+        $height = \imagesy($source);
 
         if ($width <= $maxWidth) {
-            imagejpeg($source, $targetPath, 85);
+            \imagejpeg($source, $targetPath, 85);
             return;
         }
 
         $newWidth = $maxWidth;
         $newHeight = (int) round($height * ($newWidth / $width));
-        $thumbnail = imagecreatetruecolor($newWidth, $newHeight);
+        $thumbnail = \imagecreatetruecolor($newWidth, $newHeight);
 
-        imagecopyresampled($thumbnail, $source, 0, 0, 0, 0, $newWidth, $newHeight, $width, $height);
-        imagejpeg($thumbnail, $targetPath, 85);
-        imagedestroy($thumbnail);
+        \imagecopyresampled($thumbnail, $source, 0, 0, 0, 0, $newWidth, $newHeight, $width, $height);
+        \imagejpeg($thumbnail, $targetPath, 85);
     }
 
     private function userName(): string
     {
-        return $this->user ?: (auth()->user()?->name ?? 'system');
+        return $this->user ?: (Auth::user()?->name ?? 'system');
     }
 
     private function normalizePhotoDate(string $date): string

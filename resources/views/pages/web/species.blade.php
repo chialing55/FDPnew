@@ -2,6 +2,16 @@
 
 @section('title', '樣區植物名錄-' . __('web.title'))
 
+@section('css')
+    @parent
+    <style>
+        .page {
+            width: 100%;
+            max-width: 100%;
+        }
+    </style>
+@endsection
+
 @section('pagejs')
     <script>
         // var element = document.getElementById("#list1");
