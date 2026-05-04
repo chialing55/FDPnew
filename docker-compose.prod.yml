@@ -1,0 +1,64 @@
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile.prod
+    image: fdp-app:prod
+    container_name: fdp_app_prod
+    restart: unless-stopped
+    env_file:
+      - .env.production
+    depends_on:
+      db:
+        condition: service_healthy
+    volumes:
+      - fdp_storage:/app/storage
+      - fdp_public:/app/public
+      - ${FDP_FILES_PATH:-./data/FDPfiles}:/app/public/FDPfiles
+      - ${SSP_FILES_PATH:-./data/SSPfiles}:/app/public/SSPfiles
+    expose:
+      - "9000"
+
+  nginx:
+    image: nginx:1.27-alpine
+    container_name: fdp_nginx_prod
+    restart: unless-stopped
+    depends_on:
+      - app
+    ports:
+      - "${HTTP_PORT:-80}:80"
+    volumes:
+      - fdp_public:/app/public:ro
+      - ${FDP_FILES_PATH:-./data/FDPfiles}:/app/public/FDPfiles:ro
+      - ${SSP_FILES_PATH:-./data/SSPfiles}:/app/public/SSPfiles:ro
+      - ./docker/nginx/default.prod.conf:/etc/nginx/conf.d/default.conf:ro
+
+  db:
+    image: mysql:8.0
+    container_name: fdp_mysql_prod
+    restart: unless-stopped
+    env_file:
+      - .env.production
+    environment:
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+      MYSQL_DATABASE: ${MYSQL_DATABASE:-laravel}
+      MYSQL_USER: ${MYSQL_USER:-laravel}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD}
+    command:
+      - --character-set-server=utf8mb4
+      - --collation-server=utf8mb4_unicode_ci
+      - --max_allowed_packet=256M
+    volumes:
+      - ${MYSQL_DATA_PATH:-./data/mysql}:/var/lib/mysql
+      - ./docker/mysql/init:/docker-entrypoint-initdb.d:ro
+      - ${MYSQL_IMPORT_PATH:-./initdb}:/import:ro
+    healthcheck:
+      test: ["CMD-SHELL", "mysqladmin ping -h 127.0.0.1 -uroot -p\"$${MYSQL_ROOT_PASSWORD}\" --silent"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 30s
+
+volumes:
+  fdp_storage:
+  fdp_public:

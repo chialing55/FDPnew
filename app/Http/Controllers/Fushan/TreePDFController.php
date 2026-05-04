@@ -223,7 +223,7 @@ class TreePDFController extends Controller
             } else {
                 //全線下載
             
-            $directory = public_path('recordpdf/'.$data['qx']);
+            $directory = public_path('FDPfiles/recordpdf/'.$data['qx']);
             $filename = $data['filename'] . '.pdf';
 
             // 檢查資料夾是否存在，如果不存在則建立新資料夾

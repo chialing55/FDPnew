@@ -1,0 +1,76 @@
+FROM composer:2 AS composer-bin
+
+FROM node:20-bookworm AS assets
+
+WORKDIR /app
+
+COPY package.json package-lock.json ./
+RUN npm ci
+
+COPY resources ./resources
+COPY public ./public
+COPY vite.config.js tailwind.config.js postcss.config.js ./
+RUN npm run build:css \
+    && npm run build:admin-css \
+    && ./node_modules/.bin/vite build
+
+FROM php:8.3-fpm-bookworm AS php-base
+
+RUN apt-get update \
+    && apt-get install -y --no-install-recommends \
+        bash \
+        default-mysql-client \
+        libfreetype6-dev \
+        libicu-dev \
+        libjpeg62-turbo-dev \
+        libonig-dev \
+        libpng-dev \
+        libxml2-dev \
+        libzip-dev \
+        unzip \
+    && docker-php-ext-configure gd --with-freetype --with-jpeg \
+    && docker-php-ext-install -j"$(nproc)" \
+        bcmath \
+        gd \
+        intl \
+        mbstring \
+        opcache \
+        pdo_mysql \
+        zip \
+    && rm -rf /var/lib/apt/lists/*
+
+WORKDIR /app
+
+COPY --from=composer-bin /usr/bin/composer /usr/bin/composer
+
+FROM php-base AS vendor
+
+COPY composer.json composer.lock ./
+RUN composer install \
+    --no-dev \
+    --no-interaction \
+    --prefer-dist \
+    --optimize-autoloader \
+    --no-scripts
+
+COPY . .
+RUN composer dump-autoload --no-dev --optimize --no-scripts
+
+FROM php-base AS app
+
+COPY --from=vendor /app/vendor ./vendor
+COPY . .
+COPY --from=assets /app/public ./public
+COPY --from=assets /app/public ./public-source
+COPY storage ./storage-source
+
+COPY docker/php/prod.ini /usr/local/etc/php/conf.d/prod.ini
+COPY docker/php/php-fpm-prod.conf /usr/local/etc/php-fpm.d/zz-prod.conf
+COPY docker/app/prod-entrypoint.sh /usr/local/bin/prod-entrypoint
+
+RUN chmod +x /usr/local/bin/prod-entrypoint \
+    && mkdir -p storage/app/public storage/framework/cache storage/framework/sessions storage/framework/views storage/logs bootstrap/cache \
+    && chown -R www-data:www-data storage bootstrap/cache public
+
+ENTRYPOINT ["prod-entrypoint"]
+CMD ["php-fpm"]
