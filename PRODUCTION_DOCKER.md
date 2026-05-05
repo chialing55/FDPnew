@@ -95,6 +95,21 @@ docker compose --env-file .env.production -f docker-compose.prod.yml exec app ph
 docker compose --env-file .env.production -f docker-compose.prod.yml exec app php artisan config:cache
 ```
 
+phpMyAdmin is bound to the server's localhost by default:
+
+```env
+PHPMYADMIN_BIND=127.0.0.1
+PHPMYADMIN_PORT=8081
+```
+
+Use an SSH tunnel from your own computer:
+
+```bash
+ssh -L 8081:127.0.0.1:8081 chialing@139.162.91.125
+```
+
+Then open `http://127.0.0.1:8081` locally.
+
 ## 5. Backup before resize or rebuild
 
 Before resizing Linode, replacing volumes, or re-importing data, back up MySQL:

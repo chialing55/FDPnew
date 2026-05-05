@@ -59,6 +59,20 @@ services:
       retries: 10
       start_period: 30s
 
+  phpmyadmin:
+    image: phpmyadmin:5.2-apache
+    container_name: fdp_phpmyadmin_prod
+    restart: unless-stopped
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      PMA_HOST: db
+      PMA_PORT: 3306
+      UPLOAD_LIMIT: 512M
+    ports:
+      - "${PHPMYADMIN_BIND:-127.0.0.1}:${PHPMYADMIN_PORT:-8081}:80"
+
 volumes:
   fdp_storage:
   fdp_public:
