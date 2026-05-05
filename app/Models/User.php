@@ -59,8 +59,9 @@ class User extends Authenticatable
      */
     public function canAccessPanel(Panel $panel): bool
     {
-        // 目前先規定：只有 super-admin 可以進 CMS
-        return $this->hasRole('super-admin');
+        return $this->hasRole('super-admin')
+            || (int) ($this->is_admin ?? 0) === 1
+            || $this->role === 'admin';
     }
 
     /*
