@@ -153,6 +153,18 @@
                         這裡會直接寫入 user_scopes（site_id + module_id），建議以「勾選」作為可使用模組的依據。
                     </div>
 
+                    <div class="user-edit-subcard">
+                        <div class="user-edit-site-title">後台權限</div>
+                        <div class="user-edit-chip-row">
+                            <label class="user-edit-chip">
+                                <input type="hidden" name="can_access_filament" value="0">
+                                <input type="checkbox" name="can_access_filament" value="1"
+                                    {{ old('can_access_filament', $user->can_access_filament) ? 'checked' : '' }}>
+                                <span>允許進入網頁後端管理平台</span>
+                            </label>
+                        </div>
+                    </div>
+
                     <div style="margin-top:16px;">
                         @foreach ($sites as $s)
                             @php

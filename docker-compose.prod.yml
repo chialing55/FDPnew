@@ -27,11 +27,13 @@ services:
       - app
     ports:
       - "${HTTP_PORT:-80}:80"
+      - "${HTTPS_PORT:-443}:443"
     volumes:
       - fdp_public:/app/public:ro
       - fdp_storage:/app/storage:ro
       - ${FDP_FILES_PATH:-./data/FDPfiles}:/app/public/FDPfiles:ro
       - ${SSP_FILES_PATH:-./data/SSPfiles}:/app/public/SSPfiles:ro
+      - ${CLOUDFLARE_ORIGIN_CERT_PATH:-./data/cloudflare-origin}:/etc/cloudflare-origin:ro
       - ./docker/nginx/default.prod.conf:/etc/nginx/conf.d/default.conf:ro
 
   db:

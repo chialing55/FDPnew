@@ -28,7 +28,6 @@ class CmsPanelProvider extends PanelProvider
             ->default()
             ->id('cms')
             ->path('cms')
-            ->login()
             ->authGuard('web')
             ->brandName('森林動態樣區研究成果平台・後台') 
             ->navigationItems([

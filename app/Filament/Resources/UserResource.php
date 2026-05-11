@@ -49,6 +49,10 @@ class UserResource extends Resource
                     ->dehydrated(fn ($state) => filled($state))
                     ->required(fn (string $operation) => $operation === 'create'),
 
+                Forms\Components\Toggle::make('can_access_filament')
+                    ->label('後台權限')
+                    ->helperText('允許此使用者進入網頁後端管理平台'),
+
                 // 角色選擇（多選）
                 Forms\Components\Select::make('roles')
                     ->label('角色')
@@ -77,6 +81,10 @@ class UserResource extends Resource
 
                 Tables\Columns\TextColumn::make('roles.name')
                     ->label('角色'),
+
+                Tables\Columns\IconColumn::make('can_access_filament')
+                    ->label('後台權限')
+                    ->boolean(),
 
                 Tables\Columns\TextColumn::make('created_at')
                     ->label('建立時間')

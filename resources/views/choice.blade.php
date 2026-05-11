@@ -124,11 +124,11 @@
 
                 ];
 
-                if (auth()->user()?->is_admin) {
+                if (auth()->user()?->canAccessFilament()) {
                     $fixedItems[] = [
                         'key' => 'webplatform',
                         'label' => '網頁後端管理平台',
-                        'url' => url('/cms/login'),
+                        'url' => url('/cms'),
                         'img' => asset('/images/research/DSCN6021.JPG'),
                         'style' => 'box3',
                         'new_tab' => true,

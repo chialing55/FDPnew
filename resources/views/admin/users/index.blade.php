@@ -163,10 +163,28 @@
             ->values();
     @endphp
 
-    @if ($groups->isEmpty())
+    @if (! $u->canAccessFilament() && $groups->isEmpty())
         <span style="opacity:.6;">-</span>
     @else
         <div style="display:flex; flex-direction:column; gap:6px;">
+            @if ($u->canAccessFilament())
+                <div style="display:flex; flex-wrap:wrap; gap:6px; align-items:center;">
+                    <span style="font-weight:700; font-size:12px; color:#2f3e3b;">
+                        後台：
+                    </span>
+                    <span style="
+                        display:inline-block;
+                        padding:2px 8px;
+                        border-radius:999px;
+                        border:1px solid rgba(245, 158, 11, .35);
+                        background: rgba(245, 158, 11, .18);
+                        font-size: 12px;
+                        color:#92400e;
+                        font-weight:700;
+                    ">網頁後端管理平台</span>
+                </div>
+            @endif
+
             @foreach ($groups as $g)
                 <div style="display:flex; flex-wrap:wrap; gap:6px; align-items:center;">
                     <span style="font-weight:700; font-size:12px; color:#2f3e3b;">

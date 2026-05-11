@@ -102,6 +102,7 @@ class UserController extends Controller
                 'integer',
                 Rule::exists('sites', 'id')->where(fn($q) => $q->where('is_active', 1)),
             ],
+            'can_access_filament' => ['nullable', 'boolean'],
             'scopes' => ['nullable', 'array'],
         ]);
 
@@ -113,6 +114,7 @@ class UserController extends Controller
 
         $scopes = $request->input('scopes', []);
         if (!is_array($scopes)) $scopes = [];
+        $canAccessFilament = $request->boolean('can_access_filament');
 
         $wantedPairs = [];
         foreach ($scopes as $siteId => $moduleMap) {
@@ -129,13 +131,14 @@ class UserController extends Controller
             }
         }
 
-        DB::transaction(function () use ($user, $validated, $wantedPairs) {
+        DB::transaction(function () use ($user, $validated, $wantedPairs, $canAccessFilament) {
             $now = now();
             $adminId = Auth::id();
 
             $user->unit = $validated['unit'] ?? null;
             $user->role = $validated['role'];
             $user->site_id = $validated['site_id'] ?? null;
+            $user->can_access_filament = $canAccessFilament;
             $user->save();
 
             // 先全部關閉

@@ -32,6 +32,7 @@ class User extends Authenticatable implements FilamentUser
         'site_id',
         'approved_at',
         'approved_by',
+        'can_access_filament',
         'force_password_reset',
         'temp_password_issued_at',
     ];
@@ -52,6 +53,7 @@ class User extends Authenticatable implements FilamentUser
      * @var array<string, string>
      */
     protected $casts = [
+        'can_access_filament' => 'boolean',
         'force_password_reset' => 'boolean',
     ];
 
@@ -60,9 +62,13 @@ class User extends Authenticatable implements FilamentUser
      */
     public function canAccessPanel(Panel $panel): bool
     {
+        return $this->canAccessFilament();
+    }
+
+    public function canAccessFilament(): bool
+    {
         return $this->hasRole('super-admin')
-            || (int) ($this->is_admin ?? 0) === 1
-            || $this->role === 'admin';
+            || (bool) ($this->can_access_filament ?? false);
     }
 
     /*
