@@ -29,7 +29,7 @@
 
         <div class='user iflex' style='padding:10px 30px; font-size: 14px; vertical-align: bottom;'>
             <span>Hi! {{ $user }}</span>
-            <span style='margin-left:20px' class='back'>重新選擇工作項目</span>
+            <span style='margin-left:20px' class='back'>管理介面首頁</span>
         </div>
     </div>
     @yield('headerListinner')

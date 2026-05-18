@@ -65,58 +65,117 @@
 
     @if ($selectedMapSort !== null && $selectedMap !== null)
         <div class='text_box'>
-            <form wire:submit.prevent="saveSurveyMeta"
-                style="display:flex; flex-direction:column; gap:12px; margin-bottom:14px; color:#334155; line-height:1.8;">
-                <div style="display:flex; align-items:center; gap:12px; flex-wrap:wrap;">
-                    <span style="font-weight:700; min-width:72px;">調查日期</span>
-                    <input type="date" wire:model="surveyDate"
-                        style="width:140px; height:34px; padding:4px 8px; border:1px solid #cbd5e1; border-radius:6px; box-sizing:border-box;">
-                </div>
+            <div style="display:flex; align-items:center; justify-content:space-between; gap:12px; flex-wrap:wrap;">
+                <div style="font-weight:700;">調查團隊</div>
+                <button type="button" wire:click="toggleTeamBuilder"
+                    style="height:32px; padding:0 12px; border:1px solid #94a3b8; border-radius:6px; background:#fff; color:#334155;">
+                    {{ $showTeamBuilder ? '收合團隊表' : '建立 / 查詢團隊' }}
+                </button>
+            </div>
 
-                <div style="display:flex; align-items:flex-start; gap:12px; flex-wrap:wrap;">
-                    <span style="font-weight:700; min-width:72px; padding-top:4px;">調查人員</span>
-                    <select wire:model="selectedTeamId"
-                        style="min-width:280px; height:34px; padding:4px 8px; border:1px solid #cbd5e1; border-radius:6px; box-sizing:border-box; background:#fff;">
-                        <option value="">本次調查團隊（可不選）</option>
-                        @foreach ($teamOptions as $teamOption)
-                            <option value="{{ $teamOption['id'] }}">{{ $teamOption['label'] }}</option>
-                        @endforeach
-                    </select>
-
-                    <div style="display:flex; align-items:flex-start; gap:8px; flex-wrap:wrap; flex:1 1 700px;">
-                        @foreach ($surveyPersonnel as $index => $personName)
-                            <input type="text" list="mortality-person-options"
-                                wire:model.defer="surveyPersonnel.{{ $index }}"
-                                wire:key="mortality-person-{{ $index }}" placeholder="調查人員 {{ $index + 1 }}"
-                                style="width:110px; height:34px; padding:4px 8px; border:1px solid #cbd5e1; border-radius:6px; box-sizing:border-box;">
-                        @endforeach
-
-                        <button type="button" wire:click="addPersonnelField"
-                            style="height:34px; padding:0 12px; border:1px solid #94a3b8; border-radius:6px; background:#fff; color:#334155; white-space:nowrap;">
-                            增加一位
-                        </button>
-                        <span style="margin-left:40px; display:inline-flex; align-items:center;">
-                            <button type="submit" class="datasavebutton"
-                                style="height:34px; padding:0 12px; width:auto; display:inline-flex; align-items:center; border-radius:6px; box-sizing:border-box;">
-                                儲存調查日期與人員
-                            </button>
+            @if ($showTeamBuilder)
+                <form wire:submit.prevent="createTeamFromBuilder"
+                    style="display:flex; flex-direction:column; gap:12px; margin-top:12px; margin-bottom:14px; color:#334155; line-height:1.8;">
+                    <div style="display:flex; align-items:flex-start; gap:12px; flex-wrap:wrap;">
+                        <span style="font-weight:700; min-width:72px; padding-top:4px;">
+                            {{ $editingTeamId !== '' ? '修改團隊' : '建立團隊' }}
                         </span>
-                    </div>
 
+                        <div style="display:flex; align-items:flex-start; gap:8px; flex-wrap:wrap; flex:1 1 700px;">
+                            @if ($editingTeamId !== '')
+                                <span style="height:34px; display:inline-flex; align-items:center; font-weight:700; color:#334155;">
+                                    team_id {{ $editingTeamId }}
+                                </span>
+                            @endif
+                            @foreach ($surveyPersonnel as $index => $personName)
+                                <input type="text" list="mortality-person-options"
+                                    wire:model.defer="surveyPersonnel.{{ $index }}"
+                                    wire:key="mortality-person-{{ $index }}" placeholder="調查人員 {{ $index + 1 }}"
+                                    style="width:110px; height:34px; padding:4px 8px; border:1px solid #cbd5e1; border-radius:6px; box-sizing:border-box;">
+                            @endforeach
+
+                            <button type="button" wire:click="addPersonnelField"
+                                style="height:34px; padding:0 12px; border:1px solid #94a3b8; border-radius:6px; background:#fff; color:#334155; white-space:nowrap;">
+                                增加一位
+                            </button>
+                            <span style="margin-left:40px; display:inline-flex; align-items:center;">
+                                <button type="submit" class="datasavebutton"
+                                    style="height:34px; padding:0 12px; width:auto; display:inline-flex; align-items:center; border-radius:6px; box-sizing:border-box;">
+                                    新增團隊
+                                </button>
+                            </span>
+                            @if ($editingTeamId !== '')
+                                <button type="button" wire:click="updateEditingTeam"
+                                    style="height:34px; padding:0 12px; border:1px solid #94a3b8; border-radius:6px; background:#fff; color:#334155; white-space:nowrap;">
+                                    儲存修改
+                                </button>
+                            @endif
+                            <button type="button" wire:click="startNewTeam"
+                                style="height:34px; padding:0 12px; border:1px solid #94a3b8; border-radius:6px; background:#fff; color:#334155; white-space:nowrap;">
+                                清空欄位
+                            </button>
+                            @if ($editingTeamId !== '')
+                                <button type="button" wire:click="deleteEditingTeam"
+                                    onclick="return confirm('確定要刪除 team_id {{ $editingTeamId }}？')"
+                                    style="height:34px; padding:0 12px; border:1px solid #dc2626; border-radius:6px; background:#fff; color:#b91c1c; white-space:nowrap;">
+                                    刪除團隊
+                                </button>
+                            @endif
+                        </div>
+                    </div>
+                    <div>
+                        <p style='font-size:14px; color:#64748b; margin:0;'>* 可先搜尋下方 team_id 或人名，點選團隊後會帶入人員清單。建立或修改團隊後，請在下方資料表的 Team 欄填寫 team_id。</p>
+                    </div>
+                    @error('surveyPersonnel')
+                        <div style="color:#b91c1c;">{{ $message }}</div>
+                    @enderror
+                    @if (!empty($surveyMetaMessage))
+                        <div style="color:#166534;">{{ $surveyMetaMessage }}</div>
+                    @endif
+                </form>
+
+                <div style="display:flex; align-items:center; gap:10px; margin:8px 0;">
+                    <span style="font-weight:700;">查詢調查人員</span>
+                    <input type="text" wire:model.live="teamSearch" placeholder="team_id 或人名"
+                        style="width:220px; height:32px; padding:4px 8px; border:1px solid #cbd5e1; border-radius:6px; box-sizing:border-box;">
                 </div>
-                <div>
-                    <p style='font-size:14px; color:#64748b; margin:0;'>* 可選調查團隊或自行新增團隊 - 填入調查人員組合即會自動新增團隊。</p>
+
+                <div style="max-height:180px; overflow:auto; border:1px solid #e2e8f0; border-radius:6px;">
+                    <table style="width:100%; border-collapse:collapse; font-size:13px;">
+                        <thead>
+                            <tr style="background:#f8fafc;">
+                                <th style="text-align:left; padding:0; border-bottom:1px solid #e2e8f0;">
+                                    <button type="button" wire:click="sortTeamOptions('id')"
+                                        style="width:100%; padding:6px 8px; border:0; background:transparent; text-align:left; font-weight:700; cursor:pointer;">
+                                        team_id{{ $this->teamSortMarkers['id'] }}
+                                    </button>
+                                </th>
+                                <th style="text-align:left; padding:0; border-bottom:1px solid #e2e8f0;">
+                                    <button type="button" wire:click="sortTeamOptions('label')"
+                                        style="width:100%; padding:6px 8px; border:0; background:transparent; text-align:left; font-weight:700; cursor:pointer;">
+                                        團隊人員{{ $this->teamSortMarkers['label'] }}
+                                    </button>
+                                </th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach ($this->filteredTeamOptions as $teamOption)
+                                <tr wire:key="mortality-team-option-{{ $teamOption['id'] }}"
+                                    wire:click="loadTeamForEditing({{ $teamOption['id'] }})"
+                                    style="cursor:pointer; @if((string) $editingTeamId === (string) $teamOption['id']) background:#ecfdf5; @endif">
+                                    <td style="padding:5px 8px; border-bottom:1px solid #f1f5f9; width:80px; font-weight:700;">{{ $teamOption['id'] }}</td>
+                                    <td style="padding:5px 8px; border-bottom:1px solid #f1f5f9;">{{ $teamOption['label'] }}</td>
+                                </tr>
+                            @endforeach
+                            @if (empty($this->filteredTeamOptions))
+                                <tr>
+                                    <td colspan="2" style="padding:8px; color:#64748b;">沒有符合的團隊。</td>
+                                </tr>
+                            @endif
+                        </tbody>
+                    </table>
                 </div>
-                @error('surveyDate')
-                    <div style="color:#b91c1c;">{{ $message }}</div>
-                @enderror
-                @error('surveyPersonnel')
-                    <div style="color:#b91c1c;">{{ $message }}</div>
-                @enderror
-                @if (!empty($surveyMetaMessage))
-                    <div style="color:#166534;">{{ $surveyMetaMessage }}</div>
-                @endif
-            </form>
+            @endif
         </div>
         <div class='text_box '>
 
@@ -403,6 +462,7 @@
                 let mortalityHot = null;
                 let currentRecords = [];
                 let currentEnabled = false;
+                let currentTeamOptions = [];
                 let livewireListenerBound = false;
                 let currentHotPage = 1;
                 let errorRecordIds = [];
@@ -459,9 +519,88 @@
                     callback(/^-?\d+(\.\d{1,2})?$/.test(stringValue));
                 };
 
+                function normalizeTeamOptions(teamOptions) {
+                    return (teamOptions || [])
+                        .map((team) => ({
+                            id: String(team.id ?? ''),
+                            label: String(team.label ?? '').trim(),
+                            display: String(team.display ?? `${team.id ?? ''}：${team.label ?? ''}`).trim(),
+                        }))
+                        .filter((team) => team.id !== '' && team.label !== '');
+                }
+
+                function teamLabelFromId(teamId) {
+                    const id = String(teamId ?? '');
+                    const team = currentTeamOptions.find((option) => option.id === id);
+                    return team ? team.id : id;
+                }
+
+                function teamIdFromLabel(value) {
+                    const text = String(value ?? '').trim();
+                    if (text === '') {
+                        return '';
+                    }
+
+                    const exact = currentTeamOptions.find((option) => option.label === text || option.id === text || option.display === text);
+                    return exact ? exact.id : text;
+                }
+
+                function teamIdExists(teamId) {
+                    const id = String(teamId ?? '').trim();
+                    return id !== '' && currentTeamOptions.some((option) => option.id === id);
+                }
+
+                const teamIdValidator = function(value, callback) {
+                    if (value === null || value === undefined || String(value).trim() === '') {
+                        callback(false);
+                        return;
+                    }
+
+                    callback(teamIdExists(value));
+                };
+
+                function teamRenderer(instance, td, row, col, prop, value) {
+                    Handsontable.renderers.TextRenderer.apply(this, arguments);
+                    const label = teamLabelFromId(value);
+                    td.textContent = label;
+                    const team = currentTeamOptions.find((option) => option.id === String(value ?? ''));
+                    td.title = team ? `team_id: ${team.id}\n${team.label}` : label;
+                    td.style.fontSize = '11px';
+                    td.style.overflow = 'hidden';
+                    td.style.textOverflow = 'ellipsis';
+                    td.style.whiteSpace = 'nowrap';
+                    return td;
+                }
+
+                function normalizeMortalityDate(value) {
+                    const text = String(value ?? '').trim();
+                    const match = text.match(/^\d{4}-\d{2}-\d{2}/);
+                    return match ? match[0] : text;
+                }
+
+                function dateRenderer(instance, td, row, col, prop, value) {
+                    Handsontable.renderers.TextRenderer.apply(this, arguments);
+                    td.textContent = normalizeMortalityDate(value);
+                    return td;
+                }
+
                 const columns = [{
                         data: 'map',
                         readOnly: true
+                    },
+                    {
+                        data: 'date',
+                        type: 'date',
+                        dateFormat: 'YYYY-MM-DD',
+                        correctFormat: true,
+                        allowInvalid: false,
+                        renderer: dateRenderer
+                    },
+                    {
+                        data: 'team_id',
+                        allowInvalid: false,
+                        validator: teamIdValidator,
+                        renderer: teamRenderer
                     },
                     {
                         data: 'q20',
@@ -581,6 +720,8 @@
 
                 const colHeaders = [
                     'map',
+                    'Date',
+                    'Team',
                     'Q20',
                     'Q10',
                     'Tag',
@@ -603,7 +744,7 @@
                     'Animal, other factors,<br> comments',
                 ];
 
-                const colWidths = [44, 54, 54, 86, 120, 60, 60, 58, 48, 58, 52, 52, 48, 54, 42, 54, 58, 52, 48, 54, 200];
+                const colWidths = [44, 116, 46, 54, 54, 86, 120, 60, 60, 58, 48, 58, 52, 52, 48, 54, 42, 54, 58, 52, 48, 54, 200];
                 const hiddenColumnIndexes = [0];
                 const visibleTableWidth = colWidths.reduce((total, width, index) => {
                     return hiddenColumnIndexes.includes(index) ? total : total + width;
@@ -758,6 +899,8 @@
                 function normalizeRecords(records) {
                     return (records || []).map((record) => ({
                         ...record,
+                        date: normalizeMortalityDate(record.date),
+                        team_id: record.team_id === null || record.team_id === undefined ? '' : String(record.team_id),
                         comments_button: '',
                     }));
                 }
@@ -832,13 +975,13 @@
                     wrapper.appendChild(text);
                     TH.appendChild(wrapper);
 
-                    if (column === 6) {
+                    if (column === 8) {
                         TH.classList.add('mortality-divider-right');
                     }
-                    if ([11, 15].includes(column)) {
+                    if ([13, 17].includes(column)) {
                         TH.classList.add('mortality-divider-left');
                     }
-                    if (column === 11) {
+                    if (column === 13) {
                         TH.classList.add('mortality-divider-right');
                     }
                 }
@@ -912,6 +1055,14 @@
                                 }
                                 currentRecords[globalIndex][prop] = newValue;
 
+                                if (prop === 'date') {
+                                    currentRecords[globalIndex][prop] = normalizeMortalityDate(newValue);
+                                }
+
+                                if (prop === 'team_id') {
+                                    currentRecords[globalIndex][prop] = teamIdFromLabel(newValue);
+                                }
+
                                 if (prop === 'status' || prop === 'mode') {
                                     normalizeDependentFields(currentRecords[globalIndex]);
                                 }
@@ -933,14 +1084,14 @@
                         cells(row, col) {
                             const props = {};
                             const sourceRecord = this.instance.getSourceDataAtRow(row) || {};
-                            if (col <= 5 || col === 20) {
+                            if (col === 0 || (col >= 3 && col <= 7) || col === 22) {
                                 props.readOnly = true;
                             }
                             const classNames = [];
-                            if (col === 6 || col === 11) {
+                            if (col === 8 || col === 13) {
                                 classNames.push('mortality-divider-right');
                             }
-                            if (col === 11 || col === 15) {
+                            if (col === 13 || col === 17) {
                                 classNames.push('mortality-divider-left');
                             }
                             if (rowHasError(sourceRecord)) {
@@ -965,10 +1116,12 @@
                     window.Livewire.on('mortality-entry-data', (payload) => {
                         const {
                             records,
-                            enabled
+                            enabled,
+                            teamOptions
                         } = payload || {};
                         currentRecords = records || [];
                         currentEnabled = !!enabled;
+                        currentTeamOptions = normalizeTeamOptions(teamOptions || []);
                         errorRecordIds = [];
                         currentHotPage = 1;
                         setTimeout(() => {

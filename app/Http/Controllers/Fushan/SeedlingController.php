@@ -9,9 +9,8 @@ use Illuminate\Support\Facades\Schema;
 // use Illuminate\Support\Facades\Input;
 use App\Http\Controllers\Controller;
 
-use App\Models\FsSeedlingData;
-use App\Models\FsSeedlingBase;
 use App\Models\FsSeedlingCov;
+use App\Models\FsSeedlingRecord;
 use App\Models\FsSeedlingSlcov1;
 use App\Models\FsSeedlingSlcov2;
 use App\Models\FsSeedlingSlrecord;
@@ -61,11 +60,76 @@ class SeedlingController extends Controller
         );
     }
 
+    private function seedlingWorkSelectSql(?array $columns = null): string
+    {
+        $columns ??= [
+            'id',
+            'census',
+            'year',
+            'month',
+            'date',
+            'trap',
+            'plot',
+            'tag',
+            'mtag',
+            'csp',
+            'ht',
+            'cotno',
+            'leafno',
+            'ind',
+            'note',
+            'recruit',
+            'status',
+            'sprout',
+            'x',
+            'y',
+        ];
+
+        $columnMap = [
+            'id' => 'r.id',
+            'census' => 'r.census',
+            'year' => 'r.year',
+            'month' => 'r.month',
+            'date' => "COALESCE(DATE_FORMAT(r.date, '%Y-%m-%d'), '0000-00-00')",
+            'trap' => 'i.trap',
+            'plot' => 'i.plot',
+            'tag' => 'st.tag',
+            'mtag' => 'st.mtag',
+            'csp' => 'i.csp',
+            'ht' => 'r.ht',
+            'cotno' => 'r.cotno',
+            'leafno' => 'r.leafno',
+            'ind' => 'st.ind',
+            'note' => "COALESCE(r.note, '')",
+            'recruit' => "COALESCE(r.recruit, '')",
+            'status' => "COALESCE(r.status, '')",
+            'sprout' => "COALESCE(st.sprout, '')",
+            'x' => 'i.x',
+            'y' => 'i.y',
+            'updated_at' => "''",
+            'updated_id' => "COALESCE(r.updated_id, '')",
+            'alternote' => "''",
+        ];
+
+        $selectColumns = array_map(function ($column) use ($columnMap) {
+            $expression = $columnMap[$column] ?? "''";
+
+            return $expression . ' AS ' . $this->quoteIdentifier($column);
+        }, $columns);
+
+        return 'SELECT ' . implode(', ', $selectColumns) .
+            ' FROM seedling_records r' .
+            ' JOIN seedling_stems st ON r.tag = st.tag' .
+            ' JOIN seedling_individuals i ON st.mtag = i.mtag' .
+            " WHERE r.census LIKE ? AND (r.status LIKE 'A' OR r.status LIKE 'N')" .
+            ' ORDER BY i.trap, i.plot, st.tag';
+    }
+
     private function prepareSeedlingWorkTables(int $maxCensus): void
     {
         if (!Schema::connection('mysql3')->hasTable('slrecord')) {
             DB::connection('mysql3')->statement(
-                "CREATE TABLE slrecord ENGINE = MyISAM AS SELECT seedling.*, base.x, base.y FROM seedling LEFT JOIN base ON seedling.mtag = base.mtag WHERE seedling.census LIKE ? AND (seedling.status LIKE 'A' OR seedling.status LIKE 'N') ORDER BY seedling.trap, seedling.plot, seedling.tag",
+                'CREATE TABLE slrecord ENGINE = MyISAM AS ' . $this->seedlingWorkSelectSql(),
                 [$maxCensus]
             );
             Schema::connection('mysql3')->table('slrecord', function ($table) {
@@ -80,25 +144,11 @@ class SeedlingController extends Controller
                 });
             }
 
-            $seedlingColumns = Schema::connection('mysql3')->getColumnListing('seedling');
-            $seedlingColumnMap = array_flip($seedlingColumns);
             $insertColumns = Schema::connection('mysql3')->getColumnListing('slrecord');
-            $selectColumns = array_map(function ($column) use ($seedlingColumnMap) {
-                if (isset($seedlingColumnMap[$column])) {
-                    return 'seedling.' . $this->quoteIdentifier($column);
-                }
-
-                if ($column === 'x' || $column === 'y') {
-                    return 'base.' . $this->quoteIdentifier($column);
-                }
-
-                return "''";
-            }, $insertColumns);
 
             DB::connection('mysql3')->statement(
-                'INSERT INTO slrecord (' . implode(', ', array_map([$this, 'quoteIdentifier'], $insertColumns)) . ') SELECT ' .
-                implode(', ', $selectColumns) .
-                " FROM seedling LEFT JOIN base ON seedling.mtag = base.mtag WHERE seedling.census LIKE ? AND (seedling.status LIKE 'A' OR seedling.status LIKE 'N') ORDER BY seedling.trap, seedling.plot, seedling.tag",
+                'INSERT INTO slrecord (' . implode(', ', array_map([$this, 'quoteIdentifier'], $insertColumns)) . ') ' .
+                $this->seedlingWorkSelectSql($insertColumns),
                 [$maxCensus]
             );
         }
@@ -209,7 +259,7 @@ class SeedlingController extends Controller
         $user = $request->user();
         $site = $request->route('site');
         //最近一次調查
-        $maxCensus = FsSeedlingData::max('census');
+        $maxCensus = FsSeedlingRecord::max('census');
 
 
         if ($this->shouldPrepareSeedlingWorkTables((int) $maxCensus)) {

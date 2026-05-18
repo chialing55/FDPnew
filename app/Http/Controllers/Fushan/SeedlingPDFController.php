@@ -11,7 +11,6 @@ use Dompdf\Dompdf;
 use setasign\Fpdi\Fpdi;
 use Barryvdh\DomPDF\Facade\Pdf;
 use App\Models\FsSeedlingSlrecord;
-use App\Models\FsSeedlingData;
 
 //產生pdf紀錄紙的內容
 //小苗比對之後，產生比對結果的資料表
@@ -171,7 +170,9 @@ class SeedlingPDFController extends Controller
         $end = $rangeData['end'];
 
         $mtags = $record->pluck('mtag')->filter()->unique()->values();
-        $maxbtable = FsSeedlingData::select('mtag', DB::raw('MAX(CAST(SUBSTRING_INDEX(tag, ".", -1) AS DECIMAL)) AS max_b'))
+        $maxbtable = DB::connection('mysql3')
+            ->table('seedling_stems')
+            ->select('mtag', DB::raw('MAX(CAST(SUBSTRING_INDEX(tag, ".", -1) AS DECIMAL)) AS max_b'))
             ->where('sprout', 'like', 'TRUE')
             ->when($mtags->isNotEmpty(), function ($query) use ($mtags) {
                 $query->whereIn('mtag', $mtags);

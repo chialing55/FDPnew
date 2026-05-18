@@ -7,8 +7,7 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\App;
 use Illuminate\Support\Facades\Schema;
 
-use App\Models\FsSeedlingData;
-use App\Models\FsSeedlingBase;
+use App\Models\FsSeedlingRecord;
 use App\Models\FsSeedlingSlrecord;
 use App\Models\FsSeedlingSlrecord1;
 use App\Models\FsSeedlingSlrecord2;
@@ -126,7 +125,10 @@ class FsSeedlingDataCheck
                 break;
             } 
 
-            $slrecord=FsSeedlingData::where('tag', 'like', $data[$i]['tag'])->orderBy('id', 'DESC')->get();
+            $slrecord=FsSeedlingRecord::where('tag', 'like', $data[$i]['tag'])
+                ->orderBy('census', 'DESC')
+                ->orderBy('id', 'DESC')
+                ->get();
             if (!$slrecord->isEmpty()){
                 if ($slrecord[0]['cotno']>=0 && $data[$i]['cotno']> $slrecord[0]['cotno']){
                     $datasavenote=$data[$i]['tag']." 子葉數不得增加，如需修改增加和舊資料，請利用特殊修改";

@@ -7,8 +7,7 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\App;
 use Illuminate\Support\Facades\Schema;
 
-use App\Models\FsSeedlingData;
-use App\Models\FsSeedlingBase;
+use App\Models\FsSeedlingStem;
 use App\Models\FsSeedlingSlrecord;
 use App\Models\FsSeedlingSlrecord1;
 use App\Models\FsSeedlingSlrecord2;
@@ -32,7 +31,7 @@ class FsSeedlingRecruitCheck
 		for($i=0;$i<1;$i++){
 
 //重號檢查
-                $seedling=FsSeedlingData::where('tag', 'like', $recruit[$i]['tag'])->get();
+                $seedling=FsSeedlingStem::where('tag', 'like', $recruit[$i]['tag'])->get();
                 if (!$seedling->isEmpty()){
                     $recruitsavenote = $recruitsavenote."<br>第".($q+1).'筆資料 重號';
                     $pass="0";

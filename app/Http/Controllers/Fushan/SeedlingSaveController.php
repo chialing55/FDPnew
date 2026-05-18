@@ -10,8 +10,6 @@ use Illuminate\Support\Facades\Log;
 // use Illuminate\Support\Facades\Input;
 use App\Http\Controllers\Controller;
 
-use App\Models\FsSeedlingData;
-use App\Models\FsSeedlingBase;
 use App\Models\FsSeedlingCov;
 use App\Models\FsSeedlingSlcov1;
 use App\Models\FsSeedlingSlcov2;
@@ -45,6 +43,40 @@ class SeedlingSaveController extends Controller
             $name => $message,
             $name . '_type' => $this->noteTypeFromMessage($message, $hasError),
         ];
+    }
+
+    private function previousSeedlingRows(string $tag)
+    {
+        return DB::connection('mysql3')
+            ->table('seedling_records as r')
+            ->join('seedling_stems as st', 'r.tag', '=', 'st.tag')
+            ->join('seedling_individuals as i', 'st.mtag', '=', 'i.mtag')
+            ->where('st.tag', 'like', $tag)
+            ->orderBy('r.census', 'DESC')
+            ->select([
+                'r.id',
+                'r.census',
+                'r.year',
+                'r.month',
+                DB::raw("COALESCE(DATE_FORMAT(r.date, '%Y-%m-%d'), '0000-00-00') as date"),
+                'i.trap',
+                'i.plot',
+                'st.tag',
+                'st.mtag',
+                'i.csp',
+                'r.ht',
+                'r.cotno',
+                'r.leafno',
+                'st.ind',
+                DB::raw("COALESCE(r.note, '') as note"),
+                'r.recruit',
+                'r.status',
+                'st.sprout',
+                'i.x',
+                'i.y',
+            ])
+            ->get()
+            ->map(fn ($value) => (array) $value);
     }
 
     public function getTableInstance($entry)
@@ -351,7 +383,7 @@ class SeedlingSaveController extends Controller
 
                 if ($recruit[$i]['tofix'] == '1') {  //勾選為漏資料
                     //找舊資料
-                    $seedling = FsSeedlingData::where('tag', 'like', $recruit[$i]['tag'])->orderBy('census', 'DESC')->get();
+                    $seedling = $this->previousSeedlingRows($recruit[$i]['tag']);
                     if ($seedling->isEmpty()) {
                         $datacheck['datasavenote'] = ($datacheck['datasavenote'] === '' ? '' : '<br>') . '第' . ($i + 1) . '筆 查無舊資料';
                         $datacheck['pass'] = "0";
@@ -359,9 +391,16 @@ class SeedlingSaveController extends Controller
                     } else {
 
                         if ($recruit[$i]['x'] == '') {
-                            $base = FsSeedlingBase::where('mtag', 'like', $recruit[$i]['mtag'])->get();
-                            $recruit[$i]['x'] = $base[0]['x'];
-                            $recruit[$i]['y'] = $base[0]['y'];
+                            $base = DB::connection('mysql3')
+                                ->table('seedling_individuals')
+                                ->where('mtag', 'like', $recruit[$i]['mtag'])
+                                ->first();
+                            $base = $base ? (array) $base : null;
+
+                            if ($base) {
+                                $recruit[$i]['x'] = $base['x'];
+                                $recruit[$i]['y'] = $base['y'];
+                            }
                         }
 
                         $recruit[$i]['status'] = 'A';

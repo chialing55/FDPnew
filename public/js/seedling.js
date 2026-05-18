@@ -446,7 +446,8 @@ function cellfunction(tableType, container, row, col, prop) {
     var cellProperties = {};
     if (tableType == "data") {
         var curData = container.handsontable("getData")[row][10]; //column 10 is
-        if (container.handsontable("getData")[row][16] > maxid) {
+        const currentMaxid = seedlingPage.state.maxid ?? window.maxid ?? null;
+        if (container.handsontable("getData")[row][16] > currentMaxid) {
             cellProperties.readOnly = false;
             if (col == 8 || col == 14) {
                 cellProperties.readOnly = true;
@@ -691,6 +692,7 @@ function fsseedlingtable(data, thispage, pps, maxid) {
     window.ppsall = pps;
     pps = pps;
     var data2 = processDataTable(data, thispage, pps, site, plotType);
+    const speciesOptions = seedlingPage.state.csplist || window.csplist || [];
 
     var columns = [
         {
@@ -706,7 +708,7 @@ function fsseedlingtable(data, thispage, pps, maxid) {
             data: "csp",
             readOnly: true,
             type: "autocomplete",
-            source: csplist,
+            source: speciesOptions,
             strict: false,
             visibleRows: 10,
         },
@@ -1255,6 +1257,7 @@ function alternotetable(alterdata, tag, entry, thispage) {
 
     var saveButtonName = "alternotesave";
     var tableType = "alternote";
+    const speciesOptions = seedlingPage.state.csplist || window.csplist || [];
 
     var columns = [
         { data: "Trap", type: "numeric" },
@@ -1263,7 +1266,7 @@ function alternotetable(alterdata, tag, entry, thispage) {
         {
             data: "csp",
             type: "autocomplete",
-            source: csplist,
+            source: speciesOptions,
             strict: false,
             visibleRows: 10,
             allowInvalid: false,

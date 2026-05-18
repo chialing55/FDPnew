@@ -8,9 +8,8 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Facades\Auth;
 
-use App\Models\FsSeedlingData;
 use App\Models\FsSeedlingCov;
-use App\Models\FsSeedlingBase;
+use App\Models\FsSeedlingRecord;
 use App\Models\FsSeedlingSlrecord;
 use App\Models\FsSeedlingSlrecord1;
 use App\Models\FsSeedlingSlrecord2;
@@ -65,7 +64,7 @@ class SeedlingImport extends Component
         $this->user = $user;
         $this->site = $site;
 
-        $this->slmaxcensus=FsSeedlingData::max('census');
+        $this->slmaxcensus=FsSeedlingRecord::max('census');
         $this->nowcensus=FsSeedlingSlrecord1::max('census');
         
 
@@ -89,6 +88,9 @@ class SeedlingImport extends Component
         $this->copyTable('slroll1', 'slroll_' . $suffix);
         $this->copyTable('seedling', 'seedling_' . $suffix);
         $this->copyTable('base', 'base_' . $suffix);
+        $this->copyTable('seedling_records', 'seedling_records_' . $suffix);
+        $this->copyTable('seedling_stems', 'seedling_stems_' . $suffix);
+        $this->copyTable('seedling_individuals', 'seedling_individuals_' . $suffix);
 
         foreach (['slrecord', 'slrecord1', 'slrecord2', 'slcov1', 'slcov2', 'slroll1', 'slroll2'] as $table) {
             if (Schema::connection('mysql3')->hasTable($table)) {
@@ -96,9 +98,77 @@ class SeedlingImport extends Component
             }
         }
 
-        $this->slmaxcensus=FsSeedlingData::max('census');
+        $this->slmaxcensus=FsSeedlingRecord::max('census');
         $this->nowcensus=FsSeedlingSlrecord1::max('census');
         $this->cleanupnote = '已完成資料表備份與工作表清空：' . $suffix;
+    }
+
+    private function branchFromTag(string $tag): int
+    {
+        $parts = explode('.', $tag, 2);
+
+        return isset($parts[1]) ? (int) $parts[1] : 0;
+    }
+
+    private function dateForRecord(?string $date): ?string
+    {
+        $date = trim((string) $date);
+
+        return $date === '' || $date === '0000-00-00' ? null : $date;
+    }
+
+    private function syncSeedlingRecord(array $slrecord): void
+    {
+        $now = date('Y-m-d H:i:s');
+        $updatedId = $this->user ?: ($slrecord['updated_id'] ?? null);
+        $isSprout = strtoupper((string) ($slrecord['sprout'] ?? '')) === 'TRUE';
+
+        if (!$isSprout) {
+            DB::connection('mysql3')->table('seedling_individuals')->updateOrInsert(
+                ['mtag' => $slrecord['mtag']],
+                [
+                    'trap' => $slrecord['trap'],
+                    'plot' => $slrecord['plot'],
+                    'x' => $slrecord['x'] === '' ? null : $slrecord['x'],
+                    'y' => $slrecord['y'] === '' ? null : $slrecord['y'],
+                    'csp' => $slrecord['csp'] ?? null,
+                    'updated_id' => $updatedId,
+                    'updated_at' => $now,
+                ]
+            );
+        }
+
+        DB::connection('mysql3')->table('seedling_stems')->updateOrInsert(
+            ['tag' => $slrecord['tag']],
+            [
+                'mtag' => $slrecord['mtag'],
+                'branch' => $this->branchFromTag((string) $slrecord['tag']),
+                'ind' => $slrecord['ind'] === '' ? null : $slrecord['ind'],
+                'sprout' => $slrecord['sprout'] ?? null,
+                'updated_id' => $updatedId,
+                'updated_at' => $now,
+            ]
+        );
+
+        DB::connection('mysql3')->table('seedling_records')->updateOrInsert(
+            [
+                'census' => $slrecord['census'],
+                'tag' => $slrecord['tag'],
+            ],
+            [
+                'year' => $slrecord['year'],
+                'month' => $slrecord['month'],
+                'date' => $this->dateForRecord($slrecord['date'] ?? null),
+                'ht' => $slrecord['ht'] === '' ? null : $slrecord['ht'],
+                'cotno' => $slrecord['cotno'] === '' ? null : $slrecord['cotno'],
+                'leafno' => $slrecord['leafno'] === '' ? null : $slrecord['leafno'],
+                'recruit' => $slrecord['recruit'] ?? null,
+                'status' => $slrecord['status'] ?? null,
+                'note' => $slrecord['note'] ?? null,
+                'updated_id' => $updatedId,
+                'updated_at' => $now,
+            ]
+        );
     }
 
 
@@ -113,10 +183,6 @@ class SeedlingImport extends Component
             return;
         }
 
-//合併大表
-        $seedlingkey=Schema::connection('mysql3')->getColumnListing('seedling');
-        // dd($seedlingkey);
-
         $s_slrecord=FsSeedlingSlrecord1::all()->toArray();
         if (empty($s_slrecord)) {
             $this->importnote = 'slrecord1 目前沒有可匯入資料。';
@@ -127,14 +193,7 @@ class SeedlingImport extends Component
         $censusM=str_pad($s_slrecord[0]['month'], 2, '0', STR_PAD_LEFT);
 
         foreach($s_slrecord as $slrecord){
-            $add=[];
-            $slrecord['id']='0';
-
-            for($i=0;$i<count($seedlingkey);$i++){
-                $add[$seedlingkey[$i]]=$slrecord[$seedlingkey[$i]];
-            }
-
-           $insert=FsSeedlingData::insert($add);
+            $this->syncSeedlingRecord($slrecord);
         }
 
 //cov
@@ -155,46 +214,8 @@ class SeedlingImport extends Component
         }        
 
 
-//update_base
-
-        $s_slbase=DB::connection('mysql3')->select('select distinct mtag, trap, plot, x, y from slrecord1');
-        $s_slbase=array_map(function ($value) { return (array)$value; }, $s_slbase);
-
-        foreach($s_slbase as $slbase){
-            $updatelist=[];
-            $s_base=FsSeedlingBase::where('mtag', 'like', $slbase['mtag'])->get()->toArray();
-            if (count($s_base)>0){  //有舊資料
-                // dd($s_base[0]);
-                foreach ($s_base[0] as $key => $value){
-                    // dd($key, $value);
-                    if ($key !='id' && $key !='updated_at' && $key !='updated_id' && array_key_exists($key, $slbase)){
-                        // dd($key, $value);
-                        if ($value!=$slbase[$key]){
-                            $updatelist[$key]=$slbase[$key];
-                        }
-                    }
-                }
-
-                if (!empty($updatelist)){
-                    $updatelist['updated_id']=$this->user;
-                    $updatelist['updated_at']=date("Y-m-d H:i:s");
-                    $update=FsSeedlingBase::where('mtag', 'like', $slbase['mtag'])->update($updatelist);
-                }
-            } else {  //為新增資料
-                $insertlist=[];
-                foreach($slbase as $key => $value){
-                    $insertlist[$key]=$value;
-                }
-                $insertlist['id']='0';
-                $insertlist['updated_id']=$this->user;
-                $insertlist['updated_at']=date("Y-m-d H:i:s");
-                $insert=FsSeedlingBase::insert($insertlist);
-            }
-        }
-
-
         $this->importnote="資料已匯入完成";
-        $this->slmaxcensus=FsSeedlingData::max('census');
+        $this->slmaxcensus=FsSeedlingRecord::max('census');
         $this->nowcensus=FsSeedlingSlrecord1::max('census');
 
 

@@ -45,6 +45,11 @@ class MortalityShowentry extends Component
     public $selectedTeamId = '';
     public $surveyPersonnel = [];
     public $teamOptions = [];
+    public $showTeamBuilder = false;
+    public $teamSearch = '';
+    public $teamSortField = 'id';
+    public $teamSortDirection = 'asc';
+    public $editingTeamId = '';
     public $personOptions = [];
     public $surveyMetaMessage;
     public $commentsModalOpen = false;
@@ -150,6 +155,97 @@ class MortalityShowentry extends Component
     public function addPersonnelField(): void
     {
         $this->surveyPersonnel[] = '';
+    }
+
+    public function toggleTeamBuilder(): void
+    {
+        $this->resetTeamBuilder();
+
+        $this->showTeamBuilder = !$this->showTeamBuilder;
+    }
+
+    public function loadTeamForEditing($teamId): void
+    {
+        $team = Team::query()
+            ->with(['teamMembers' => function ($query) {
+                $query->orderBy('person_id');
+            }, 'teamMembers.person'])
+            ->find((int) $teamId);
+
+        if (!$team) {
+            return;
+        }
+
+        $this->editingTeamId = (string) $team->id;
+        $this->selectedTeamId = (string) $team->id;
+        $this->surveyPersonnel = $team->teamMembers
+            ->map(fn ($member) => $member->person?->name)
+            ->filter(fn ($name) => trim((string) $name) !== '')
+            ->values()
+            ->all();
+        $this->ensureMinimumPersonnelSlots();
+        $this->surveyMetaMessage = '已載入 team_id ' . $team->id . '，可修改後儲存。';
+        $this->showTeamBuilder = true;
+    }
+
+    public function resetTeamBuilder(): void
+    {
+        $this->editingTeamId = '';
+        $this->selectedTeamId = '';
+        $this->surveyPersonnel = array_fill(0, self::DEFAULT_PERSONNEL_SLOTS, '');
+        $this->surveyMetaMessage = null;
+        $this->resetErrorBag('surveyPersonnel');
+    }
+
+    public function startNewTeam(): void
+    {
+        $this->resetTeamBuilder();
+        $this->showTeamBuilder = true;
+    }
+
+    public function sortTeamOptions(string $field): void
+    {
+        if (!in_array($field, ['id', 'label'], true)) {
+            return;
+        }
+
+        if ($this->teamSortField === $field) {
+            $this->teamSortDirection = $this->teamSortDirection === 'asc' ? 'desc' : 'asc';
+
+            return;
+        }
+
+        $this->teamSortField = $field;
+        $this->teamSortDirection = 'asc';
+    }
+
+    public function deleteEditingTeam(): void
+    {
+        if ($this->editingTeamId === '') {
+            return;
+        }
+
+        $teamId = (int) $this->editingTeamId;
+        $isUsed = Record1::query()->where('team_id', $teamId)->exists()
+            || Record2::query()->where('team_id', $teamId)->exists()
+            || DB::connection('fs_mortality')->table('census_records')->where('team_id', $teamId)->exists();
+
+        if ($isUsed) {
+            $this->surveyMetaMessage = 'team_id ' . $teamId . ' 已被調查資料使用，不能刪除。';
+
+            return;
+        }
+
+        DB::connection('fs_mortality')->transaction(function () use ($teamId) {
+            TeamMember::query()->where('team_id', $teamId)->delete();
+            Team::query()->where('id', $teamId)->delete();
+        });
+
+        $this->refreshEntryState();
+        $this->resetTeamBuilder();
+        $this->showTeamBuilder = true;
+        $this->surveyMetaMessage = '已刪除 team_id ' . $teamId . '。';
+        $this->dispatchEntryGridEvent();
     }
 
     public function openCommentsEditor(int $recordId, array $draftRecords = []): void
@@ -327,64 +423,51 @@ class MortalityShowentry extends Component
         );
     }
 
-    public function saveSurveyMeta(): void
+    public function createTeamFromBuilder(): void
     {
         if ($this->selectedMapSort === null || $this->selectedMap === null) {
             return;
         }
 
-        $this->validate([
-            'surveyDate' => ['required', 'date'],
-        ], [
-            'surveyDate.required' => '請填入調查日期。',
-            'surveyDate.date' => '調查日期格式不正確。',
-        ]);
+        $personNames = $this->validateSurveyPersonnel();
 
-        $personNames = collect($this->surveyPersonnel)
-            ->map(fn ($name) => trim((string) $name))
-            ->filter(fn ($name) => $name !== '')
-            ->values()
-            ->all();
-
-        if (empty($personNames)) {
-            $this->addError('surveyPersonnel', '請至少填入一位調查人員。');
-
+        if ($personNames === null) {
             return;
         }
 
-        $duplicateNames = collect($personNames)
-            ->countBy()
-            ->filter(fn ($count) => $count > 1)
-            ->keys()
-            ->values()
-            ->all();
-
-        if (!empty($duplicateNames)) {
-            $this->addError(
-                'surveyPersonnel',
-                '調查人員有重複：' . implode('、', $duplicateNames) . '，請確認後再儲存。'
-            );
-
-            return;
-        }
-
-        $this->resetErrorBag('surveyPersonnel');
-        $modelClass = $this->getRecordModelClass();
         $teamId = DB::connection('fs_mortality')->transaction(function () use ($personNames) {
             return $this->resolveTeamId($personNames);
         });
 
-        $this->scopeSelectedMap($modelClass::query())
-            ->update([
-                'date' => $this->surveyDate,
-                'team_id' => $teamId,
-                'updated_by' => (string) $this->user,
-                'updated_at' => now(),
-            ]);
+        $this->selectedTeamId = (string) $teamId;
+        $this->editingTeamId = (string) $teamId;
+        $this->surveyMetaMessage = '已建立 team_id ' . $teamId . '，可在下方資料表逐筆填寫。';
+        $this->refreshEntryState();
+        $this->showTeamBuilder = true;
+        $this->dispatchEntryGridEvent();
+    }
+
+    public function updateEditingTeam(): void
+    {
+        if ($this->selectedMapSort === null || $this->selectedMap === null || $this->editingTeamId === '') {
+            return;
+        }
+
+        $personNames = $this->validateSurveyPersonnel();
+
+        if ($personNames === null) {
+            return;
+        }
+
+        $teamId = DB::connection('fs_mortality')->transaction(function () use ($personNames) {
+            return $this->updateTeamMembers((int) $this->editingTeamId, $personNames);
+        });
 
         $this->selectedTeamId = (string) $teamId;
-        $this->surveyMetaMessage = '調查日期與調查人員已儲存。';
+        $this->editingTeamId = (string) $teamId;
+        $this->surveyMetaMessage = 'team_id ' . $teamId . ' 已修改，可在下方資料表逐筆填寫。';
         $this->refreshEntryState();
+        $this->showTeamBuilder = true;
         $this->dispatchEntryGridEvent();
     }
 
@@ -477,12 +560,13 @@ class MortalityShowentry extends Component
                     ['sort_label', 'asc'],
                     ['id', 'asc'],
                 ])
-                ->values()
-                ->map(fn ($team) => [
-                    'id' => $team['id'],
-                    'label' => $team['label'],
-                ])
-                ->all()
+            ->values()
+            ->map(fn ($team) => [
+                'id' => $team['id'],
+                'label' => $team['label'],
+                'display' => $team['id'] . '：' . $team['label'],
+            ])
+            ->all()
             : [];
 
         $firstPendingRow = (clone $baseQuery)
@@ -572,33 +656,16 @@ class MortalityShowentry extends Component
                 $record->rotten = $record->rotten !== null ? (int) $record->rotten : null;
                 $record->leaf_damage = $record->leaf_damage !== null ? (int) $record->leaf_damage : null;
                 $record->comments_summary = $this->summarizeComments(is_array($record->comments_json) ? $record->comments_json : []);
+                $recordArray = $record->toArray();
+                $recordArray['date'] = $record->date ? $record->date->format('Y-m-d') : null;
+                $recordArray['team_id'] = $record->team_id !== null ? (string) $record->team_id : '';
+                $recordArray['comments_summary'] = $record->comments_summary;
 
-                return $record->toArray();
+                return $recordArray;
             })->all()
             : [];
 
-        $firstRecord = $this->records[0] ?? null;
-        $this->surveyDate = !empty($firstRecord['date'])
-            ? (string) $firstRecord['date']
-            : ($this->surveyDate ?: now()->toDateString());
-        $this->selectedTeamId = !empty($firstRecord['team_id'])
-            ? (string) $firstRecord['team_id']
-            : '';
-
-        if ($this->selectedTeamId !== '') {
-            $selectedTeam = collect($this->teamOptions)
-                ->first(fn ($team) => (string) $team['id'] === (string) $this->selectedTeamId);
-
-            if ($selectedTeam) {
-                $this->updatedSelectedTeamId($this->selectedTeamId);
-            } else {
-                $this->selectedTeamId = '';
-                $this->ensureMinimumPersonnelSlots();
-            }
-        } else {
-            $this->surveyPersonnel = array_fill(0, self::DEFAULT_PERSONNEL_SLOTS, '');
-        }
-
+        $this->surveyDate = $this->surveyDate ?: now()->toDateString();
         $this->ensureMinimumPersonnelSlots();
         $this->recordCount = count($this->records);
         $this->pendingCount = collect($this->records)
@@ -659,7 +726,8 @@ class MortalityShowentry extends Component
             enabled: $this->selectedMapSort !== null && $this->selectedMap !== null && !empty($this->records),
             mapSort: $this->selectedMapSort,
             map: $this->selectedMap,
-            entry: $this->entry
+            entry: $this->entry,
+            teamOptions: $this->teamOptions
         );
     }
 
@@ -704,6 +772,41 @@ class MortalityShowentry extends Component
         while (count($this->surveyPersonnel) < self::DEFAULT_PERSONNEL_SLOTS) {
             $this->surveyPersonnel[] = '';
         }
+    }
+
+    private function validateSurveyPersonnel(): ?array
+    {
+        $personNames = collect($this->surveyPersonnel)
+            ->map(fn ($name) => trim((string) $name))
+            ->filter(fn ($name) => $name !== '')
+            ->values()
+            ->all();
+
+        if (empty($personNames)) {
+            $this->addError('surveyPersonnel', '請至少填入一位調查人員。');
+
+            return null;
+        }
+
+        $duplicateNames = collect($personNames)
+            ->countBy()
+            ->filter(fn ($count) => $count > 1)
+            ->keys()
+            ->values()
+            ->all();
+
+        if (!empty($duplicateNames)) {
+            $this->addError(
+                'surveyPersonnel',
+                '調查人員有重複：' . implode('、', $duplicateNames) . '，請確認後再儲存。'
+            );
+
+            return null;
+        }
+
+        $this->resetErrorBag('surveyPersonnel');
+
+        return $personNames;
     }
 
     private function resolveTeamId(array $personNames): int
@@ -777,6 +880,91 @@ class MortalityShowentry extends Component
         }
 
         return (int) $team->id;
+    }
+
+    private function updateTeamMembers(int $teamId, array $personNames): int
+    {
+        $team = Team::query()->where('census', $this->currentCensus)->find($teamId);
+
+        if (!$team) {
+            return $this->resolveTeamId($personNames);
+        }
+
+        $personIds = $this->resolvePersonIds($personNames);
+
+        TeamMember::query()->where('team_id', $teamId)->delete();
+
+        foreach ($personIds as $personId) {
+            TeamMember::query()->create([
+                'team_id' => $teamId,
+                'person_id' => $personId,
+                'role' => null,
+            ]);
+        }
+
+        return $teamId;
+    }
+
+    private function resolvePersonIds(array $personNames): array
+    {
+        $uniqueNames = collect($personNames)
+            ->map(fn ($name) => trim((string) $name))
+            ->filter(fn ($name) => $name !== '')
+            ->unique()
+            ->values();
+
+        $existingPeople = Person::query()
+            ->whereIn('name', $uniqueNames->all())
+            ->pluck('id', 'name')
+            ->map(fn ($id) => (int) $id)
+            ->all();
+
+        foreach ($uniqueNames as $name) {
+            if (!isset($existingPeople[$name])) {
+                $person = Person::query()->create([
+                    'name' => $name,
+                ]);
+
+                $existingPeople[$name] = (int) $person->id;
+            }
+        }
+
+        return $uniqueNames
+            ->map(fn ($name) => (int) $existingPeople[$name])
+            ->sort()
+            ->values()
+            ->all();
+    }
+
+    public function getFilteredTeamOptionsProperty(): array
+    {
+        $keyword = trim((string) $this->teamSearch);
+
+        return collect($this->teamOptions)
+            ->when($keyword !== '', function ($teams) use ($keyword) {
+                return $teams->filter(function ($team) use ($keyword) {
+                    return str_contains((string) $team['id'], $keyword)
+                        || str_contains($team['label'], $keyword)
+                        || str_contains($team['display'] ?? '', $keyword);
+                });
+            })
+            ->sortBy(function ($team) {
+                if ($this->teamSortField === 'label') {
+                    return (string) $team['label'];
+                }
+
+                return (int) $team['id'];
+            }, SORT_REGULAR, $this->teamSortDirection === 'desc')
+            ->values()
+            ->all();
+    }
+
+    public function getTeamSortMarkersProperty(): array
+    {
+        return [
+            'id' => $this->teamSortField === 'id' ? ($this->teamSortDirection === 'asc' ? ' ↑' : ' ↓') : '',
+            'label' => $this->teamSortField === 'label' ? ($this->teamSortDirection === 'asc' ? ' ↑' : ' ↓') : '',
+        ];
     }
 
     private function persistDraftRecords(array $records, array $commentsJsonOverrides = []): array
@@ -861,6 +1049,8 @@ class MortalityShowentry extends Component
             'rotten' => $record->rotten !== null ? (int) $record->rotten : null,
             'leaves' => $record->leaves !== null ? (int) $record->leaves : null,
             'leaf_damage' => $record->leaf_damage !== null ? (int) $record->leaf_damage : null,
+            'date' => $record->date ? $record->date->format('Y-m-d') : null,
+            'team_id' => $record->team_id !== null ? (int) $record->team_id : null,
         ];
     }
 
@@ -1059,10 +1249,32 @@ class MortalityShowentry extends Component
         $rottenRaw = $this->blankToNull($payload['rotten'] ?? null);
         $leavesRaw = $this->blankToNull($payload['leaves'] ?? null);
         $leafDamageRaw = $this->blankToNull($payload['leaf_damage'] ?? null);
+        $dateRaw = $this->normalizeDateValue($payload['date'] ?? null);
+        $teamIdRaw = $this->blankToNull($payload['team_id'] ?? null);
 
         $allowedStatuses = ['OK', 'A', 'D', 'X', 'NF'];
         if ($status === '' || !in_array($status, $allowedStatuses, true)) {
             $errors[] = 'status 必須填入 OK、A、D、X 或 NF。';
+        }
+
+        if ($dateRaw === null) {
+            $errors[] = '調查日期必須填寫。';
+            $date = null;
+        } elseif (!$this->isValidDate($dateRaw)) {
+            $errors[] = '調查日期格式需為 YYYY-MM-DD。';
+            $date = null;
+        } else {
+            $date = $dateRaw;
+        }
+
+        if ($teamIdRaw === null) {
+            $errors[] = '調查團隊必須選擇。';
+            $teamId = null;
+        } elseif (!ctype_digit((string) $teamIdRaw) || !Team::query()->where('census', $this->currentCensus)->where('id', (int) $teamIdRaw)->exists()) {
+            $errors[] = '調查團隊不存在或不屬於本次 census，請重新選擇。';
+            $teamId = null;
+        } else {
+            $teamId = (int) $teamIdRaw;
         }
 
         $statusAllowsDetails = in_array($status, ['A', 'OK'], true);
@@ -1258,8 +1470,32 @@ class MortalityShowentry extends Component
                 'rotten' => $rotten,
                 'leaves' => $leaves,
                 'leaf_damage' => $leafDamage,
+                'date' => $date,
+                'team_id' => $teamId,
             ],
         ];
+    }
+
+    private function isValidDate(string $date): bool
+    {
+        $parsed = \DateTime::createFromFormat('Y-m-d', $date);
+
+        return $parsed !== false && $parsed->format('Y-m-d') === $date;
+    }
+
+    private function normalizeDateValue($value): ?string
+    {
+        $value = $this->blankToNull($value);
+
+        if ($value === null) {
+            return null;
+        }
+
+        if (preg_match('/^\d{4}-\d{2}-\d{2}/', (string) $value, $matches)) {
+            return $matches[0];
+        }
+
+        return (string) $value;
     }
 
     private function validateOptionalDiscrete($value, array $allowed, string $field, array &$errors): ?int
