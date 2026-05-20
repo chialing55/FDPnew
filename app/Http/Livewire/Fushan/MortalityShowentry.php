@@ -16,6 +16,10 @@ use Livewire\Component;
 class MortalityShowentry extends Component
 {
     private const DEFAULT_PERSONNEL_SLOTS = 4;
+    private const SPECIAL_CASE_COMMENT_KEYWORDS = [
+        '特例',
+        'exception',
+    ];
 
     public $entry;
     public $user;
@@ -1227,6 +1231,7 @@ class MortalityShowentry extends Component
             ?? (is_array($payload['comments_json'] ?? null)
                 ? $payload['comments_json']
                 : (is_array($record->comments_json) ? $record->comments_json : []));
+        $bypassInputRestrictions = $this->hasSpecialCaseComment((array) $commentsJson);
         $hasDbhShrinkComment = collect((array) $commentsJson)
             ->contains(function ($item) {
                 $commentId = (int) ($item['comment_id'] ?? 0);
@@ -1454,7 +1459,7 @@ class MortalityShowentry extends Component
         }
 
         return [
-            'errors' => $errors,
+            'errors' => $bypassInputRestrictions ? [] : $errors,
             'data' => [
                 'dbh2' => $dbh2,
                 'status' => $status,
@@ -1474,6 +1479,41 @@ class MortalityShowentry extends Component
                 'team_id' => $teamId,
             ],
         ];
+    }
+
+    private function hasSpecialCaseComment(array $commentsJson): bool
+    {
+        $commentIds = collect($commentsJson)
+            ->map(fn ($item) => (int) ($item['comment_id'] ?? 0))
+            ->filter()
+            ->unique()
+            ->values()
+            ->all();
+
+        if (empty($commentIds)) {
+            return false;
+        }
+
+        return CommentOption::query()
+            ->whereIn('id', $commentIds)
+            ->get(['code', 'comment_zh', 'comment_en'])
+            ->contains(function ($option) {
+                $values = [
+                    $option->code,
+                    $option->comment_zh,
+                    $option->comment_en,
+                ];
+
+                foreach ($values as $value) {
+                    $normalized = mb_strtolower(trim((string) $value));
+
+                    if ($normalized !== '' && in_array($normalized, self::SPECIAL_CASE_COMMENT_KEYWORDS, true)) {
+                        return true;
+                    }
+                }
+
+                return false;
+            });
     }
 
     private function isValidDate(string $date): bool
