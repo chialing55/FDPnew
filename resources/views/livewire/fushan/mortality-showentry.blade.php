@@ -655,12 +655,12 @@
                         data: 'branches',
                         type: 'numeric',
                         allowInvalid: false,
-                        validator: integerRangeValidator(1, 100)
+                        validator: integerRangeValidator(0, 100)
                     },
                     {
                         data: 'illumination',
                         type: 'dropdown',
-                        source: ['', '1', '2', '3', '4', '5'],
+                        source: ['', '0', '1', '2', '3', '4', '5'],
                         allowInvalid: false
                     },
                     {
