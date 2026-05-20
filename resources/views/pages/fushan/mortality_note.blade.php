@@ -65,7 +65,7 @@
             ],
             'biotic_damage' => ['被松鼠咬 / ST', '白蟻 / termite', '蛀蝕 / erosion', '有蜂 / beehive'],
             'disease' => ['絹皮病 / white stem blight'],
-            'other' => ['牌子不見 / tag lose', 'R / R', '存活長度增加 / Living length increased', 'GR / GR'],
+            'other' => ['牌子不見 / tag lose', 'R / R', '存活長度增加 / Living length increased', 'GR / GR', '特例 / exception'],
         ];
     @endphp
 
@@ -154,7 +154,7 @@
                             <li>Branches
                                 <ul style="list-style-type:disc;">
                                     <li><b>Branches</b> 只能填 0 到 100 的整數。</li>
-                                    <li><b>Status = A</b> 且有 <b>DBH(new)</b> 時，<b>Branches</b> 必須填 1 到 100，且不可空白。</li>
+                                    <li><b>Status = A</b> 且有 <b>DBH(new)</b> 時，<b>Branches</b> 必須填 0 到 100，且不可空白。</li>
                                     <li><b>Status = A</b> 且沒有 <b>DBH(new)</b> 時，<b>Branches</b> 可以留空；若填了非 0 的值，則必須補填
                                         <b>DBH(new)</b>。
                                     </li>
@@ -164,7 +164,7 @@
                                 <ul style="list-style-type:disc;">
                                     <li><b>Illumination</b> 只能填 0 到 5。</li>
                                     <li><b>Status = A</b> 或 <b>OK</b> 以外，不可填寫 <b>Illumination</b>。</li>
-                                    <li><b>Status = A</b> 且有 <b>DBH(new)</b> 時，<b>Illumination</b> 必須填 1 到 5。</li>
+                                    <li><b>Status = A</b> 且有 <b>DBH(new)</b> 時，<b>Illumination</b> 必須填 0 到 5。</li>
                                     <li><b>Status = A</b> 且 <b>Branches = 0</b>、<b>DBH(new)</b> 空白時，若有填寫
                                         <b>Illumination</b>，則只能填 0。
                                     </li>
@@ -219,6 +219,13 @@
                                 <ul style="list-style-type:disc;">
                                     <li>若 <b>DBH(new) &lt; DBH(old)</b>，請在備註中加入 <b>確認縮水</b> 或 <b>DBH shrink</b>，否則系統不會儲存。
                                     </li>
+                                </ul>
+                            </li>
+                            <li>特例
+                                <ul style="list-style-type:disc;">
+                                    <li>若現場狀況無法符合一般輸入檢查規則，但資料判斷確認需要照實記錄，請在備註中加入 <b>特例</b> 或 <b>exception</b> option。</li>
+                                    <li>有 <b>特例 / exception</b> 備註的資料，系統會放寬該筆的欄位連動檢查，例如 DBH、branches、illumination、mode、leaning 與狀態欄位之間的限制。</li>
+                                    <li>請在同一筆備註的文字欄位補充原因，說明為什麼此筆需列為特例，方便後續比對與匯入時判讀。</li>
                                 </ul>
                             </li>
                             <li>備註填寫

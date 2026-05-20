@@ -1354,8 +1354,8 @@ class MortalityShowentry extends Component
         }
 
         if (!$branchesInvalid && $status === 'A' && $dbh2 !== null) {
-            if ($branches === null || $branches < 1 || $branches > 100) {
-                $errors[] = 'status 為 A 且有 DBH(new) 時，branches 必須為 1 到 100。';
+            if ($branches === null || $branches < 0 || $branches > 100) {
+                $errors[] = 'status 為 A 且有 DBH(new) 時，branches 必須為 0 到 100。';
             }
         }
 
@@ -1390,8 +1390,8 @@ class MortalityShowentry extends Component
         }
 
         if ($status === 'A' && $dbh2 !== null) {
-            if ($illumination === null || $illumination < 1 || $illumination > 5) {
-                $errors[] = 'status 為 A 且有 DBH(new) 時，illumination 必須為 1 到 5。';
+            if ($illumination === null || $illumination < 0 || $illumination > 5) {
+                $errors[] = 'status 為 A 且有 DBH(new) 時，illumination 必須為 0 到 5。';
             }
         }
 
