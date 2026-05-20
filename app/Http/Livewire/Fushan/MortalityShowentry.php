@@ -1483,6 +1483,18 @@ class MortalityShowentry extends Component
 
     private function hasSpecialCaseComment(array $commentsJson): bool
     {
+        $hasSpecialText = collect($commentsJson)
+            ->contains(function ($item) {
+                $text = mb_strtolower(trim((string) ($item['text'] ?? '')));
+
+                return $text !== '' && collect(self::SPECIAL_CASE_COMMENT_KEYWORDS)
+                    ->contains(fn ($keyword) => str_contains($text, $keyword));
+            });
+
+        if ($hasSpecialText) {
+            return true;
+        }
+
         $commentIds = collect($commentsJson)
             ->map(fn ($item) => (int) ($item['comment_id'] ?? 0))
             ->filter()
