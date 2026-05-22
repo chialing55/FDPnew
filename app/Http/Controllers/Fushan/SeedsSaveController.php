@@ -21,6 +21,13 @@ use App\Jobs\SeedsAddButton;
 
 class SeedsSaveController extends Controller
 {
+    protected function actorAccount(Request $request): string
+    {
+        $user = $request->user();
+
+        return (string) ($user?->account ?? $user?->name ?? '');
+    }
+
     protected function resolveSeedsPageById(array $rows, $targetId, int $perPage = 29): int
     {
         if (!$targetId || empty($rows)) {
@@ -186,7 +193,7 @@ class SeedsSaveController extends Controller
         $table = $this->getTableInstance($type);
         $data_all = $request->all();
         $data = $data_all['data'];
-        $user = $request->user()?->name ?? '';
+        $user = $this->actorAccount($request);
         $datasavenote = '';
 
         $spinfo = $this->spinfo();
@@ -340,7 +347,7 @@ class SeedsSaveController extends Controller
         $data = $data_all['data'];
         $requestCensus = (string) ($request->input('currentCensus') ?? '');
 
-        $user = $request->user();
+        $user = $this->actorAccount($request);
 
 
         $spinfo = $this->spinfo();
@@ -373,7 +380,7 @@ class SeedsSaveController extends Controller
 
         foreach ($data as $row) {
             if (trim($row['trap']) === '') continue;
-            $inlist = $this->prepareInsertRow($row, $spinfo, $existingSigns, $type, $user->name, $requestCensus);
+            $inlist = $this->prepareInsertRow($row, $spinfo, $existingSigns, $type, $user, $requestCensus);
 
             $newId = $table::insertGetId($inlist);
             $insertedIds[] = $newId;
@@ -390,7 +397,7 @@ class SeedsSaveController extends Controller
                     'type' => 'insert',
                     'census' => $inlist['census'],
                     'descript' => json_encode($updatedes, JSON_UNESCAPED_UNICODE),
-                    'updated_id' => $user->name,
+                    'updated_id' => $user,
                     'updated_at' => now()
                 ];
             }
@@ -434,7 +441,7 @@ class SeedsSaveController extends Controller
     //刪除已輸入資料
     public function deletedata(Request $request, $id, $info, $thispage, $type)
     {
-        $user = $request->user();
+        $user = $this->actorAccount($request);
 
 
         $datasavenote = '';
@@ -472,7 +479,7 @@ class SeedsSaveController extends Controller
                 'type' => 'delete',
                 'census' => $census,
                 'descript' => json_encode($updatedes, JSON_UNESCAPED_UNICODE),
-                'updated_id' => $user->name,
+                'updated_id' => $user,
                 'updated_at' => now(),
             ]);
 
@@ -498,7 +505,7 @@ class SeedsSaveController extends Controller
                     'identifier' => $this->identifier,
                     'note' => '',
                     'checknote' => '',
-                    'updated_id' => $user->name,
+                    'updated_id' => $user,
                     'updated_at' => now(),
                 ]);
             }
@@ -594,7 +601,7 @@ class SeedsSaveController extends Controller
     //輸入完成檢查，並匯入大表
     public function finishnote(Request $request)
     {
-        $user = $request->user();
+        $user = $this->actorAccount($request);
 
 
         $finishnote = '';
@@ -654,7 +661,7 @@ class SeedsSaveController extends Controller
                     $inlist['identified'] = 'N';
                 }
 
-                $inlist['updated_id'] = $user->name;
+                $inlist['updated_id'] = $user;
                 $inlist['updated_at'] = now();
 
                 $insertList[] = $inlist;
@@ -679,7 +686,7 @@ class SeedsSaveController extends Controller
                 $inlist['identifier'] = $this->identifier;
                 $inlist['note'] = '';
                 $inlist['checknote'] = '';
-                $inlist['updated_id'] = $user->name;
+                $inlist['updated_id'] = $user;
                 $inlist['updated_at'] = now();
 
                 $insertList[] = $inlist;

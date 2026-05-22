@@ -7,6 +7,7 @@ use Livewire\Component;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\App;
+use Illuminate\Support\Facades\Auth;
 use Livewire\WithPagination;
 
 use App\Models\FsSeedsDateinfo;
@@ -27,33 +28,54 @@ class SeedsShowentry extends Component
     public $entry;
     public $thiscensus;
     public $dateinfo;
+    public $isAdmin = false;
+    public $skipnote = '';
 
     public function mount(){
-        $maxcensus=FsSeedsDateinfo::query()->max('census');
-        $this->census=$maxcensus+1;   
-        $maxcensus2=FsSeedsFulldata::query()->max('census');
-        $this->census2=$maxcensus2+1;   
+        $this->isAdmin = (bool) (Auth::user()?->is_admin ?? false);
+        $this->refreshCensusState();
+    }
 
-        $this->dateinfo=FsSeedsDateinfo::query()->orderBy('census', 'desc')->take(5)->get()->toArray();
+    private function actorAccount(): string
+    {
+        $user = Auth::user();
 
-        if ($this->census2<$this->census){  //有date資料但沒有種子雨資料
-            $census2date=FsSeedsDateinfo::query()->where('census', 'like', $this->census2)->get()->toArray();
-            $this->census2date=$census2date[0];
+        return (string) ($this->user ?: ($user?->account ?? $user?->name ?? 'system'));
+    }
+
+    private function refreshCensusState(): void
+    {
+        $maxDateCensus = (int) (FsSeedsDateinfo::query()->max('census') ?? 0);
+        $this->census = $maxDateCensus + 1;
+
+        $maxImportedCensus = (int) (FsSeedsFulldata::query()->max('census') ?? 0);
+        $pendingDate = FsSeedsDateinfo::query()
+            ->where('census', '>', $maxImportedCensus)
+            ->where(function ($query) {
+                $query->whereNull('status')
+                    ->orWhere('status', '!=', 'skipped');
+            })
+            ->orderBy('census')
+            ->first();
+
+        if ($pendingDate) {
+            $this->census2 = (int) $pendingDate->census;
+            $this->census2date = $pendingDate->toArray();
         } else {
-            $this->census2date['date']='';
+            $this->census2 = $this->census;
+            $this->census2date = ['date' => ''];
         }
 
+        $this->dateinfo = FsSeedsDateinfo::query()->orderBy('census', 'desc')->take(5)->get()->toArray();
 
-        $entrytable=FsSeedsRecord1::query()->get()->toArray();
-        // dd(count($entrytable));
-        if (count($entrytable)>0){
-            // $this->createTable($entrytable[0]['census']);
-            $this->entry='y';
-            $this->thiscensus=$entrytable[0]['census'];
+        $entrytable = FsSeedsRecord1::query()->get()->toArray();
+        if (count($entrytable) > 0) {
+            $this->entry = 'y';
+            $this->thiscensus = $entrytable[0]['census'];
+        } else {
+            $this->entry = '';
+            $this->thiscensus = null;
         }
-
-
-
     }
 
     public $note='';
@@ -64,9 +86,7 @@ class SeedsShowentry extends Component
 
 //輸入要輸入資料的周次資訊
     public function submitForm(Request $request){
-        $user = $request->session()->get('user', function () {
-            return 'no';
-        });
+        $user = $this->actorAccount();
         $pass='yes';
 
         if ($this->date!=''){
@@ -105,10 +125,41 @@ class SeedsShowentry extends Component
                 $inlist = array_merge($inlist, $additionalData);
                 FsSeedsDateinfo::insert($inlist);
 
-                $this->createTable($this->census);
+                $this->refreshCensusState();
+                $this->createTable($this->census2);
             }
 
         }
+    }
+
+    public function skipCurrentCensus()
+    {
+        abort_unless((bool) (Auth::user()?->is_admin ?? false), 403);
+
+        if ($this->entry !== '' || !isset($this->census2date['census'])) {
+            $this->skipnote = '目前沒有可略過的調查資料。';
+            return;
+        }
+
+        $census = (int) $this->census2date['census'];
+        $hasImportedData = FsSeedsFulldata::query()->where('census', $census)->exists();
+        $hasWorkData = FsSeedsRecord1::query()->exists();
+
+        if ($hasImportedData || $hasWorkData) {
+            $this->skipnote = 'record1 表已有資料，不能略過此周輸入。';
+            return;
+        }
+
+        FsSeedsDateinfo::query()
+            ->where('census', $census)
+            ->update([
+                'status' => 'skipped',
+                'updated_id' => $this->actorAccount(),
+                'updated_at' => date('Y-m-d H:i:s'),
+            ]);
+
+        $this->skipnote = '已略過第 ' . $census . ' 次調查。';
+        $this->refreshCensusState();
     }
 
 //處理日期欄位
@@ -272,14 +323,12 @@ class SeedsShowentry extends Component
         $this->dateinfo=FsSeedsDateinfo::query()->orderBy('census', 'desc')->take(5)->get()->toArray(); //取前五筆檢視
         $this->chcensus='';
 
-        $this->reset();
+        $this->resetExcept(['user']);
         $this->mount();
     }
 //更新調查日期資訊
     public function submitForm3(Request $request){
-        $user = $request->session()->get('user', function () {
-            return 'no';
-        });
+        $user = $this->actorAccount();
 
 
         if ($this->date3!=''){
@@ -303,7 +352,7 @@ class SeedsShowentry extends Component
             FsSeedsDateinfo::where('census', 'like', $this->census3)->update($inlist);
 
             // $this->createTable($this->census);
-            $this->reset();
+            $this->resetExcept(['user']);
             $this->mount();
         }        
     }

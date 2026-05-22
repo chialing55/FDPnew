@@ -29,7 +29,7 @@ class SeedsController extends Controller
         return view('pages/fushan/seeds_doc', [
             'site' => $site,
             'project' => '種子雨',
-            'user' => $user->name
+            'user' => $user->account ?? $user->name
 
 
         ]);
@@ -47,7 +47,7 @@ class SeedsController extends Controller
         return view('pages/fushan/seeds_entry', [
             'site' => $site,
             'project' => '種子雨',
-            'user' => $user->name
+            'user' => $user->account ?? $user->name
 
         ]);
     }
@@ -63,7 +63,7 @@ class SeedsController extends Controller
         return view('pages/fushan/seeds_import', [
             'site' => $site,
             'project' => '種子雨',
-            'user' => $user->name
+            'user' => $user->account ?? $user->name
 
         ]);
     }
@@ -78,7 +78,7 @@ class SeedsController extends Controller
         return view('pages/fushan/seeds_note', [
             'site' => $site,
             'project' => '種子雨',
-            'user' => $user->name
+            'user' => $user->account ?? $user->name
 
 
         ]);
@@ -95,7 +95,7 @@ class SeedsController extends Controller
         return view('pages/fushan/seeds_dataviewer', [
             'site' => $site,
             'project' => '種子雨',
-            'user' => $user->name
+            'user' => $user->account ?? $user->name
 
 
         ]);
@@ -111,7 +111,7 @@ class SeedsController extends Controller
         return view('pages/fushan/seeds_unknown', [
             'site' => $site,
             'project' => '種子雨',
-            'user' => $user->name
+            'user' => $user->account ?? $user->name
 
 
         ]);
@@ -127,7 +127,7 @@ class SeedsController extends Controller
         return view('pages/fushan/seeds_unknown_data', [
             'site' => $site,
             'project' => '種子雨',
-            'user' => $user->name,
+            'user' => $user->account ?? $user->name,
             'unk' => $unk,
         ]);
     }
@@ -140,7 +140,7 @@ class SeedsController extends Controller
         return view('pages/fushan/seeds_updatebackdata', [
             'site' => $site,
             'project' => '種子雨',
-            'user' => $user->name
+            'user' => $user->account ?? $user->name
 
         ]);
     }

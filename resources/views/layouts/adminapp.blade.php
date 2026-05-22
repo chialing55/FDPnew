@@ -54,21 +54,24 @@
 
 
     function handleHoverEvents(selector, innerSelector) {
-        $(selector + ', ' + innerSelector).on('mouseenter', function() {
-            $(innerSelector).css('display', 'inline-flex');
-            $(selector).css({
-                'color': '#fff',
-                'background-color': '#91A21C'
+        $(innerSelector).hide();
+        $(selector + ', ' + innerSelector)
+            .off('mouseenter.navHover mouseleave.navHover')
+            .on('mouseenter.navHover', function() {
+                $(innerSelector).css('display', 'inline-flex');
+                $(selector).css({
+                    'color': '#fff',
+                    'background-color': '#91A21C'
+                });
+                $('.now hr').css('color', 'transparent');
+            }).on('mouseleave.navHover', function() {
+                $(innerSelector).hide();
+                $(selector).css({
+                    'color': '',
+                    'background-color': ''
+                });
+                $('.now hr').css('color', '#91A21C');
             });
-            $('.now hr').css('color', 'transparent');
-        }).on('mouseleave', function() {
-            $(innerSelector).hide();
-            $(selector).css({
-                'color': '',
-                'background-color': ''
-            });
-            $('.now hr').css('color', '#91A21C');
-        });
     }
 
     $(document).ajaxStart(function() {

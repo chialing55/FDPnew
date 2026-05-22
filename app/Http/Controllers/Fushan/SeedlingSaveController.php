@@ -45,6 +45,13 @@ class SeedlingSaveController extends Controller
         ];
     }
 
+    private function actorAccount(Request $request): string
+    {
+        $user = $request->user();
+
+        return (string) ($user?->account ?? $user?->name ?? '');
+    }
+
     private function previousSeedlingRows(string $tag)
     {
         return DB::connection('mysql3')
@@ -166,7 +173,7 @@ class SeedlingSaveController extends Controller
     //地被資料儲存
     public function savecov(Request $request)
     {
-        $user = $request->user();
+        $user = $this->actorAccount($request);
 
         $data_all = request()->all();
         // print_r($savecov);
@@ -203,7 +210,7 @@ class SeedlingSaveController extends Controller
             } else {
 
 
-                $tablecov::where('id', $savecov[$i]['id'])->update(['cov' => $savecov[$i]['cov'], 'date' => $savecov[$i]['date'], 'canopy' => $savecov[$i]['canopy'], 'note' => $savecov[$i]['note'], 'updated_id' => $user->name]);
+                $tablecov::where('id', $savecov[$i]['id'])->update(['cov' => $savecov[$i]['cov'], 'date' => $savecov[$i]['date'], 'canopy' => $savecov[$i]['canopy'], 'note' => $savecov[$i]['note'], 'updated_id' => $user]);
                 //重新下載資料
 
 
@@ -218,6 +225,475 @@ class SeedlingSaveController extends Controller
             ...$this->noteField('covsavenote', $covsavenote, $hasCovError),
 
         ];
+    }
+
+
+    //小苗後端資料修改
+    public function saveupdate(Request $request)
+    {
+        abort_unless((int) ($request->user()?->is_admin ?? 0) === 1, 403);
+
+        $payload = $request->all();
+        $workRows = $payload['workRows'] ?? [];
+        $identityRows = $payload['identityRows'] ?? [];
+        $masterRows = $payload['masterRows'] ?? [];
+        $user = (string) ($payload['user'] ?? $request->user()?->account ?? $request->user()?->name ?? '');
+        $from = (string) ($payload['from'] ?? '');
+        $currentTag = (string) ($payload['tag'] ?? '');
+
+        if (!is_array($workRows) || !is_array($identityRows) || !is_array($masterRows)) {
+            return [
+                'result' => 'error',
+                'datasavenote' => '資料格式錯誤。',
+                'datasavenote_type' => 'error',
+            ];
+        }
+
+        $savedTag = $currentTag;
+        $updatedAt = now()->toDateTimeString();
+        $duplicateNote = $this->seedlingUpdateDuplicateNumberNote($identityRows);
+        if ($duplicateNote !== '') {
+            return [
+                'result' => 'error',
+                'datasavenote' => $duplicateNote,
+                'datasavenote_type' => 'error',
+            ];
+        }
+
+        DB::connection('mysql3')->transaction(function () use ($workRows, $identityRows, $masterRows, $user, $updatedAt, &$savedTag) {
+            foreach ($workRows as $row) {
+                if (!is_array($row)) {
+                    continue;
+                }
+
+                $workId = $row['work_id'] ?? $row['id'] ?? null;
+                if (!$workId) {
+                    continue;
+                }
+
+                $tag = strtoupper(trim((string) ($row['tag'] ?? '')));
+                $mtag = trim((string) ($row['mtag'] ?? ''));
+                $originalTag = strtoupper(trim((string) ($row['original_tag'] ?? '')));
+                $originalMtag = trim((string) ($row['original_mtag'] ?? ''));
+                if ($mtag !== '' && $mtag !== $originalMtag && ($tag === '' || $tag === $originalTag)) {
+                    $tag = $originalMtag !== '' && str_starts_with($originalTag, $originalMtag)
+                        ? $mtag . substr($originalTag, strlen($originalMtag))
+                        : $mtag;
+                }
+                if ($tag !== '' && ($mtag === '' || ($tag !== $originalTag && $mtag === $originalMtag))) {
+                    $mtag = explode('.', $tag)[0];
+                }
+
+                $update = $this->onlySeedlingUpdateFields($row, [
+                    'census', 'year', 'month', 'date', 'trap', 'plot', 'tag', 'mtag', 'csp',
+                    'ht', 'cotno', 'leafno', 'ind', 'note', 'recruit', 'status', 'sprout',
+                    'x', 'y', 'alternote',
+                ]);
+
+                if ($tag !== '') {
+                    $update['tag'] = $tag;
+                    $savedTag = $tag;
+                }
+                if ($mtag !== '') {
+                    $update['mtag'] = $mtag;
+                }
+                $update['updated_id'] = $user;
+
+                DB::connection('mysql3')
+                    ->table('slrecord1')
+                    ->where('id', $workId)
+                    ->update($update);
+            }
+
+            foreach ($identityRows as $row) {
+                if (!is_array($row)) {
+                    continue;
+                }
+
+                $tag = strtoupper(trim((string) ($row["tag"] ?? "")));
+                $mtag = trim((string) ($row["mtag"] ?? ""));
+                $originalTag = strtoupper(trim((string) ($row["original_tag"] ?? "")));
+                $originalMtag = trim((string) ($row["original_mtag"] ?? ""));
+                $isSprout = strtoupper(trim((string) ($row["sprout"] ?? ""))) === "TRUE";
+                if ($mtag !== "" && $mtag !== $originalMtag && ($tag === "" || $tag === $originalTag)) {
+                    $tag = $originalMtag !== "" && str_starts_with($originalTag, $originalMtag)
+                        ? $mtag . substr($originalTag, strlen($originalMtag))
+                        : $mtag;
+                }
+                if ($tag !== "" && ($mtag === "" || ($tag !== $originalTag && $mtag === $originalMtag))) {
+                    $mtag = explode(".", $tag)[0];
+                }
+                if ($tag !== "") {
+                    $savedTag = $tag;
+                }
+
+                $stemId = $row["stem_id"] ?? null;
+                if ($stemId) {
+                    $stemUpdate = $this->onlySeedlingUpdateFields($row, ["mtag", "tag", "sprout"]);
+                    $stemUpdate["ind"] = 1;
+                    if ($tag !== "") {
+                        $stemUpdate["tag"] = $tag;
+                        $stemUpdate["branch"] = $this->seedlingBranchFromTag($tag);
+                    }
+                    if ($mtag !== "") {
+                        $stemUpdate["mtag"] = $mtag;
+                    }
+                    $stemUpdate["updated_id"] = $user;
+                    $stemUpdate["updated_at"] = $updatedAt;
+
+                    if (($tag !== "" && $tag !== $originalTag) || ($mtag !== "" && $mtag !== $originalMtag)) {
+                        $oldStem = DB::connection("mysql3")
+                            ->table("seedling_stems")
+                            ->where("id", $stemId)
+                            ->first();
+
+                        if ($oldStem) {
+                            $newStem = (array) $oldStem;
+                            unset($newStem["id"]);
+                            $newStem = array_merge($newStem, $stemUpdate, [
+                                "deleted_at" => null,
+                                "updated_id" => $user,
+                                "updated_at" => $updatedAt,
+                            ]);
+
+                            DB::connection("mysql3")
+                                ->table("seedling_stems")
+                                ->insert($newStem);
+
+                            DB::connection("mysql3")
+                                ->table("seedling_stems")
+                                ->where("id", $stemId)
+                                ->update([
+                                    "deleted_at" => $updatedAt,
+                                    "updated_id" => $user,
+                                    "updated_at" => $updatedAt,
+                                ]);
+                        }
+                    } else {
+                        DB::connection("mysql3")
+                            ->table("seedling_stems")
+                            ->where("id", $stemId)
+                            ->update($stemUpdate);
+                    }
+                }
+
+                $individualId = $row["individual_id"] ?? null;
+                if ($individualId && !$isSprout) {
+                    $individualUpdate = $this->onlySeedlingUpdateFields($row, ["mtag", "trap", "plot", "x", "y", "csp"]);
+                    if ($mtag !== "") {
+                        $individualUpdate["mtag"] = $mtag;
+                    }
+                    $individualUpdate["updated_id"] = $user;
+                    $individualUpdate["updated_at"] = $updatedAt;
+
+                    if ($originalMtag !== "" && $mtag !== "" && $mtag !== $originalMtag) {
+                        $oldIndividual = DB::connection("mysql3")
+                            ->table("seedling_individuals")
+                            ->where("id", $individualId)
+                            ->first();
+
+                        if ($oldIndividual) {
+                            $newIndividual = (array) $oldIndividual;
+                            unset($newIndividual["id"]);
+                            $newIndividual = array_merge($newIndividual, $individualUpdate, [
+                                "mtag" => $mtag,
+                                "merge_to" => null,
+                                "deleted_at" => null,
+                                "updated_id" => $user,
+                                "updated_at" => $updatedAt,
+                            ]);
+
+                            $existingNewIndividual = DB::connection("mysql3")
+                                ->table("seedling_individuals")
+                                ->where("mtag", $mtag)
+                                ->whereNull("deleted_at")
+                                ->first();
+
+                            if ($existingNewIndividual) {
+                                DB::connection("mysql3")
+                                    ->table("seedling_individuals")
+                                    ->where("id", $existingNewIndividual->id)
+                                    ->update($newIndividual);
+                            } else {
+                                DB::connection("mysql3")
+                                    ->table("seedling_individuals")
+                                    ->insert($newIndividual);
+                            }
+
+                            DB::connection("mysql3")
+                                ->table("seedling_individuals")
+                                ->where("id", $individualId)
+                                ->update([
+                                    "deleted_at" => $updatedAt,
+                                    "merge_to" => $mtag,
+                                    "updated_id" => $user,
+                                    "updated_at" => $updatedAt,
+                                ]);
+                        }
+                    } else {
+                        DB::connection("mysql3")
+                            ->table("seedling_individuals")
+                            ->where("id", $individualId)
+                            ->update($individualUpdate);
+                    }
+                }
+
+                $originalTag = strtoupper(trim((string) ($row["original_tag"] ?? "")));
+                if ($tag !== "" && $originalTag !== "" && $tag !== $originalTag) {
+                    DB::connection("mysql3")
+                        ->table("seedling_records")
+                        ->where("tag", $originalTag)
+                        ->update([
+                            "tag" => $tag,
+                            "updated_id" => $user,
+                        ]);
+                }
+            }
+
+            foreach ($masterRows as $row) {
+                if (!is_array($row)) {
+                    continue;
+                }
+
+                $recordId = $row["record_id"] ?? $row["id"] ?? null;
+                if (!$recordId) {
+                    continue;
+                }
+
+                $recordUpdate = $this->onlySeedlingUpdateFields($row, [
+                    "census", "year", "month", "date", "ht", "cotno", "leafno",
+                    "recruit", "status", "note",
+                ]);
+                $recordUpdate["updated_id"] = $user;
+
+                DB::connection("mysql3")
+                    ->table("seedling_records")
+                    ->where("id", $recordId)
+                    ->update($recordUpdate);
+            }
+        });
+
+        return [
+            'result' => 'ok',
+            'tag' => $savedTag,
+            'from' => $from,
+            'datasavenote' => '資料已儲存',
+            'datasavenote_type' => 'success',
+        ];
+    }
+
+    public function deleteupdate(Request $request)
+    {
+        abort_unless((int) ($request->user()?->is_admin ?? 0) === 1, 403);
+
+        $payload = $request->all();
+        $tableType = (string) ($payload["tableType"] ?? "");
+        $rows = $payload["rows"] ?? [];
+        $user = (string) ($payload["user"] ?? $request->user()?->account ?? $request->user()?->name ?? "");
+        $deletedAt = now()->toDateTimeString();
+
+        if (!in_array($tableType, ["work", "identity", "records", "all"], true) || !is_array($rows)) {
+            return [
+                "result" => "error",
+                "datasavenote" => "刪除資料格式錯誤。",
+                "datasavenote_type" => "error",
+            ];
+        }
+
+        $workRows = $tableType === "all" ? ($payload["workRows"] ?? []) : ($tableType === "work" ? $rows : []);
+        $identityRows = $tableType === "all" ? ($payload["identityRows"] ?? []) : ($tableType === "identity" ? $rows : []);
+        $recordRows = $tableType === "all" ? ($payload["masterRows"] ?? []) : ($tableType === "records" ? $rows : []);
+
+        if (!is_array($workRows) || !is_array($identityRows) || !is_array($recordRows)) {
+            return [
+                "result" => "error",
+                "datasavenote" => "刪除資料格式錯誤。",
+                "datasavenote_type" => "error",
+            ];
+        }
+
+        $deletedCount = 0;
+
+        DB::connection("mysql3")->transaction(function () use ($workRows, $identityRows, $recordRows, $user, $deletedAt, &$deletedCount) {
+            $workIds = collect($workRows)
+                ->map(fn ($row) => $row["work_id"] ?? $row["id"] ?? null)
+                ->filter()
+                ->unique()
+                ->values()
+                ->all();
+
+            if (!empty($workIds)) {
+                $deletedCount += DB::connection("mysql3")
+                    ->table("slrecord1")
+                    ->whereIn("id", $workIds)
+                    ->delete();
+            }
+
+            $stemIds = collect($identityRows)
+                ->map(fn ($row) => $row["stem_id"] ?? $row["id"] ?? null)
+                ->filter()
+                ->unique()
+                ->values()
+                ->all();
+            $individualIds = collect($identityRows)
+                ->map(fn ($row) => $row["individual_id"] ?? null)
+                ->filter()
+                ->unique()
+                ->values()
+                ->all();
+
+            if (!empty($stemIds)) {
+                $deletedCount += DB::connection("mysql3")
+                    ->table("seedling_stems")
+                    ->whereIn("id", $stemIds)
+                    ->update([
+                        "deleted_at" => $deletedAt,
+                        "updated_id" => $user,
+                    ]);
+            }
+
+            if (!empty($individualIds)) {
+                $deletedCount += DB::connection("mysql3")
+                    ->table("seedling_individuals")
+                    ->whereIn("id", $individualIds)
+                    ->update([
+                        "deleted_at" => $deletedAt,
+                        "updated_id" => $user,
+                    ]);
+            }
+
+            $recordIds = collect($recordRows)
+                ->map(fn ($row) => $row["record_id"] ?? $row["id"] ?? null)
+                ->filter()
+                ->unique()
+                ->values()
+                ->all();
+
+            if (!empty($recordIds)) {
+                $deletedCount += DB::connection("mysql3")
+                    ->table("seedling_records")
+                    ->whereIn("id", $recordIds)
+                    ->update([
+                        "deleted_at" => $deletedAt,
+                        "updated_id" => $user,
+                    ]);
+            }
+        });
+
+        return [
+            "result" => "ok",
+            "tag" => $payload["tag"] ?? null,
+            "from" => $payload["from"] ?? null,
+            "datasavenote" => $deletedCount > 0 ? "已刪除此筆資料" : "沒有可刪除資料。",
+            "datasavenote_type" => $deletedCount > 0 ? "success" : "error",
+        ];
+    }
+
+    private function seedlingBranchFromTag(string $tag): int
+    {
+        $parts = explode(".", $tag);
+
+        return isset($parts[1]) ? (int) $parts[1] : 0;
+    }
+
+    private function seedlingUpdateDuplicateNumberNote(array $identityRows): string
+    {
+        foreach ($identityRows as $row) {
+            if (!is_array($row)) {
+                continue;
+            }
+
+            $tag = strtoupper(trim((string) ($row["tag"] ?? "")));
+            $mtag = trim((string) ($row["mtag"] ?? ""));
+            $originalTag = strtoupper(trim((string) ($row["original_tag"] ?? "")));
+            $originalMtag = trim((string) ($row["original_mtag"] ?? ""));
+            $isSprout = strtoupper(trim((string) ($row["sprout"] ?? ""))) === "TRUE";
+
+            if ($mtag !== "" && $mtag !== $originalMtag && ($tag === "" || $tag === $originalTag)) {
+                $tag = $originalMtag !== "" && str_starts_with($originalTag, $originalMtag)
+                    ? $mtag . substr($originalTag, strlen($originalMtag))
+                    : $mtag;
+            }
+            if ($tag !== "" && ($mtag === "" || ($tag !== $originalTag && $mtag === $originalMtag))) {
+                $mtag = explode(".", $tag)[0];
+            }
+
+            if (str_contains($tag, ".") && !$isSprout) {
+                return "tag {$tag} 為分支編號，萌櫱需為 TRUE。";
+            }
+
+            if ($isSprout) {
+                if ($mtag === "") {
+                    return "萌櫱資料需填寫 mtag，請確認後再儲存。";
+                }
+
+                $hasParentMtag = DB::connection("mysql3")
+                    ->table("seedling_individuals")
+                    ->where("mtag", $mtag)
+                    ->whereNull("deleted_at")
+                    ->exists();
+
+                if (!$hasParentMtag) {
+                    return "萌櫱 mtag {$mtag} 不存在於 seedling_individuals，請先確認主幹編號。";
+                }
+            }
+
+            $individualId = $row["individual_id"] ?? null;
+            if (!$isSprout && $originalMtag !== "" && $mtag !== "" && $mtag !== $originalMtag) {
+                $duplicateMtag = DB::connection("mysql3")
+                    ->table("seedling_individuals")
+                    ->where("mtag", $mtag)
+                    ->whereNull("deleted_at")
+                    ->when($individualId, fn ($query) => $query->where("id", "!=", $individualId))
+                    ->exists();
+
+                if ($duplicateMtag) {
+                    return "mtag {$mtag} 已存在，請先確認資料檢視中沒有重號。";
+                }
+            }
+
+            $stemId = $row["stem_id"] ?? null;
+            if ($originalTag !== "" && $tag !== "" && $tag !== $originalTag) {
+                $duplicateTag = DB::connection("mysql3")
+                    ->table("seedling_stems")
+                    ->where("tag", $tag)
+                    ->whereNull("deleted_at")
+                    ->when($stemId, fn ($query) => $query->where("id", "!=", $stemId))
+                    ->exists();
+
+                if ($duplicateTag) {
+                    return "tag {$tag} 已存在，請先確認資料檢視中沒有重號。";
+                }
+            }
+        }
+
+        return "";
+    }
+
+    private function onlySeedlingUpdateFields(array $row, array $allowed): array
+    {
+        $update = [];
+
+        foreach ($allowed as $field) {
+            if (!array_key_exists($field, $row)) {
+                continue;
+            }
+
+            $value = $row[$field];
+            if (is_string($value)) {
+                $value = trim($value);
+            }
+            if (in_array($field, ['note', 'alternote', 'recruit', 'status', 'sprout', 'csp', 'tag', 'mtag'], true) && $value === null) {
+                $value = '';
+            }
+            if ($field === 'date' && ($value === '' || $value === null)) {
+                $value = '0000-00-00';
+            }
+
+            $update[$field] = $value;
+        }
+
+        return $update;
     }
 
     //小苗資料儲存
@@ -567,7 +1043,7 @@ class SeedlingSaveController extends Controller
     public function saveslroll(Request $request, $entry, $trap)
     {
         // $test='';
-        $user = $request->user();
+        $user = $this->actorAccount($request);
 
         $tableroll = $this->getTableInstanceRoll($entry);
         $tablecov = $this->getTableInstanceCov($entry);
@@ -616,7 +1092,7 @@ class SeedlingSaveController extends Controller
 
                 if ($uplist != []) {  //有資料要存
                     // $list=$data[$i]['tag'];
-                    $uplist['updated_id'] = $user->name;
+                    $uplist['updated_id'] = $user;
 
                     $tableroll::where('id', 'like', $slrollnew[$i]['id'])->update($uplist);
 
@@ -649,7 +1125,7 @@ class SeedlingSaveController extends Controller
 
                 $insertkey = $insertkey . 'updated_id';
                 $insertvalue = $insertvalue . "'" . $user . "'";
-                $insert2['updated_id'] = $user->name;
+                $insert2['updated_id'] = $user;
 
 
                 $tableroll::insert($insert2);
@@ -736,8 +1212,8 @@ class SeedlingSaveController extends Controller
         $entry = $data_all['entry'];
         $thispage = $data_all['thispage'];
         $authUser = $request->user();
-        $user = $authUser?->name
-            ?? $authUser?->account
+        $user = $authUser?->account
+            ?? $authUser?->name
             ?? ($authUser?->id ? (string) $authUser->id : null)
             ?? ($data_all['user'] ?? '');
         $datasavenote = '';
@@ -817,7 +1293,7 @@ class SeedlingSaveController extends Controller
             'entry' => $entry,
             'thispage' => $thispage,
             'method' => $request->method(),
-            'user' => $request->user()?->name,
+            'user' => $request->user()?->account ?? $request->user()?->name,
         ]);
 
         $table = $this->getTableInstance($entry);

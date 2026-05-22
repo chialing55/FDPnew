@@ -44,8 +44,16 @@
             </div>
         @elseif($census > $census2)
             <div class='text_box keepenter'>
-                <b>輸入第 {{ $census2 }} 次 ({{ $census2date['date'] }}) 資料</b> <button type='submit'
-                    wire:click='direntry({{ $census2 }})' style='margin-left: 20px;'>輸入</button>
+                <b>輸入第 {{ $census2 }} 次 ({{ $census2date['date'] }}) 資料</b>
+                <button type='submit' wire:click='direntry({{ $census2 }})' style='margin-left: 20px;'>輸入</button>
+                @if ($isAdmin)
+                    <button type='button' wire:click='skipCurrentCensus'
+                        onclick="return confirm('確定要略過第 {{ $census2 }} 次調查輸入嗎？此動作會將 dateinfo.status 設為 skipped。');"
+                        style='margin-left: 10px;'>略過此周輸入</button>
+                @endif
+                @if ($skipnote !== '')
+                    <span class='savenote' style='margin-left: 10px;'>{{ $skipnote }}</span>
+                @endif
             </div>
         @endif
     @else
@@ -61,6 +69,7 @@
                     <th>census</th>
                     <th>date</th>
                     <th>workers</th>
+                    <th>status</th>
                 </tr>
             </thead>
             <tbody>
@@ -69,6 +78,7 @@
                         <td>{{ $info['census'] }}</td>
                         <td>{{ $info['date'] }}</td>
                         <td>{{ $info['workers'] }}</td>
+                        <td>{{ $info['status'] ?? '' }}</td>
 
                     </tr>
                 @endforeach

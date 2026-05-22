@@ -160,8 +160,15 @@ Route::middleware(['auth'])->prefix('admin')->name('admin.')->group(function () 
                 ->defaults('site', 'fushan')
                 ->name('compare');
 
+            // 小苗資料修改
+            Route::get('/update', [SeedlingController::class, 'update'])
+                ->middleware('admin')
+                ->defaults('site', 'fushan')
+                ->name('update');
+
             // 舊：/admin/fushan/seedling/import
             Route::get('/import', [SeedlingController::class, 'import'])
+                ->middleware('admin')
                 ->defaults('site', 'fushan')
                 ->name('import');
 
@@ -221,6 +228,7 @@ Route::middleware(['auth'])->prefix('admin')->name('admin.')->group(function () 
                 ->name('compare');
 
             Route::get('/import', [MortalityController::class, 'import'])
+                ->middleware('admin')
                 ->defaults('site', 'fushan')
                 ->name('import');
 
@@ -598,6 +606,14 @@ Route::middleware(['auth'])->prefix('admin')->name('admin.')->group(function () 
         // 舊：POST /fsseedling/savedata
         Route::post('/data', [SeedlingSaveController::class, 'savedata'])
             ->name('data.save');
+
+        Route::post('/update-data', [SeedlingSaveController::class, 'saveupdate'])
+            ->middleware('admin')
+            ->name('update-data');
+
+        Route::post('/update-data/delete', [SeedlingSaveController::class, 'deleteupdate'])
+            ->middleware('admin')
+            ->name('update-data.delete');
 
         // 舊：POST /fsseedling/saverecruit
         Route::post('/recruit', [SeedlingSaveController::class, 'saverecruit'])

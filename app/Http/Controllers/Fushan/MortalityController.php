@@ -41,7 +41,7 @@ class MortalityController extends Controller
         return view('pages/fushan/mortality_doc', [
             'site' => $site,
             'project' => '死亡率調查',
-            'user' => $user->name,
+            'user' => $user->account ?? $user->name,
         ]);
     }
 
@@ -53,7 +53,7 @@ class MortalityController extends Controller
         return view('pages/fushan/mortality_note', [
             'site' => $site,
             'project' => '死亡率調查',
-            'user' => $user->name,
+            'user' => $user->account ?? $user->name,
         ]);
     }
 
@@ -67,7 +67,7 @@ class MortalityController extends Controller
         return view('pages/fushan/mortality_entry', [
             'site' => $site,
             'project' => '死亡率調查',
-            'user' => $user->name,
+            'user' => $user->account ?? $user->name,
             'entry' => $entry,
             ...$entryContext,
         ]);
@@ -84,7 +84,7 @@ class MortalityController extends Controller
         return view('pages/fushan/mortality_census', [
             'site' => $site,
             'project' => '死亡率調查',
-            'user' => $user->name,
+            'user' => $user->account ?? $user->name,
             'censuses' => $censuses,
         ]);
     }
@@ -199,7 +199,7 @@ class MortalityController extends Controller
         return view('pages/fushan/mortality_survey_import', [
             'site' => $site,
             'project' => '死亡率調查',
-            'user' => $user->name,
+            'user' => $user->account ?? $user->name,
             ...$surveyImportContext,
         ]);
     }
@@ -700,7 +700,7 @@ class MortalityController extends Controller
         return view('pages/fushan/mortality_compare', [
             'site' => $site,
             'project' => '死亡率調查',
-            'user' => $user->name,
+            'user' => $user->account ?? $user->name,
         ]);
     }
 
@@ -714,7 +714,7 @@ class MortalityController extends Controller
         return view('pages/fushan/mortality_import', [
             'site' => $site,
             'project' => '死亡率調查',
-            'user' => $user->name,
+            'user' => $user->account ?? $user->name,
         ]);
     }
 
@@ -726,7 +726,7 @@ class MortalityController extends Controller
         return view('pages/fushan/mortality_dataviewer', [
             'site' => $site,
             'project' => '死亡率調查',
-            'user' => $user->name,
+            'user' => $user->account ?? $user->name,
         ]);
     }
 
@@ -796,7 +796,7 @@ class MortalityController extends Controller
         return view('pages/fushan/mortality_process', [
             'site' => $site,
             'project' => '死亡率調查',
-            'user' => $user->name,
+            'user' => $user->account ?? $user->name,
             'basicProcessed' => $basicProcessed,
             'peopleProcessed' => $peopleProcessed,
             'commentsRemaining' => $commentsRemaining,
@@ -1299,7 +1299,7 @@ class MortalityController extends Controller
         ]);
 
         $census = (int) $validated['census'];
-        $userName = (string) ($request->user()?->name ?? '');
+        $userName = (string) ($request->user()?->account ?? $request->user()?->name ?? '');
 
         $censusAlreadyImported = CensusRecord::query()
             ->where('census', $census)
@@ -1612,7 +1612,7 @@ class MortalityController extends Controller
         return view('pages/fushan/mortality_comment_review', [
             'site' => $site,
             'project' => '死亡率調查',
-            'user' => $user->name,
+            'user' => $user->account ?? $user->name,
             'records' => $records,
             'remainingCount' => $remainingCount,
             'commentOptions' => $commentOptions,
@@ -1744,7 +1744,7 @@ class MortalityController extends Controller
         return view('pages/fushan/mortality_comment_other_review', [
             'site' => $site,
             'project' => '死亡率調查',
-            'user' => $user->name,
+            'user' => $user->account ?? $user->name,
             'records' => $records,
             'remainingCount' => $remainingCount,
             'commentOptions' => $commentOptions,

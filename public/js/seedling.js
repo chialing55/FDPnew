@@ -59,6 +59,12 @@ const seedlingPage = (window.seedlingPage = window.seedlingPage || {
         alterDeleteBase:
             seedlingRoutes.alterDeleteBase ||
             `${seedlingRoutes.base || "/admin/fushan/seedling"}/alter`,
+        updateData:
+            seedlingRoutes.updateData ||
+            `${seedlingRoutes.base || "/admin/fushan/seedling"}/update-data`,
+        updateDataDelete:
+            seedlingRoutes.updateDataDelete ||
+            `${seedlingRoutes.base || "/admin/fushan/seedling"}/update-data/delete`,
     },
     context: {
         entry: resolveSeedlingEntry(),
@@ -89,6 +95,8 @@ const seedlingPage = (window.seedlingPage = window.seedlingPage || {
             dataDelete: this.routes.dataDeleteBase,
             alternote: this.routes.alternoteBase,
             alterDelete: this.routes.alterDeleteBase,
+            updateData: this.routes.updateData,
+            updateDataDelete: this.routes.updateDataDelete,
         };
         const base = routeMap[name];
 
@@ -337,7 +345,7 @@ $(".listlink")
 
 // 使用
 handleHoverEvents(".list4", ".list4inner");
-// handleHoverEvents('.list6', '.list6inner');
+handleHoverEvents(".list3", ".list3inner");
 
 document.addEventListener("livewire:init", () => {
     if (window.__boundSeedlingEvents) return;
@@ -466,6 +474,16 @@ function cellfunction(tableType, container, row, col, prop) {
         }
         return cellProperties;
     }
+
+    if (tableType == "seedlingUpdate") {
+        const source = container.handsontable("getSourceDataAtRow", row) || {};
+        if (source.source === "master" && prop === "tag") {
+            cellProperties.readOnly = true;
+            cellProperties.className = ` seedling-readonly-cell`.trim();
+        }
+    }
+
+    return cellProperties;
 }
 
 function reloadSeedlingDataTable(data, thispage, pps, maxid, forceRebuild = false) {
@@ -1346,3 +1364,470 @@ function finish(entry) {
     }
     makeAjaxRequest(saveUrl, ajaxData, ajaxType, handleSuccess, function () {});
 }
+
+// 後端資料修改：特殊修改與個別 tag 共用同一組 Handsontable。
+function buildSeedlingUpdateColumns(csplist) {
+    return [
+        { data: "census", type: "numeric", allowInvalid: false },
+        { data: "year", type: "numeric", allowInvalid: false },
+        { data: "month", type: "numeric", allowInvalid: false },
+        { data: "date", dateFormat: "YYYY-MM-DD", type: "date", allowInvalid: false },
+        { data: "trap", type: "numeric", allowInvalid: false },
+        { data: "plot", type: "numeric", allowInvalid: false },
+        { data: "tag" },
+        { data: "mtag" },
+        {
+            data: "csp",
+            type: "autocomplete",
+            source: csplist || [],
+            strict: false,
+            visibleRows: 10,
+        },
+        { data: "ht", type: "numeric", allowInvalid: false },
+        { data: "cotno", type: "numeric", allowInvalid: false },
+        { data: "leafno", type: "numeric", allowInvalid: false },
+        { data: "ind", type: "numeric", allowInvalid: false },
+        { data: "recruit" },
+        {
+            data: "status",
+            type: "dropdown",
+            source: ["A", "G", "D", "N", ""],
+            allowInvalid: false,
+        },
+        {
+            data: "sprout",
+            type: "dropdown",
+            source: ["TRUE", "FALSE"],
+            allowInvalid: false,
+        },
+        { data: "x", type: "numeric", allowInvalid: false },
+        { data: "y", type: "numeric", allowInvalid: false },
+        { data: "note" },
+        { data: "alternote" },
+        { data: "delete_action", renderer: "html", readOnly: true },
+        { data: "source" },
+        { data: "work_id" },
+        { data: "record_id" },
+        { data: "individual_id" },
+        { data: "stem_id" },
+        { data: "original_tag" },
+        { data: "original_mtag" },
+    ];
+}
+
+function seedlingUpdateTable(container, rows, csplist, fitToRows = false, tableShape = "work") {
+    const existing = container.data("handsontable");
+    if (existing && typeof existing.destroy === "function") {
+        existing.destroy();
+        container.removeData("handsontable");
+    }
+    container.empty();
+    container.css({
+        minHeight: "0",
+        width: "100%",
+    });
+
+    const tableRows = Array.isArray(rows) ? rows : [];
+    if (tableRows.length === 0) {
+        container.html("<div class='tablenote'>沒有資料</div>");
+        return null;
+    }
+
+    let columns = buildSeedlingUpdateColumns(csplist);
+    let colHeaders = [
+        "census",
+        "year",
+        "month",
+        "date",
+        "trap",
+        "plot",
+        "tag",
+        "mtag",
+        "種類",
+        "長度",
+        "子葉",
+        "真葉",
+        "ind",
+        "新舊",
+        "狀態",
+        "萌櫱",
+        "X",
+        "Y",
+        "Note",
+        "特殊修改",
+        "",
+    ];
+    let colWidths = [
+        60, 55, 50, 115, 45, 45, 100, 100, 120, 50, 50, 50, 45, 45, 45, 90, 40, 40, 180, 220, 45,
+    ];
+    let hiddenColumns = { columns: [12, 21, 22, 23, 24, 25, 26, 27] };
+
+    if (tableShape === "identity") {
+        columns = [
+            { data: "trap", type: "numeric", allowInvalid: false },
+            { data: "plot", type: "numeric", allowInvalid: false },
+            { data: "tag" },
+            { data: "mtag" },
+            { data: "csp", type: "autocomplete", source: csplist || [], strict: false, visibleRows: 10 },
+            { data: "sprout", type: "dropdown", source: ["TRUE", "FALSE"], allowInvalid: false },
+            { data: "x", type: "numeric", allowInvalid: false },
+            { data: "y", type: "numeric", allowInvalid: false },
+            { data: "source" },
+            { data: "work_id" },
+            { data: "record_id" },
+            { data: "individual_id" },
+            { data: "stem_id" },
+            { data: "original_tag" },
+            { data: "original_mtag" },
+        ];
+        colHeaders = ["trap", "plot", "tag", "mtag", "種類", "萌櫱", "X", "Y"];
+        colWidths = [55, 55, 120, 120, 140, 100, 50, 50];
+        hiddenColumns = { columns: [8, 9, 10, 11, 12, 13, 14] };
+    } else if (tableShape === "records") {
+        columns = [
+            { data: "census", type: "numeric", allowInvalid: false },
+            { data: "year", type: "numeric", allowInvalid: false },
+            { data: "month", type: "numeric", allowInvalid: false },
+            { data: "date", dateFormat: "YYYY-MM-DD", type: "date", allowInvalid: false },
+            { data: "tag", readOnly: true },
+            { data: "ht", type: "numeric", allowInvalid: false },
+            { data: "cotno", type: "numeric", allowInvalid: false },
+            { data: "leafno", type: "numeric", allowInvalid: false },
+            { data: "recruit" },
+            { data: "status", type: "dropdown", source: ["A", "G", "D", "N", ""], allowInvalid: false },
+            { data: "note" },
+            { data: "delete_action", renderer: "html", readOnly: true },
+            { data: "source" },
+            { data: "work_id" },
+            { data: "record_id" },
+            { data: "individual_id" },
+            { data: "stem_id" },
+            { data: "original_tag" },
+            { data: "original_mtag" },
+        ];
+        colHeaders = ["census", "year", "month", "date", "tag", "長度", "子葉", "真葉", "新舊", "狀態", "Note", ""];
+        colWidths = [60, 55, 55, 115, 120, 60, 55, 55, 55, 55, 260, 45];
+        hiddenColumns = { columns: [12, 13, 14, 15, 16, 17, 18] };
+    }
+
+    if (tableShape === "work") {
+        tableRows.forEach((row) => {
+            row.delete_action = "<button type=\"button\" class=\"seedling-update-row-delete\" data-delete-table=\"work\">X<\/button>";
+        });
+    } else if (tableShape === "records") {
+        tableRows.forEach((row, rowIndex) => {
+            row.delete_action = rowIndex === 0
+                ? ""
+                : "<button type=\"button\" class=\"seedling-update-row-delete\" data-delete-table=\"records\">X<\/button>";
+        });
+    }
+
+    const visibleHiddenColumns = Array.isArray(hiddenColumns?.columns) ? hiddenColumns.columns : [];
+    const tableWidth = 40 + colWidths.reduce((total, width, index) => (visibleHiddenColumns.includes(index) ? total : total + width), 0);
+    const rowHeight = 35;
+    const fullTableHeight = 44 + (tableRows.length * rowHeight);
+    const tableHeight = fitToRows
+        ? Math.max(90, fullTableHeight)
+        : Math.max(90, Math.min(360, fullTableHeight));
+    container.toggleClass("seedling-update-fit-table", fitToRows);
+    container.css({
+        height: fitToRows ? "auto" : tableHeight + "px",
+        minWidth: tableWidth + "px",
+        width: tableWidth + "px",
+        overflow: "visible",
+    });
+
+    const handsontable = createHandsontable(
+        container,
+        columns,
+        tableRows,
+        "__seedlingUpdateNoAutoSave",
+        seedlingPage.route("updateData"),
+        "seedlingUpdate",
+        colWidths,
+        hiddenColumns,
+        colHeaders,
+        1,
+    );
+
+    const refreshTable = () => {
+        if (!handsontable) return;
+        if (typeof handsontable.updateSettings === "function") {
+            const settings = {
+                width: tableWidth,
+                minSpareRows: 0,
+                renderAllRows: fitToRows,
+                viewportRowRenderingOffset: fitToRows ? tableRows.length : undefined,
+            };
+            if (fitToRows) {
+                settings.height = "auto";
+            } else {
+                settings.height = tableHeight;
+            }
+            handsontable.updateSettings(settings);
+        }
+        if (typeof handsontable.refreshDimensions === "function") {
+            handsontable.refreshDimensions();
+        }
+        if (typeof handsontable.render === "function") {
+            handsontable.render();
+        }
+    };
+
+    requestAnimationFrame(() => {
+        refreshTable();
+        setTimeout(refreshTable, 80);
+    });
+
+    return handsontable;
+}
+
+function deleteSeedlingUpdateRows(tableType, payload, tag, from) {
+    const hasRows = tableType === 'all'
+        ? ['workRows', 'identityRows', 'masterRows'].some((key) => Array.isArray(payload?.[key]) && payload[key].length > 0)
+        : Array.isArray(payload) && payload.length > 0;
+
+    if (!hasRows) {
+        seedlingPage.setNote('.seedlingupdatesavenote', '沒有可刪除資料。', 'error');
+        return;
+    }
+
+    if (!window.confirm('確定要刪除此筆資料？')) {
+        return;
+    }
+
+    const requestPayload = {
+        tableType,
+        tag,
+        from,
+        user: seedlingPage.context.user,
+    };
+
+    if (tableType === 'all') {
+        Object.assign(requestPayload, payload);
+    } else {
+        requestPayload.rows = payload;
+    }
+
+    seedlingPage.clearNotes();
+    makeAjaxRequest(
+        seedlingPage.route('updateDataDelete'),
+        requestPayload,
+        'POST',
+        function (res) {
+            seedlingPage.setNote('.seedlingupdatesavenote', res.datasavenote || '已刪除此筆資料', res.datasavenote_type || 'success');
+            if (window.Livewire) {
+                Livewire.dispatch('seedlingUpdateSaved', {
+                    data: { tag: res.tag || tag, from, note: res.datasavenote || "已刪除此筆資料", noteType: res.datasavenote_type || "success" },
+                });
+            }
+        },
+        function (err) {
+            const detail = err?.response?.datasavenote || err?.error || '刪除失敗';
+            seedlingPage.setNote('.seedlingupdatesavenote', detail, 'error');
+        },
+    );
+}
+
+
+function seedlingUpdateSortValue(value) {
+    const numberValue = Number(value);
+    return Number.isNaN(numberValue) ? 0 : numberValue;
+}
+
+function sortSeedlingUpdateRecords(masterContainer, csplist, sortKey) {
+    const masterHot = masterContainer.data("handsontable");
+    const rows = masterHot ? masterHot.getSourceData() : [];
+    const sortedRows = [...rows].sort((a, b) => {
+        if (sortKey === "tag") {
+            const tagCompare = `${a.tag ?? ""}`.localeCompare(`${b.tag ?? ""}`, undefined, {
+                numeric: true,
+                sensitivity: "base",
+            });
+            if (tagCompare !== 0) return tagCompare;
+        }
+
+        const censusCompare = seedlingUpdateSortValue(a.census) - seedlingUpdateSortValue(b.census);
+        if (censusCompare !== 0) return censusCompare;
+
+        return `${a.date ?? ""}`.localeCompare(`${b.date ?? ""}`);
+    });
+
+    seedlingUpdateTable(masterContainer, sortedRows, csplist, true, "records");
+}
+
+function renderSeedlingUpdateTables(tag, workRows, identityRows, masterRows, csplist, from) {
+    const workContainer = $("#seedlingUpdateWorkTable");
+    const identityContainer = jQuery("#seedlingUpdateIdentityTable");
+    const masterContainer = jQuery("#seedlingUpdateMasterTable");
+
+    if (!workContainer.length || !identityContainer.length || !masterContainer.length) {
+        return false;
+    }
+
+    seedlingUpdateTable(workContainer, workRows, csplist, true);
+    seedlingUpdateTable(identityContainer, identityRows, csplist, true, "identity");
+    seedlingUpdateTable(masterContainer, masterRows, csplist, true, "records");
+
+    $("button[name=seedlingUpdateSortTag]")
+        .off("click.seedlingUpdateSort")
+        .on("click.seedlingUpdateSort", function () {
+            sortSeedlingUpdateRecords(masterContainer, csplist, "tag");
+        });
+
+    $("button[name=seedlingUpdateSortCensus]")
+        .off("click.seedlingUpdateSort")
+        .on("click.seedlingUpdateSort", function () {
+            sortSeedlingUpdateRecords(masterContainer, csplist, "census");
+        });
+
+    const saveButton = $("button[name=seedlingUpdateSave]");
+    saveButton.off("click.seedlingUpdateSave").on("click.seedlingUpdateSave", function () {
+        seedlingPage.clearNotes();
+        const workHot = workContainer.data("handsontable");
+        const identityHot = identityContainer.data("handsontable");
+        const masterHot = masterContainer.data("handsontable");
+
+        makeAjaxRequest(
+            seedlingPage.route("updateData"),
+            {
+                tag,
+                from,
+                user: seedlingPage.context.user,
+                workRows: workHot ? workHot.getSourceData() : [],
+                identityRows: identityHot ? identityHot.getSourceData() : [],
+                masterRows: masterHot ? masterHot.getSourceData() : [],
+            },
+            "POST",
+            function (res) {
+                seedlingPage.setNote(".seedlingupdatesavenote", res.datasavenote || "資料已儲存", res.datasavenote_type || "success");
+                if (window.Livewire) {
+                    Livewire.dispatch("seedlingUpdateSaved", {
+                        data: { tag: res.tag || tag, from: res.from || from, note: res.datasavenote || "資料已儲存", noteType: res.datasavenote_type || "success" },
+                    });
+                }
+            },
+            function (err) {
+                const detail = err?.response?.datasavenote || err?.error || "儲存失敗";
+                seedlingPage.setNote(".seedlingupdatesavenote", detail, "error");
+            },
+        );
+    });
+
+    $("button[name=seedlingUpdateDeleteAll]")
+        .off("click.seedlingUpdateDelete")
+        .on("click.seedlingUpdateDelete", function () {
+            const workHot = workContainer.data("handsontable");
+            const identityHot = identityContainer.data("handsontable");
+            const masterHot = masterContainer.data("handsontable");
+            deleteSeedlingUpdateRows("all", {
+                workRows: workHot ? workHot.getSourceData() : [],
+                identityRows: identityHot ? identityHot.getSourceData() : [],
+                masterRows: masterHot ? masterHot.getSourceData() : [],
+            }, tag, from);
+        });
+
+
+    workContainer.add(masterContainer)
+        .off("click.seedlingUpdateRowDelete")
+        .on("click.seedlingUpdateRowDelete", ".seedling-update-row-delete", function (event) {
+            event.preventDefault();
+            const button = $(this);
+            const tableType = button.data("delete-table");
+            const tableContainer = tableType === "work" ? workContainer : masterContainer;
+            const hot = tableContainer.data("handsontable");
+            if (!hot) return;
+
+            const selectedCell = hot.getCoords(button.closest("td")[0]);
+            const rowIndex = selectedCell ? selectedCell.row : -1;
+            if (tableType === "records" && rowIndex === 0) {
+                seedlingPage.setNote(".seedlingupdatesavenote", "seedling_records 第一筆資料不可單筆刪除，若需刪除請使用刪除全部資料。", "error");
+                return;
+            }
+
+            const row = rowIndex >= 0 ? hot.getSourceDataAtRow(rowIndex) : null;
+            if (!row) {
+                seedlingPage.setNote(".seedlingupdatesavenote", "沒有可刪除資料。", "error");
+                return;
+            }
+
+            deleteSeedlingUpdateRows(tableType, [row], tag, from);
+        });
+
+    return true;
+}
+
+function renderSeedlingUpdateTablesFromDom() {
+    const payloadElement = document.getElementById("seedlingUpdatePayload");
+    if (!payloadElement) {
+        return false;
+    }
+
+    let payload = null;
+    try {
+        payload = JSON.parse(payloadElement.textContent || "{}");
+    } catch (error) {
+        console.error("seedling update payload parse failed", error);
+        return false;
+    }
+
+    if (!payload || !payload.tag) {
+        return false;
+    }
+
+    return renderSeedlingUpdateTables(
+        payload.tag,
+        payload.workRows || [],
+        payload.identityRows || [],
+        payload.masterRows || [],
+        payload.csplist || [],
+        payload.from || "",
+    );
+}
+
+let seedlingUpdateRenderTimers = [];
+
+function scheduleSeedlingUpdateRender(payload = null) {
+    seedlingUpdateRenderTimers.forEach((timer) => clearTimeout(timer));
+    seedlingUpdateRenderTimers = [];
+
+    const render = () => {
+        if (payload) {
+            const rendered = renderSeedlingUpdateTables(
+                payload.tag,
+                payload.workRows || [],
+                payload.identityRows || [],
+                payload.masterRows || [],
+                payload.csplist || [],
+                payload.from || "",
+            );
+            if (rendered) return true;
+        }
+
+        return renderSeedlingUpdateTablesFromDom();
+    };
+
+    const firstDelay = payload ? 0 : 40;
+    seedlingUpdateRenderTimers.push(setTimeout(() => {
+        if (render()) return;
+
+        seedlingUpdateRenderTimers.push(setTimeout(render, 80));
+    }, firstDelay));
+}
+
+window.renderSeedlingUpdateTablesFromDom = renderSeedlingUpdateTablesFromDom;
+
+document.addEventListener("livewire:init", () => {
+    if (window.__boundSeedlingUpdateEvents) return;
+    window.__boundSeedlingUpdateEvents = true;
+
+    Livewire.on("seedling-update-data", ({ tag, workRows, identityRows, masterRows, csplist, from }) => {
+        scheduleSeedlingUpdateRender({ tag, workRows, identityRows, masterRows, csplist, from });
+    });
+
+    scheduleSeedlingUpdateRender();
+});
+
+document.addEventListener("DOMContentLoaded", () => {
+    scheduleSeedlingUpdateRender();
+});

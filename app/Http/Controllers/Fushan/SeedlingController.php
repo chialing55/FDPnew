@@ -283,7 +283,7 @@ class SeedlingController extends Controller
         return view('pages/fushan/seedling_doc', [
             'site' => $site,
             'project' => '小苗',
-            'user' => $user->name,
+            'user' => $user->account ?? $user->name,
             // 'maxcensus' => $maxCensus,
             'census' => $census,
             // 'entry1note' => $entry1note,
@@ -313,7 +313,7 @@ class SeedlingController extends Controller
         return view('pages/fushan/seedling_entry', [
             'site' => $site,
             'project' => '小苗',
-            'user' => $user->name,
+            'user' => $user->account ?? $user->name,
             'entry' => $entry,
             'census' => $census,
 
@@ -332,9 +332,25 @@ class SeedlingController extends Controller
         return view('pages/fushan/seedling_compare', [
             'site' => $site,
             'project' => '小苗',
-            'user' => $user->name,
+            'user' => $user->account ?? $user->name,
             'census' => $census,
 
+        ]);
+    }
+
+    public function update(Request $request)
+    {
+        $user = $request->user();
+        $site = $request->route("site");
+
+        $slrecord = FsSeedlingSlrecord::first();
+        $census = $slrecord["census"];
+
+        return view("pages/fushan/seedling_update", [
+            "site" => $site,
+            "project" => "小苗",
+            "user" => $user->account ?? $user->name,
+            "census" => $census,
         ]);
     }
 
@@ -351,7 +367,7 @@ class SeedlingController extends Controller
         return view('pages/fushan/seedling_import', [
             'site' => $site,
             'project' => '小苗',
-            'user' => $user->name,
+            'user' => $user->account ?? $user->name,
             'census' => $census,
 
         ]);
@@ -367,7 +383,7 @@ class SeedlingController extends Controller
         return view('pages/fushan/seedling_note', [
             'site' => $site,
             'project' => '小苗',
-            'user' => $user->name,
+            'user' => $user->account ?? $user->name,
 
         ]);
     }
@@ -380,7 +396,7 @@ class SeedlingController extends Controller
         return view('pages/fushan/seedling_dataviewer', [
             'site' => $site,
             'project' => '小苗',
-            'user' => $user->name,
+            'user' => $user->account ?? $user->name,
 
         ]);
     }

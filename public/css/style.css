@@ -504,6 +504,14 @@ button:-webkit-details-marker {
   font-size:90%; 
   color:red;
 }
+.savenote.app-feedback-note--success {
+  color: #14532d;
+}
+
+.savenote.app-feedback-note--error {
+  color: #8a2f00;
+}
+
 
 .photocombo{
   margin: 20px 10px;

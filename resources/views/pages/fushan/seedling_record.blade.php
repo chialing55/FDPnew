@@ -197,7 +197,7 @@
                                     <span>{{ $record[$plot[$k]][$i]['csp'] }}</span>
                                     @if (isset($maxb[$record[$plot[$k]][$i]['mtag']]) && $record[$plot[$k]][$i]['sprout'] == 'FALSE')
                                         <span style='font-size: 70%; color: #333333;'>
-                                            ({{ $maxb[$record[$plot[$k]][$i]['tag']] }})</span>
+                                            ({{ $maxb[$record[$plot[$k]][$i]['mtag']] }})</span>
                                     @endif
                                 </div>
                             </td>

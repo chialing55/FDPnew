@@ -52,6 +52,22 @@ class LoginRequest extends FormRequest
             ]);
         }
 
+        $user = Auth::user();
+        if (!$user || !$user->isApproved()) {
+            Auth::guard("web")->logout();
+            $this->session()->invalidate();
+            $this->session()->regenerateToken();
+            RateLimiter::clear($this->throttleKey());
+
+            $message = $user?->isRejected()
+                ? "帳號審核未通過，請洽管理員。"
+                : "帳號尚未通過審核，請等待管理員審核。";
+
+            throw ValidationException::withMessages([
+                "account" => $message,
+            ]);
+        }
+
         RateLimiter::clear($this->throttleKey());
     }
 

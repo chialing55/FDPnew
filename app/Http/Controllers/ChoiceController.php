@@ -13,9 +13,20 @@ class ChoiceController extends Controller
         /** @var \App\Models\User $user */
         $user = Auth::user();
         if (!$user) {
-            return redirect()->route('login'); // 或你的後台登入 route
+            return redirect()->route('login');
         }
 
+        if (!$user->isApproved()) {
+            Auth::guard('web')->logout();
+            $request->session()->invalidate();
+            $request->session()->regenerateToken();
+
+            $message = $user->isRejected()
+                ? '帳號審核未通過，請洽管理員。'
+                : '帳號尚未通過審核，請等待管理員審核。';
+
+            return redirect()->route('login')->with('status', $message);
+        }
         // 1) 研究工作（依權限過濾）
         // dd($user->id, $user->canScope('fushan', 'tree'), config('work'));
 

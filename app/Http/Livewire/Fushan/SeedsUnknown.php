@@ -374,7 +374,7 @@ class SeedsUnknown extends Component
 
     private function userName(): string
     {
-        return $this->user ?: (Auth::user()?->name ?? 'system');
+        return $this->user ?: (Auth::user()?->account ?? Auth::user()?->name ?? 'system');
     }
 
     private function normalizePhotoDate(string $date): string

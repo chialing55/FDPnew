@@ -117,58 +117,100 @@ class SeedlingImport extends Component
         return $date === '' || $date === '0000-00-00' ? null : $date;
     }
 
+    private function nullableValue(array $row, string $key)
+    {
+        $value = $row[$key] ?? null;
+
+        return $value === '' ? null : $value;
+    }
+
     private function syncSeedlingRecord(array $slrecord): void
     {
         $now = date('Y-m-d H:i:s');
         $updatedId = $this->user ?: ($slrecord['updated_id'] ?? null);
-        $isSprout = strtoupper((string) ($slrecord['sprout'] ?? '')) === 'TRUE';
 
-        if (!$isSprout) {
-            DB::connection('mysql3')->table('seedling_individuals')->updateOrInsert(
-                ['mtag' => $slrecord['mtag']],
-                [
+        $individual = DB::connection('mysql3')
+            ->table('seedling_individuals')
+            ->where('mtag', $slrecord['mtag'])
+            ->first();
+
+        if ($individual) {
+            $individualUpdate = [];
+            foreach (['x', 'y'] as $field) {
+                $value = $this->nullableValue($slrecord, $field);
+                if ((string) ($individual->{$field} ?? '') !== (string) ($value ?? '')) {
+                    $individualUpdate[$field] = $value;
+                }
+            }
+
+            if (!empty($individualUpdate)) {
+                $individualUpdate['updated_id'] = $updatedId;
+                $individualUpdate['updated_at'] = $now;
+
+                DB::connection('mysql3')
+                    ->table('seedling_individuals')
+                    ->where('mtag', $slrecord['mtag'])
+                    ->update($individualUpdate);
+            }
+        } else {
+            DB::connection('mysql3')
+                ->table('seedling_individuals')
+                ->insert([
+                    'mtag' => $slrecord['mtag'],
                     'trap' => $slrecord['trap'],
                     'plot' => $slrecord['plot'],
-                    'x' => $slrecord['x'] === '' ? null : $slrecord['x'],
-                    'y' => $slrecord['y'] === '' ? null : $slrecord['y'],
+                    'x' => $this->nullableValue($slrecord, 'x'),
+                    'y' => $this->nullableValue($slrecord, 'y'),
                     'csp' => $slrecord['csp'] ?? null,
                     'updated_id' => $updatedId,
                     'updated_at' => $now,
-                ]
-            );
+                ]);
         }
 
-        DB::connection('mysql3')->table('seedling_stems')->updateOrInsert(
-            ['tag' => $slrecord['tag']],
-            [
-                'mtag' => $slrecord['mtag'],
-                'branch' => $this->branchFromTag((string) $slrecord['tag']),
-                'ind' => $slrecord['ind'] === '' ? null : $slrecord['ind'],
-                'sprout' => $slrecord['sprout'] ?? null,
-                'updated_id' => $updatedId,
-                'updated_at' => $now,
-            ]
-        );
+        $hasStem = DB::connection('mysql3')
+            ->table('seedling_stems')
+            ->where('tag', $slrecord['tag'])
+            ->exists();
 
-        DB::connection('mysql3')->table('seedling_records')->updateOrInsert(
-            [
-                'census' => $slrecord['census'],
-                'tag' => $slrecord['tag'],
-            ],
-            [
-                'year' => $slrecord['year'],
-                'month' => $slrecord['month'],
-                'date' => $this->dateForRecord($slrecord['date'] ?? null),
-                'ht' => $slrecord['ht'] === '' ? null : $slrecord['ht'],
-                'cotno' => $slrecord['cotno'] === '' ? null : $slrecord['cotno'],
-                'leafno' => $slrecord['leafno'] === '' ? null : $slrecord['leafno'],
-                'recruit' => $slrecord['recruit'] ?? null,
-                'status' => $slrecord['status'] ?? null,
-                'note' => $slrecord['note'] ?? null,
-                'updated_id' => $updatedId,
-                'updated_at' => $now,
-            ]
-        );
+        if (!$hasStem) {
+            DB::connection('mysql3')
+                ->table('seedling_stems')
+                ->insert([
+                    'tag' => $slrecord['tag'],
+                    'mtag' => $slrecord['mtag'],
+                    'branch' => $this->branchFromTag((string) $slrecord['tag']),
+                    'ind' => $this->nullableValue($slrecord, 'ind'),
+                    'sprout' => $slrecord['sprout'] ?? null,
+                    'updated_id' => $updatedId,
+                    'updated_at' => $now,
+                ]);
+        }
+
+        $hasRecord = DB::connection('mysql3')
+            ->table('seedling_records')
+            ->where('census', $slrecord['census'])
+            ->where('tag', $slrecord['tag'])
+            ->exists();
+
+        if (!$hasRecord) {
+            DB::connection('mysql3')
+                ->table('seedling_records')
+                ->insert([
+                    'census' => $slrecord['census'],
+                    'tag' => $slrecord['tag'],
+                    'year' => $slrecord['year'],
+                    'month' => $slrecord['month'],
+                    'date' => $this->dateForRecord($slrecord['date'] ?? null),
+                    'ht' => $this->nullableValue($slrecord, 'ht'),
+                    'cotno' => $this->nullableValue($slrecord, 'cotno'),
+                    'leafno' => $this->nullableValue($slrecord, 'leafno'),
+                    'recruit' => $slrecord['recruit'] ?? null,
+                    'status' => $slrecord['status'] ?? null,
+                    'note' => $slrecord['note'] ?? null,
+                    'updated_id' => $updatedId,
+                    'updated_at' => $now,
+                ]);
+        }
     }
 
 
@@ -192,29 +234,31 @@ class SeedlingImport extends Component
         $censusY=$s_slrecord[0]['year'];
         $censusM=str_pad($s_slrecord[0]['month'], 2, '0', STR_PAD_LEFT);
 
-        foreach($s_slrecord as $slrecord){
-            $this->syncSeedlingRecord($slrecord);
-        }
-
-//cov
-        $covkey=Schema::connection('mysql3')->getColumnListing('seedling_cov');
-        $s_slcov=FsSeedlingSlcov1::all()->toArray();
-
-        foreach($s_slcov as $slcov){
-            $add=[];
-            $slcov['id']='0';
-            $slcov['ht']='0';
-
-            for($i=0;$i<count($covkey);$i++){
-                if (is_null($slcov[$covkey[$i]])){$slcov[$covkey[$i]]='';}
-                $add[$covkey[$i]]=$slcov[$covkey[$i]];
+        DB::connection('mysql3')->transaction(function () use ($s_slrecord) {
+            foreach($s_slrecord as $slrecord){
+                $this->syncSeedlingRecord($slrecord);
             }
 
-           $insert=FsSeedlingCov::insert($add);
-        }        
+//cov
+            $covkey=Schema::connection('mysql3')->getColumnListing('seedling_cov');
+            $s_slcov=FsSeedlingSlcov1::all()->toArray();
+
+            foreach($s_slcov as $slcov){
+                $add=[];
+                $slcov['id']='0';
+                $slcov['ht']='0';
+
+                for($i=0;$i<count($covkey);$i++){
+                    if (is_null($slcov[$covkey[$i]] ?? null)){$slcov[$covkey[$i]]='';}
+                    $add[$covkey[$i]]=$slcov[$covkey[$i]];
+                }
+
+               FsSeedlingCov::insert($add);
+            }
+        });
 
 
-        $this->importnote="資料已匯入完成";
+        $this->importnote="資料已匯入完成：小苗資料已寫入 seedling_individuals、seedling_stems、seedling_records；覆蓋度資料已寫入 seedling_cov。";
         $this->slmaxcensus=FsSeedlingRecord::max('census');
         $this->nowcensus=FsSeedlingSlrecord1::max('census');
 

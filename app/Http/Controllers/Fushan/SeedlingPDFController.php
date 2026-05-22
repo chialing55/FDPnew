@@ -182,8 +182,8 @@ class SeedlingPDFController extends Controller
 
         $maxb = [];
         foreach ($maxbtable as $item) {
-            if ($item['max_b'] != '0' && $item['max_b'] < 200) {
-                $maxb[$item['mtag']] = $item['max_b'];
+            if ($item->max_b != '0' && $item->max_b < 200) {
+                $maxb[$item->mtag] = $item->max_b;
             }
         }
 
