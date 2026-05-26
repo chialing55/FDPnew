@@ -243,7 +243,7 @@ class SeedlingImport extends Component
                     'y' => $this->nullableValue($slrecord, 'y'),
                     'csp' => $slrecord['csp'] ?? null,
                     'updated_id' => $updatedId,
-                    'updated_at' => $now,
+                    'created_at' => $now,
                 ]);
         }
 
@@ -262,7 +262,7 @@ class SeedlingImport extends Component
                     'ind' => $this->nullableValue($slrecord, 'ind'),
                     'sprout' => $slrecord['sprout'] ?? null,
                     'updated_id' => $updatedId,
-                    'updated_at' => $now,
+                    'created_at' => $now,
                 ]);
         }
 
@@ -287,8 +287,8 @@ class SeedlingImport extends Component
                     'recruit' => $slrecord['recruit'] ?? null,
                     'status' => $slrecord['status'] ?? null,
                     'note' => $slrecord['note'] ?? null,
+                    'created_at' => $now,
                     'updated_id' => $updatedId,
-                    'updated_at' => $now,
                 ]);
         }
     }
