@@ -15,8 +15,25 @@
             
                 <li>將小苗資料匯入大表 seedling_individuals, seedling_stems, seedling_records，將覆蓋度資料匯入 seedling_cov (slroll 沒有大表) 。</li>
             </ol>
+            @if(!empty($importCheckStatus))
+                <div style="margin: 10px 0 16px 0; padding: 10px; border: 1px solid #ddd; max-width: 520px;">
+                    <div style="font-weight: 800; margin-bottom: 6px;">匯入前資料檢查</div>
+                    <table style="border-collapse: collapse; width: 100%;">
+                        <tbody>
+                            <tr><td style="border-top: 1px solid #eee; padding: 4px 6px;">seedling_records 最新 census</td><td style="border-top: 1px solid #eee; padding: 4px 6px; text-align: right;">{{ $importCheckStatus["official_census"] ?? "無" }}</td></tr>
+                            <tr><td style="border-top: 1px solid #eee; padding: 4px 6px;">下一次應匯入 census</td><td style="border-top: 1px solid #eee; padding: 4px 6px; text-align: right;">{{ $importCheckStatus["expected_census"] ?? "-" }}</td></tr>
+                            <tr><td style="border-top: 1px solid #eee; padding: 4px 6px;">slrecord1 census 範圍</td><td style="border-top: 1px solid #eee; padding: 4px 6px; text-align: right;">{{ ($importCheckStatus["work_min_census"] ?? "-") . " - " . ($importCheckStatus["work_max_census"] ?? "-") }}</td></tr>
+                            <tr><td style="border-top: 1px solid #eee; padding: 4px 6px;">slrecord1 筆數</td><td style="border-top: 1px solid #eee; padding: 4px 6px; text-align: right;">{{ number_format($importCheckStatus["work_rows"] ?? 0) }}</td></tr>
+                            <tr><td style="border-top: 1px solid #eee; padding: 4px 6px;">slrecord1 未填日期筆數</td><td style="border-top: 1px solid #eee; padding: 4px 6px; text-align: right; font-weight: 800; color: {{ ($importCheckStatus["missing_date_rows"] ?? 0) > 0 ? "#b00020" : "#167a30" }};">{{ number_format($importCheckStatus["missing_date_rows"] ?? 0) }}</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            @endif
+            @if($importCensusWarning !== "")
+                <p style="margin: 10px 0 16px 0; font-weight: 800; color: #b00020;">{{ $importCensusWarning }}</p>
+            @endif
             @if($slmaxcensus != $nowcensus)
-                <p style='margin: 10px 0 30px 0'><button class='recruitbutton' wire:click="import" wire:loading.attr="disabled">匯入大表</button></p>
+                <p style='margin: 10px 0 30px 0'><button class="recruitbutton" wire:click="import" wire:loading.attr="disabled" @if($importCensusWarning !== "") disabled @endif>匯入大表</button></p>
             @else
                 <p style='margin: 10px 0 30px 0'><button class='recruitbutton' type="button" disabled>已匯入大表</button></p>
             @endif
@@ -33,8 +50,33 @@
                 <li>清空並重建完整的 seedling 分析資料表。</li>
                 <li>將重建完成的 seedling 備份為 seedling_yyyymm。</li>
             </ol>
+            @if($cleanupBackupSuffix !== "")
+                <div style="margin: 10px 0 16px 0; padding: 10px; border: 1px solid #ddd; max-width: 520px;">
+                    <div style="font-weight: 800; margin-bottom: 6px;">本次預計備份年月：{{ $cleanupBackupSuffix }}</div>
+                    <table style="border-collapse: collapse; width: 100%;">
+                        <tbody>
+                            @foreach($cleanupBackupStatus as $backup)
+                                <tr>
+                                    <td style="border-top: 1px solid #eee; padding: 4px 6px;">{{ $backup["table"] }}</td>
+                                    <td style="border-top: 1px solid #eee; padding: 4px 6px; font-weight: 800; color: {{ $backup["exists"] ? "#9a5b00" : "#167a30" }};">
+                                        {{ $backup["exists"] ? "已存在" : "尚未產生" }}
+                                    </td>
+                                    <td style="border-top: 1px solid #eee; padding: 4px 6px; text-align: right;">
+                                        {{ $backup["exists"] ? number_format($backup["count"]) . " 筆" : "-" }}
+                                    </td>
+                                </tr>
+                            @endforeach
+                        </tbody>
+                    </table>
+                </div>
+            @else
+                <p style="margin: 10px 0 16px 0; font-weight: 800;">目前沒有可整理的工作表資料。</p>
+            @endif
+            @if($cleanupCensusWarning !== "")
+                <p style="margin: 10px 0 16px 0; font-weight: 800; color: #b00020;">{{ $cleanupCensusWarning }}</p>
+            @endif
             <p style='margin: 10px 0 30px 0'>
-                <button class='recruitbutton' wire:click="cleanupWorkTables" wire:loading.attr="disabled">自動整理資料表</button>
+                <button class="recruitbutton" wire:click="cleanupWorkTables" wire:loading.attr="disabled" @if($cleanupCensusWarning !== "") disabled @endif>自動整理資料表</button>
             </p>
 
         </p>

@@ -28,6 +28,13 @@ class SeedlingImport extends Component
     public $cleanupnote;
     public $user;
     public $site;
+    public string $cleanupBackupSuffix = '';
+    public array $cleanupBackupStatus = [];
+    public $cleanupWorkCensus = null;
+    public $cleanupExpectedCensus = null;
+    public string $cleanupCensusWarning = '';
+    public array $importCheckStatus = [];
+    public string $importCensusWarning = '';
 
     private function quoteIdentifier(string $identifier): string
     {
@@ -38,6 +45,102 @@ class SeedlingImport extends Component
     {
         DB::connection('mysql3')->statement('TRUNCATE TABLE ' . $this->quoteIdentifier($table));
     }
+
+    private function refreshImportCheckStatus(): void
+    {
+        $officialCensus = FsSeedlingRecord::max("census");
+        $workMinCensus = FsSeedlingSlrecord1::min("census");
+        $workMaxCensus = FsSeedlingSlrecord1::max("census");
+        $workRows = FsSeedlingSlrecord1::count();
+        $missingDateRows = FsSeedlingSlrecord1::whereNull("date")
+            ->orWhere("date", "")
+            ->orWhere("date", "0000-00-00")
+            ->count();
+        $expectedCensus = $officialCensus === null ? 1 : (int) $officialCensus + 1;
+
+        $this->slmaxcensus = $officialCensus;
+        $this->nowcensus = $workMaxCensus;
+        $this->importCensusWarning = "";
+        $this->importCheckStatus = [
+            "official_census" => $officialCensus,
+            "expected_census" => $expectedCensus,
+            "work_min_census" => $workMinCensus,
+            "work_max_census" => $workMaxCensus,
+            "work_rows" => $workRows,
+            "missing_date_rows" => $missingDateRows,
+        ];
+
+        if ($workRows === 0 || $workMaxCensus === null) {
+            $this->importCensusWarning = "slrecord1 目前沒有可匯入資料。";
+            return;
+        }
+
+        if ((int) $workMinCensus !== (int) $workMaxCensus) {
+            $this->importCensusWarning = "slrecord1 內有多個 census：第 " . $workMinCensus . " 次到第 " . $workMaxCensus . " 次，請先檢查工作表。";
+            return;
+        }
+        if ($missingDateRows > 0) {
+            $this->importCensusWarning = "slrecord1 還有 " . $missingDateRows . " 筆資料沒有調查日期，請先完成輸入。";
+            return;
+        }
+
+
+        if ((int) $workMaxCensus !== $expectedCensus) {
+            $this->importCensusWarning = "slrecord1 目前是第 " . $workMaxCensus . " 次，但 seedling_records 最新為第 " . ($officialCensus ?? "無") . " 次，下一次應匯入第 " . $expectedCensus . " 次。";
+        }
+    }
+
+    private function cleanupRecord()
+    {
+        return FsSeedlingSlrecord2::first() ?: FsSeedlingSlrecord1::first();
+    }
+
+    private function cleanupSuffixFromRecord($record): string
+    {
+        if (!$record) {
+            return '';
+        }
+
+        $year = (string) ($record->year ?: date('Y'));
+        $month = str_pad((string) ($record->month ?: date('m')), 2, '0', STR_PAD_LEFT);
+
+        return $year . $month;
+    }
+
+    private function refreshCleanupBackupStatus(): void
+    {
+        $record = $this->cleanupRecord();
+        $suffix = $this->cleanupSuffixFromRecord($record);
+        $this->cleanupBackupSuffix = $suffix;
+        $this->cleanupBackupStatus = [];
+        $this->cleanupWorkCensus = $record ? (int) $record->census : null;
+        $this->cleanupExpectedCensus = FsSeedlingRecord::max('census');
+        $this->cleanupCensusWarning = '';
+
+        if ($this->cleanupWorkCensus !== null && $this->cleanupExpectedCensus !== null && (int) $this->cleanupWorkCensus !== (int) $this->cleanupExpectedCensus) {
+            $this->cleanupCensusWarning = '目前工作表 slrecord2 是第 ' . $this->cleanupWorkCensus . ' 次，但 seedling_records 最新已匯入為第 ' . $this->cleanupExpectedCensus . ' 次；整理會備份錯誤 census，已停止。';
+        }
+
+        if ($suffix === '') {
+            return;
+        }
+
+        foreach ([
+            'slrecord_' . $suffix,
+            'slcov_' . $suffix,
+            'slroll_' . $suffix,
+            'seedling_' . $suffix,
+        ] as $table) {
+            $exists = Schema::connection('mysql3')->hasTable($table);
+
+            $this->cleanupBackupStatus[] = [
+                'table' => $table,
+                'exists' => $exists,
+                'count' => $exists ? DB::connection('mysql3')->table($table)->count() : null,
+            ];
+        }
+    }
+
 
     private function activeRowsWhereClause(string $table, ?string $alias = null): ?string
     {
@@ -142,24 +245,30 @@ class SeedlingImport extends Component
         $this->user = $user;
         $this->site = $site;
 
-        $this->slmaxcensus=FsSeedlingRecord::max('census');
-        $this->nowcensus=FsSeedlingSlrecord1::max('census');
+        $this->refreshImportCheckStatus();
+        $this->refreshCleanupBackupStatus();
         
 
     }
 
     public function cleanupWorkTables()
     {
-        $record = FsSeedlingSlrecord2::first() ?: FsSeedlingSlrecord1::first();
+        $record = $this->cleanupRecord();
 
         if (!$record) {
             $this->cleanupnote = '目前沒有可整理的調查工作表資料。';
             return;
         }
+        $expectedCensus = FsSeedlingRecord::max("census");
+        $workCensus = (int) $record->census;
 
-        $year = (string) ($record->year ?: date('Y'));
-        $month = str_pad((string) ($record->month ?: date('m')), 2, '0', STR_PAD_LEFT);
-        $suffix = $year . $month;
+        if ($expectedCensus !== null && $workCensus !== (int) $expectedCensus) {
+            $this->refreshCleanupBackupStatus();
+            $this->cleanupnote = "資料表整理已停止：slrecord2 目前是第 " . $workCensus . " 次，但 seedling_records 最新已匯入為第 " . $expectedCensus . " 次。請確認工作表不是下一期資料。";
+            return;
+        }
+
+        $suffix = $this->cleanupSuffixFromRecord($record);
 
         try {
             DB::connection('mysql3')->transaction(function () use ($suffix) {
@@ -180,8 +289,8 @@ class SeedlingImport extends Component
             return;
         }
 
-        $this->slmaxcensus=FsSeedlingRecord::max('census');
-        $this->nowcensus=FsSeedlingSlrecord1::max('census');
+        $this->refreshImportCheckStatus();
+        $this->refreshCleanupBackupStatus();
         $this->cleanupnote = '已重建 seedling 分析表、完成 seedling_' . $suffix . ' 備份，並清空工作表。';
     }
 
@@ -297,8 +406,10 @@ class SeedlingImport extends Component
 
 
     public function import(){
-        if (empty($this->nowcensus)) {
-            $this->importnote = '目前沒有可匯入的大表資料。';
+        $this->refreshImportCheckStatus();
+
+        if ($this->importCensusWarning !== "") {
+            $this->importnote = "資料匯入已停止：" . $this->importCensusWarning;
             return;
         }
 
@@ -341,8 +452,8 @@ class SeedlingImport extends Component
 
 
         $this->importnote="資料已匯入完成：小苗資料已寫入 seedling_individuals、seedling_stems、seedling_records；覆蓋度資料已寫入 seedling_cov。";
-        $this->slmaxcensus=FsSeedlingRecord::max('census');
-        $this->nowcensus=FsSeedlingSlrecord1::max('census');
+        $this->refreshImportCheckStatus();
+        $this->refreshCleanupBackupStatus();
 
 
     }
