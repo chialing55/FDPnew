@@ -107,10 +107,10 @@ class SeedlingImport extends Component
         return $year . $month;
     }
 
-    private function refreshCleanupBackupStatus(): void
+    private function refreshCleanupBackupStatus(?string $suffixOverride = null): void
     {
         $record = $this->cleanupRecord();
-        $suffix = $this->cleanupSuffixFromRecord($record);
+        $suffix = $suffixOverride ?? $this->cleanupSuffixFromRecord($record);
         $this->cleanupBackupSuffix = $suffix;
         $this->cleanupBackupStatus = [];
         $this->cleanupWorkCensus = $record ? (int) $record->census : null;
@@ -271,29 +271,28 @@ class SeedlingImport extends Component
         $suffix = $this->cleanupSuffixFromRecord($record);
 
         try {
-            DB::connection('mysql3')->transaction(function () use ($suffix) {
-                $this->copyTable('slrecord2', 'slrecord_' . $suffix);
-                $this->copyTable('slcov1', 'slcov_' . $suffix);
-                $this->copyTable('slroll1', 'slroll_' . $suffix);
-                $this->rebuildSeedlingAnalysisTable();
-                $this->copyTable('seedling', 'seedling_' . $suffix);
+            $this->copyTable("slrecord2", "slrecord_" . $suffix);
+            $this->copyTable("slcov1", "slcov_" . $suffix);
+            $this->copyTable("slroll1", "slroll_" . $suffix);
+            $this->rebuildSeedlingAnalysisTable();
+            $this->copyTable("seedling", "seedling_" . $suffix);
 
-                foreach (['slrecord', 'slrecord1', 'slrecord2', 'slcov1', 'slcov2', 'slroll1', 'slroll2'] as $table) {
-                    if (Schema::connection('mysql3')->hasTable($table)) {
-                        $this->truncateTable($table);
-                    }
+            foreach (["slrecord", "slrecord1", "slrecord2", "slcov1", "slcov2", "slroll1", "slroll2"] as $table) {
+                if (Schema::connection("mysql3")->hasTable($table)) {
+                    $this->truncateTable($table);
                 }
-            });
+            }
         } catch (\Throwable $e) {
-            $this->cleanupnote = '資料表整理失敗：' . $e->getMessage();
+            $this->refreshImportCheckStatus();
+            $this->refreshCleanupBackupStatus($suffix);
+            $this->cleanupnote = "資料表整理失敗：" . $e->getMessage();
             return;
         }
 
         $this->refreshImportCheckStatus();
-        $this->refreshCleanupBackupStatus();
-        $this->cleanupnote = '已重建 seedling 分析表、完成 seedling_' . $suffix . ' 備份，並清空工作表。';
+        $this->refreshCleanupBackupStatus($suffix);
+        $this->cleanupnote = "已重建 seedling 分析表、完成 seedling_" . $suffix . " 備份，並清空工作表。";
     }
-
     private function branchFromTag(string $tag): int
     {
         $parts = explode('.', $tag, 2);
