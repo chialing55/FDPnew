@@ -56,13 +56,13 @@ class SeedlingImport extends Component
             return;
         }
 
-        if (!Schema::connection('mysql3')->hasTable($targetTable)) {
-            DB::connection('mysql3')->statement(
-                'CREATE TABLE ' . $this->quoteIdentifier($targetTable) . ' LIKE ' . $this->quoteIdentifier($sourceTable)
-            );
-        } else {
-            $this->truncateTable($targetTable);
+        if (Schema::connection('mysql3')->hasTable($targetTable)) {
+            return;
         }
+
+        DB::connection('mysql3')->statement(
+            'CREATE TABLE ' . $this->quoteIdentifier($targetTable) . ' LIKE ' . $this->quoteIdentifier($sourceTable)
+        );
 
         DB::connection('mysql3')->statement(
             'INSERT INTO ' . $this->quoteIdentifier($targetTable) . ' SELECT * FROM ' . $this->quoteIdentifier($sourceTable)
@@ -107,7 +107,9 @@ class SeedlingImport extends Component
 
             $quotedColumn = $this->quoteIdentifier($column);
             $insertColumns[] = $quotedColumn;
-            $selectColumns[] = $source . '.' . $quotedColumn;
+            $selectColumns[] = $column === 'note'
+                ? 'COALESCE(' . $source . '.' . $quotedColumn . ", '')"
+                : $source . '.' . $quotedColumn;
         }
 
         if (empty($insertColumns)) {
