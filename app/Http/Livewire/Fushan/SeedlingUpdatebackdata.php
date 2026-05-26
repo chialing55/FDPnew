@@ -5,6 +5,7 @@ namespace App\Http\Livewire\Fushan;
 use Livewire\Component;
 use Livewire\Attributes\On;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Schema;
 
 use App\Models\FsSeedlingSlrecord1;
 
@@ -29,6 +30,19 @@ class SeedlingUpdatebackdata extends Component
     public array $workRows = [];
     public array $identityRows = [];
     public array $masterRows = [];
+
+    private function seedlingStemBranchColumn(): ?string
+    {
+        if (Schema::connection('mysql3')->hasColumn('seedling_stems', 'branch')) {
+            return 'branch';
+        }
+
+        if (Schema::connection('mysql3')->hasColumn('seedling_stems', 'branch_no')) {
+            return 'branch_no';
+        }
+
+        return null;
+    }
 
     public function mount($user = null, $site = null): void
     {
@@ -252,6 +266,14 @@ class SeedlingUpdatebackdata extends Component
 
     private function tagData(string $tag, string $from = ""): array
     {
+        $branchColumn = $this->seedlingStemBranchColumn();
+        $branchSelect = $branchColumn
+            ? DB::raw('st.`' . $branchColumn . '` as branch')
+            : DB::raw('0 as branch');
+        $branchOrder = $branchColumn
+            ? 'COALESCE(st.`' . $branchColumn . '`, 0)'
+            : '0';
+
         if ($from !== "indTag") {
             $workRows = FsSeedlingSlrecord1::query()
                 ->where("tag", $tag)
@@ -273,7 +295,7 @@ class SeedlingUpdatebackdata extends Component
                     "i.plot",
                     "st.tag",
                     "st.mtag",
-                    "st.branch",
+                    $branchSelect,
                     "i.csp",
                     "st.ind",
                     "st.sprout",
@@ -281,7 +303,7 @@ class SeedlingUpdatebackdata extends Component
                     "i.y",
                     "st.updated_id",
                 ])
-                ->orderByRaw("COALESCE(st.branch, 0)")
+                ->orderByRaw($branchOrder)
                 ->orderBy("st.tag")
                 ->get()
                 ->map(fn ($row) => $this->normalizeIdentityRow((array) $row))
@@ -368,7 +390,7 @@ class SeedlingUpdatebackdata extends Component
                 "i.plot",
                 "st.tag",
                 "st.mtag",
-                "st.branch",
+                $branchSelect,
                 "i.csp",
                 "st.ind",
                 "st.sprout",
@@ -377,7 +399,7 @@ class SeedlingUpdatebackdata extends Component
                 "st.updated_id",
             ])
             ->orderBy("st.mtag")
-            ->orderByRaw("COALESCE(st.branch, 0)")
+            ->orderByRaw($branchOrder)
             ->orderBy("st.tag")
             ->get()
             ->map(fn ($row) => $this->normalizeIdentityRow((array) $row))

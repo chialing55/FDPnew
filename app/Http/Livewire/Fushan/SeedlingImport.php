@@ -39,6 +39,17 @@ class SeedlingImport extends Component
         DB::connection('mysql3')->statement('TRUNCATE TABLE ' . $this->quoteIdentifier($table));
     }
 
+    private function activeRowsWhereClause(string $table, ?string $alias = null): ?string
+    {
+        if (!Schema::connection('mysql3')->hasColumn($table, 'deleted_at')) {
+            return null;
+        }
+
+        $prefix = $alias !== null ? $alias . '.' : '';
+
+        return $prefix . $this->quoteIdentifier('deleted_at') . ' IS NULL';
+    }
+
     private function copyTable(string $sourceTable, string $targetTable): void
     {
         if (!Schema::connection('mysql3')->hasTable($sourceTable)) {
@@ -103,6 +114,13 @@ class SeedlingImport extends Component
             throw new \RuntimeException('seedling 分析表沒有可重建的共同欄位。');
         }
 
+        $whereClauses = array_filter([
+            $this->activeRowsWhereClause('seedling_records', 'r'),
+            $this->activeRowsWhereClause('seedling_stems', 'st'),
+            $this->activeRowsWhereClause('seedling_individuals', 'i'),
+        ]);
+        $whereSql = $whereClauses === [] ? '' : 'WHERE ' . implode(' AND ', $whereClauses) . ' ';
+
         $this->truncateTable('seedling');
 
         DB::connection('mysql3')->statement(
@@ -111,6 +129,7 @@ class SeedlingImport extends Component
             'FROM ' . $this->quoteIdentifier('seedling_records') . ' r ' .
             'JOIN ' . $this->quoteIdentifier('seedling_stems') . ' st ON r.' . $this->quoteIdentifier('tag') . ' = st.' . $this->quoteIdentifier('tag') . ' ' .
             'JOIN ' . $this->quoteIdentifier('seedling_individuals') . ' i ON st.' . $this->quoteIdentifier('mtag') . ' = i.' . $this->quoteIdentifier('mtag') . ' ' .
+            $whereSql .
             'ORDER BY r.' . $this->quoteIdentifier('census') . ', i.' . $this->quoteIdentifier('trap') . ', i.' . $this->quoteIdentifier('plot') . ', st.' . $this->quoteIdentifier('tag')
         );
     }

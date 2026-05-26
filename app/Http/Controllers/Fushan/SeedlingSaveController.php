@@ -333,7 +333,7 @@ class SeedlingSaveController extends Controller
                     $stemUpdate["ind"] = 1;
                     if ($tag !== "") {
                         $stemUpdate["tag"] = $tag;
-                        $stemUpdate["branch"] = $this->seedlingBranchFromTag($tag);
+                        $stemUpdate = $this->withSeedlingStemBranch($stemUpdate, $tag);
                     }
                     if ($mtag !== "") {
                         $stemUpdate["mtag"] = $mtag;
@@ -594,6 +594,29 @@ class SeedlingSaveController extends Controller
         $parts = explode(".", $tag);
 
         return isset($parts[1]) ? (int) $parts[1] : 0;
+    }
+
+    private function seedlingStemBranchColumn(): ?string
+    {
+        if (Schema::connection('mysql3')->hasColumn('seedling_stems', 'branch')) {
+            return 'branch';
+        }
+
+        if (Schema::connection('mysql3')->hasColumn('seedling_stems', 'branch_no')) {
+            return 'branch_no';
+        }
+
+        return null;
+    }
+
+    private function withSeedlingStemBranch(array $values, string $tag): array
+    {
+        $branchColumn = $this->seedlingStemBranchColumn();
+        if ($branchColumn !== null) {
+            $values[$branchColumn] = $this->seedlingBranchFromTag($tag);
+        }
+
+        return $values;
     }
 
     private function seedlingUpdateDuplicateNumberNote(array $identityRows): string
