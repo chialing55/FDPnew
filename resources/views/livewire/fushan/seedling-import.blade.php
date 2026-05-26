@@ -8,13 +8,11 @@
     <div class='text_box'>
         <h2>資料處理流程</h2>
         <hr>
-        <p>
             <ol>
                 <li>完成<a href='{{asset('/fushan/seedling/compare')}}'>資料比對</a></li>
                 <li>進行特殊修改：修改 slrecord1。</li>
             
-                <li>將小苗資料匯入大表 seedling_individuals, seedling_stems, seedling_records，將覆蓋度資料匯入 seedling_cov (slroll 沒有大表) 。</li>
-            </ol>
+                <li>將小苗資料匯入大表 seedling_individuals, seedling_stems, seedling_records，將覆蓋度資料匯入 seedling_cov (slroll 沒有大表) 。
             @if(!empty($importCheckStatus))
                 <div style="margin: 10px 0 16px 0; padding: 10px; border: 1px solid #ddd; max-width: 520px;">
                     <div style="font-weight: 800; margin-bottom: 6px;">匯入前資料檢查</div>
@@ -37,19 +35,18 @@
             @else
                 <p style='margin: 10px 0 30px 0'><button class='recruitbutton' type="button" disabled>已匯入大表</button></p>
             @endif
-        </p>
 <div class="loading-container" wire:loading.class="visible">
     <div class="loading-spinner"></div>
 </div>
-        <p>
+                </li>
 
-        <h6>後續資料表整理 (自動)</h6>
-            <ol>
+                <li>後續資料表整理
+                    <ul style="list-style-type: disc; margin: 8px 0 12px 22px; padding-left: 18px;">
                 <li>備份 slrecord2(才有完整調查資料)、slcov1、slroll1 為 slrecord_yyyymm、slcov_yyyymm、slroll_yyyymm。</li>
                 <li>清空 slrecord、slrecord1、slrecord2、slcov1、slcov2、slroll1、slroll2 工作表，不刪除資料表。</li>
                 <li>清空並重建完整的 seedling 分析資料表。</li>
                 <li>將重建完成的 seedling 備份為 seedling_yyyymm。</li>
-            </ol>
+                    </ul>
             @if($cleanupBackupSuffix !== "")
                 <div style="margin: 10px 0 16px 0; padding: 10px; border: 1px solid #ddd; max-width: 520px;">
                     <div style="font-weight: 800; margin-bottom: 6px;">本次預計備份年月：{{ $cleanupBackupSuffix }}</div>
@@ -76,10 +73,10 @@
                 <p style="margin: 10px 0 16px 0; font-weight: 800; color: #b00020;">{{ $cleanupCensusWarning }}</p>
             @endif
             <p style='margin: 10px 0 30px 0'>
-                <button class="recruitbutton" wire:click="cleanupWorkTables" wire:loading.attr="disabled" @if($cleanupCensusWarning !== "") disabled @endif>自動整理資料表</button>
+                <button class="recruitbutton" wire:click="cleanupWorkTables" wire:loading.attr="disabled" @if(!$canCleanupWorkTables) disabled @endif>自動整理資料表</button>
             </p>
-
-        </p>
+                </li>
+            </ol>
         <p style='margin: 10px 0; font-weight: 800'>以上完成後即可進 <a href='{{asset('/fushan/seedling/doc')}}'>相關文件</a> 產生新一期調查用的紀錄紙</p>
 
     

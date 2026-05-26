@@ -33,6 +33,7 @@ class SeedlingImport extends Component
     public $cleanupWorkCensus = null;
     public $cleanupExpectedCensus = null;
     public string $cleanupCensusWarning = '';
+    public bool $canCleanupWorkTables = false;
     public array $importCheckStatus = [];
     public string $importCensusWarning = '';
 
@@ -115,10 +116,12 @@ class SeedlingImport extends Component
         $this->cleanupBackupStatus = [];
         $this->cleanupWorkCensus = $record ? (int) $record->census : null;
         $this->cleanupExpectedCensus = FsSeedlingRecord::max('census');
+        $this->canCleanupWorkTables = $record !== null;
         $this->cleanupCensusWarning = '';
 
         if ($this->cleanupWorkCensus !== null && $this->cleanupExpectedCensus !== null && (int) $this->cleanupWorkCensus !== (int) $this->cleanupExpectedCensus) {
-            $this->cleanupCensusWarning = '目前工作表 slrecord2 是第 ' . $this->cleanupWorkCensus . ' 次，但 seedling_records 最新已匯入為第 ' . $this->cleanupExpectedCensus . ' 次；整理會備份錯誤 census，已停止。';
+            $this->cleanupCensusWarning = '目前工作表 slrecord2 是第 ' . $this->cleanupWorkCensus . ' 次，但 seedling_records 最新匯入資料為第 ' . $this->cleanupExpectedCensus . ' 次；請先將資料匯入大表。';
+            $this->canCleanupWorkTables = false;
         }
 
         if ($suffix === '') {
@@ -264,7 +267,7 @@ class SeedlingImport extends Component
 
         if ($expectedCensus !== null && $workCensus !== (int) $expectedCensus) {
             $this->refreshCleanupBackupStatus();
-            $this->cleanupnote = "資料表整理已停止：slrecord2 目前是第 " . $workCensus . " 次，但 seedling_records 最新已匯入為第 " . $expectedCensus . " 次。請確認工作表不是下一期資料。";
+            $this->cleanupnote = "資料表整理已停止：slrecord2 目前是第 " . $workCensus . " 次，但 seedling_records 最新匯入資料為第 " . $expectedCensus . " 次；請先將資料匯入大表。";
             return;
         }
 
