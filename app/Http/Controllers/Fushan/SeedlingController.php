@@ -35,6 +35,29 @@ class SeedlingController extends Controller
         DB::connection('mysql3')->statement('TRUNCATE TABLE ' . $this->quoteIdentifier($table));
     }
 
+    private function nextSurveyYearMonth(int $maxCensus): array
+    {
+        $latest = FsSeedlingRecord::query()
+            ->where('census', $maxCensus)
+            ->select('year', 'month')
+            ->first();
+
+        $latestYear = (int) ($latest->year ?? 0);
+        $latestMonth = (int) ($latest->month ?? 0);
+
+        if ($latestYear > 0 && $latestMonth === 2) {
+            return [$latestYear, 8];
+        }
+
+        if ($latestYear > 0 && $latestMonth === 8) {
+            return [$latestYear + 1, 2];
+        }
+
+        $nextMonth = (($maxCensus + 1) % 2 === 0) ? 2 : 8;
+
+        return [(int) date('Y'), $nextMonth];
+    }
+
     private function insertTableFromTable(string $targetTable, string $sourceTable): void
     {
         $targetColumns = Schema::connection('mysql3')->getColumnListing($targetTable);
@@ -183,10 +206,9 @@ class SeedlingController extends Controller
 
         $this->insertTableFromTable('slrecord1', 'slrecord');
 
-        $census = FsSeedlingSlrecord1::first();
-        $month = ((int) ($census['census'] ?? ($maxCensus + 1)) % 2 === 0) ? '2' : '8';
+        [$year, $month] = $this->nextSurveyYearMonth($maxCensus);
 
-        FsSeedlingSlrecord1::query()->update(['year' => date('Y'), 'month' => $month]);
+        FsSeedlingSlrecord1::query()->update(['year' => $year, 'month' => $month]);
         FsSeedlingSlrecord1::where('ht', '>=', '-1')->update(['ht' => NULL, 'cotno' => NULL, 'leafno' => NULL]);
         FsSeedlingSlrecord1::query()->update(['updated_at' => '', 'alternote' => '', 'updated_id' => '']);
 
@@ -213,7 +235,7 @@ class SeedlingController extends Controller
         }
 
         DB::connection('mysql3')->statement("DELETE FROM fs_seedling.slcov1 WHERE trap = 33 AND plot = 3");
-        FsSeedlingSlcov1::query()->update(['year' => date('Y'), 'month' => $month, 'date' => '0000-00-00', 'updated_at' => '']);
+        FsSeedlingSlcov1::query()->update(['year' => $year, 'month' => $month, 'date' => '0000-00-00', 'updated_at' => '']);
 
         if (!Schema::connection('mysql3')->hasTable('slcov2')) {
             DB::connection('mysql3')->statement("CREATE TABLE slcov2 LIKE slcov1");

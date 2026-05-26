@@ -150,7 +150,7 @@ class SeedlingImport extends Component
 
     public function cleanupWorkTables()
     {
-        $record = FsSeedlingSlrecord1::first() ?: FsSeedlingSlrecord2::first();
+        $record = FsSeedlingSlrecord2::first() ?: FsSeedlingSlrecord1::first();
 
         if (!$record) {
             $this->cleanupnote = '目前沒有可整理的調查工作表資料。';
