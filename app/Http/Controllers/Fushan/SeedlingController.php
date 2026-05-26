@@ -298,8 +298,7 @@ class SeedlingController extends Controller
         // print_r($slrecord[0])
 
         $slrecord = FsSeedlingSlrecord::first();
-        // $year=$slrecord[0]['year'];
-        $census = $slrecord['census'];
+        $census = $slrecord["census"];
         // print_r($census);
 
 
@@ -383,9 +382,8 @@ class SeedlingController extends Controller
         $user = $request->user();
         $site = $request->route('site');
 
-        $slrecord = FsSeedlingSlrecord::first();
-        // $year=$slrecord[0]['year'];
-        $census = $slrecord['census'];
+        $slrecord = FsSeedlingSlrecord::first() ?: FsSeedlingSlrecord1::first() ?: FsSeedlingSlrecord2::first();
+        $census = $slrecord->census ?? FsSeedlingRecord::max("census");
 
         return view('pages/fushan/seedling_import', [
             'site' => $site,
