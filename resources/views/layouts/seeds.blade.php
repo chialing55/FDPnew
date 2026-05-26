@@ -52,7 +52,7 @@
         <div class='list list4 listlink'>資料輸入
             <hr>
         </div>
-        <div class='list list6 listlink'>資料查詢
+        <div class='list list6 listlink'>資料檢視
             <hr>
         </div>
     </div>
@@ -79,7 +79,7 @@
         <li class='innerlist list62 listlink' type='websplist'>物種名錄
             <hr>
         </li>
-        <li class='innerlist list61 listlink' type='showdata'>歷年資料查詢
+        <li class='innerlist list61 listlink' type='showdata'>歷年資料檢視
             <hr>
         </li>
         <li class='innerlist list62 listlink' type='unknown'>UNKNOWN

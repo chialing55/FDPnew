@@ -53,7 +53,8 @@
     @if ((int) (auth()->user()?->is_admin ?? 0) === 1)
     <div class='listinner list3inner' style='display:none;'>
         <li class='innerlist list31 listlink admin-only-link' type='process'>excel資料匯入整理</li>
-        <li class='innerlist list32 listlink admin-only-link' type='import'>將資料匯入大表<hr></li>
+        <li class='innerlist list32 listlink admin-only-link' type='import'>將資料匯入大表</li>
+        <li class='innerlist list33 listlink admin-only-link' type='download'>下載資料<hr></li>
     </div>
     @endif
 @endsection

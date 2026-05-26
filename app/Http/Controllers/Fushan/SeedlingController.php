@@ -18,6 +18,7 @@ use App\Models\FsSeedlingSlrecord1;
 use App\Models\FsSeedlingSlrecord2;
 use App\Models\FsSeedlingSlroll1;
 use App\Models\FsSeedlingSlroll2;
+use Symfony\Component\HttpFoundation\StreamedResponse;
 
 //產生紀錄紙資料表
 //分配網址到各個頁面
@@ -398,6 +399,63 @@ class SeedlingController extends Controller
             'project' => '小苗',
             'user' => $user->account ?? $user->name,
 
+        ]);
+    }
+
+    public function download(Request $request)
+    {
+        $user = $request->user();
+        $site = $request->route('site');
+        $latestSeedling = DB::connection('mysql3')
+            ->table('seedling')
+            ->select('year', 'month')
+            ->orderByDesc('census')
+            ->first();
+
+        $latestSeedlingYm = $latestSeedling
+            ? sprintf('%04d-%02d', (int) $latestSeedling->year, (int) $latestSeedling->month)
+            : '尚無資料';
+
+        return view('pages/fushan/seedling_download', [
+            'site' => $site,
+            'project' => '小苗',
+            'user' => $user->account ?? $user->name,
+            'latestSeedlingYm' => $latestSeedlingYm,
+        ]);
+    }
+
+    public function downloadSeedling(): StreamedResponse
+    {
+        $columns = Schema::connection('mysql3')->getColumnListing('seedling');
+        $filename = 'seedling_latest_' . now()->format('Ymd') . '.txt';
+
+        return $this->streamTxt($filename, $columns, function ($handle) use ($columns) {
+            $query = DB::connection('mysql3')->table('seedling')->select($columns);
+
+            foreach (['census', 'trap', 'plot', 'tag'] as $column) {
+                if (in_array($column, $columns, true)) {
+                    $query->orderBy($column);
+                }
+            }
+
+            $query->chunk(1000, function ($rows) use ($handle, $columns) {
+                foreach ($rows as $row) {
+                    fputcsv($handle, array_map(fn ($column) => $row->{$column}, $columns), "	");
+                }
+            });
+        });
+    }
+
+    private function streamTxt(string $filename, array $headers, callable $writeRows): StreamedResponse
+    {
+        return response()->streamDownload(function () use ($headers, $writeRows) {
+            $handle = fopen('php://output', 'w');
+            fwrite($handle, "\xEF\xBB\xBF");
+            fputcsv($handle, $headers, "	");
+            $writeRows($handle);
+            fclose($handle);
+        }, $filename, [
+            'Content-Type' => 'text/plain; charset=UTF-8',
         ]);
     }
 }

@@ -41,7 +41,7 @@
             style="padding: 10px 30px;  align-items: center;
   justify-content: space-between">
             <h2>個人資訊：{{ $user->name }}（{{ $user->email }}）</h2>
-            <span style='margin-left:20px' class='back'>重新選擇工作項目</span>
+            <span style='margin-left:20px' class='back'>管理介面首頁</span>
         </div>
 
         <div class="user-edit-wrap">

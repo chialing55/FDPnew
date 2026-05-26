@@ -30,9 +30,13 @@ if [ ! -f .env ]; then
   cp .env.example .env
 fi
 
-# 2. 產生 APP Key
-echo "🔑 產生 APP Key..."
-php artisan key:generate || true
+# 2. 只在 APP_KEY 尚未設定時產生，避免重啟容器後讓既有 session / CSRF token 失效
+if ! grep -Eq '^APP_KEY=base64:.+' .env; then
+  echo "🔑 產生 APP Key..."
+  php artisan key:generate || true
+else
+  echo "🔑 APP Key already exists, skip key generation."
+fi
 
 # 3. 設定目錄權限（storage、bootstrap/cache）
 echo "🛠️ 設定 storage 和 cache 權限..."

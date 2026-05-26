@@ -25,6 +25,7 @@ use Illuminate\Support\Facades\Schema;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Str;
 use League\Csv\Reader;
+use Symfony\Component\HttpFoundation\StreamedResponse;
 
 class MortalityController extends Controller
 {
@@ -715,6 +716,309 @@ class MortalityController extends Controller
             'site' => $site,
             'project' => '死亡率調查',
             'user' => $user->account ?? $user->name,
+        ]);
+    }
+
+    public function download(Request $request)
+    {
+        $this->ensureProcessAdmin($request);
+
+        $user = $request->user();
+        $site = $request->route('site');
+        $latestCensus = $this->latestCensusRecordInfo();
+        $latestCensusText = $latestCensus
+            ? '第 ' . $latestCensus->census . ' 次（' . ($latestCensus->survey_year ?? '年份未設定') . ' 年）'
+            : '尚無資料';
+
+        return view('pages/fushan/mortality_download', [
+            'site' => $site,
+            'project' => '死亡率調查',
+            'user' => $user->account ?? $user->name,
+            'latestCensus' => $latestCensus,
+            'latestCensusText' => $latestCensusText,
+        ]);
+    }
+
+    public function downloadLatestCensusRecords(Request $request): StreamedResponse
+    {
+        $this->ensureProcessAdmin($request);
+
+        $latestCensus = $this->latestCensusRecordInfo();
+        abort_unless($latestCensus, 404);
+
+        $census = (int) $latestCensus->census;
+        $year = trim((string) ($latestCensus->survey_year ?? ''));
+        $filenameYear = $year !== '' ? $year : 'unknown-year';
+        $filename = 'mortality_census_' . $census . '_' . $filenameYear . '.txt';
+        $headers = $this->mortalityDownloadHeaders();
+
+        return $this->streamTxt($filename, $headers, function ($handle) use ($census) {
+            $rows = DB::connection('fs_mortality')
+                ->table('census_records as cr')
+                ->leftJoin('tree_individuals as ti', 'cr.stemid', '=', 'ti.stemid')
+                ->where('cr.census', $census)
+                ->select([
+                    'cr.id',
+                    'cr.map',
+                    'cr.stemid',
+                    'cr.date',
+                    'cr.dbh',
+                    'cr.status',
+                    'cr.mode',
+                    'cr.living_length',
+                    'cr.branches',
+                    'cr.illumination',
+                    'cr.leaning',
+                    'cr.liana',
+                    'cr.fungi',
+                    'cr.wounded_stem',
+                    'cr.deformity',
+                    'cr.rotten',
+                    'cr.leaves',
+                    'cr.leaf_damage',
+                    'ti.qx',
+                    'ti.qy',
+                    'ti.subqx',
+                    'ti.subqy',
+                    'ti.qudx',
+                    'ti.qudy',
+                ])
+                ->orderBy('cr.map')
+                ->orderBy('ti.qx')
+                ->orderBy('ti.qy')
+                ->orderBy('ti.subqx')
+                ->orderBy('ti.subqy')
+                ->orderBy('cr.stemid')
+                ->get();
+
+            $stemids = $rows->pluck('stemid')->filter()->map(fn ($stemid) => (string) $stemid)->unique()->values()->all();
+            $spcodes = $this->baseSpcodesForStemids($stemids);
+            $comments = $this->downloadCommentsByRecordId($rows->pluck('id')->all());
+
+            foreach ($rows as $row) {
+                $stemid = (string) $row->stemid;
+                $baseTag = $this->baseTagFromStemid($stemid);
+
+                fputcsv($handle, [
+                    $row->map,
+                    $this->formatQ20($row->qx, $row->qy),
+                    $this->formatQ10($row->subqx, $row->subqy),
+                    $row->qx,
+                    $row->qy,
+                    $row->subqx,
+                    $row->subqy,
+                    $stemid,
+                    $spcodes[$baseTag] ?? '',
+                    $this->formatDownloadValue($row->qudx),
+                    $this->formatDownloadValue($row->qudy),
+                    '',
+                    $this->formatDownloadValue($row->dbh),
+                    $row->status,
+                    $row->mode,
+                    $this->formatDownloadValue($row->living_length),
+                    $row->branches,
+                    $row->illumination,
+                    $row->leaning,
+                    $row->liana,
+                    $this->formatDownloadValue($row->fungi),
+                    $row->wounded_stem,
+                    $row->deformity,
+                    $row->rotten,
+                    $row->leaves,
+                    $this->formatDownloadValue($row->leaf_damage),
+                    $comments[(int) $row->id] ?? '',
+                    $this->formatDownloadDate($row->date),
+                ], "\t");
+            }
+        });
+    }
+
+    private function latestCensusRecordInfo(): ?object
+    {
+        $latestCensus = DB::connection('fs_mortality')
+            ->table('census_records')
+            ->max('census');
+
+        if ($latestCensus === null) {
+            return null;
+        }
+
+        $censusInfo = DB::connection('fs_mortality')
+            ->table('censuses')
+            ->where('census', $latestCensus)
+            ->first(['census', 'survey_year']);
+
+        if ($censusInfo) {
+            return $censusInfo;
+        }
+
+        return (object) [
+            'census' => (int) $latestCensus,
+            'survey_year' => null,
+        ];
+    }
+
+    private function mortalityDownloadHeaders(): array
+    {
+        return [
+            'map',
+            'q20',
+            'q10',
+            'qx',
+            'qy',
+            'subqx',
+            'subqy',
+            'stemid',
+            'sp',
+            'x',
+            'y',
+            'dbh1',
+            'dbh2',
+            'status',
+            'mode',
+            'living_length',
+            'branches',
+            'illumination',
+            'leaning',
+            'liana',
+            'fungi',
+            'wounded_stem',
+            'deformity',
+            'rotten',
+            'leaves',
+            'leaf_damage',
+            'comments',
+            'date',
+        ];
+    }
+
+    private function baseSpcodesForStemids(array $stemids): array
+    {
+        $baseTags = collect($stemids)
+            ->map(fn ($stemid) => $this->baseTagFromStemid((string) $stemid))
+            ->filter()
+            ->unique()
+            ->values()
+            ->all();
+
+        if (empty($baseTags)) {
+            return [];
+        }
+
+        return FsTreeBase::query()
+            ->whereIn('tag', $baseTags)
+            ->pluck('spcode', 'tag')
+            ->all();
+    }
+
+    private function baseTagFromStemid(string $stemid): string
+    {
+        $stemid = trim($stemid);
+        $beforeDot = explode('.', $stemid, 2)[0];
+
+        return substr($beforeDot, 0, 6);
+    }
+
+    private function downloadCommentsByRecordId(array $recordIds): array
+    {
+        $recordIds = array_values(array_filter(array_map('intval', $recordIds)));
+
+        if (empty($recordIds)) {
+            return [];
+        }
+
+        return DB::connection('fs_mortality')
+            ->table('census_record_comments as crc')
+            ->leftJoin('comment_options as co', 'crc.comment_option_id', '=', 'co.id')
+            ->whereIn('crc.census_record_id', $recordIds)
+            ->orderBy('crc.census_record_id')
+            ->orderBy('crc.sort_order')
+            ->orderBy('crc.id')
+            ->get([
+                'crc.census_record_id',
+                'crc.comment_other',
+                'co.comment_en',
+                'co.comment_zh',
+            ])
+            ->groupBy('census_record_id')
+            ->map(function ($rows) {
+                return $rows
+                    ->map(function ($row) {
+                        $optionText = $this->nullIfBlank($row->comment_en)
+                            ?? $this->nullIfBlank($row->comment_zh);
+                        $otherText = $this->nullIfBlank($row->comment_other);
+
+                        return $optionText ?? $otherText;
+                    })
+                    ->filter(fn ($text) => $text !== null && $text !== '')
+                    ->implode(' | ');
+            })
+            ->all();
+    }
+
+    private function formatQ20($qx, $qy): string
+    {
+        if ($qx === null || $qy === null || $qx === '' || $qy === '') {
+            return '';
+        }
+
+        return $qx . ',' . $qy;
+    }
+
+    private function formatQ10($subqx, $subqy): string
+    {
+        $subqx = (string) $subqx;
+        $subqy = (string) $subqy;
+
+        return match ($subqx . ',' . $subqy) {
+            '1,2' => '<^',
+            '1,1' => '<v',
+            '2,2' => '>^',
+            '2,1' => '>v',
+            default => '',
+        };
+    }
+
+    private function formatDownloadValue($value): string
+    {
+        if ($value === null || $value === '') {
+            return '';
+        }
+
+        if (is_bool($value)) {
+            return $value ? '1' : '';
+        }
+
+        if (is_numeric($value)) {
+            return rtrim(rtrim(sprintf('%.6F', (float) $value), '0'), '.');
+        }
+
+        return trim((string) $value);
+    }
+
+    private function formatDownloadDate($value): string
+    {
+        if ($value === null || $value === '') {
+            return '';
+        }
+
+        if ($value instanceof \DateTimeInterface) {
+            return $value->format('Y-m-d');
+        }
+
+        return substr((string) $value, 0, 10);
+    }
+
+    private function streamTxt(string $filename, array $headers, callable $writeRows): StreamedResponse
+    {
+        return response()->streamDownload(function () use ($headers, $writeRows) {
+            $handle = fopen('php://output', 'w');
+            fwrite($handle, "\xEF\xBB\xBF");
+            fputcsv($handle, $headers, "\t");
+            $writeRows($handle);
+            fclose($handle);
+        }, $filename, [
+            'Content-Type' => 'text/plain; charset=UTF-8',
         ]);
     }
 

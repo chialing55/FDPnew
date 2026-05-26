@@ -109,5 +109,4 @@
             </div>
         @endif
 
-    </div>
-@endsection
+    </div>@endsection

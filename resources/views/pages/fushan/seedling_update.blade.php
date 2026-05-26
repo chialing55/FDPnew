@@ -12,8 +12,8 @@ window.seedlingRoutes = {
 };
 </script>
 <script type="text/javascript">
-  jQuery(".list4").addClass("now");
-  jQuery(".list45").addClass("now");
+  jQuery(".list3").addClass("now");
+  jQuery(".list3 hr").css("color", "#91A21C");
 </script>
 @endsection
 

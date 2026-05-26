@@ -58,6 +58,63 @@ class SeedlingImport extends Component
         );
     }
 
+    private function rebuildSeedlingAnalysisTable(): void
+    {
+        foreach (['seedling', 'seedling_records', 'seedling_stems', 'seedling_individuals'] as $table) {
+            if (!Schema::connection('mysql3')->hasTable($table)) {
+                throw new \RuntimeException('找不到資料表：' . $table);
+            }
+        }
+
+        $seedlingColumns = Schema::connection('mysql3')->getColumnListing('seedling');
+        $recordColumns = Schema::connection('mysql3')->getColumnListing('seedling_records');
+        $stemColumns = Schema::connection('mysql3')->getColumnListing('seedling_stems');
+        $individualColumns = Schema::connection('mysql3')->getColumnListing('seedling_individuals');
+
+        $columnSources = [];
+        foreach ($recordColumns as $column) {
+            $columnSources[$column] = 'r';
+        }
+        foreach ($stemColumns as $column) {
+            $columnSources[$column] ??= 'st';
+        }
+        foreach ($individualColumns as $column) {
+            $columnSources[$column] ??= 'i';
+        }
+
+        $insertColumns = [];
+        $selectColumns = [];
+        foreach ($seedlingColumns as $column) {
+            if ($column === 'id') {
+                continue;
+            }
+
+            $source = $columnSources[$column] ?? null;
+            if (!$source) {
+                continue;
+            }
+
+            $quotedColumn = $this->quoteIdentifier($column);
+            $insertColumns[] = $quotedColumn;
+            $selectColumns[] = $source . '.' . $quotedColumn;
+        }
+
+        if (empty($insertColumns)) {
+            throw new \RuntimeException('seedling 分析表沒有可重建的共同欄位。');
+        }
+
+        $this->truncateTable('seedling');
+
+        DB::connection('mysql3')->statement(
+            'INSERT INTO ' . $this->quoteIdentifier('seedling') . ' (' . implode(', ', $insertColumns) . ') ' .
+            'SELECT ' . implode(', ', $selectColumns) . ' ' .
+            'FROM ' . $this->quoteIdentifier('seedling_records') . ' r ' .
+            'JOIN ' . $this->quoteIdentifier('seedling_stems') . ' st ON r.' . $this->quoteIdentifier('tag') . ' = st.' . $this->quoteIdentifier('tag') . ' ' .
+            'JOIN ' . $this->quoteIdentifier('seedling_individuals') . ' i ON st.' . $this->quoteIdentifier('mtag') . ' = i.' . $this->quoteIdentifier('mtag') . ' ' .
+            'ORDER BY r.' . $this->quoteIdentifier('census') . ', i.' . $this->quoteIdentifier('trap') . ', i.' . $this->quoteIdentifier('plot') . ', st.' . $this->quoteIdentifier('tag')
+        );
+    }
+
     public function mount($user = null, $site = null){
         abort_unless(Auth::user()?->is_admin, 403);
 
@@ -83,24 +140,28 @@ class SeedlingImport extends Component
         $month = str_pad((string) ($record->month ?: date('m')), 2, '0', STR_PAD_LEFT);
         $suffix = $year . $month;
 
-        $this->copyTable('slrecord2', 'slrecord_' . $suffix);
-        $this->copyTable('slcov1', 'slcov_' . $suffix);
-        $this->copyTable('slroll1', 'slroll_' . $suffix);
-        $this->copyTable('seedling', 'seedling_' . $suffix);
-        $this->copyTable('base', 'base_' . $suffix);
-        $this->copyTable('seedling_records', 'seedling_records_' . $suffix);
-        $this->copyTable('seedling_stems', 'seedling_stems_' . $suffix);
-        $this->copyTable('seedling_individuals', 'seedling_individuals_' . $suffix);
+        try {
+            DB::connection('mysql3')->transaction(function () use ($suffix) {
+                $this->copyTable('slrecord2', 'slrecord_' . $suffix);
+                $this->copyTable('slcov1', 'slcov_' . $suffix);
+                $this->copyTable('slroll1', 'slroll_' . $suffix);
+                $this->rebuildSeedlingAnalysisTable();
+                $this->copyTable('seedling', 'seedling_' . $suffix);
 
-        foreach (['slrecord', 'slrecord1', 'slrecord2', 'slcov1', 'slcov2', 'slroll1', 'slroll2'] as $table) {
-            if (Schema::connection('mysql3')->hasTable($table)) {
-                $this->truncateTable($table);
-            }
+                foreach (['slrecord', 'slrecord1', 'slrecord2', 'slcov1', 'slcov2', 'slroll1', 'slroll2'] as $table) {
+                    if (Schema::connection('mysql3')->hasTable($table)) {
+                        $this->truncateTable($table);
+                    }
+                }
+            });
+        } catch (\Throwable $e) {
+            $this->cleanupnote = '資料表整理失敗：' . $e->getMessage();
+            return;
         }
 
         $this->slmaxcensus=FsSeedlingRecord::max('census');
         $this->nowcensus=FsSeedlingSlrecord1::max('census');
-        $this->cleanupnote = '已完成資料表備份與工作表清空：' . $suffix;
+        $this->cleanupnote = '已重建 seedling 分析表、完成 seedling_' . $suffix . ' 備份，並清空工作表。';
     }
 
     private function branchFromTag(string $tag): int

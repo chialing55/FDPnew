@@ -137,7 +137,7 @@
   justify-content: space-between">
             <h2>更換密碼：{{ $user->name }}（{{ $user->email }}）</h2>
 
-            <span style='margin-left:20px' class='back'>重新選擇工作項目</span>
+            <span style='margin-left:20px' class='back'>管理介面首頁</span>
         </div>
         <div class="card">
             <div class="card__box">

@@ -172,6 +172,16 @@ Route::middleware(['auth'])->prefix('admin')->name('admin.')->group(function () 
                 ->defaults('site', 'fushan')
                 ->name('import');
 
+            Route::get('/download', [SeedlingController::class, 'download'])
+                ->middleware('admin')
+                ->defaults('site', 'fushan')
+                ->name('download');
+
+            Route::get('/download/seedling', [SeedlingController::class, 'downloadSeedling'])
+                ->middleware('admin')
+                ->defaults('site', 'fushan')
+                ->name('download.seedling');
+
             // 舊：/admin/fushan/seedling/dataviewer
             Route::get('/dataviewer', [SeedlingController::class, 'dataviewer'])
                 ->defaults('site', 'fushan')
@@ -260,6 +270,14 @@ Route::middleware(['auth'])->prefix('admin')->name('admin.')->group(function () 
                 Route::post('/process/census-records', [MortalityController::class, 'runCensusRecordImport'])
                     ->defaults('site', 'fushan')
                     ->name('process.census-records');
+
+                Route::get('/download', [MortalityController::class, 'download'])
+                    ->defaults('site', 'fushan')
+                    ->name('download');
+
+                Route::get('/download/latest-census-records', [MortalityController::class, 'downloadLatestCensusRecords'])
+                    ->defaults('site', 'fushan')
+                    ->name('download.latest-census-records');
 
                 Route::get('/process/comments/review', [MortalityController::class, 'commentReview'])
                     ->defaults('site', 'fushan')

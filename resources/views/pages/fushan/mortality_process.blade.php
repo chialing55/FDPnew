@@ -310,10 +310,16 @@
     </div>
 
     <div style="margin-top:28px;">
-        <h2 style="margin-bottom:20px;">管理 `comment_other` 資料表</h2>
+        <h2 style="margin-bottom:20px;">`census_record_comments.comment_other`</h2>
+        <ol style="padding-left:20px; line-height:1.8;">
+            <li>`comment_other` 是 `census_record_comments` 裡暫存未整理備註文字的欄位。</li>
+            <li>若某筆備註已對應到 `comment_options`，但還有額外補充文字，補充文字會放在 `comment_other`。</li>
+            <li>若原始備註沒有可對應的標準選項，也會先放在 `comment_other`。</li>
+            <li>進入此頁逐筆確認：能歸類的選成標準 `comment_options`，真的無法歸類或需要保留原文的才留在 `comment_other`。</li>
+        </ol>
         <a href="{{ route('admin.fushan.mortality.process.comment-other.review') }}"
             style="display:inline-block; padding:10px 18px; border:1px solid rgba(0,0,0,.15); border-radius:6px; background:rgba(255,255,255,.9); color:#2f3e3b; text-decoration:none;">
-            管理 `comment_other` 資料表{{ !empty($commentOtherRemainingCount) ? '（' . $commentOtherRemainingCount . '）' : '' }}
+            管理 `census_record_comments.comment_other`{{ !empty($commentOtherRemainingCount) ? '（' . $commentOtherRemainingCount . '）' : '' }}
         </a>
     </div>
     </div>

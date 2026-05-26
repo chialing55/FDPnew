@@ -30,8 +30,8 @@
             <ol>
                 <li>備份 slrecord2(才有完整調查資料)、slcov1、slroll1 為 slrecord_yyyymm、slcov_yyyymm、slroll_yyyymm。</li>
                 <li>清空 slrecord、slrecord1、slrecord2、slcov1、slcov2、slroll1、slroll2 工作表，不刪除資料表。</li>
-                <li>備份 seedling_individuals、seedling_stems、seedling_records 為 *_yyyymm(最新調查年月)。</li>
-                <li>若舊 seedling/base 表仍存在，會一併備份為 seedling_yyyymm、base_yyyymm。</li>
+                <li>清空並重建完整的 seedling 分析資料表。</li>
+                <li>將重建完成的 seedling 備份為 seedling_yyyymm。</li>
             </ol>
             <p style='margin: 10px 0 30px 0'>
                 <button class='recruitbutton' wire:click="cleanupWorkTables" wire:loading.attr="disabled">自動整理資料表</button>

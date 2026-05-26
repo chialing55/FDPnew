@@ -14,6 +14,7 @@ use App\Models\FsSeedsDateinfo;
 use App\Models\FsSeedsFulldata;
 use App\Models\FsSeedsRecord1;
 use App\Models\FsSeedsSplist;
+use App\Services\SeedsDateinfoSyncService;
 
 use App\Jobs\SeedsAddButton;
 
@@ -124,6 +125,7 @@ class SeedsShowentry extends Component
                 $additionalData=['date'=>$this->date, 'census'=>$this->census,  'updated_id' => $user,'note'=>$this->note ,'updated_at' => date("Y-m-d H:i:s")];
                 $inlist = array_merge($inlist, $additionalData);
                 FsSeedsDateinfo::insert($inlist);
+                SeedsDateinfoSyncService::sync();
 
                 $this->refreshCensusState();
                 $this->createTable($this->census2);
@@ -317,7 +319,8 @@ class SeedsShowentry extends Component
     {
 
         // 更新date資料
-        $d_record = FsSeedsDateinfo::where('census', 'like', $this->chcensus)->delete();
+        FsSeedsDateinfo::where('census', 'like', $this->chcensus)->delete();
+        SeedsDateinfoSyncService::sync();
         $this->note2='已刪除 census'.$this->chcensus.' 資料';
 
         $this->dateinfo=FsSeedsDateinfo::query()->orderBy('census', 'desc')->take(5)->get()->toArray(); //取前五筆檢視
@@ -333,7 +336,7 @@ class SeedsShowentry extends Component
 
         if ($this->date3!=''){
 
-            $datecheck=$this->datecheck($this->census3, $this->date3, $this->person31, $this->person32, $this->person33);
+            $datecheck=$this->dateinfo($this->census3, $this->date3, $this->person31, $this->person32, $this->person33);
 
             if (is_null($this->note3)){$this->note3='';}
 
@@ -350,6 +353,7 @@ class SeedsShowentry extends Component
             $inlist = array_merge($inlist, $additionalData);
             // dd($inlist);
             FsSeedsDateinfo::where('census', 'like', $this->census3)->update($inlist);
+            SeedsDateinfoSyncService::sync();
 
             // $this->createTable($this->census);
             $this->resetExcept(['user']);

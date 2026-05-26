@@ -4,7 +4,7 @@
         <div class="loading-container" wire:loading.class="visible">
             <div class="loading-spinner"></div>
         </div>
-        <h2>福山小苗資料檢視<span style="margin-left: 20px ; font-weight: 500; font-size: 70%;">共 {{ $total }} 筆</span></h2>
+        <h2>福山小苗資料檢視<span style="margin-left: 20px ; font-weight: 500; font-size: 70%;">最新調查年月：{{ $latestSurveyYm }}</span><span style="margin-left: 20px ; font-weight: 500; font-size: 70%;">共 {{ $total }} 筆</span></h2>
         <hr>
         <div class="pages" style="margin-bottom: 14px; display: flex; align-items: center; gap: 12px; flex-wrap: wrap;">
             <div class="totalnum">每頁 {{ $perPage }} 筆</div>
@@ -37,8 +37,6 @@
                     <th>葉片數</th>
                     <th>新舊</th>
                     <th>萌櫱</th>
-                    <th>x</th>
-                    <th>y</th>
                     <th style='width: 220px;'>note</th>
                 </tr>
                 <tr>
@@ -68,20 +66,10 @@
                         </select>
                     </td>
                     <td>
-                        <select class="fs100" wire:model='mtag' wire:change="search">
-                            <option value="all">all</option>
-                            @foreach($mtagOptions as $mtagOption)
-                                <option value="{{ $mtagOption }}">{{ $mtagOption }}</option>
-                            @endforeach
-                        </select>
+                        <input type="text" class="fs100" style="width: 70px;" wire:model="mtag" wire:change="search" wire:keydown.enter="search" placeholder="all">
                     </td>
                     <td>
-                        <select class="fs100" wire:model='tag' wire:change="search">
-                            <option value="all">all</option>
-                            @foreach($tagOptions as $tagOption)
-                                <option value="{{ $tagOption }}">{{ $tagOption }}</option>
-                            @endforeach
-                        </select>
+                        <input type="text" class="fs100" style="width: 70px;" wire:model="tag" wire:change="search" wire:keydown.enter="search" placeholder="all">
                     </td>
                     <td>
                         <select class="fs100" style='width: 150px;' wire:model='species' wire:change="search">
@@ -120,8 +108,6 @@
                         </select>
                     </td>
                     <td></td>
-                    <td></td>
-                    <td></td>
                 </tr>
             </thead>
             <tbody>
@@ -145,8 +131,6 @@
                         <td>{{$row['leaf']}}</td>
                         <td>{{$row['recruit']}}</td>
                         <td>{{$row['sprout']}}</td>
-                        <td>{{$row['x']}}</td>
-                        <td>{{$row['y']}}</td>
                         <td>{{$row['note']}}</td>
                     </tr>
                 @endforeach

@@ -41,68 +41,14 @@ class SeedlingDataviewer extends Component
         $this->user = $user;
         $this->site = $site;
 
-        $this->plots = DB::connection('njs_seedling')
-            ->table('quadrats')
-            ->select('plot_name')
-            ->whereNotNull('plot_name')
-            ->distinct()
-            ->orderBy('plot_name')
-            ->pluck('plot_name')
-            ->toArray();
-
-        $this->quadrats = DB::connection('njs_seedling')
-            ->table('quadrats')
-            ->select('quadrat')
-            ->distinct()
-            ->orderBy('quadrat')
-            ->pluck('quadrat')
-            ->toArray();
-
-        $this->months = DB::connection('njs_seedling')
-            ->table('censuses')
-            ->select('ym')
-            ->distinct()
-            ->orderBy('ym')
-            ->pluck('ym')
-            ->toArray();
-
-        $this->speciesOptions = DB::connection('njs_seedling')
-            ->table('seedling_individuals')
-            ->select('standard_species_name')
-            ->distinct()
-            ->orderBy('standard_species_name')
-            ->pluck('standard_species_name')
-            ->map(fn ($species) => trim((string) $species))
-            ->filter(fn ($species) => $species !== '')
-            ->unique()
-            ->values()
-            ->toArray();
-
-        $this->tagOptions = DB::connection('njs_seedling')
-            ->table('seedling_individuals')
-            ->select('tag')
-            ->distinct()
-            ->orderBy('tag')
-            ->pluck('tag')
-            ->toArray();
-
-        $this->statusOptions = DB::connection('njs_seedling')
-            ->table('seedling_records')
-            ->select('status')
-            ->whereNotNull('status')
-            ->distinct()
-            ->orderBy('status')
-            ->pluck('status')
-            ->filter(fn ($status) => trim((string) $status) !== '')
-            ->values()
-            ->toArray();
-
+        $this->refreshFilterOptions();
         $this->search();
     }
 
     public function search(): void
     {
         $this->page = 1;
+        $this->refreshFilterOptions();
         $this->loadData();
     }
 
@@ -165,12 +111,19 @@ class SeedlingDataviewer extends Component
             ->toArray();
     }
 
+    private function refreshFilterOptions(): void
+    {
+        $this->plots = $this->distinctOption('quadrats.plot_name', 'plot');
+        $this->quadrats = $this->distinctOption('quadrats.quadrat', 'quadrat');
+        $this->months = $this->distinctOption('censuses.ym', 'ym');
+        $this->speciesOptions = $this->distinctOption('seedling_individuals.standard_species_name', 'species');
+        $this->tagOptions = $this->distinctOption('seedling_individuals.tag', 'tag');
+        $this->statusOptions = $this->distinctOption('seedling_records.status', 'status');
+    }
+
     private function baseQuery()
     {
-        $tag = trim($this->tag);
-        $species = trim($this->species);
-
-        return DB::connection('njs_seedling')
+        $query = DB::connection('njs_seedling')
             ->table('seedling_records')
             ->join('seedling_individuals', 'seedling_records.tag', '=', 'seedling_individuals.tag')
             ->join('quadrats', 'seedling_individuals.quadrat', '=', 'quadrats.quadrat')
@@ -192,19 +145,55 @@ class SeedlingDataviewer extends Component
                 'seedling_records.disease_spot_percent',
                 'seedling_records.death_cause',
                 'seedling_records.remark',
-            ])
-            ->when($this->plot !== 'all', fn ($query) => $query->where('quadrats.plot_name', $this->plot))
-            ->when($this->quadrat !== 'all', fn ($query) => $query->where('quadrats.quadrat', $this->quadrat))
-            ->when($this->ym !== 'all', fn ($query) => $query->where('censuses.ym', $this->ym))
-            ->when($tag !== '' && $tag !== 'all', fn ($query) => $query->where('seedling_individuals.tag', $tag))
-            ->when($this->status !== 'all', fn ($query) => $query->where('seedling_records.status', $this->status))
+            ]);
+
+        return $this->applyFilters($query);
+    }
+
+    private function optionBaseQuery(?string $except = null)
+    {
+        $query = DB::connection('njs_seedling')
+            ->table('seedling_records')
+            ->join('seedling_individuals', 'seedling_records.tag', '=', 'seedling_individuals.tag')
+            ->join('quadrats', 'seedling_individuals.quadrat', '=', 'quadrats.quadrat')
+            ->join('censuses', 'seedling_records.census', '=', 'censuses.census');
+
+        return $this->applyFilters($query, $except);
+    }
+
+    private function applyFilters($query, ?string $except = null)
+    {
+        $tag = trim($this->tag);
+        $species = trim($this->species);
+
+        return $query
+            ->when($except !== 'plot' && $this->plot !== 'all', fn ($query) => $query->where('quadrats.plot_name', $this->plot))
+            ->when($except !== 'quadrat' && $this->quadrat !== 'all', fn ($query) => $query->where('quadrats.quadrat', $this->quadrat))
+            ->when($except !== 'ym' && $this->ym !== 'all', fn ($query) => $query->where('censuses.ym', $this->ym))
+            ->when($except !== 'tag' && $tag !== '' && $tag !== 'all', fn ($query) => $query->where('seedling_individuals.tag', $tag))
+            ->when($except !== 'status' && $this->status !== 'all', fn ($query) => $query->where('seedling_records.status', $this->status))
             ->when($this->hasNumericFilter($this->heightValue), fn ($query) => $this->applyNumericFilter($query, 'seedling_records.height', $this->heightOperator, $this->heightValue))
             ->when($this->hasNumericFilter($this->leafEatenValue), fn ($query) => $this->applyNumericFilter($query, 'seedling_records.leaf_eaten_percent', $this->leafEatenOperator, $this->leafEatenValue))
             ->when($this->hasNumericFilter($this->leafCoveredValue), fn ($query) => $this->applyNumericFilter($query, 'seedling_records.leaf_covered_percent', $this->leafCoveredOperator, $this->leafCoveredValue))
             ->when($this->hasNumericFilter($this->diseaseSpotValue), fn ($query) => $this->applyNumericFilter($query, 'seedling_records.disease_spot_percent', $this->diseaseSpotOperator, $this->diseaseSpotValue))
-            ->when($species !== '' && $species !== 'all', function ($query) use ($species) {
+            ->when($except !== 'species' && $species !== '' && $species !== 'all', function ($query) use ($species) {
                 $query->where('seedling_individuals.standard_species_name', $species);
             });
+    }
+
+    private function distinctOption(string $column, string $except): array
+    {
+        return $this->optionBaseQuery($except)
+            ->selectRaw("{$column} as option_value")
+            ->whereNotNull(DB::raw($column))
+            ->distinct()
+            ->orderBy('option_value')
+            ->pluck('option_value')
+            ->map(fn ($value) => trim((string) $value))
+            ->filter(fn ($value) => $value !== '')
+            ->unique()
+            ->values()
+            ->toArray();
     }
 
     private function hasNumericFilter(string $value): bool

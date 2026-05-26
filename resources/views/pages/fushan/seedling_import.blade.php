@@ -2,7 +2,8 @@
 @section('pagejs')
 
 <script type="text/javascript">
-  $('.list5').addClass('now');
+  $('.list3').addClass('now');
+  $('.list3 hr').css('color', '#91A21C');
 </script>
 
 @endsection
