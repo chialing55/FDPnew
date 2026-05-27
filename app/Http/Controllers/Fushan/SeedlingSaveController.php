@@ -267,6 +267,7 @@ class SeedlingSaveController extends Controller
             }
         }
     }
+
     public function getTableInstance($entry)
     {
         if ($entry == '1') {
@@ -449,18 +450,7 @@ class SeedlingSaveController extends Controller
                     continue;
                 }
 
-                $tag = strtoupper(trim((string) ($row['tag'] ?? '')));
-                $mtag = trim((string) ($row['mtag'] ?? ''));
-                $originalTag = strtoupper(trim((string) ($row['original_tag'] ?? '')));
-                $originalMtag = trim((string) ($row['original_mtag'] ?? ''));
-                if ($mtag !== '' && $mtag !== $originalMtag && ($tag === '' || $tag === $originalTag)) {
-                    $tag = $originalMtag !== '' && str_starts_with($originalTag, $originalMtag)
-                        ? $mtag . substr($originalTag, strlen($originalMtag))
-                        : $mtag;
-                }
-                if ($tag !== '' && ($mtag === '' || ($tag !== $originalTag && $mtag === $originalMtag))) {
-                    $mtag = explode('.', $tag)[0];
-                }
+                ['tag' => $tag, 'mtag' => $mtag] = $this->seedlingIdentityValues($row);
 
                 $update = $this->onlySeedlingUpdateFields($row, [
                     'census', 'year', 'month', 'date', 'trap', 'plot', 'tag', 'mtag', 'csp',
@@ -488,19 +478,13 @@ class SeedlingSaveController extends Controller
                     continue;
                 }
 
-                $tag = strtoupper(trim((string) ($row["tag"] ?? "")));
-                $mtag = trim((string) ($row["mtag"] ?? ""));
-                $originalTag = strtoupper(trim((string) ($row["original_tag"] ?? "")));
-                $originalMtag = trim((string) ($row["original_mtag"] ?? ""));
-                $isSprout = strtoupper(trim((string) ($row["sprout"] ?? ""))) === "TRUE";
-                if ($mtag !== "" && $mtag !== $originalMtag && ($tag === "" || $tag === $originalTag)) {
-                    $tag = $originalMtag !== "" && str_starts_with($originalTag, $originalMtag)
-                        ? $mtag . substr($originalTag, strlen($originalMtag))
-                        : $mtag;
-                }
-                if ($tag !== "" && ($mtag === "" || ($tag !== $originalTag && $mtag === $originalMtag))) {
-                    $mtag = explode(".", $tag)[0];
-                }
+                [
+                    'tag' => $tag,
+                    'mtag' => $mtag,
+                    'originalTag' => $originalTag,
+                    'originalMtag' => $originalMtag,
+                    'isSprout' => $isSprout,
+                ] = $this->seedlingIdentityValues($row);
                 if ($tag !== "") {
                     $savedTag = $tag;
                 }
@@ -545,16 +529,7 @@ class SeedlingSaveController extends Controller
                                 ]);
                         }
                     } else {
-                        $stemUpdate = $this->changedSeedlingUpdateFields("seedling_stems", $stemId, $stemUpdate);
-                        if ($stemUpdate !== []) {
-                            $stemUpdate["updated_id"] = $user;
-                            $stemUpdate["updated_at"] = $updatedAt;
-
-                            DB::connection("mysql3")
-                                ->table("seedling_stems")
-                                ->where("id", $stemId)
-                                ->update($stemUpdate);
-                        }
+                        $this->updateChangedSeedlingRow('seedling_stems', $stemId, $stemUpdate, $user, $updatedAt);
                     }
                 }
 
@@ -609,20 +584,10 @@ class SeedlingSaveController extends Controller
                                 ]);
                         }
                     } else {
-                        $individualUpdate = $this->changedSeedlingUpdateFields("seedling_individuals", $individualId, $individualUpdate);
-                        if ($individualUpdate !== []) {
-                            $individualUpdate["updated_id"] = $user;
-                            $individualUpdate["updated_at"] = $updatedAt;
-
-                            DB::connection("mysql3")
-                                ->table("seedling_individuals")
-                                ->where("id", $individualId)
-                                ->update($individualUpdate);
-                        }
+                        $this->updateChangedSeedlingRow('seedling_individuals', $individualId, $individualUpdate, $user, $updatedAt);
                     }
                 }
 
-                $originalTag = strtoupper(trim((string) ($row["original_tag"] ?? "")));
                 if ($tag !== "" && $originalTag !== "" && $tag !== $originalTag) {
                     DB::connection("mysql3")
                         ->table("seedling_records")
@@ -649,13 +614,7 @@ class SeedlingSaveController extends Controller
                     "census", "year", "month", "date", "ht", "cotno", "leafno",
                     "recruit", "status", "note",
                 ]);
-                $recordUpdate["updated_id"] = $user;
-                $recordUpdate["updated_at"] = $updatedAt;
-
-                DB::connection("mysql3")
-                    ->table("seedling_records")
-                    ->where("id", $recordId)
-                    ->update($recordUpdate);
+                $this->updateChangedSeedlingRow('seedling_records', $recordId, $recordUpdate, $user, $updatedAt);
             }
 
         });
@@ -813,6 +772,43 @@ class SeedlingSaveController extends Controller
         return $values;
     }
 
+    private function seedlingIdentityValues(array $row): array
+    {
+        $tag = strtoupper(trim((string) ($row['tag'] ?? '')));
+        $mtag = trim((string) ($row['mtag'] ?? ''));
+        $originalTag = strtoupper(trim((string) ($row['original_tag'] ?? '')));
+        $originalMtag = trim((string) ($row['original_mtag'] ?? ''));
+        $isSprout = strtoupper(trim((string) ($row['sprout'] ?? ''))) === 'TRUE';
+
+        if ($mtag !== '' && $mtag !== $originalMtag && ($tag === '' || $tag === $originalTag)) {
+            $tag = $originalMtag !== '' && str_starts_with($originalTag, $originalMtag)
+                ? $mtag . substr($originalTag, strlen($originalMtag))
+                : $mtag;
+        }
+
+        if ($tag !== '' && ($mtag === '' || ($tag !== $originalTag && $mtag === $originalMtag))) {
+            $mtag = explode('.', $tag)[0];
+        }
+
+        return compact('tag', 'mtag', 'originalTag', 'originalMtag', 'isSprout');
+    }
+
+    private function updateChangedSeedlingRow(string $table, $id, array $values, string $user, string $updatedAt): void
+    {
+        $changes = $this->changedSeedlingUpdateFields($table, $id, $values);
+        if ($changes === []) {
+            return;
+        }
+
+        $changes['updated_id'] = $user;
+        $changes['updated_at'] = $updatedAt;
+
+        DB::connection('mysql3')
+            ->table($table)
+            ->where('id', $id)
+            ->update($changes);
+    }
+
     private function seedlingUpdateDuplicateNumberNote(array $identityRows): string
     {
         foreach ($identityRows as $row) {
@@ -820,20 +816,13 @@ class SeedlingSaveController extends Controller
                 continue;
             }
 
-            $tag = strtoupper(trim((string) ($row["tag"] ?? "")));
-            $mtag = trim((string) ($row["mtag"] ?? ""));
-            $originalTag = strtoupper(trim((string) ($row["original_tag"] ?? "")));
-            $originalMtag = trim((string) ($row["original_mtag"] ?? ""));
-            $isSprout = strtoupper(trim((string) ($row["sprout"] ?? ""))) === "TRUE";
-
-            if ($mtag !== "" && $mtag !== $originalMtag && ($tag === "" || $tag === $originalTag)) {
-                $tag = $originalMtag !== "" && str_starts_with($originalTag, $originalMtag)
-                    ? $mtag . substr($originalTag, strlen($originalMtag))
-                    : $mtag;
-            }
-            if ($tag !== "" && ($mtag === "" || ($tag !== $originalTag && $mtag === $originalMtag))) {
-                $mtag = explode(".", $tag)[0];
-            }
+            [
+                'tag' => $tag,
+                'mtag' => $mtag,
+                'originalTag' => $originalTag,
+                'originalMtag' => $originalMtag,
+                'isSprout' => $isSprout,
+            ] = $this->seedlingIdentityValues($row);
 
             if (str_contains($tag, ".") && !$isSprout) {
                 return "tag {$tag} 為分支編號，萌櫱需為 TRUE。";
@@ -906,6 +895,7 @@ class SeedlingSaveController extends Controller
             ->filter(fn ($value, $field) => (string) ($current->{$field} ?? '') !== (string) ($value ?? ''))
             ->all();
     }
+
     private function onlySeedlingUpdateFields(array $row, array $allowed): array
     {
         $update = [];
