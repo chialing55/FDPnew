@@ -26,6 +26,43 @@ const resolveSeedlingUser = () => {
     return "";
 };
 
+function seedlingAjaxErrorDetail(err, fallback = "儲存失敗") {
+    const response = err?.response || err?.xhr?.responseJSON || {};
+    const directMessage =
+        response?.datasavenote ||
+        response?.message ||
+        response?.error ||
+        response?.seedssavenote ||
+        response?.finishnote;
+
+    if (directMessage) {
+        return directMessage;
+    }
+
+    const responseText = err?.xhr?.responseText || "";
+    if (responseText) {
+        const text = $("<div>").html(responseText).text().replace(/\s+/g, " ").trim();
+        if (text) {
+            return text.length > 500 ? `${text.slice(0, 500)}...` : text;
+        }
+    }
+
+    const responseJson = Object.keys(response).length ? JSON.stringify(response) : "";
+    if (responseJson && responseJson !== "{}") {
+        return "後端回傳錯誤但沒有訊息：" + responseJson;
+    }
+
+    if (err?.error && err.error !== "Save error") {
+        return err.error;
+    }
+
+    if (err?.xhr?.status) {
+        return `HTTP ${err.xhr.status} ${err?.error && err.error !== "Save error" ? err.error : fallback}`;
+    }
+
+    return fallback;
+}
+
 const seedlingPage = (window.seedlingPage = window.seedlingPage || {
     routes: {
         base: seedlingRoutes.base || "/admin/fushan/seedling",
@@ -1690,14 +1727,14 @@ function renderSeedlingUpdateTables(tag, workRows, identityRows, masterRows, csp
 
         makeAjaxRequest(
             seedlingPage.route("updateData"),
-            {
+            JSON.stringify({
                 tag,
                 from,
                 user: seedlingPage.context.user,
                 workRows: workHot ? workHot.getSourceData() : [],
                 identityRows: identityHot ? identityHot.getSourceData() : [],
                 masterRows: masterHot ? masterHot.getSourceData() : [],
-            },
+            }),
             "POST",
             function (res) {
                 seedlingPage.setNote(".seedlingupdatesavenote", res.datasavenote || "資料已儲存", res.datasavenote_type || "success");
@@ -1708,9 +1745,11 @@ function renderSeedlingUpdateTables(tag, workRows, identityRows, masterRows, csp
                 }
             },
             function (err) {
-                const detail = err?.response?.datasavenote || err?.error || "儲存失敗";
+                const detail = seedlingAjaxErrorDetail(err, "儲存失敗");
                 seedlingPage.setNote(".seedlingupdatesavenote", detail, "error");
+                console.error("seedling update save failed", err);
             },
+            { contentType: "application/json", processData: false, dataType: "json" },
         );
     });
 

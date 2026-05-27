@@ -80,7 +80,7 @@ function getAlternoteScope(plotType) {
   return $('.alternotetalbeouter').first();
 }
 
-function makeAjaxRequest(url, requestData, requstType, successCallback, errorCallback) {
+function makeAjaxRequest(url, requestData, requstType, successCallback, errorCallback, requestOptions = {}) {
   $.ajaxSetup({
     headers: {
       'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content'),
@@ -90,11 +90,24 @@ function makeAjaxRequest(url, requestData, requstType, successCallback, errorCal
     url: url,
     data: requestData,
     type: requstType,
+    contentType: requestOptions.contentType || undefined,
+    processData: requestOptions.processData ?? true,
+    dataType: requestOptions.dataType || undefined,
     success: function (res) {
       if (res.result === 'ok') {
-        successCallback(res);
+        try {
+          successCallback(res);
+        } catch (callbackError) {
+          const detail = callbackError?.message || String(callbackError || "前端處理儲存回應失敗");
+          console.error("Save success callback failed.", callbackError);
+          if (errorCallback) {
+            errorCallback({ error: "前端處理儲存回應失敗：" + detail, xhr: null, status: "callback", response: res });
+          } else {
+            console.log(detail);
+          }
+        }
       } else {
-        const detail = res?.message || res?.datasavenote || res?.error || 'Save error';
+        const detail = res?.message || res?.datasavenote || res?.error || (res ? "後端回傳錯誤但沒有訊息：" + JSON.stringify(res) : 'Save error');
         if (errorCallback) {
           errorCallback({ error: detail, xhr: null, status: 'application', response: res });
         } else {
