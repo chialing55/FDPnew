@@ -516,9 +516,6 @@ class SeedlingSaveController extends Controller
                     if ($mtag !== "") {
                         $stemUpdate["mtag"] = $mtag;
                     }
-                    $stemUpdate["updated_id"] = $user;
-                    $stemUpdate["updated_at"] = $updatedAt;
-
                     if (($tag !== "" && $tag !== $originalTag) || ($mtag !== "" && $mtag !== $originalMtag)) {
                         $oldStem = DB::connection("mysql3")
                             ->table("seedling_stems")
@@ -548,10 +545,16 @@ class SeedlingSaveController extends Controller
                                 ]);
                         }
                     } else {
-                        DB::connection("mysql3")
-                            ->table("seedling_stems")
-                            ->where("id", $stemId)
-                            ->update($stemUpdate);
+                        $stemUpdate = $this->changedSeedlingUpdateFields("seedling_stems", $stemId, $stemUpdate);
+                        if ($stemUpdate !== []) {
+                            $stemUpdate["updated_id"] = $user;
+                            $stemUpdate["updated_at"] = $updatedAt;
+
+                            DB::connection("mysql3")
+                                ->table("seedling_stems")
+                                ->where("id", $stemId)
+                                ->update($stemUpdate);
+                        }
                     }
                 }
 
@@ -561,9 +564,6 @@ class SeedlingSaveController extends Controller
                     if ($mtag !== "") {
                         $individualUpdate["mtag"] = $mtag;
                     }
-                    $individualUpdate["updated_id"] = $user;
-                    $individualUpdate["updated_at"] = $updatedAt;
-
                     if ($originalMtag !== "" && $mtag !== "" && $mtag !== $originalMtag) {
                         $oldIndividual = DB::connection("mysql3")
                             ->table("seedling_individuals")
@@ -609,10 +609,16 @@ class SeedlingSaveController extends Controller
                                 ]);
                         }
                     } else {
-                        DB::connection("mysql3")
-                            ->table("seedling_individuals")
-                            ->where("id", $individualId)
-                            ->update($individualUpdate);
+                        $individualUpdate = $this->changedSeedlingUpdateFields("seedling_individuals", $individualId, $individualUpdate);
+                        if ($individualUpdate !== []) {
+                            $individualUpdate["updated_id"] = $user;
+                            $individualUpdate["updated_at"] = $updatedAt;
+
+                            DB::connection("mysql3")
+                                ->table("seedling_individuals")
+                                ->where("id", $individualId)
+                                ->update($individualUpdate);
+                        }
                     }
                 }
 
@@ -881,6 +887,25 @@ class SeedlingSaveController extends Controller
         return "";
     }
 
+    private function changedSeedlingUpdateFields(string $table, $id, array $values): array
+    {
+        if ($values === []) {
+            return [];
+        }
+
+        $current = DB::connection('mysql3')
+            ->table($table)
+            ->where('id', $id)
+            ->first(array_keys($values));
+
+        if (!$current) {
+            return $values;
+        }
+
+        return collect($values)
+            ->filter(fn ($value, $field) => (string) ($current->{$field} ?? '') !== (string) ($value ?? ''))
+            ->all();
+    }
     private function onlySeedlingUpdateFields(array $row, array $allowed): array
     {
         $update = [];
