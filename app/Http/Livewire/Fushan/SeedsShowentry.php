@@ -122,7 +122,7 @@ class SeedsShowentry extends Component
                 $inlist['period']=$datecheck['period'];
                 $inlist['workers']=$datecheck['workers'];
 
-                $additionalData=['date'=>$this->date, 'census'=>$this->census,  'updated_id' => $user,'note'=>$this->note ,'updated_at' => date("Y-m-d H:i:s")];
+                $additionalData=['date'=>$this->date, 'census'=>$this->census,  'updated_id' => $user,'note'=>$this->note, 'status' => '', 'updated_at' => date("Y-m-d H:i:s")];
                 $inlist = array_merge($inlist, $additionalData);
                 FsSeedsDateinfo::insert($inlist);
                 SeedsDateinfoSyncService::sync();
