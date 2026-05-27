@@ -1,4 +1,6 @@
-<style>
+
+<div class='flex text_outbox' style='flex-direction: column; align-items: center;'>
+    <style>
     #fs-seedling-dataviewer-table .link-button {
         appearance: none;
         background: transparent;
@@ -10,8 +12,6 @@
         white-space: nowrap;
     }
 </style>
-
-<div class='flex text_outbox' style='flex-direction: column; align-items: center;'>
     <div class='text_box' style='margin: 0 auto;'>
         <div class="loading-container" wire:loading.class="visible">
             <div class="loading-spinner"></div>
