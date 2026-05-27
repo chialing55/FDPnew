@@ -439,7 +439,8 @@ class SeedlingSaveController extends Controller
 
         $analysisTags = $this->collectAffectedSeedlingTags($workRows, $identityRows, $masterRows);
 
-        DB::connection('mysql3')->transaction(function () use ($workRows, $identityRows, $masterRows, $user, $updatedAt, &$savedTag) {
+        try {
+            DB::connection('mysql3')->transaction(function () use ($workRows, $identityRows, $masterRows, $user, $updatedAt, &$savedTag) {
             foreach ($workRows as $row) {
                 if (!is_array($row)) {
                     continue;
@@ -617,8 +618,21 @@ class SeedlingSaveController extends Controller
                 $this->updateChangedSeedlingRow('seedling_records', $recordId, $recordUpdate, $user, $updatedAt);
             }
 
-        });
-        $this->syncSeedlingAnalysisRows($analysisTags);
+            });
+            $this->syncSeedlingAnalysisRows($analysisTags);
+        } catch (\Throwable $e) {
+            Log::error('seedling.saveupdate.failed', [
+                'tag' => $currentTag,
+                'from' => $from,
+                'message' => $e->getMessage(),
+            ]);
+
+            return [
+                'result' => 'error',
+                'datasavenote' => '資料儲存失敗：' . $e->getMessage(),
+                'datasavenote_type' => 'error',
+            ];
+        }
 
         return [
             'result' => 'ok',
@@ -893,7 +907,7 @@ class SeedlingSaveController extends Controller
 
         return collect($values)
             ->filter(fn ($value, $field) => (string) ($current->{$field} ?? '') !== (string) ($value ?? ''))
-            ->all();
+            ->toArray();
     }
 
     private function onlySeedlingUpdateFields(array $row, array $allowed): array
