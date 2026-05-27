@@ -37,6 +37,8 @@ class SeedlingDataviewer extends Component
     public int $total = 0;
     public int $totalPages = 1;
     public string $latestSurveyYm = "尚無資料";
+    public string $sortField = 'census';
+    public string $sortDirection = 'asc';
 
     public function mount($user = null, $site = null): void
     {
@@ -48,12 +50,14 @@ class SeedlingDataviewer extends Component
         $this->search();
     }
 
+
     public function search(): void
     {
         $this->page = 1;
         $this->refreshFilterOptions();
         $this->loadData();
     }
+
 
     public function previousPage(): void
     {
@@ -63,6 +67,7 @@ class SeedlingDataviewer extends Component
         }
     }
 
+
     public function nextPage(): void
     {
         if ($this->page < $this->totalPages) {
@@ -71,12 +76,41 @@ class SeedlingDataviewer extends Component
         }
     }
 
+
     public function goToPage($page): void
     {
         $page = max(1, min((int) $page, $this->totalPages));
         $this->page = $page;
         $this->loadData();
     }
+
+    public function sortBy(string $field): void
+    {
+        if (!array_key_exists($field, $this->sortableColumns())) {
+            return;
+        }
+
+        if ($this->sortField === $field) {
+            $this->sortDirection = $this->sortDirection === 'asc' ? 'desc' : 'asc';
+        } else {
+            $this->sortField = $field;
+            $this->sortDirection = 'asc';
+        }
+
+        $this->page = 1;
+        $this->loadData();
+    }
+
+
+    public function sortIndicator(string $field): string
+    {
+        if ($this->sortField !== $field) {
+            return '';
+        }
+
+        return $this->sortDirection === 'asc' ? ' ▲' : ' ▼';
+    }
+
 
     private function loadLatestSurveyYm(): string
     {
@@ -93,6 +127,7 @@ class SeedlingDataviewer extends Component
         return sprintf("%04d-%02d", (int) $latest->year, (int) $latest->month);
     }
 
+
     private function loadData(): void
     {
         $query = $this->baseQuery();
@@ -101,11 +136,7 @@ class SeedlingDataviewer extends Component
         $this->totalPages = max(1, (int) ceil($this->total / $this->perPage));
         $this->page = max(1, min($this->page, $this->totalPages));
 
-        $this->data = $query
-            ->orderBy('s.trap')
-            ->orderBy('s.plot')
-            ->orderBy('s.census')
-            ->orderBy('s.tag')
+        $this->data = $this->applySorting($query)
             ->offset(($this->page - 1) * $this->perPage)
             ->limit($this->perPage)
             ->get()
@@ -127,6 +158,7 @@ class SeedlingDataviewer extends Component
             ->toArray();
     }
 
+
     private function refreshFilterOptions(): void
     {
         $this->traps = $this->distinctOption('s.trap', 'trap');
@@ -137,6 +169,7 @@ class SeedlingDataviewer extends Component
         $this->recruitOptions = $this->distinctOption('s.recruit', 'recruit');
         $this->sproutOptions = $this->distinctOption('s.sprout', 'sprout');
     }
+
 
     private function baseQuery()
     {
@@ -162,12 +195,14 @@ class SeedlingDataviewer extends Component
         return $this->applyFilters($query);
     }
 
+
     private function optionBaseQuery(?string $except = null)
     {
         $query = DB::connection("mysql3")->table("seedling as s");
 
         return $this->applyFilters($query, $except);
     }
+
 
     private function applyFilters($query, ?string $except = null)
     {
@@ -192,6 +227,35 @@ class SeedlingDataviewer extends Component
             ->when($this->hasNumericFilter($this->heightValue), fn ($query) => $this->applyNumericFilter($query, 's.ht', $this->heightOperator, $this->heightValue));
     }
 
+
+    private function sortableColumns(): array
+    {
+        return [
+            'census' => ['s.census'],
+            'trap' => ['s.trap'],
+            'mtag' => ['s.mtag'],
+            'tag' => ['s.tag'],
+            'species' => ['s.csp'],
+        ];
+    }
+
+
+    private function applySorting($query)
+    {
+        $columns = $this->sortableColumns()[$this->sortField] ?? $this->sortableColumns()['census'];
+        $direction = $this->sortDirection === 'desc' ? 'desc' : 'asc';
+
+        foreach ($columns as $column) {
+            $query->orderBy($column, $direction);
+        }
+
+        return $query
+            ->orderBy('s.census')
+            ->orderBy('s.trap')
+            ->orderBy('s.plot')
+            ->orderBy('s.tag');
+    }
+
     private function distinctOption(string $column, string $except): array
     {
         return $this->optionBaseQuery($except)
@@ -206,6 +270,7 @@ class SeedlingDataviewer extends Component
             ->toArray();
     }
 
+
     private function distinctMonthOptions(): array
     {
         return $this->optionBaseQuery('ym')
@@ -216,10 +281,12 @@ class SeedlingDataviewer extends Component
             ->toArray();
     }
 
+
     private function hasNumericFilter(string $value): bool
     {
         return trim($value) !== '' && is_numeric($value);
     }
+
 
     private function applyNumericFilter($query, string $column, string $operator, string $value)
     {
@@ -236,6 +303,7 @@ class SeedlingDataviewer extends Component
         return $query->where($column, $sqlOperator, (float) $value);
     }
 
+
     private function formatNumber($value): string
     {
         if ($value === null || $value === '') {
@@ -244,6 +312,7 @@ class SeedlingDataviewer extends Component
 
         return rtrim(rtrim((string) $value, '0'), '.');
     }
+
 
     private function formatLeafCount($cotyledon, $leaf): string
     {
@@ -258,8 +327,10 @@ class SeedlingDataviewer extends Component
         return $this->formatNumber($cotyledon) . '+' . $this->formatNumber($leaf);
     }
 
+
     public function render()
     {
         return view('livewire.fushan.seedling-dataviewer');
     }
+
 }

@@ -1,3 +1,15 @@
+<style>
+    #fs-seedling-dataviewer-table .link-button {
+        appearance: none;
+        background: transparent;
+        border: 0;
+        color: inherit;
+        cursor: pointer;
+        font: inherit;
+        padding: 0;
+        white-space: nowrap;
+    }
+</style>
 
 <div class='flex text_outbox' style='flex-direction: column; align-items: center;'>
     <div class='text_box' style='margin: 0 auto;'>
@@ -21,17 +33,17 @@
         <table
             id='fs-seedling-dataviewer-table'
             class='tablesorter'
-            wire:key="fs-seedling-dataviewer-{{ $trap }}-{{ $plot }}-{{ $ym }}-{{ md5($mtag) }}-{{ md5($tag) }}-{{ md5($species) }}-{{ $status }}-{{ $recruit }}-{{ $sprout }}-{{ $page }}-{{ count($data) }}"
+            wire:key="fs-seedling-dataviewer-{{ $trap }}-{{ $plot }}-{{ $ym }}-{{ md5($mtag) }}-{{ md5($tag) }}-{{ md5($species) }}-{{ $status }}-{{ $recruit }}-{{ $sprout }}-{{ $sortField }}-{{ $sortDirection }}-{{ $page }}-{{ count($data) }}"
         >
             <thead>
                 <tr>
-                    <th>trap</th>
-                    <th>plot</th>
-                    <th>census</th>
+                    <th><button type="button" class="link-button" wire:click="sortBy('census')">census{{ $this->sortIndicator('census') }}</button></th>
                     <th>調查年月</th>
-                    <th>mtag</th>
-                    <th>tag</th>
-                    <th>種類</th>
+                    <th><button type="button" class="link-button" wire:click="sortBy('trap')">trap{{ $this->sortIndicator('trap') }}</button></th>
+                    <th>plot</th>
+                    <th><button type="button" class="link-button" wire:click="sortBy('mtag')">mtag{{ $this->sortIndicator('mtag') }}</button></th>
+                    <th><button type="button" class="link-button" wire:click="sortBy('tag')">tag{{ $this->sortIndicator('tag') }}</button></th>
+                    <th><button type="button" class="link-button" wire:click="sortBy('species')">種類{{ $this->sortIndicator('species') }}</button></th>
                     <th>長度</th>
                     <th>葉片數</th>
                     <th>新舊</th>
@@ -40,6 +52,15 @@
                     <th style='width: 220px;'>note</th>
                 </tr>
                 <tr>
+                    <td></td>
+                    <td>
+                        <select class="fs100" wire:model='ym' wire:change="search">
+                            <option value="all">all</option>
+                            @foreach($months as $monthOption)
+                                <option value="{{$monthOption}}">{{$monthOption}}</option>
+                            @endforeach
+                        </select>
+                    </td>
                     <td>
                         <select class="fs100" wire:model='trap' wire:change="search">
                             <option value="all">all</option>
@@ -53,15 +74,6 @@
                             <option value="all">all</option>
                             @foreach($plots as $plotOption)
                                 <option value="{{$plotOption}}">{{$plotOption}}</option>
-                            @endforeach
-                        </select>
-                    </td>
-                    <td></td>
-                    <td>
-                        <select class="fs100" wire:model='ym' wire:change="search">
-                            <option value="all">all</option>
-                            @foreach($months as $monthOption)
-                                <option value="{{$monthOption}}">{{$monthOption}}</option>
                             @endforeach
                         </select>
                     </td>
@@ -113,16 +125,16 @@
             <tbody>
                 @foreach($data as $row)
                     @php
-                        $isNewPlot = !$loop->first && ($row['trap'] !== $data[$loop->index - 1]['trap'] || $row['plot'] !== $data[$loop->index - 1]['plot']);
+                        $isNewCensus = !$loop->first && $row['census'] !== $data[$loop->index - 1]['census'];
                     @endphp
                     <tr
-                        wire:key="fs-seedling-row-{{ $row['trap'] }}-{{ $row['plot'] }}-{{ $row['census'] }}-{{ $row['tag'] }}"
-                        @if($isNewPlot) style="border-top: 3px solid #6f7f18;" @endif
+                        wire:key="fs-seedling-row-{{ $row['census'] }}-{{ $row['trap'] }}-{{ $row['plot'] }}-{{ $row['tag'] }}"
+                        @if($isNewCensus) style="border-top: 3px solid #6f7f18;" @endif
                     >
-                        <td>{{$row['trap']}}</td>
-                        <td>{{$row['plot']}}</td>
                         <td>{{$row['census']}}</td>
                         <td>{{$row['ym']}}</td>
+                        <td>{{$row['trap']}}</td>
+                        <td>{{$row['plot']}}</td>
                         <td>{{$row['mtag']}}</td>
                         <td>{{$row['tag']}}</td>
                         <td>{{$row['species']}}</td>
