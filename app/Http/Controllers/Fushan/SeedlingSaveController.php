@@ -624,6 +624,7 @@ class SeedlingSaveController extends Controller
                         ->update([
                             "tag" => $tag,
                             "updated_id" => $user,
+                            "updated_at" => $updatedAt,
                         ]);
                 }
             }
@@ -643,6 +644,7 @@ class SeedlingSaveController extends Controller
                     "recruit", "status", "note",
                 ]);
                 $recordUpdate["updated_id"] = $user;
+                $recordUpdate["updated_at"] = $updatedAt;
 
                 DB::connection("mysql3")
                     ->table("seedling_records")
@@ -731,6 +733,7 @@ class SeedlingSaveController extends Controller
                     ->update([
                         "deleted_at" => $deletedAt,
                         "updated_id" => $user,
+                        "updated_at" => $deletedAt,
                     ]);
             }
 
@@ -741,6 +744,7 @@ class SeedlingSaveController extends Controller
                     ->update([
                         "deleted_at" => $deletedAt,
                         "updated_id" => $user,
+                        "updated_at" => $deletedAt,
                     ]);
             }
 
@@ -758,6 +762,7 @@ class SeedlingSaveController extends Controller
                     ->update([
                         "deleted_at" => $deletedAt,
                         "updated_id" => $user,
+                        "updated_at" => $deletedAt,
                     ]);
             }
         });
