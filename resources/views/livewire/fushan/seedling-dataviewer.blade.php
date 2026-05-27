@@ -1,23 +1,32 @@
 
 <div class='flex text_outbox' style='flex-direction: column; align-items: center;'>
     <style>
-    #fs-seedling-dataviewer-table .link-button {
-        appearance: none;
-        background: transparent;
-        border: 0;
-        color: inherit;
-        cursor: pointer;
-        font: inherit;
-        padding: 0;
-        white-space: nowrap;
-    }
-</style>
+        #fs-seedling-dataviewer-table .sortable-heading {
+            appearance: none;
+            background: transparent;
+            border: 0;
+            color: inherit;
+            cursor: pointer;
+            font: inherit;
+            font-weight: inherit;
+            padding: 0;
+            text-decoration: none;
+            white-space: nowrap;
+        }
+
+        #fs-seedling-dataviewer-table .sortable-heading:hover {
+            text-decoration: underline;
+        }
+    </style>
     <div class='text_box' style='margin: 0 auto;'>
         <div class="loading-container" wire:loading.class="visible">
             <div class="loading-spinner"></div>
         </div>
         <h2>福山小苗資料檢視<span style="margin-left: 20px ; font-weight: 500; font-size: 70%;">最新調查年月：{{ $latestSurveyYm }}</span><span style="margin-left: 20px ; font-weight: 500; font-size: 70%;">共 {{ $total }} 筆</span></h2>
         <hr>
+        <div style="margin-bottom: 8px; color: #555; font-size: 0.95em;">
+            可點選 census、trap、mtag、tag、種類欄位標題排序；調查年月依 census 排序。
+        </div>
         <div class="pages" style="margin-bottom: 14px; display: flex; align-items: center; gap: 12px; flex-wrap: wrap;">
             <div class="totalnum">每頁 {{ $perPage }} 筆</div>
             <div class="pagenote">第 {{ $page }} / {{ $totalPages }} 頁</div>
@@ -37,13 +46,13 @@
         >
             <thead>
                 <tr>
-                    <th><button type="button" class="link-button" wire:click="sortBy('census')">census{{ $this->sortIndicator('census') }}</button></th>
+                    <th><button type="button" class="sortable-heading" wire:click="sortBy('census')">census{{ $this->sortIndicator('census') }}</button></th>
                     <th>調查年月</th>
-                    <th><button type="button" class="link-button" wire:click="sortBy('trap')">trap{{ $this->sortIndicator('trap') }}</button></th>
+                    <th><button type="button" class="sortable-heading" wire:click="sortBy('trap')">trap{{ $this->sortIndicator('trap') }}</button></th>
                     <th>plot</th>
-                    <th><button type="button" class="link-button" wire:click="sortBy('mtag')">mtag{{ $this->sortIndicator('mtag') }}</button></th>
-                    <th><button type="button" class="link-button" wire:click="sortBy('tag')">tag{{ $this->sortIndicator('tag') }}</button></th>
-                    <th><button type="button" class="link-button" wire:click="sortBy('species')">種類{{ $this->sortIndicator('species') }}</button></th>
+                    <th><button type="button" class="sortable-heading" wire:click="sortBy('mtag')">mtag{{ $this->sortIndicator('mtag') }}</button></th>
+                    <th><button type="button" class="sortable-heading" wire:click="sortBy('tag')">tag{{ $this->sortIndicator('tag') }}</button></th>
+                    <th><button type="button" class="sortable-heading" wire:click="sortBy('species')">種類{{ $this->sortIndicator('species') }}</button></th>
                     <th>長度</th>
                     <th>葉片數</th>
                     <th>新舊</th>

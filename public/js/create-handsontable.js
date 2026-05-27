@@ -103,16 +103,18 @@ function makeAjaxRequest(url, requestData, requstType, successCallback, errorCal
       }
     },
     error: function (xhr, status, error) {
-      console.log('Save error. '+url);
+      console.log('Save error. '+url, xhr?.status, error || status, xhr?.responseText);
       if (errorCallback) {
         const response = xhr?.responseJSON || {};
+        const statusText = xhr?.status
+          ? `HTTP ${xhr.status}${error ? ` ${error}` : ''}`
+          : (error || status || 'Save error');
         const detail = response?.message
           || response?.datasavenote
           || response?.seedssavenote
           || response?.finishnote
           || xhr?.responseText
-          || error
-          || 'Save error';
+          || statusText;
         errorCallback({ error: detail, xhr: xhr, status: status, response: response });
       }
     },
