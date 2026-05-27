@@ -86,6 +86,146 @@ class SeedlingSaveController extends Controller
             ->map(fn ($value) => (array) $value);
     }
 
+    private function quoteIdentifier(string $identifier): string
+    {
+        return "`" . str_replace("`", "``", $identifier) . "`";
+    }
+
+    private function activeRowsWhereClause(string $table, string $alias): ?string
+    {
+        if (!Schema::connection("mysql3")->hasColumn($table, "deleted_at")) {
+            return null;
+        }
+
+        return $alias . "." . $this->quoteIdentifier("deleted_at") . " IS NULL";
+    }
+
+    private function collectAffectedSeedlingTags(array ...$rowGroups): array
+    {
+        $tags = collect();
+        $mtags = collect();
+
+        foreach ($rowGroups as $rows) {
+            foreach ($rows as $row) {
+                if (!is_array($row)) {
+                    continue;
+                }
+
+                foreach (["tag", "original_tag"] as $key) {
+                    $value = strtoupper(trim((string) ($row[$key] ?? "")));
+                    if ($value !== "") {
+                        $tags->push($value);
+                    }
+                }
+
+                foreach (["mtag", "original_mtag"] as $key) {
+                    $value = trim((string) ($row[$key] ?? ""));
+                    if ($value !== "") {
+                        $mtags->push($value);
+                    }
+                }
+            }
+        }
+
+        $mtagValues = $mtags->unique()->values()->all();
+        if ($mtagValues !== []) {
+            DB::connection("mysql3")
+                ->table("seedling_stems")
+                ->whereIn("mtag", $mtagValues)
+                ->pluck("tag")
+                ->each(fn ($tag) => $tags->push(strtoupper(trim((string) $tag))));
+        }
+
+        return $tags
+            ->map(fn ($tag) => strtoupper(trim((string) $tag)))
+            ->filter(fn ($tag) => $tag !== "")
+            ->unique()
+            ->values()
+            ->all();
+    }
+
+    private function syncSeedlingAnalysisRows(array $tags): void
+    {
+        $tags = collect($tags)
+            ->map(fn ($tag) => strtoupper(trim((string) $tag)))
+            ->filter(fn ($tag) => $tag !== "")
+            ->unique()
+            ->values()
+            ->all();
+
+        if ($tags === [] || !Schema::connection("mysql3")->hasTable("seedling")) {
+            return;
+        }
+
+        foreach (["seedling_records", "seedling_stems", "seedling_individuals"] as $table) {
+            if (!Schema::connection("mysql3")->hasTable($table)) {
+                return;
+            }
+        }
+        DB::connection("mysql3")->table("seedling")->whereIn("tag", $tags)->delete();
+
+        $seedlingColumns = Schema::connection("mysql3")->getColumnListing("seedling");
+        $recordColumns = Schema::connection("mysql3")->getColumnListing("seedling_records");
+        $stemColumns = Schema::connection("mysql3")->getColumnListing("seedling_stems");
+        $individualColumns = Schema::connection("mysql3")->getColumnListing("seedling_individuals");
+
+        $columnSources = [];
+        foreach ($recordColumns as $column) {
+            $columnSources[$column] = "r";
+        }
+        foreach ($stemColumns as $column) {
+            $columnSources[$column] ??= "st";
+        }
+        foreach ($individualColumns as $column) {
+            $columnSources[$column] ??= "i";
+        }
+
+        $insertColumns = [];
+        $selectColumns = [];
+        foreach ($seedlingColumns as $column) {
+            if ($column === "id") {
+                continue;
+            }
+
+            $source = $columnSources[$column] ?? null;
+            if (!$source) {
+                continue;
+            }
+
+            $quotedColumn = $this->quoteIdentifier($column);
+            $insertColumns[] = $quotedColumn;
+            $selectColumns[] = $column === "note"
+                ? "COALESCE(" . $source . "." . $quotedColumn . ", '')"
+                : $source . "." . $quotedColumn;
+        }
+
+        if ($insertColumns === []) {
+            return;
+        }
+
+        $whereClauses = array_filter([
+            $this->activeRowsWhereClause("seedling_records", "r"),
+            $this->activeRowsWhereClause("seedling_stems", "st"),
+            $this->activeRowsWhereClause("seedling_individuals", "i"),
+        ]);
+        $placeholders = implode(", ", array_fill(0, count($tags), "?"));
+        $whereSql = "WHERE r." . $this->quoteIdentifier("tag") . " IN (" . $placeholders . ")";
+        if ($whereClauses !== []) {
+            $whereSql .= " AND " . implode(" AND ", $whereClauses);
+        }
+
+        DB::connection("mysql3")->statement(
+            "INSERT INTO " . $this->quoteIdentifier("seedling") . " (" . implode(", ", $insertColumns) . ") " .
+            "SELECT " . implode(", ", $selectColumns) . " " .
+            "FROM " . $this->quoteIdentifier("seedling_records") . " r " .
+            "JOIN " . $this->quoteIdentifier("seedling_stems") . " st ON r." . $this->quoteIdentifier("tag") . " = st." . $this->quoteIdentifier("tag") . " " .
+            "JOIN " . $this->quoteIdentifier("seedling_individuals") . " i ON st." . $this->quoteIdentifier("mtag") . " = i." . $this->quoteIdentifier("mtag") . " " .
+            $whereSql . " " .
+            "ORDER BY r." . $this->quoteIdentifier("census") . ", i." . $this->quoteIdentifier("trap") . ", i." . $this->quoteIdentifier("plot") . ", st." . $this->quoteIdentifier("tag"),
+            $tags
+        );
+    }
+
     public function getTableInstance($entry)
     {
         if ($entry == '1') {
@@ -120,7 +260,6 @@ class SeedlingSaveController extends Controller
 
         $redata = $table::where('trap', 'like', $trap)->orderBy('plot', 'asc')->orderBy('tag', 'asc')->get();
 
-
         $ob_redata = new SeedlingAddButton;
         $redata = $ob_redata->addbutton($redata, $entry);
 
@@ -146,7 +285,6 @@ class SeedlingSaveController extends Controller
             $finishnote = '有資料未輸入完成 [' . $string . ']';
         } else {
 
-
             $data = $table::query()->where('date', 'like', '0000-00-00')->get();
             if (count($data) != '0') {
                 foreach ($data as $temp) {
@@ -164,6 +302,7 @@ class SeedlingSaveController extends Controller
         }
 
         // echo $user;
+
         return [
             'result' => 'ok',
             'pass' => $pass,
@@ -209,15 +348,12 @@ class SeedlingSaveController extends Controller
                 break;
             } else {
 
-
                 $tablecov::where('id', $savecov[$i]['id'])->update(['cov' => $savecov[$i]['cov'], 'date' => $savecov[$i]['date'], 'canopy' => $savecov[$i]['canopy'], 'note' => $savecov[$i]['note'], 'updated_id' => $user]);
                 //重新下載資料
-
 
                 $covsavenote = '已儲存環境資料';
             }
         }
-
 
         return [
             'result' => 'ok',
@@ -226,7 +362,6 @@ class SeedlingSaveController extends Controller
 
         ];
     }
-
 
     //小苗後端資料修改
     public function saveupdate(Request $request)
@@ -259,6 +394,8 @@ class SeedlingSaveController extends Controller
                 'datasavenote_type' => 'error',
             ];
         }
+
+        $analysisTags = $this->collectAffectedSeedlingTags($workRows, $identityRows, $masterRows);
 
         DB::connection('mysql3')->transaction(function () use ($workRows, $identityRows, $masterRows, $user, $updatedAt, &$savedTag) {
             foreach ($workRows as $row) {
@@ -471,7 +608,9 @@ class SeedlingSaveController extends Controller
                     ->where("id", $recordId)
                     ->update($recordUpdate);
             }
+
         });
+        $this->syncSeedlingAnalysisRows($analysisTags);
 
         return [
             'result' => 'ok',
@@ -511,6 +650,8 @@ class SeedlingSaveController extends Controller
                 "datasavenote_type" => "error",
             ];
         }
+
+        $analysisTags = $this->collectAffectedSeedlingTags($workRows, $identityRows, $recordRows);
 
         $deletedCount = 0;
 
@@ -579,6 +720,7 @@ class SeedlingSaveController extends Controller
                     ]);
             }
         });
+        $this->syncSeedlingAnalysisRows($analysisTags);
 
         return [
             "result" => "ok",
@@ -811,7 +953,6 @@ class SeedlingSaveController extends Controller
             }
         } //最外層
 
-
         $redata = $this->getRedata($entry, $data[0]['trap']);
 
         return [
@@ -845,7 +986,6 @@ class SeedlingSaveController extends Controller
         };
         $savedRecruitTag = null;
         $savedRecruitTrap = null;
-
 
         $table = $this->getTableInstance($entry);
 
@@ -927,8 +1067,6 @@ class SeedlingSaveController extends Controller
                     $datacheck = $check->check($recruit[$i], $entry, $i);
                 }
 
-
-
                 // //補上資料庫其他欄位的資料       
                 if ($datacheck['pass'] == 1) {
 
@@ -980,8 +1118,6 @@ class SeedlingSaveController extends Controller
                     $nonsavelist[$i]['note'] = '';
                     $nonsavelist[$i]['tofix'] = '';
 
-
-
                     $table::insert($insert2);
 
                     $appendRecruitNote('第' . ($i + 1) . '筆資料已儲存');
@@ -1014,7 +1150,6 @@ class SeedlingSaveController extends Controller
             }
         }
 
-
         return [
             'result' => 'ok',
             'data' => $recruit,
@@ -1025,7 +1160,6 @@ class SeedlingSaveController extends Controller
             // 'temp' => $temp,
             ...$this->noteField('recruitsavenote', $recruitsavenote, $hasRecruitError)
             // 'insert' => $insert2
-
 
         ];
     }
@@ -1050,7 +1184,6 @@ class SeedlingSaveController extends Controller
         $maxid = FsSeedlingSlrecord::count();
 
         $redata = $this->getRedata($entry, $thistrap);
-
 
         return [
             'result' => 'ok',
@@ -1079,7 +1212,6 @@ class SeedlingSaveController extends Controller
         for ($i = 0; $i < count($slrollnew); $i++) {
             $uplist = [];
             if (empty($slrollnew[$i])) break;
-
 
             if ($slrollnew[$i]['date'] == '') {
                 if (
@@ -1111,7 +1243,6 @@ class SeedlingSaveController extends Controller
                         }
                     }
                 }
-
 
                 if ($uplist != []) {  //有資料要存
                     // $list=$data[$i]['tag'];
@@ -1145,11 +1276,9 @@ class SeedlingSaveController extends Controller
                     }
                 }
 
-
                 $insertkey = $insertkey . 'updated_id';
                 $insertvalue = $insertvalue . "'" . $user . "'";
                 $insert2['updated_id'] = $user;
-
 
                 $tableroll::insert($insert2);
 
@@ -1161,9 +1290,6 @@ class SeedlingSaveController extends Controller
 
         $slroll = $tableroll::where('trap', 'like', $trap)->orderBy('plot', 'asc')->orderBy('tag', 'asc')->get();
 
-
-
-
         if (!$slroll->isEmpty()) {
             $slroll = $slroll->toArray();
             for ($m = 0; $m < count($slroll); $m++) {
@@ -1172,7 +1298,6 @@ class SeedlingSaveController extends Controller
         } else {
             $slroll = [];
         }
-
 
         return [
             'result' => 'ok',
@@ -1198,9 +1323,7 @@ class SeedlingSaveController extends Controller
 
         // 重新載入資料
 
-
         $slroll = $tableroll::where('trap', 'like', $trap)->orderBy('plot', 'asc')->orderBy('tag', 'asc')->get();
-
 
         if (!$slroll->isEmpty()) {
             $slroll = $slroll->toArray();
@@ -1213,7 +1336,6 @@ class SeedlingSaveController extends Controller
             $slroll[0]['month'] = '';
         }
 
-
         return [
             'result' => 'ok',
             'data' => $slroll,
@@ -1221,8 +1343,6 @@ class SeedlingSaveController extends Controller
             ...$this->noteField('slrollsavenote', $slrollsavenote)
         ];
     }
-
-
 
     //儲存特殊修改
 
@@ -1296,7 +1416,6 @@ class SeedlingSaveController extends Controller
 
         $redata = $this->getRedata($entry, $olddata->trap);
 
-
         return [
             'result' => 'ok',
             ...$this->noteField('datasavenote', $datasavenote),
@@ -1328,7 +1447,6 @@ class SeedlingSaveController extends Controller
 
         $datasavenote = '已刪除 ' . $tag . ' 特殊修改資料';
 
-
         //重新載入資料
         $olddata = $table::where('tag', 'like', $tag)->get()->toArray();
         if (empty($olddata)) {
@@ -1348,8 +1466,6 @@ class SeedlingSaveController extends Controller
         // $redata='1';
 
         $redata = $this->getRedata($entry, $olddata[0]['trap']);
-
-
 
         $realterdata = ['Tag' => '', 'Trap' => '', 'Plot' => '', '原長度' => '', '原葉片數' => '', '狀態' => '', 'id' => $olddata[0]['id']];
         $havedata = 'no';
