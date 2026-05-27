@@ -32,10 +32,10 @@
                     <th>mtag</th>
                     <th>tag</th>
                     <th>種類</th>
-                    <th>狀態</th>
                     <th>長度</th>
                     <th>葉片數</th>
                     <th>新舊</th>
+                    <th>狀態</th>
                     <th>萌櫱</th>
                     <th style='width: 220px;'>note</th>
                 </tr>
@@ -80,14 +80,6 @@
                         </select>
                     </td>
                     <td>
-                        <select class="fs100" wire:model='status' wire:change="search">
-                            <option value="all">all</option>
-                            @foreach($statusOptions as $statusOption)
-                                <option value="{{ $statusOption }}">{{ $statusOption }}</option>
-                            @endforeach
-                        </select>
-                    </td>
-                    <td>
                         @include('livewire.nanjenshan.partials.numeric-filter', ['operatorModel' => 'heightOperator', 'valueModel' => 'heightValue'])
                     </td>
                     <td></td>
@@ -96,6 +88,14 @@
                             <option value="all">all</option>
                             @foreach($recruitOptions as $recruitOption)
                                 <option value="{{ $recruitOption }}">{{ $recruitOption }}</option>
+                            @endforeach
+                        </select>
+                    </td>
+                    <td>
+                        <select class="fs100" wire:model='status' wire:change="search">
+                            <option value="all">all</option>
+                            @foreach($statusOptions as $statusOption)
+                                <option value="{{ $statusOption }}">{{ $statusOption }}</option>
                             @endforeach
                         </select>
                     </td>
@@ -126,10 +126,10 @@
                         <td>{{$row['mtag']}}</td>
                         <td>{{$row['tag']}}</td>
                         <td>{{$row['species']}}</td>
-                        <td>{{$row['status']}}</td>
                         <td>{{$row['height']}}</td>
                         <td>{{$row['leaf']}}</td>
                         <td>{{$row['recruit']}}</td>
+                        <td>{{$row['status']}}</td>
                         <td>{{$row['sprout']}}</td>
                         <td>{{$row['note']}}</td>
                     </tr>

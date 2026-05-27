@@ -148,42 +148,41 @@ class SeedlingSaveController extends Controller
     {
         $tags = collect($tags)
             ->map(fn ($tag) => strtoupper(trim((string) $tag)))
-            ->filter(fn ($tag) => $tag !== "")
+            ->filter(fn ($tag) => $tag !== '')
             ->unique()
             ->values()
             ->all();
 
-        if ($tags === [] || !Schema::connection("mysql3")->hasTable("seedling")) {
+        if ($tags === [] || !Schema::connection('mysql3')->hasTable('seedling')) {
             return;
         }
 
-        foreach (["seedling_records", "seedling_stems", "seedling_individuals"] as $table) {
-            if (!Schema::connection("mysql3")->hasTable($table)) {
+        foreach (['seedling_records', 'seedling_stems', 'seedling_individuals'] as $table) {
+            if (!Schema::connection('mysql3')->hasTable($table)) {
                 return;
             }
         }
-        DB::connection("mysql3")->table("seedling")->whereIn("tag", $tags)->delete();
 
-        $seedlingColumns = Schema::connection("mysql3")->getColumnListing("seedling");
-        $recordColumns = Schema::connection("mysql3")->getColumnListing("seedling_records");
-        $stemColumns = Schema::connection("mysql3")->getColumnListing("seedling_stems");
-        $individualColumns = Schema::connection("mysql3")->getColumnListing("seedling_individuals");
+        $seedlingColumns = Schema::connection('mysql3')->getColumnListing('seedling');
+        $recordColumns = Schema::connection('mysql3')->getColumnListing('seedling_records');
+        $stemColumns = Schema::connection('mysql3')->getColumnListing('seedling_stems');
+        $individualColumns = Schema::connection('mysql3')->getColumnListing('seedling_individuals');
 
         $columnSources = [];
         foreach ($recordColumns as $column) {
-            $columnSources[$column] = "r";
+            $columnSources[$column] = 'r';
         }
         foreach ($stemColumns as $column) {
-            $columnSources[$column] ??= "st";
+            $columnSources[$column] ??= 'st';
         }
         foreach ($individualColumns as $column) {
-            $columnSources[$column] ??= "i";
+            $columnSources[$column] ??= 'i';
         }
 
-        $insertColumns = [];
+        $syncColumns = [];
         $selectColumns = [];
         foreach ($seedlingColumns as $column) {
-            if ($column === "id") {
+            if ($column === 'id') {
                 continue;
             }
 
@@ -193,39 +192,81 @@ class SeedlingSaveController extends Controller
             }
 
             $quotedColumn = $this->quoteIdentifier($column);
-            $insertColumns[] = $quotedColumn;
-            $selectColumns[] = $column === "note"
+            $syncColumns[] = $column;
+            $expression = $column === 'note'
                 ? "COALESCE(" . $source . "." . $quotedColumn . ", '')"
                 : $source . "." . $quotedColumn;
+            $selectColumns[] = DB::raw($expression . ' AS ' . $quotedColumn);
         }
 
-        if ($insertColumns === []) {
+        if ($syncColumns === [] || !in_array('tag', $syncColumns, true) || !in_array('census', $syncColumns, true)) {
             return;
         }
 
-        $whereClauses = array_filter([
-            $this->activeRowsWhereClause("seedling_records", "r"),
-            $this->activeRowsWhereClause("seedling_stems", "st"),
-            $this->activeRowsWhereClause("seedling_individuals", "i"),
-        ]);
-        $placeholders = implode(", ", array_fill(0, count($tags), "?"));
-        $whereSql = "WHERE r." . $this->quoteIdentifier("tag") . " IN (" . $placeholders . ")";
-        if ($whereClauses !== []) {
-            $whereSql .= " AND " . implode(" AND ", $whereClauses);
+        $rebuiltRows = DB::connection('mysql3')
+            ->table('seedling_records as r')
+            ->join('seedling_stems as st', 'r.tag', '=', 'st.tag')
+            ->join('seedling_individuals as i', 'st.mtag', '=', 'i.mtag')
+            ->select($selectColumns)
+            ->whereIn('r.tag', $tags)
+            ->when(Schema::connection('mysql3')->hasColumn('seedling_records', 'deleted_at'), fn ($query) => $query->whereNull('r.deleted_at'))
+            ->when(Schema::connection('mysql3')->hasColumn('seedling_stems', 'deleted_at'), fn ($query) => $query->whereNull('st.deleted_at'))
+            ->when(Schema::connection('mysql3')->hasColumn('seedling_individuals', 'deleted_at'), fn ($query) => $query->whereNull('i.deleted_at'))
+            ->orderBy('r.census')
+            ->orderBy('i.trap')
+            ->orderBy('i.plot')
+            ->orderBy('st.tag')
+            ->get()
+            ->map(fn ($row) => (array) $row)
+            ->values();
+
+        $rowKey = fn (array $row): string => (string) ($row['census'] ?? '') . "\x1F" . strtoupper((string) ($row['tag'] ?? ''));
+        $normalize = fn ($value): string => $value === null ? '' : (string) $value;
+
+        $rebuiltByKey = $rebuiltRows->keyBy($rowKey);
+        $existingRows = DB::connection('mysql3')
+            ->table('seedling')
+            ->whereIn('tag', $tags)
+            ->get($syncColumns)
+            ->map(fn ($row) => (array) $row)
+            ->values();
+        $existingByKey = $existingRows->keyBy($rowKey);
+
+        foreach ($existingRows as $existingRow) {
+            if (!$rebuiltByKey->has($rowKey($existingRow))) {
+                DB::connection('mysql3')
+                    ->table('seedling')
+                    ->where('census', $existingRow['census'] ?? null)
+                    ->where('tag', $existingRow['tag'] ?? null)
+                    ->delete();
+            }
         }
 
-        DB::connection("mysql3")->statement(
-            "INSERT INTO " . $this->quoteIdentifier("seedling") . " (" . implode(", ", $insertColumns) . ") " .
-            "SELECT " . implode(", ", $selectColumns) . " " .
-            "FROM " . $this->quoteIdentifier("seedling_records") . " r " .
-            "JOIN " . $this->quoteIdentifier("seedling_stems") . " st ON r." . $this->quoteIdentifier("tag") . " = st." . $this->quoteIdentifier("tag") . " " .
-            "JOIN " . $this->quoteIdentifier("seedling_individuals") . " i ON st." . $this->quoteIdentifier("mtag") . " = i." . $this->quoteIdentifier("mtag") . " " .
-            $whereSql . " " .
-            "ORDER BY r." . $this->quoteIdentifier("census") . ", i." . $this->quoteIdentifier("trap") . ", i." . $this->quoteIdentifier("plot") . ", st." . $this->quoteIdentifier("tag"),
-            $tags
-        );
-    }
+        foreach ($rebuiltRows as $rebuiltRow) {
+            $key = $rowKey($rebuiltRow);
+            $existingRow = $existingByKey->get($key);
 
+            if (!$existingRow) {
+                DB::connection('mysql3')->table('seedling')->insert($rebuiltRow);
+                continue;
+            }
+
+            $changes = [];
+            foreach ($syncColumns as $column) {
+                if ($normalize($existingRow[$column] ?? null) !== $normalize($rebuiltRow[$column] ?? null)) {
+                    $changes[$column] = $rebuiltRow[$column] ?? null;
+                }
+            }
+
+            if ($changes !== []) {
+                DB::connection('mysql3')
+                    ->table('seedling')
+                    ->where('census', $rebuiltRow['census'] ?? null)
+                    ->where('tag', $rebuiltRow['tag'] ?? null)
+                    ->update($changes);
+            }
+        }
+    }
     public function getTableInstance($entry)
     {
         if ($entry == '1') {
