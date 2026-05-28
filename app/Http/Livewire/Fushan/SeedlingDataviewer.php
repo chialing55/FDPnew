@@ -310,7 +310,13 @@ class SeedlingDataviewer extends Component
             return '';
         }
 
-        return rtrim(rtrim((string) $value, '0'), '.');
+        $value = (string) $value;
+
+        if (strpos($value, '.') !== false) {
+            return rtrim(rtrim($value, '0'), '.');
+        }
+
+        return $value;
     }
 
 

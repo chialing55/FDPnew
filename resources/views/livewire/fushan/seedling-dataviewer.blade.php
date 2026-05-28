@@ -3,19 +3,21 @@
     <style>
         #fs-seedling-dataviewer-table .sortable-heading {
             appearance: none;
-            background: transparent;
-            border: 0;
+            background: transparent !important;
+            border: none !important;
+            box-shadow: none !important;
             color: inherit;
             cursor: pointer;
             font: inherit;
             font-weight: inherit;
+            outline: none;
             padding: 0;
             text-decoration: none;
             white-space: nowrap;
         }
 
         #fs-seedling-dataviewer-table .sortable-heading:hover {
-            text-decoration: underline;
+            text-decoration: none;
         }
     </style>
     <div class='text_box' style='margin: 0 auto;'>
