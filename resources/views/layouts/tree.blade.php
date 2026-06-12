@@ -28,7 +28,7 @@
 {{-- <script src="{{asset('/js/jquery.caret-1.5.2.min.js')}}"></script> --}}
 <script src="{{asset('/js/create-handsontable.js')}}"></script>
 <script src="{{asset('/js/tree-map.js')}}"></script>
-<script src="{{asset('/js/fstree.js')}}"></script>
+<script src="{{ asset('/js/fstree.js') }}?v={{ filemtime(public_path('js/fstree.js')) }}"></script>
 
 
 @yield('pagejs')
