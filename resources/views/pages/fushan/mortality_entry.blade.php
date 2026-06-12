@@ -24,31 +24,12 @@
 
     @if ($entry === '1' && !$recordTablesMatchTargetCensus)
         <div class='text_box mortality-entry-shell' style="margin-bottom:16px;">
-            <h2>第一次輸入表單準備</h2>
+            <h2>尚未建立輸入表單</h2>
             <hr>
-
-            <div style="line-height:1.8;">
-                <div>本次預計輸入：census {{ $nextCensus?->census ?? '—' }}，{{ $nextCensus?->survey_year ?? '—' }} 年資料</div>
-                <div>來源資料表：{{ $targetTable ?? '—' }}</div>
-            </div>
-
-            <div style="margin-top:14px; color:{{ $recordTablesNeedRefresh ? '#9a3412' : '#475569' }};">
-                @if (!empty($generateBlockedReason))
-                    {{ $generateBlockedReason }}
-                @else
-                    {{ $recordTablesStatusMessage }}
-                @endif
-            </div>
-
-            <form method="POST" action="{{ route('admin.fushan.mortality.entry.generate') }}" style="margin-top:14px;">
-                @csrf
-                <button type="submit"
-                    {{ empty($canGenerateRecords) ? 'disabled' : '' }}
-                    onclick="{{ empty($canGenerateRecords) ? 'return false;' : ($recordTablesNeedRefresh ? "return confirm('目前偵測到輸入表單仍有舊年度資料，確定要清除後更新為此次資料嗎？');" : "return confirm('確定要建立第一次與第二次輸入表單資料嗎？');") }}"
-                    style="padding:10px 18px; border:0; border-radius:6px; background:{{ empty($canGenerateRecords) ? '#d1d5db' : ($recordTablesNeedRefresh ? '#b45309' : '#3f5f5b') }}; color:{{ empty($canGenerateRecords) ? '#6b7280' : '#fff' }}; cursor:{{ empty($canGenerateRecords) ? 'not-allowed' : 'pointer' }};">
-                    {{ $recordTablesNeedRefresh ? '清除舊資料並更新為此次資料' : '建立 ' . ($nextCensus?->survey_year ?? '—') . ' 年輸入表單' }}
-                </button>
-            </form>
+            <p style="line-height:1.8; margin:0;">請管理員先到<a href="{{ route('admin.fushan.mortality.import') }}">資料匯入</a>頁面下方產生輸入表單。</p>
+            @if (!empty($generateBlockedReason))
+                <div style="margin-top:10px; color:#9a3412;">{{ $generateBlockedReason }}</div>
+            @endif
         </div>
     @endif
 
@@ -56,7 +37,7 @@
         <div class='text_box mortality-entry-shell' style="margin-bottom:16px;">
             <h2>尚未建立輸入表單</h2>
             <hr>
-            <p style="line-height:1.8; margin:0;">record1 / record2 目前沒有資料，請先到第一次輸入建立輸入表單。</p>
+            <p style="line-height:1.8; margin:0;">record1 / record2 目前沒有資料，請管理員先到資料匯入頁面下方產生輸入表單。</p>
         </div>
     @else
         @livewire($site . '.mortality-showentry', ['entry' => $entry, 'user' => $user, 'site' => $site])

@@ -189,7 +189,7 @@
         <ol style="padding-left:20px; line-height:1.8;">
             <li>依 `import_stage.stemid` 檢查目前追蹤清單。</li>
             <li>若 `tree_individuals` 尚無該 `stemid`，就新增並將 `is_active` 設為 `1`。</li>
-            <li>若 `tree_individuals` 已有該 `stemid`，就更新基本欄位並將 `is_active` 設為 `1`。</li>
+            <li>若 `tree_individuals` 已有該 `stemid`，就只確認 `is_active` 為 `1`。</li>
             <li>若 `tree_individuals` 內有資料，但這批 `import_stage` 中找不到，則改為 `is_active = 0`。</li>
         </ol>
     </div>

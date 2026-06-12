@@ -5,18 +5,7 @@
         </div>
         <h2>南仁山小苗資料檢視<span style="margin-left: 20px ; font-weight: 500; font-size: 70%;">共 {{ $total }} 筆</span></h2>
         <hr>
-        <div class="pages" style="margin-bottom: 14px; display: flex; align-items: center; gap: 12px; flex-wrap: wrap;">
-            <div class="totalnum">每頁 {{ $perPage }} 筆</div>
-            <div class="pagenote">第 {{ $page }} / {{ $totalPages }} 頁</div>
-            <button type="button" class="prev" wire:click="previousPage" @if($page <= 1) disabled @endif>上一頁</button>
-            <button type="button" class="next" wire:click="nextPage" @if($page >= $totalPages) disabled @endif>下一頁</button>
-            <span>跳至</span>
-            <select class="fs100" style="width: 72px;" wire:change="goToPage($event.target.value)">
-                @for($i = 1; $i <= $totalPages; $i++)
-                    <option value="{{ $i }}" @if($i === $page) selected @endif>{{ $i }}</option>
-                @endfor
-            </select>
-        </div>
+        @include('livewire.partials.dataviewer-pagination')
         <table
             id='njs-seedling-dataviewer-table'
             class='tablesorter'
@@ -42,67 +31,47 @@
                 </tr>
                 <tr>
                     <td>
-                        <select class="fs100" wire:model='plot' wire:change="search">
-                            <option value="all">all</option>
-                            @foreach($plots as $plotOption)
-                                <option value="{{$plotOption}}">{{$plotOption}}</option>
-                            @endforeach
-                        </select>
+                        @include('livewire.partials.select-filter', ['model' => 'plot', 'options' => $plots])
                     </td>
                     <td>
-                        <select class="fs100" wire:model='quadrat' wire:change="search">
-                            <option value="all">all</option>
-                            @foreach($quadrats as $quadratOption)
-                                <option value="{{$quadratOption}}">{{$quadratOption}}</option>
-                            @endforeach
-                        </select>
+                        @include('livewire.partials.select-filter', ['model' => 'quadrat', 'options' => $quadrats])
                     </td>
                     <td></td>
                     <td>
-                        <select class="fs100" wire:model='ym' wire:change="search">
-                            <option value="all">all</option>
-                            @foreach($months as $monthOption)
-                                <option value="{{$monthOption}}">{{$monthOption}}</option>
-                            @endforeach
-                        </select>
+                        @include('livewire.partials.select-filter', ['model' => 'ym', 'options' => $months])
                     </td>
                     <td>
-                        <select class="fs100" wire:model='tag' wire:change="search">
-                            <option value="all">all</option>
-                            @foreach($tagOptions as $tagOption)
-                                <option value="{{ $tagOption }}">{{ $tagOption }}</option>
-                            @endforeach
-                        </select>
+                        @include('livewire.partials.datalist-filter', [
+                            'model' => 'tag',
+                            'options' => $tagOptions,
+                            'listId' => 'njs-seedling-tag-options',
+                            'width' => '90px',
+                        ])
                     </td>
                     <td>
-                        <select class="fs100" style='width: 150px;' wire:model='species' wire:change="search">
-                            <option value="all">all</option>
-                            @foreach($speciesOptions as $speciesOption)
-                                <option value="{{ $speciesOption }}">{{ $speciesOption }}</option>
-                            @endforeach
-                        </select>
+                        @include('livewire.partials.datalist-filter', [
+                            'model' => 'species',
+                            'options' => $speciesOptions,
+                            'listId' => 'njs-seedling-species-options',
+                            'width' => '150px',
+                        ])
                     </td>
                     <td>
-                        <select class="fs100"  wire:model='status' wire:change="search">
-                            <option value="all">all</option>
-                            @foreach($statusOptions as $statusOption)
-                                <option value="{{ $statusOption }}">{{ $statusOption }}</option>
-                            @endforeach
-                        </select>
+                        @include('livewire.partials.select-filter', ['model' => 'status', 'options' => $statusOptions])
                     </td>
                     <td>
-                        @include('livewire.nanjenshan.partials.numeric-filter', ['operatorModel' => 'heightOperator', 'valueModel' => 'heightValue'])
+                        @include('livewire.partials.numeric-filter', ['operatorModel' => 'heightOperator', 'valueModel' => 'heightValue'])
                     </td>
                     <td></td>
                     <td></td>
                     <td>
-                        @include('livewire.nanjenshan.partials.numeric-filter', ['operatorModel' => 'leafEatenOperator', 'valueModel' => 'leafEatenValue'])
+                        @include('livewire.partials.numeric-filter', ['operatorModel' => 'leafEatenOperator', 'valueModel' => 'leafEatenValue'])
                     </td>
                     <td>
-                        @include('livewire.nanjenshan.partials.numeric-filter', ['operatorModel' => 'leafCoveredOperator', 'valueModel' => 'leafCoveredValue'])
+                        @include('livewire.partials.numeric-filter', ['operatorModel' => 'leafCoveredOperator', 'valueModel' => 'leafCoveredValue'])
                     </td>
                     <td>
-                        @include('livewire.nanjenshan.partials.numeric-filter', ['operatorModel' => 'diseaseSpotOperator', 'valueModel' => 'diseaseSpotValue'])
+                        @include('livewire.partials.numeric-filter', ['operatorModel' => 'diseaseSpotOperator', 'valueModel' => 'diseaseSpotValue'])
                     </td>
                     <td></td>
                     <td></td>

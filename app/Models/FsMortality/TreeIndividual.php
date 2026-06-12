@@ -14,13 +14,6 @@ class TreeIndividual extends Model
 
     protected $fillable = [
         'stemid',
-        'spcode',
-        'qx',
-        'qy',
-        'subqx',
-        'subqy',
-        'qudx',
-        'qudy',
         'is_active',
         'note',
     ];

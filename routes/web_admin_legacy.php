@@ -246,6 +246,14 @@ Route::middleware(['auth'])->prefix('admin')->name('admin.')->group(function () 
                 ->defaults('site', 'fushan')
                 ->name('dataviewer');
 
+            Route::get('/download', [MortalityController::class, 'download'])
+                ->defaults('site', 'fushan')
+                ->name('download');
+
+            Route::get('/record-paper', [MortalityController::class, 'downloadRecordPaper'])
+                ->defaults('site', 'fushan')
+                ->name('record-paper');
+
             Route::middleware('admin')->group(function () {
                 Route::get('/process', [MortalityController::class, 'process'])
                     ->defaults('site', 'fushan')
@@ -270,10 +278,6 @@ Route::middleware(['auth'])->prefix('admin')->name('admin.')->group(function () 
                 Route::post('/process/census-records', [MortalityController::class, 'runCensusRecordImport'])
                     ->defaults('site', 'fushan')
                     ->name('process.census-records');
-
-                Route::get('/download', [MortalityController::class, 'download'])
-                    ->defaults('site', 'fushan')
-                    ->name('download');
 
                 Route::get('/download/latest-census-records', [MortalityController::class, 'downloadLatestCensusRecords'])
                     ->defaults('site', 'fushan')

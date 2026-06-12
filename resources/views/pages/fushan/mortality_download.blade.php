@@ -2,8 +2,8 @@
 
 @section('pagejs')
     <script>
-        $('.list3').addClass('now');
-        $('.list3 hr').css('color', '#91A21C');
+        $('.list5').addClass('now');
+        $('.list5 hr').css('color', '#91A21C');
     </script>
 @endsection
 
@@ -12,6 +12,8 @@
         <div class='text_box'>
             <h2>死亡率調查資料下載</h2>
             <hr>
+            <p style="margin: 10px 0 18px;">資料下載頁面已建立，下載項目之後再補。</p>
+            @if ((int) (auth()->user()?->is_admin ?? 0) === 1)
             <table class="tablesorter" style="min-width: 620px;">
                 <thead>
                     <tr>
@@ -36,6 +38,7 @@
                     </tr>
                 </tbody>
             </table>
+            @endif
         </div>
     </div>
 @endsection

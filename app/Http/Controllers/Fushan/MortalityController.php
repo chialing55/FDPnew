@@ -3,7 +3,7 @@
 namespace App\Http\Controllers\Fushan;
 
 use App\Http\Controllers\Controller;
-use App\Models\FsTreeBase;
+use App\Models\FsBaseSpinfo;
 use App\Models\FsMortality\CensusRecord;
 use App\Models\FsMortality\CensusRecordComment;
 use App\Models\FsMortality\Census;
@@ -19,12 +19,15 @@ use App\Models\FsTreeCensus2;
 use App\Models\FsTreeCensus3;
 use App\Models\FsTreeCensus4;
 use App\Models\FsTreeCensus5;
+use App\Services\Fushan\MortalityRecordPaperExporter;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Schema;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Str;
 use League\Csv\Reader;
+use RuntimeException;
+use Symfony\Component\HttpFoundation\BinaryFileResponse;
 use Symfony\Component\HttpFoundation\StreamedResponse;
 
 class MortalityController extends Controller
@@ -38,12 +41,38 @@ class MortalityController extends Controller
     {
         $user = $request->user();
         $site = $request->route('site');
+        $surveyContext = $this->nextMortalitySurveyContext();
 
         return view('pages/fushan/mortality_doc', [
             'site' => $site,
             'project' => '死亡率調查',
             'user' => $user->account ?? $user->name,
+            ...$surveyContext,
+            ...$this->recordPaperDownloadContext(),
         ]);
+    }
+
+    public function downloadRecordPaper(Request $request, MortalityRecordPaperExporter $exporter): BinaryFileResponse|\Illuminate\Http\RedirectResponse
+    {
+        $downloadContext = $this->recordPaperDownloadContext();
+
+        if (!$downloadContext['canDownloadRecordPaper']) {
+            return redirect()
+                ->route('admin.fushan.mortality.doc')
+                ->with('status', $downloadContext['recordPaperDownloadMessage']);
+        }
+
+        try {
+            $file = $exporter->make();
+        } catch (RuntimeException $exception) {
+            return redirect()
+                ->route('admin.fushan.mortality.doc')
+                ->with('status', $exception->getMessage());
+        }
+
+        return response()
+            ->download($file['path'], $file['filename'])
+            ->deleteFileAfterSend(true);
     }
 
     public function note(Request $request)
@@ -321,19 +350,19 @@ class MortalityController extends Controller
 
         if (!$entryContext['nextCensus']) {
             return redirect()
-                ->route('admin.fushan.mortality.entry.1')
+                ->route('admin.fushan.mortality.import')
                 ->with('status', '目前找不到下一次要處理的 census，尚無法產生輸入表單。');
         }
 
         if (!$entryContext['targetTableHasData'] || $targetTable === null) {
             return redirect()
-                ->route('admin.fushan.mortality.entry.1')
+                ->route('admin.fushan.mortality.import')
                 ->with('status', "請先匯入 `{$targetTable}` 的資料後，再產生輸入表單。");
         }
 
         if ($entryContext['recordTablesMatchTargetCensus']) {
             return redirect()
-                ->route('admin.fushan.mortality.entry.1')
+                ->route('admin.fushan.mortality.import')
                 ->with('status', "record1 與 record2 已是 census {$targetCensus} 的資料，可以直接開始輸入。");
         }
 
@@ -343,25 +372,10 @@ class MortalityController extends Controller
             ->whereNotNull('stemid')
             ->where('stemid', '!=', '')
             ->orderBy('id')
-            ->get([
-                'stemid',
-                'csp',
-                'qx',
-                'qy',
-                'subqx',
-                'subqy',
-                'x',
-                'y',
-            ]);
+            ->get(['stemid']);
 
-        $stageIndividuals = $this->buildTreeIndividualsPayload($treeIndividualRows, 'csp');
+        $stageIndividuals = $this->buildTreeIndividualsPayload($treeIndividualRows);
         $treeIndividualSyncSummary = $this->syncTreeIndividuals($stageIndividuals);
-
-        $sourceColumns = collect(Schema::connection('fs_mortality')->getColumnListing($targetTable))
-            ->reject(fn($column) => $column === 'id')
-            ->values()
-            ->all();
-        $insertColumns = array_values(array_unique(array_merge(['census'], $sourceColumns)));
 
         $recordTables = ['record1', 'record2'];
 
@@ -370,16 +384,17 @@ class MortalityController extends Controller
             $this->ensureMortalityRecordTableExists($recordTable, $targetTable);
         }
 
-        $connection->transaction(function () use ($connection, $targetTable, $targetCensus, $sourceColumns, $insertColumns, $recordTables) {
+        $entryRows = $this->buildMortalityEntryRows($targetTable, (int) $targetCensus);
+
+        $connection->transaction(function () use ($connection, $recordTables, $entryRows) {
             foreach ($recordTables as $recordTable) {
                 $connection->table($recordTable)->delete();
 
-                $connection->table($recordTable)->insertUsing(
-                    $insertColumns,
-                    $connection->table($targetTable)
-                        ->selectRaw('? as census', [(int) $targetCensus])
-                        ->addSelect($sourceColumns)
-                );
+                if (!empty($entryRows)) {
+                    foreach (array_chunk($entryRows, 500) as $chunk) {
+                        $connection->table($recordTable)->insert($chunk);
+                    }
+                }
             }
         });
 
@@ -388,9 +403,218 @@ class MortalityController extends Controller
         $status = "已先同步 tree_individuals（新增 {$treeIndividualSyncSummary['created_count']}、更新 {$treeIndividualSyncSummary['updated_count']}、停用 {$treeIndividualSyncSummary['deactivated_count']}），再更新 census {$census}（{$year} 年）的輸入表單資料：record1 / record2。";
 
         return redirect()
-            ->route('admin.fushan.mortality.entry.1')
+            ->route('admin.fushan.mortality.import')
             ->with('status', $status)
             ->with('tree_individual_sync_summary', $treeIndividualSyncSummary);
+    }
+
+
+    private function buildMortalityEntryRows(string $targetTable, int $targetCensus): array
+    {
+        $sourceRows = DB::connection('fs_mortality')
+            ->table($targetTable)
+            ->whereNotNull('stemid')
+            ->where('stemid', '!=', '')
+            ->orderBy('map_sort')
+            ->orderBy('map')
+            ->orderBy('id')
+            ->get(['map_sort', 'map', 'stemid']);
+
+        if ($sourceRows->isEmpty()) {
+            return [];
+        }
+
+        $stemids = $sourceRows
+            ->pluck('stemid')
+            ->map(fn ($stemid) => trim((string) $stemid))
+            ->filter(fn ($stemid) => $stemid !== '')
+            ->unique()
+            ->values()
+            ->all();
+        $baseRows = $this->baseRowsForStemids($stemids);
+        $speciesMap = $this->speciesMapForBaseRows($baseRows);
+        $latestRecords = $this->latestCensusRecordsForStemids($stemids);
+        $recordColumns = collect(Schema::connection('fs_mortality')->getColumnListing('record1'))
+            ->reject(fn ($column) => $column === 'id')
+            ->values()
+            ->all();
+        $now = now();
+        $rows = [];
+
+        foreach ($sourceRows as $sourceRow) {
+            $stemid = trim((string) $sourceRow->stemid);
+
+            if ($stemid === '') {
+                continue;
+            }
+
+            $baseTag = $this->baseTagFromStemid($stemid);
+            $base = $baseRows[$baseTag] ?? null;
+            $latestRecord = $latestRecords[$stemid] ?? null;
+            $latestStatus = strtoupper(trim((string) ($latestRecord->status ?? '')));
+            $status = $latestStatus !== '' && $latestStatus !== 'A' ? $latestStatus : null;
+
+            $candidate = [
+                'census' => $targetCensus,
+                'map_sort' => $this->toNullableInteger($sourceRow->map_sort ?? null) ?? 1,
+                'map' => $this->nullIfBlank($sourceRow->map ?? null),
+                'q20' => $this->formatQ20($base->qx ?? null, $base->qy ?? null),
+                'q10' => $this->formatQ10($base->subqx ?? null, $base->subqy ?? null),
+                'qx' => $this->toNullableInteger($base->qx ?? null),
+                'qy' => $this->toNullableInteger($base->qy ?? null),
+                'subqx' => $this->toNullableInteger($base->subqx ?? null),
+                'subqy' => $this->toNullableInteger($base->subqy ?? null),
+                'stemid' => $stemid,
+                'csp' => $this->nullIfBlank($speciesMap[$base->spcode ?? ''] ?? ($base->spcode ?? null)),
+                'x' => $this->toNullableDecimal($base->qudx ?? null),
+                'y' => $this->toNullableDecimal($base->qudy ?? null),
+                'dbh1' => $latestStatus === 'D' ? null : $this->toNullableDbh($latestRecord->dbh ?? null),
+                'dbh2' => null,
+                'status' => $status,
+                'mode' => null,
+                'living_length' => null,
+                'branches' => null,
+                'illumination' => null,
+                'leaning' => null,
+                'liana' => null,
+                'fungi' => null,
+                'wounded_stem' => null,
+                'deformity' => null,
+                'rotten' => null,
+                'leaves' => null,
+                'leaf_damage' => null,
+                'comments_json' => null,
+                'stem_corrections_json' => null,
+                'date' => null,
+                'team_id' => null,
+                'created_at' => $now,
+                'updated_at' => $now,
+                'created_by' => null,
+                'updated_by' => null,
+            ];
+
+            $rows[] = array_intersect_key($candidate, array_flip($recordColumns));
+        }
+
+        return $rows;
+    }
+
+    private function baseRowsForStemids(array $stemids): array
+    {
+        $baseTags = collect($stemids)
+            ->map(fn ($stemid) => $this->baseTagFromStemid((string) $stemid))
+            ->filter()
+            ->unique()
+            ->values()
+            ->all();
+
+        if (empty($baseTags)) {
+            return [];
+        }
+
+        return DB::connection('mysql1')
+            ->table('base')
+            ->whereIn('tag', $baseTags)
+            ->get([
+                'tag',
+                'spcode',
+                'qx',
+                'qy',
+                'subqx',
+                'subqy',
+                'qudx',
+                'qudy',
+            ])
+            ->keyBy('tag')
+            ->all();
+    }
+
+
+    private function speciesMapForBaseRows(array $baseRows): array
+    {
+        $spcodes = collect($baseRows)
+            ->pluck('spcode')
+            ->map(fn ($spcode) => trim((string) $spcode))
+            ->filter(fn ($spcode) => $spcode !== '')
+            ->unique()
+            ->values()
+            ->all();
+
+        if (empty($spcodes)) {
+            return [];
+        }
+
+        return FsBaseSpinfo::query()
+            ->whereIn('spcode', $spcodes)
+            ->pluck('csp', 'spcode')
+            ->all();
+    }
+
+    private function latestCensusRecordsForStemids(array $stemids): array
+    {
+        $stemids = array_values(array_filter(array_map(fn ($stemid) => trim((string) $stemid), $stemids)));
+
+        if (empty($stemids)) {
+            return [];
+        }
+
+        $latestCensuses = DB::connection('fs_mortality')
+            ->table('census_records')
+            ->select('stemid', DB::raw('MAX(census) as latest_census'))
+            ->whereIn('stemid', $stemids)
+            ->groupBy('stemid');
+
+        $latestStatusRows = DB::connection('fs_mortality')
+            ->table('census_records as cr')
+            ->joinSub($latestCensuses, 'latest', function ($join) {
+                $join->on('cr.stemid', '=', 'latest.stemid')
+                    ->on('cr.census', '=', 'latest.latest_census');
+            })
+            ->get([
+                'cr.stemid',
+                'cr.status',
+            ])
+            ->keyBy('stemid');
+
+        $latestDbhCensuses = DB::connection('fs_mortality')
+            ->table('census_records')
+            ->select('stemid', DB::raw('MAX(census) as latest_dbh_census'))
+            ->whereIn('stemid', $stemids)
+            ->whereNotNull('dbh')
+            ->groupBy('stemid');
+
+        $latestDbhRows = DB::connection('fs_mortality')
+            ->table('census_records as cr')
+            ->joinSub($latestDbhCensuses, 'latest_dbh', function ($join) {
+                $join->on('cr.stemid', '=', 'latest_dbh.stemid')
+                    ->on('cr.census', '=', 'latest_dbh.latest_dbh_census');
+            })
+            ->get([
+                'cr.stemid',
+                'cr.dbh',
+            ])
+            ->keyBy('stemid');
+
+        return collect($stemids)
+            ->mapWithKeys(function ($stemid) use ($latestStatusRows, $latestDbhRows) {
+                $statusRow = $latestStatusRows->get($stemid);
+                $dbhRow = $latestDbhRows->get($stemid);
+
+                return [$stemid => (object) [
+                    'stemid' => $stemid,
+                    'status' => $statusRow->status ?? null,
+                    'dbh' => $dbhRow->dbh ?? null,
+                ]];
+            })
+            ->all();
+    }
+
+    private function baseTagFromStemid(string $stemid): string
+    {
+        $stemid = trim($stemid);
+        $beforeDot = explode('.', $stemid, 2)[0];
+
+        return substr($beforeDot, 0, 6);
     }
 
     private function getSurveyImportContext(): array
@@ -445,6 +669,63 @@ class MortalityController extends Controller
             'targetTable' => $targetTable,
             'targetTableExists' => $targetTableExists,
             'targetTableHasData' => $targetTableHasData,
+        ];
+    }
+
+    private function recordPaperDownloadContext(): array
+    {
+        $surveyImportContext = $this->getSurveyImportContext();
+        $targetCensus = $surveyImportContext['nextCensus']?->census;
+        $record1Exists = Schema::connection('fs_mortality')->hasTable('record1');
+        $record1HasData = $record1Exists
+            ? DB::connection('fs_mortality')->table('record1')->exists()
+            : false;
+        $record1HasDateData = false;
+        $record1MatchesTargetCensus = false;
+
+        if ($record1HasData && $targetCensus !== null) {
+            $record1CensusValues = DB::connection('fs_mortality')
+                ->table('record1')
+                ->select('census')
+                ->distinct()
+                ->pluck('census')
+                ->map(fn ($value) => (int) $value)
+                ->all();
+            $record1MatchesTargetCensus = count($record1CensusValues) === 1
+                && $record1CensusValues[0] === (int) $targetCensus;
+        }
+
+        if ($record1HasData && Schema::connection('fs_mortality')->hasColumn('record1', 'date')) {
+            $record1HasDateData = DB::connection('fs_mortality')
+                ->table('record1')
+                ->whereNotNull('date')
+                ->where('date', '!=', '')
+                ->exists();
+        }
+
+        if (!$record1HasData || !$record1MatchesTargetCensus) {
+            return [
+                'recordPaperHasRecord1Data' => $record1HasData,
+                'recordPaperHasDateData' => $record1HasDateData,
+                'canDownloadRecordPaper' => false,
+                'recordPaperDownloadMessage' => '請先產生新一年度輸入表單。',
+            ];
+        }
+
+        if ($record1HasDateData) {
+            return [
+                'recordPaperHasRecord1Data' => true,
+                'recordPaperHasDateData' => true,
+                'canDownloadRecordPaper' => false,
+                'recordPaperDownloadMessage' => '已進行資料輸入，不能下載紀錄紙。',
+            ];
+        }
+
+        return [
+            'recordPaperHasRecord1Data' => true,
+            'recordPaperHasDateData' => false,
+            'canDownloadRecordPaper' => true,
+            'recordPaperDownloadMessage' => null,
         ];
     }
 
@@ -716,13 +997,12 @@ class MortalityController extends Controller
             'site' => $site,
             'project' => '死亡率調查',
             'user' => $user->account ?? $user->name,
+            ...$this->getMortalityEntryContext(),
         ]);
     }
 
     public function download(Request $request)
     {
-        $this->ensureProcessAdmin($request);
-
         $user = $request->user();
         $site = $request->route('site');
         $latestCensus = $this->latestCensusRecordInfo();
@@ -756,6 +1036,9 @@ class MortalityController extends Controller
             $rows = DB::connection('fs_mortality')
                 ->table('census_records as cr')
                 ->leftJoin('tree_individuals as ti', 'cr.stemid', '=', 'ti.stemid')
+                ->leftJoin(DB::raw($this->qualifiedBaseTable() . ' as b'), function ($join) {
+                    $join->on('b.tag', '=', DB::raw("LEFT(SUBSTRING_INDEX(cr.stemid, '.', 1), 6)"));
+                })
                 ->where('cr.census', $census)
                 ->select([
                     'cr.id',
@@ -776,28 +1059,26 @@ class MortalityController extends Controller
                     'cr.rotten',
                     'cr.leaves',
                     'cr.leaf_damage',
-                    'ti.qx',
-                    'ti.qy',
-                    'ti.subqx',
-                    'ti.subqy',
-                    'ti.qudx',
-                    'ti.qudy',
+                    'b.spcode',
+                    'b.qx',
+                    'b.qy',
+                    'b.subqx',
+                    'b.subqy',
+                    'b.qudx',
+                    'b.qudy',
                 ])
                 ->orderBy('cr.map')
-                ->orderBy('ti.qx')
-                ->orderBy('ti.qy')
-                ->orderBy('ti.subqx')
-                ->orderBy('ti.subqy')
+                ->orderBy('b.qx')
+                ->orderBy('b.qy')
+                ->orderBy('b.subqx')
+                ->orderBy('b.subqy')
                 ->orderBy('cr.stemid')
                 ->get();
 
-            $stemids = $rows->pluck('stemid')->filter()->map(fn ($stemid) => (string) $stemid)->unique()->values()->all();
-            $spcodes = $this->baseSpcodesForStemids($stemids);
             $comments = $this->downloadCommentsByRecordId($rows->pluck('id')->all());
 
             foreach ($rows as $row) {
                 $stemid = (string) $row->stemid;
-                $baseTag = $this->baseTagFromStemid($stemid);
 
                 fputcsv($handle, [
                     $row->map,
@@ -808,7 +1089,7 @@ class MortalityController extends Controller
                     $row->subqx,
                     $row->subqy,
                     $stemid,
-                    $spcodes[$baseTag] ?? '',
+                    $row->spcode ?? '',
                     $this->formatDownloadValue($row->qudx),
                     $this->formatDownloadValue($row->qudy),
                     '',
@@ -858,6 +1139,22 @@ class MortalityController extends Controller
         ];
     }
 
+    private function nextMortalitySurveyContext(): array
+    {
+        $latestCensus = $this->latestCensusRecordInfo();
+        $latestSurveyYear = $latestCensus?->survey_year !== null
+            ? (int) $latestCensus->survey_year
+            : 2025;
+        $nextSurveyYear = $latestSurveyYear + 1;
+
+        return [
+            'latestCensus' => $latestCensus,
+            'latestSurveyYear' => $latestSurveyYear,
+            'nextSurveyYear' => $nextSurveyYear,
+            'nextCensus' => $latestCensus?->census !== null ? (int) $latestCensus->census + 1 : null,
+        ];
+    }
+
     private function mortalityDownloadHeaders(): array
     {
         return [
@@ -892,33 +1189,16 @@ class MortalityController extends Controller
         ];
     }
 
-    private function baseSpcodesForStemids(array $stemids): array
+    private function qualifiedBaseTable(): string
     {
-        $baseTags = collect($stemids)
-            ->map(fn ($stemid) => $this->baseTagFromStemid((string) $stemid))
-            ->filter()
-            ->unique()
-            ->values()
-            ->all();
+        $database = config('database.connections.mysql1.database');
 
-        if (empty($baseTags)) {
-            return [];
+        if (!$database) {
+            return '`base`';
         }
 
-        return FsTreeBase::query()
-            ->whereIn('tag', $baseTags)
-            ->pluck('spcode', 'tag')
-            ->all();
+        return '`' . str_replace('`', '``', $database) . '`.`base`';
     }
-
-    private function baseTagFromStemid(string $stemid): string
-    {
-        $stemid = trim($stemid);
-        $beforeDot = explode('.', $stemid, 2)[0];
-
-        return substr($beforeDot, 0, 6);
-    }
-
     private function downloadCommentsByRecordId(array $recordIds): array
     {
         $recordIds = array_values(array_filter(array_map('intval', $recordIds)));
@@ -962,7 +1242,9 @@ class MortalityController extends Controller
             return '';
         }
 
-        return $qx . ',' . $qy;
+        return str_pad((string) (int) $qx, 2, '0', STR_PAD_LEFT)
+            . ','
+            . str_pad((string) (int) $qy, 2, '0', STR_PAD_LEFT);
     }
 
     private function formatQ10($subqx, $subqy): string
@@ -1376,17 +1658,8 @@ class MortalityController extends Controller
             ->whereNotNull('stemid')
             ->where('stemid', '!=', '')
             ->orderBy('id')
-            ->get([
-                'stemid',
-                'sp',
-                'qx',
-                'qy',
-                'subqx',
-                'subqy',
-                'x',
-                'y',
-            ]);
-        $stageIndividuals = $this->buildTreeIndividualsPayload($rows, 'sp');
+            ->get(['stemid']);
+        $stageIndividuals = $this->buildTreeIndividualsPayload($rows);
 
         if (empty($stageIndividuals)) {
             return redirect()
@@ -1406,44 +1679,19 @@ class MortalityController extends Controller
             ]);
     }
 
-    private function buildTreeIndividualsPayload(iterable $rows, string $speciesField): array
+    private function buildTreeIndividualsPayload(iterable $rows): array
     {
-        $rowCollection = collect($rows);
-
-        $baseTags = $rowCollection
-            ->map(fn($row) => substr(trim((string) ($row->stemid ?? '')), 0, 6))
-            ->filter()
-            ->unique()
-            ->values()
-            ->all();
-
-        $baseSpcodes = FsTreeBase::query()
-            ->whereIn('tag', $baseTags)
-            ->pluck('spcode', 'tag')
-            ->all();
-
         $stageIndividuals = [];
 
-        foreach ($rowCollection as $row) {
+        foreach ($rows as $row) {
             $stemid = trim((string) ($row->stemid ?? ''));
 
             if ($stemid === '' || isset($stageIndividuals[$stemid])) {
                 continue;
             }
 
-            $baseTag = substr($stemid, 0, 6);
-            $resolvedSpcode = $this->nullIfBlank($baseSpcodes[$baseTag] ?? null);
-            $sourceSpecies = $this->nullIfBlank(data_get($row, $speciesField));
-
             $stageIndividuals[$stemid] = [
                 'stemid' => $stemid,
-                'spcode' => $resolvedSpcode ?? $sourceSpecies,
-                'qx' => $this->toNullableInteger($row->qx ?? null),
-                'qy' => $this->toNullableInteger($row->qy ?? null),
-                'subqx' => $this->toNullableInteger($row->subqx ?? null),
-                'subqy' => $this->toNullableInteger($row->subqy ?? null),
-                'qudx' => $this->toNullableDecimal($row->x ?? null),
-                'qudy' => $this->toNullableDecimal($row->y ?? null),
                 'is_active' => true,
             ];
         }

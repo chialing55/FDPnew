@@ -162,10 +162,10 @@ class MortalityDataviewer extends Component
 
         $rows = $query
             ->orderBy('cr.map')
-            ->orderBy('ti.qx')
-            ->orderBy('ti.qy')
-            ->orderBy('ti.subqx')
-            ->orderBy('ti.subqy')
+            ->orderBy('b.qx')
+            ->orderBy('b.qy')
+            ->orderBy('b.subqx')
+            ->orderBy('b.subqy')
             ->orderBy('cr.census')
             ->orderBy('cr.stemid')
             ->offset(($this->page - 1) * $this->perPage)
@@ -215,18 +215,19 @@ class MortalityDataviewer extends Component
         $this->maps = $this->distinctCensusRecordOptions('map', 'map');
         $this->yearOptions = $this->distinctSurveyYearOptions();
 
-        $speciesCodes = $this->distinctTreeIndividualOptions('spcode', 'species');
+        $speciesCodes = $this->distinctBaseOptions('spcode', 'species');
         $speciesNames = $this->speciesMap($speciesCodes);
         $this->speciesOptions = collect($speciesCodes)
             ->map(fn ($spcode) => [
+                'value' => $speciesNames[$spcode] ?? $spcode,
+                'label' => $spcode . ' ' . ($speciesNames[$spcode] ?? $spcode),
                 'spcode' => $spcode,
-                'label' => $speciesNames[$spcode] ?? $spcode,
             ])
             ->toArray();
 
-        $this->stemidOptions = $this->distinctCensusRecordOptions('stemid', 'stemid');
-        $this->qxOptions = $this->distinctTreeIndividualOptions('qx', 'qx');
-        $this->qyOptions = $this->distinctTreeIndividualOptions('qy', 'qy');
+        $this->stemidOptions = array_slice($this->distinctCensusRecordOptions('stemid', 'stemid'), 0, 500);
+        $this->qxOptions = $this->distinctBaseOptions('qx', 'qx');
+        $this->qyOptions = $this->distinctBaseOptions('qy', 'qy');
         $this->statusOptions = $this->distinctCensusRecordOptions('status', 'status');
         $this->modeOptions = $this->distinctCensusRecordOptions('mode', 'mode');
         $this->illuminationOptions = $this->distinctCensusRecordOptions('illumination', 'illumination');
@@ -243,6 +244,9 @@ class MortalityDataviewer extends Component
         $query = DB::connection('fs_mortality')
             ->table('census_records as cr')
             ->leftJoin('tree_individuals as ti', 'cr.stemid', '=', 'ti.stemid')
+            ->leftJoin(DB::raw($this->qualifiedBaseTable() . ' as b'), function ($join) {
+                $join->on('b.tag', '=', DB::raw("LEFT(SUBSTRING_INDEX(cr.stemid, '.', 1), 6)"));
+            })
             ->leftJoin('censuses as c', 'cr.census', '=', 'c.census')
             ->select([
                 'cr.id',
@@ -251,13 +255,13 @@ class MortalityDataviewer extends Component
                 'c.survey_year',
                 'cr.date',
                 'cr.stemid',
-                'ti.spcode',
-                'ti.qx',
-                'ti.qy',
-                'ti.subqx',
-                'ti.subqy',
-                'ti.qudx',
-                'ti.qudy',
+                'b.spcode',
+                'b.qx',
+                'b.qy',
+                'b.subqx',
+                'b.subqy',
+                'b.qudx',
+                'b.qudy',
                 'cr.dbh',
                 'cr.status',
                 'cr.mode',
@@ -282,6 +286,9 @@ class MortalityDataviewer extends Component
         $query = DB::connection('fs_mortality')
             ->table('census_records as cr')
             ->leftJoin('tree_individuals as ti', 'cr.stemid', '=', 'ti.stemid')
+            ->leftJoin(DB::raw($this->qualifiedBaseTable() . ' as b'), function ($join) {
+                $join->on('b.tag', '=', DB::raw("LEFT(SUBSTRING_INDEX(cr.stemid, '.', 1), 6)"));
+            })
             ->leftJoin('censuses as c', 'cr.census', '=', 'c.census');
 
         return $this->applyFilters($query, $except);
@@ -295,10 +302,20 @@ class MortalityDataviewer extends Component
         return $query
             ->when($except !== 'map' && $this->map !== 'all', fn ($query) => $query->where('cr.map', $this->map))
             ->when($except !== 'year' && $this->year !== 'all', fn ($query) => $query->where('c.survey_year', $this->year))
-            ->when($except !== 'stemid' && $stemid !== '' && $stemid !== 'all', fn ($query) => $query->where('cr.stemid', $stemid))
-            ->when($except !== 'species' && $species !== '' && $species !== 'all', fn ($query) => $query->where('ti.spcode', $species))
-            ->when($except !== 'qx' && $this->qx !== 'all', fn ($query) => $query->where('ti.qx', $this->qx))
-            ->when($except !== 'qy' && $this->qy !== 'all', fn ($query) => $query->where('ti.qy', $this->qy))
+            ->when($except !== 'stemid' && $stemid !== '' && $stemid !== 'all', fn ($query) => $query->where('cr.stemid', 'like', '%' . $stemid . '%'))
+            ->when($except !== 'species' && $species !== '' && $species !== 'all', function ($query) use ($species) {
+                $spcodes = $this->speciesFilterSpcodes($species);
+
+                $query->where(function ($query) use ($species, $spcodes) {
+                    $query->where('b.spcode', 'like', '%' . $species . '%');
+
+                    if (!empty($spcodes)) {
+                        $query->orWhereIn('b.spcode', $spcodes);
+                    }
+                });
+            })
+            ->when($except !== 'qx' && $this->qx !== 'all', fn ($query) => $query->where('b.qx', $this->qx))
+            ->when($except !== 'qy' && $this->qy !== 'all', fn ($query) => $query->where('b.qy', $this->qy))
             ->when($except !== 'status' && $this->status !== 'all', fn ($query) => $query->where('cr.status', $this->status))
             ->when($except !== 'mode' && $this->mode !== 'all', fn ($query) => $query->where('cr.mode', $this->mode))
             ->when($except !== 'illumination' && $this->illumination !== 'all', fn ($query) => $query->where('cr.illumination', $this->illumination))
@@ -314,14 +331,14 @@ class MortalityDataviewer extends Component
     }
 
 
-    private function distinctTreeIndividualOptions(string $column, ?string $except = null): array
+    private function distinctBaseOptions(string $column, ?string $except = null): array
     {
         return $this->optionBaseQuery($except)
-            ->select("ti.{$column}")
-            ->whereNotNull("ti.{$column}")
+            ->select("b.{$column}")
+            ->whereNotNull("b.{$column}")
             ->distinct()
-            ->orderBy("ti.{$column}")
-            ->pluck("ti.{$column}")
+            ->orderBy("b.{$column}")
+            ->pluck("b.{$column}")
             ->map(fn ($value) => trim((string) $value))
             ->filter(fn ($value) => $value !== '')
             ->values()
@@ -352,6 +369,17 @@ class MortalityDataviewer extends Component
             ->pluck('c.survey_year')
             ->map(fn ($year) => (string) $year)
             ->toArray();
+    }
+
+    private function qualifiedBaseTable(): string
+    {
+        $database = config('database.connections.mysql1.database');
+
+        if (!$database) {
+            return '`base`';
+        }
+
+        return '`' . str_replace('`', '``', $database) . '`.`base`';
     }
 
     private function commentsByRecordId(array $recordIds): array
@@ -402,6 +430,25 @@ class MortalityDataviewer extends Component
         return FsBaseSpinfo::query()
             ->whereIn('spcode', $spcodes)
             ->pluck('csp', 'spcode')
+            ->all();
+    }
+
+    private function speciesFilterSpcodes(string $species): array
+    {
+        $species = trim($species);
+
+        if ($species === '') {
+            return [];
+        }
+
+        return FsBaseSpinfo::query()
+            ->where('spcode', 'like', '%' . $species . '%')
+            ->orWhere('csp', 'like', '%' . $species . '%')
+            ->pluck('spcode')
+            ->map(fn ($spcode) => trim((string) $spcode))
+            ->filter(fn ($spcode) => $spcode !== '')
+            ->unique()
+            ->values()
             ->all();
     }
 

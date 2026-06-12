@@ -35,6 +35,7 @@
         <div class='list list1 listlink' type='doc'>相關文件<hr></div>
         <div class='list list4 listlink'>資料輸入<hr></div>
         <div class='list list2 listlink' type='dataviewer'>資料檢視<hr></div>
+        <div class='list list5 listlink' type='download'>資料下載<hr></div>
         @if ($isAdmin)
             <div class='list list3 listlink admin-only-link'>資料處理<hr></div>
         @endif
@@ -53,8 +54,7 @@
     @if ((int) (auth()->user()?->is_admin ?? 0) === 1)
     <div class='listinner list3inner' style='display:none;'>
         <li class='innerlist list31 listlink admin-only-link' type='process'>excel資料匯入整理</li>
-        <li class='innerlist list32 listlink admin-only-link' type='import'>將資料匯入大表</li>
-        <li class='innerlist list33 listlink admin-only-link' type='download'>下載資料<hr></li>
+        <li class='innerlist list32 listlink admin-only-link' type='import'>將資料匯入大表<hr></li>
     </div>
     @endif
 @endsection

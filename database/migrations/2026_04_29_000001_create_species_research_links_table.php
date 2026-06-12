@@ -41,22 +41,39 @@ return new class extends Migration
                 }
             });
 
-        DB::connection('fs_mortality')
+        $mortalityStemids = DB::connection('fs_mortality')
             ->table('tree_individuals')
-            ->select('spcode')
-            ->whereNotNull('spcode')
-            ->where('spcode', '!=', '')
-            ->distinct()
-            ->orderBy('spcode')
-            ->pluck('spcode')
-            ->each(function ($spcode) use (&$links, $now) {
-                $links[$spcode.'|mortality'] = [
-                    'spcode' => $spcode,
-                    'research_code' => 'mortality',
-                    'created_at' => $now,
-                    'updated_at' => $now,
-                ];
-            });
+            ->select('stemid')
+            ->whereNotNull('stemid')
+            ->where('stemid', '!=', '')
+            ->pluck('stemid');
+
+        $mortalityBaseTags = $mortalityStemids
+            ->map(fn ($stemid) => substr(explode('.', trim((string) $stemid), 2)[0], 0, 6))
+            ->filter()
+            ->unique()
+            ->values()
+            ->all();
+
+        if (! empty($mortalityBaseTags)) {
+            DB::connection('mysql1')
+                ->table('base')
+                ->select('spcode')
+                ->whereIn('tag', $mortalityBaseTags)
+                ->whereNotNull('spcode')
+                ->where('spcode', '!=', '')
+                ->distinct()
+                ->orderBy('spcode')
+                ->pluck('spcode')
+                ->each(function ($spcode) use (&$links, $now) {
+                    $links[$spcode.'|mortality'] = [
+                        'spcode' => $spcode,
+                        'research_code' => 'mortality',
+                        'created_at' => $now,
+                        'updated_at' => $now,
+                    ];
+                });
+        }
 
         foreach (array_chunk(array_values($links), 500) as $chunk) {
             DB::connection('mysql4')->table('species_research_links')->insert($chunk);

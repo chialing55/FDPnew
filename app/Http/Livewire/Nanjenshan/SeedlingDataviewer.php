@@ -170,14 +170,17 @@ class SeedlingDataviewer extends Component
             ->when($except !== 'plot' && $this->plot !== 'all', fn ($query) => $query->where('quadrats.plot_name', $this->plot))
             ->when($except !== 'quadrat' && $this->quadrat !== 'all', fn ($query) => $query->where('quadrats.quadrat', $this->quadrat))
             ->when($except !== 'ym' && $this->ym !== 'all', fn ($query) => $query->where('censuses.ym', $this->ym))
-            ->when($except !== 'tag' && $tag !== '' && $tag !== 'all', fn ($query) => $query->where('seedling_individuals.tag', $tag))
+            ->when($except !== 'tag' && $tag !== '' && $tag !== 'all', fn ($query) => $query->where('seedling_individuals.tag', 'like', '%' . $tag . '%'))
             ->when($except !== 'status' && $this->status !== 'all', fn ($query) => $query->where('seedling_records.status', $this->status))
             ->when($this->hasNumericFilter($this->heightValue), fn ($query) => $this->applyNumericFilter($query, 'seedling_records.height', $this->heightOperator, $this->heightValue))
             ->when($this->hasNumericFilter($this->leafEatenValue), fn ($query) => $this->applyNumericFilter($query, 'seedling_records.leaf_eaten_percent', $this->leafEatenOperator, $this->leafEatenValue))
             ->when($this->hasNumericFilter($this->leafCoveredValue), fn ($query) => $this->applyNumericFilter($query, 'seedling_records.leaf_covered_percent', $this->leafCoveredOperator, $this->leafCoveredValue))
             ->when($this->hasNumericFilter($this->diseaseSpotValue), fn ($query) => $this->applyNumericFilter($query, 'seedling_records.disease_spot_percent', $this->diseaseSpotOperator, $this->diseaseSpotValue))
             ->when($except !== 'species' && $species !== '' && $species !== 'all', function ($query) use ($species) {
-                $query->where('seedling_individuals.standard_species_name', $species);
+                $query->where(function ($query) use ($species) {
+                    $query->where('seedling_individuals.standard_species_name', 'like', '%' . $species . '%')
+                        ->orWhere('seedling_individuals.recorded_species_name', 'like', '%' . $species . '%');
+                });
             });
     }
 

@@ -39,18 +39,7 @@
         </div>
         <h2>死亡率調查資料檢視<span style="margin-left: 20px ; font-weight: 500; font-size: 70%;">最新調查年份：{{ $latestSurveyYear }}</span><span style="margin-left: 20px ; font-weight: 500; font-size: 70%;">共 {{ $total }} 筆</span></h2>
         <hr>
-        <div class="pages" style="margin-bottom: 14px; display: flex; align-items: center; gap: 12px; flex-wrap: wrap;">
-            <div class="totalnum">每頁 {{ $perPage }} 筆</div>
-            <div class="pagenote">第 {{ $page }} / {{ $totalPages }} 頁</div>
-            <button type="button" class="prev" wire:click="previousPage" @if($page <= 1) disabled @endif>上一頁</button>
-            <button type="button" class="next" wire:click="nextPage" @if($page >= $totalPages) disabled @endif>下一頁</button>
-            <span>跳至</span>
-            <select class="fs100" style="width: 72px;" wire:change="goToPage($event.target.value)">
-                @for($i = 1; $i <= $totalPages; $i++)
-                    <option value="{{ $i }}" @if($i === $page) selected @endif>{{ $i }}</option>
-                @endfor
-            </select>
-        </div>
+        @include('livewire.partials.dataviewer-pagination')
         <table
             id='fs-mortality-dataviewer-table'
             class='tablesorter'
@@ -94,63 +83,36 @@
                 </tr>
                 <tr class="mortality-dataviewer-filter-row">
                     <td>
-                        <select class="fs100" wire:model='map' wire:change="setFilter('map', $event.target.value)">
-                            <option value="all">all</option>
-                            @foreach($maps as $mapOption)
-                                <option value="{{ $mapOption }}">{{ $mapOption }}</option>
-                            @endforeach
-                        </select>
+                        @include('livewire.partials.select-filter', ['model' => 'map', 'options' => $maps])
                     </td>
                     <td>
-                        <select class="fs100" wire:model='year' wire:change="setFilter('year', $event.target.value)">
-                            <option value="all">all</option>
-                            @foreach($yearOptions as $yearOption)
-                                <option value="{{ $yearOption }}">{{ $yearOption }}</option>
-                            @endforeach
-                        </select>
+                        @include('livewire.partials.select-filter', ['model' => 'year', 'options' => $yearOptions])
                     </td>
                     <td></td>
                     <td>
-                        <select class="fs100" style='width: 92px;' wire:model='stemid' wire:change="setFilter('stemid', $event.target.value)">
-                            <option value="all">all</option>
-                            @foreach($stemidOptions as $stemidOption)
-                                <option value="{{ $stemidOption }}">{{ $stemidOption }}</option>
-                            @endforeach
-                        </select>
+                        @include('livewire.partials.datalist-filter', [
+                            'model' => 'stemid',
+                            'options' => $stemidOptions,
+                            'listId' => 'mortality-stemid-options',
+                            'width' => '92px',
+                        ])
                     </td>
                     <td>
-                        <select class="fs100" style='width: 82px;' wire:model='species' wire:change="setFilter('species', $event.target.value)">
-                            <option value="all">all</option>
-                            @foreach($speciesOptions as $speciesOption)
-                                <option value="{{ $speciesOption['spcode'] }}">{{ $speciesOption['label'] }}</option>
-                            @endforeach
-                        </select>
+                        @include('livewire.partials.datalist-filter', [
+                            'model' => 'species',
+                            'options' => $speciesOptions,
+                            'listId' => 'mortality-species-options',
+                            'width' => '120px',
+                        ])
                     </td>
                     <td>
-                        <select class="fs100" wire:model='qx' wire:change="setFilter('qx', $event.target.value)">
-                            <option value="all">all</option>
-                            @foreach($qxOptions as $qxOption)
-                                <option value="{{ $qxOption }}">{{ $qxOption }}</option>
-                            @endforeach
-                        </select>
+                        @include('livewire.partials.select-filter', ['model' => 'qx', 'options' => $qxOptions])
                     </td>
                     <td>
-                        <select class="fs100" wire:model='qy' wire:change="setFilter('qy', $event.target.value)">
-                            <option value="all">all</option>
-                            @foreach($qyOptions as $qyOption)
-                                <option value="{{ $qyOption }}">{{ $qyOption }}</option>
-                            @endforeach
-                        </select>
+                        @include('livewire.partials.select-filter', ['model' => 'qy', 'options' => $qyOptions])
                     </td>
                     <td>
-                        <div style="display: inline-flex; gap: 4px; align-items: center;">
-                            <select class="fs100" style="width: 40px;" wire:model="dbhOperator" wire:change="setFilter('dbhOperator', $event.target.value)">
-                                @foreach($operatorOptions as $operatorOption)
-                                    <option value="{{ $operatorOption }}">{{ $operatorOption }}</option>
-                                @endforeach
-                            </select>
-                            <input type="number" step="any" class="fs100" style="width: 40px;" wire:model="dbhValue" wire:change="setFilter('dbhValue', $event.target.value)">
-                        </div>
+                        @include('livewire.partials.numeric-filter', ['operatorModel' => 'dbhOperator', 'valueModel' => 'dbhValue'])
                     </td>
                     <td>
                         <select class="fs100" wire:model='status' wire:change="setFilter('status', $event.target.value)">
@@ -170,14 +132,7 @@
                     </td>
                     <td></td>
                     <td>
-                        <div style="display: inline-flex; gap: 4px; align-items: center;">
-                            <select class="fs100" style="width: 40px;" wire:model="branchesOperator" wire:change="setFilter('branchesOperator', $event.target.value)">
-                                @foreach($operatorOptions as $operatorOption)
-                                    <option value="{{ $operatorOption }}">{{ $operatorOption }}</option>
-                                @endforeach
-                            </select>
-                            <input type="number" step="any" class="fs100" style="width: 40px;" wire:model="branchesValue" wire:change="setFilter('branchesValue', $event.target.value)">
-                        </div>
+                        @include('livewire.partials.numeric-filter', ['operatorModel' => 'branchesOperator', 'valueModel' => 'branchesValue'])
                     </td>
                     <td>
                         <select class="fs100" wire:model='illumination' wire:change="setFilter('illumination', $event.target.value)">
@@ -229,14 +184,7 @@
                         </select>
                     </td>
                     <td>
-                        <div style="display: inline-flex; gap: 4px; align-items: center;">
-                            <select class="fs100" style="width: 40px;" wire:model="leavesOperator" wire:change="setFilter('leavesOperator', $event.target.value)">
-                                @foreach($operatorOptions as $operatorOption)
-                                    <option value="{{ $operatorOption }}">{{ $operatorOption }}</option>
-                                @endforeach
-                            </select>
-                            <input type="number" step="any" class="fs100" style="width: 40px;" wire:model="leavesValue" wire:change="setFilter('leavesValue', $event.target.value)">
-                        </div>
+                        @include('livewire.partials.numeric-filter', ['operatorModel' => 'leavesOperator', 'valueModel' => 'leavesValue'])
                     </td>
                     <td>
                         <select class="fs100" wire:model='leafDamage' wire:change="setFilter('leafDamage', $event.target.value)">

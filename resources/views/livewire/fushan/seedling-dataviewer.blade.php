@@ -29,18 +29,7 @@
         <div style="margin-bottom: 8px; color: #555; font-size: 0.95em;">
             可點選 census、trap、mtag、tag、種類欄位標題排序；調查年月依 census 排序。
         </div>
-        <div class="pages" style="margin-bottom: 14px; display: flex; align-items: center; gap: 12px; flex-wrap: wrap;">
-            <div class="totalnum">每頁 {{ $perPage }} 筆</div>
-            <div class="pagenote">第 {{ $page }} / {{ $totalPages }} 頁</div>
-            <button type="button" class="prev" wire:click="previousPage" @if($page <= 1) disabled @endif>上一頁</button>
-            <button type="button" class="next" wire:click="nextPage" @if($page >= $totalPages) disabled @endif>下一頁</button>
-            <span>跳至</span>
-            <select class="fs100" style="width: 72px;" wire:change="goToPage($event.target.value)">
-                @for($i = 1; $i <= $totalPages; $i++)
-                    <option value="{{ $i }}" @if($i === $page) selected @endif>{{ $i }}</option>
-                @endfor
-            </select>
-        </div>
+        @include('livewire.partials.dataviewer-pagination')
         <table
             id='fs-seedling-dataviewer-table'
             class='tablesorter'
@@ -65,70 +54,50 @@
                 <tr>
                     <td></td>
                     <td>
-                        <select class="fs100" wire:model='ym' wire:change="search">
-                            <option value="all">all</option>
-                            @foreach($months as $monthOption)
-                                <option value="{{$monthOption}}">{{$monthOption}}</option>
-                            @endforeach
-                        </select>
+                        @include('livewire.partials.select-filter', ['model' => 'ym', 'options' => $months])
                     </td>
                     <td>
-                        <select class="fs100" wire:model='trap' wire:change="search">
-                            <option value="all">all</option>
-                            @foreach($traps as $trapOption)
-                                <option value="{{$trapOption}}">{{$trapOption}}</option>
-                            @endforeach
-                        </select>
+                        @include('livewire.partials.select-filter', ['model' => 'trap', 'options' => $traps])
                     </td>
                     <td>
-                        <select class="fs100" wire:model='plot' wire:change="search">
-                            <option value="all">all</option>
-                            @foreach($plots as $plotOption)
-                                <option value="{{$plotOption}}">{{$plotOption}}</option>
-                            @endforeach
-                        </select>
+                        @include('livewire.partials.select-filter', ['model' => 'plot', 'options' => $plots])
                     </td>
                     <td>
-                        <input type="text" class="fs100" style="width: 70px;" wire:model="mtag" wire:change="search" wire:keydown.enter="search" placeholder="all">
+                        @include('livewire.partials.datalist-filter', [
+                            'model' => 'mtag',
+                            'options' => $mtagOptions,
+                            'listId' => 'fs-seedling-mtag-options',
+                            'width' => '70px',
+                        ])
                     </td>
                     <td>
-                        <input type="text" class="fs100" style="width: 70px;" wire:model="tag" wire:change="search" wire:keydown.enter="search" placeholder="all">
+                        @include('livewire.partials.datalist-filter', [
+                            'model' => 'tag',
+                            'options' => $tagOptions,
+                            'listId' => 'fs-seedling-tag-options',
+                            'width' => '70px',
+                        ])
                     </td>
                     <td>
-                        <select class="fs100" style='width: 150px;' wire:model='species' wire:change="search">
-                            <option value="all">all</option>
-                            @foreach($speciesOptions as $speciesOption)
-                                <option value="{{ $speciesOption }}">{{ $speciesOption }}</option>
-                            @endforeach
-                        </select>
+                        @include('livewire.partials.datalist-filter', [
+                            'model' => 'species',
+                            'options' => $speciesOptions,
+                            'listId' => 'fs-seedling-species-options',
+                            'width' => '150px',
+                        ])
                     </td>
                     <td>
-                        @include('livewire.nanjenshan.partials.numeric-filter', ['operatorModel' => 'heightOperator', 'valueModel' => 'heightValue'])
+                        @include('livewire.partials.numeric-filter', ['operatorModel' => 'heightOperator', 'valueModel' => 'heightValue'])
                     </td>
                     <td></td>
                     <td>
-                        <select class="fs100" wire:model='recruit' wire:change="search">
-                            <option value="all">all</option>
-                            @foreach($recruitOptions as $recruitOption)
-                                <option value="{{ $recruitOption }}">{{ $recruitOption }}</option>
-                            @endforeach
-                        </select>
+                        @include('livewire.partials.select-filter', ['model' => 'recruit', 'options' => $recruitOptions])
                     </td>
                     <td>
-                        <select class="fs100" wire:model='status' wire:change="search">
-                            <option value="all">all</option>
-                            @foreach($statusOptions as $statusOption)
-                                <option value="{{ $statusOption }}">{{ $statusOption }}</option>
-                            @endforeach
-                        </select>
+                        @include('livewire.partials.select-filter', ['model' => 'status', 'options' => $statusOptions])
                     </td>
                     <td>
-                        <select class="fs100" wire:model='sprout' wire:change="search">
-                            <option value="all">all</option>
-                            @foreach($sproutOptions as $sproutOption)
-                                <option value="{{ $sproutOption }}">{{ $sproutOption }}</option>
-                            @endforeach
-                        </select>
+                        @include('livewire.partials.select-filter', ['model' => 'sprout', 'options' => $sproutOptions])
                     </td>
                     <td></td>
                 </tr>

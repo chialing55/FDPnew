@@ -30,7 +30,7 @@ class MortalityImport extends Component
         $this->refreshImportState();
     }
 
-    public function importRecord1(): void
+    public function importRecord1()
     {
         $this->refreshImportState();
 
@@ -235,7 +235,9 @@ class MortalityImport extends Component
             : '；略過 tree_individuals 不存在的 stemid ' . count($skippedMissingTreeStemids) . ' 筆：' . implode('、', array_slice($skippedMissingTreeStemids, 0, 20));
 
         $this->importNote = "已完成匯入 census {$census}：新增 {$createdCount} 筆、更新 {$updatedCount} 筆、備註 {$commentCount} 筆、修正紀錄 {$stemCorrectionCount} 筆；已備份 record2 為 {$backupTable}，並清空 record1 / record2{$skippedNote}。";
-        $this->refreshImportState(false);
+        session()->flash('status', $this->importNote);
+
+        return redirect()->route('admin.fushan.mortality.import');
     }
 
     private function refreshImportState(bool $resetNote = true): void

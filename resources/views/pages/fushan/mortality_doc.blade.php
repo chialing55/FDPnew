@@ -8,26 +8,103 @@
 @endsection
 
 @section('rightbox')
-    <div class='flex text_outbox'>
+    <style>
+        .workflow-role-title {
+            margin: 16px 0 6px;
+            font-size: 20px;
+            line-height: 1.35;
+            font-weight: 700;
+            text-decoration: none;
+        }
+
+        .record-paper-button {
+            display: inline-block;
+            padding: 8px 14px;
+            border-radius: 4px;
+            border: 0;
+            background: #7f8f18;
+            color: #fff;
+            text-decoration: none;
+            font-size: 15px;
+            line-height: 1.2;
+            cursor: pointer;
+        }
+
+        .record-paper-button:hover {
+            color: #fff;
+            background: #697713;
+        }
+
+        .record-paper-button:disabled {
+            background: #d1d5db;
+            color: #6b7280;
+            cursor: not-allowed;
+        }
+
+        .record-paper-hint {
+            margin-top: 8px;
+            color: #6b7280;
+            font-size: 14px;
+        }
+
+        .record-paper-alert {
+            margin: 8px 0 0;
+            color: #92400e;
+            font-size: 14px;
+        }
+    </style>
+    <div class='text_outbox flex'>
         <div class='text_box'>
             <h2>死亡率調查相關文件</h2>
             <hr>
-            <p>內容待補。</p>
+            @if(session('status'))
+                <div class="record-paper-alert">{{ session('status') }}</div>
+            @endif
+            <div style="margin-top: 12px;">
+                @if(!empty($canDownloadRecordPaper))
+                    <a class="record-paper-button" href="{{ route('admin.fushan.mortality.record-paper') }}">下載 {{ $nextSurveyYear }} 年紀錄紙</a>
+                @else
+                    <button type="button" class="record-paper-button" disabled>下載 {{ $nextSurveyYear }} 年紀錄紙</button>
+                    <div class="record-paper-hint">{{ $recordPaperDownloadMessage ?? '目前無法下載紀錄紙。' }}</div>
+                @endif
+            </div>
         </div>
 
         <div class='text_box'>
             <h2>工作流程</h2>
             <hr>
+            <h3 class="workflow-role-title">管理員</h3>
             <ol>
                 <li>先在<a href="{{ route('admin.fushan.mortality.census') }}">調查年度</a>確認本次調查與年份。</li>
-                <li>到<a href="{{ route('admin.fushan.mortality.survey-import') }}">匯入調查資料</a>上傳或確認本次調查資料。</li>
-                <li>資料輸入前，先到<a href="{{ route('admin.fushan.mortality.entry.1') }}">第一次輸入</a>建立輸入表單。</li>
+                <li>到<a href="{{ route('admin.fushan.mortality.survey-import') }}">匯入調查資料</a>上傳新資料或確認本次調查清單。</li>
+                @if ((int) (auth()->user()?->is_admin ?? 0) === 1)
+                    <li>到<a class="admin-only-body-link"
+                            href="{{ route('admin.fushan.mortality.import') }}">資料處理</a>頁面下方產生最新輸入表單。</li>
+                @else
+                    <li>請管理員產生最新輸入表單。</li>
+                @endif
+            </ol>
+
+            <h3 class="workflow-role-title">資料輸入者</h3>
+            <ol>
                 <li>正式輸入前，先閱讀<a href="{{ route('admin.fushan.mortality.note') }}">輸入注意事項</a>。</li>
-                <li>完成<a href="{{ route('admin.fushan.mortality.entry.1') }}">第一次輸入</a>與<a href="{{ route('admin.fushan.mortality.entry.2') }}">第二次輸入</a>。</li>
+                <li>完成<a href="{{ route('admin.fushan.mortality.entry.1') }}">第一次輸入</a>與<a
+                        href="{{ route('admin.fushan.mortality.entry.2') }}">第二次輸入</a>。</li>
                 <li>完成兩次輸入後，到<a href="{{ route('admin.fushan.mortality.compare') }}">資料比對</a>確認差異。</li>
-                @if((int) (auth()->user()?->is_admin ?? 0) === 1)
-                    <li>確認無誤後，再到<a class="admin-only-body-link" href="{{ route('admin.fushan.mortality.import') }}">將資料匯入大表</a>。</li>
-                    <li>如需進一步整理資料，可到<a class="admin-only-body-link" href="{{ route('admin.fushan.mortality.process') }}">資料處理</a>頁面。</li>
+                <li>通知資料管理員。</li>
+            </ol>
+
+            <h3 class="workflow-role-title">管理員</h3>
+            <ol>
+                @if ((int) (auth()->user()?->is_admin ?? 0) === 1)
+                    <li>確認無誤後，到<a class="admin-only-body-link" href="{{ route('admin.fushan.mortality.import') }}">資料處理</a>將
+                        record1 匯入大表。</li>
+                    <li>檢查是否需更新 stem 的基本資料。</li>
+                    <li>更新後可產生下一年度資料表，或是匯入新一期資料。</li>
+                @else
+                    <li>確認無誤後，由管理員將 record1 匯入大表。</li>
+                    <li>檢查是否需更新 stem 的基本資料。</li>
+                    <li>更新後可產生下一年度資料表，或是匯入新一期資料。</li>
                 @endif
             </ol>
         </div>
