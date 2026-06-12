@@ -19,26 +19,34 @@
 
         .record-paper-button {
             display: inline-block;
-            padding: 8px 14px;
-            border-radius: 4px;
+            padding: 7px 14px;
+            border-radius: 6px;
             border: 0;
-            background: #7f8f18;
-            color: #fff;
-            text-decoration: none;
-            font-size: 15px;
-            line-height: 1.2;
+            background: #5f857b;
+            color: #fff !important;
+            text-decoration: none !important;
+            transition: background-color 0.2s cubic-bezier(0.3, 0, 0.5, 1);
+            font-size: 14px;
+            font-weight: 500;
+            line-height: 15px;
             cursor: pointer;
         }
 
+        .record-paper-button:hover,
+        .record-paper-button:active,
+        .record-paper-button:visited {
+            color: #fff !important;
+            text-decoration: none !important;
+        }
+
         .record-paper-button:hover {
-            color: #fff;
-            background: #697713;
+            background: #52756d;
         }
 
         .record-paper-button:disabled {
             background: #d1d5db;
-            color: #6b7280;
-            cursor: not-allowed;
+            color: #6b7280 !important;
+            cursor: default;
         }
 
         .record-paper-hint {
