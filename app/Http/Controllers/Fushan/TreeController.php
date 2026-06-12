@@ -14,11 +14,13 @@ use App\Models\FsTreeRecord1;
 use App\Models\FsTreeRecord2;
 use App\Models\FsTreeCensus4;
 use App\Models\FsTreeCensus3;
+use App\Support\ResolvesActorAccount;
 
 
 //分配網址到各個頁面
 class TreeController extends Controller
 {
+    use ResolvesActorAccount;
 
     public function tree(Request $request)
     {
@@ -91,7 +93,7 @@ class TreeController extends Controller
         return view('pages/fushan/tree_doc', [
             'site' => $site,
             'project' => '每木',
-            'user' => $user->name,
+            'user' => $this->actorAccount($request),
             'census' => 5
 
 
@@ -111,7 +113,7 @@ class TreeController extends Controller
         return view('pages/fushan/tree_note', [
             'site' => $site,
             'project' => '每木',
-            'user' => $user->name
+            'user' => $this->actorAccount($request)
 
         ]);
     }
@@ -131,7 +133,7 @@ class TreeController extends Controller
             'site' => $site,
             'project' => '每木',
             'entry' => $entry,
-            'user' => $user->name,
+            'user' => $this->actorAccount($request),
         ]);
     }
 
@@ -148,7 +150,7 @@ class TreeController extends Controller
         return view('pages/fushan/tree_progress', [
             'site' => $site,
             'project' => '每木',
-            'user' => $user->name,
+            'user' => $this->actorAccount($request),
         ]);
     }
 
@@ -164,7 +166,7 @@ class TreeController extends Controller
         return view('pages/fushan/tree_dataviewer', [
             'site' => $site,
             'project' => '每木',
-            'user' => $user->name,
+            'user' => $this->actorAccount($request),
         ]);
     }
 
@@ -180,7 +182,7 @@ class TreeController extends Controller
         return view('pages/fushan/tree_entryprogress', [
             'site' => $site,
             'project' => '每木',
-            'user' => $user->name,
+            'user' => $this->actorAccount($request),
         ]);
     }
 
@@ -196,7 +198,7 @@ class TreeController extends Controller
         return view('pages/fushan/tree_compare', [
             'site' => $site,
             'project' => '每木',
-            'user' => $user->name,
+            'user' => $this->actorAccount($request),
         ]);
     }
 
@@ -212,7 +214,7 @@ class TreeController extends Controller
         return view('pages/fushan/tree_modifyPathway', [
             'site' => $site,
             'project' => '每木',
-            'user' => $user->name,
+            'user' => $this->actorAccount($request),
         ]);
     }
 
@@ -227,7 +229,7 @@ class TreeController extends Controller
         return view('pages/fushan/tree_updateTable', [
             'site' => $site,
             'project' => '每木',
-            'user' => $user->name,
+            'user' => $this->actorAccount($request),
         ]);
     }
 
@@ -243,7 +245,7 @@ class TreeController extends Controller
         return view('pages/fushan/tree_updateBackData', [
             'site' => $site,
             'project' => '每木',
-            'user' => $user->name,
+            'user' => $this->actorAccount($request),
         ]);
     }
 
@@ -259,7 +261,7 @@ class TreeController extends Controller
         return view('pages/fushan/tree_addData', [
             'site' => $site,
             'project' => '每木',
-            'user' => $user->name,
+            'user' => $this->actorAccount($request),
         ]);
     }
 
@@ -275,7 +277,7 @@ class TreeController extends Controller
         return view('pages/fushan/tree_map', [
             'site' => $site,
             'project' => '每木',
-            'user' => $user->name,
+            'user' => $this->actorAccount($request),
         ]);
     }
 }

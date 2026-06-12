@@ -590,8 +590,8 @@ function handleDeleteid(stemid, saveUrl){
   {
     $('.datasavenote').html('');
     
-    var ajaxData={};
-    var ajaxType='get';
+    var ajaxData={ _method: 'DELETE' };
+    var ajaxType='post';
 
     function handleSuccess(res) {
           if (res.datasavenote !=''){

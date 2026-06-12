@@ -17,16 +17,12 @@ use App\Models\FsSeedsFixlog;
 
 use App\Jobs\FsSeedsCheck;
 use App\Jobs\SeedsAddButton;
+use App\Support\ResolvesActorAccount;
 
 
 class SeedsSaveController extends Controller
 {
-    protected function actorAccount(Request $request): string
-    {
-        $user = $request->user();
-
-        return (string) ($user?->account ?? $user?->name ?? '');
-    }
+    use ResolvesActorAccount;
 
     protected function resolveSeedsPageById(array $rows, $targetId, int $perPage = 29): int
     {

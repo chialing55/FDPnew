@@ -27,6 +27,7 @@ use App\Jobs\FsTreeRecruitCheck;
 use App\Jobs\TreeAddButton;
 use App\Jobs\TreeUpdateBase;
 use App\Jobs\TreeUpdateCensusData;
+use App\Support\ResolvesActorAccount;
 
 
 
@@ -34,6 +35,7 @@ use App\Jobs\TreeUpdateCensusData;
 
 class TreeSaveController extends Controller
 {
+    use ResolvesActorAccount;
 
     public function getTableInstance($entry) {
         if ($entry == '1') {
@@ -77,7 +79,7 @@ class TreeSaveController extends Controller
         $splist = $request->session()->get('splist');
         $data=$data_all['data'];
         $entry=$data_all['entry'];
-        $user=$data_all['user'];
+        $user = $this->actorAccount($request);
         $test='';
 
         $datasavenote='';
@@ -160,7 +162,7 @@ class TreeSaveController extends Controller
 
         $data=$data_all['data'];
         $entry=$data_all['entry'];
-        $user=$data_all['user'];
+        $user = $this->actorAccount($request);
         $recruitsavenote='';
         $datacheck='';
         $uplistalter='';
@@ -335,7 +337,7 @@ class TreeSaveController extends Controller
 //刪除新增資料
     public function deletedata(Request $request, $stemid, $entry, $thispage){
         $test='';
-        $user = $request->user()->name;
+        $user = $this->actorAccount($request);
 
 
         // $user='chialing';
@@ -371,7 +373,7 @@ class TreeSaveController extends Controller
 //儲存特殊修改
     public function savealternote(Request $request){
 
-        $user = $request->user()->name;
+        $user = $this->actorAccount($request);
 
 
         $data_all = request()->all();
@@ -445,7 +447,7 @@ class TreeSaveController extends Controller
 
     public function deletealter(Request $request, $stemid, $entry, $thispage){
 
-        $user = $request->user()->name;
+        $user = $this->actorAccount($request);
         $table = $this->getTableInstance($entry);
         $datasavenote='';
        
@@ -484,7 +486,7 @@ class TreeSaveController extends Controller
 //輸入完成
     public function finishnote(Request $request, $qx, $qy, $entry){
 
-        $user = $request->user()->name;
+        $user = $this->actorAccount($request);
 
         $splist = $request->session()->get('splist');
 
@@ -659,7 +661,7 @@ class TreeSaveController extends Controller
         $data_all = request()->all();
         $splist = $request->session()->get('splist');
 
-        $user=$data_all['user'];
+        $user = $this->actorAccount($request);
         $from=$data_all['from'];
         $base=$data_all['data1'][0];
         $plotType='fstree';
@@ -748,7 +750,7 @@ class TreeSaveController extends Controller
 
         $data_all = request()->all();
 
-        $user=$data_all['user'];
+        $user = $this->actorAccount($request);
         $from=$data_all['from'];
         $stemid=$data_all['stemid'];
 
@@ -885,7 +887,7 @@ class TreeSaveController extends Controller
 
         $data=$data_all['data'];
         $entry=$data_all['entry'];
-        $user=$data_all['user'];
+        $user = $this->actorAccount($request);
 
         $recruitsavenote='';
         $datacheck='';

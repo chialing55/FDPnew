@@ -48,8 +48,9 @@ class TreeUpdateBase
         $user=$data_all['user'];
         $from=$data_all['from'];
 
-        $base=$data_all['data1'][0];  
-        $base['spcode'] = array_search($base['csp'], $splist); 
+        $base=$data_all['data1'][0];
+        $base['csp'] = trim((string) ($base['csp'] ?? ''));
+        $base['spcode'] = $this->spcodeFromCsp($base['csp'], is_array($splist) ? $splist : []);
         //原有編號       
         $stemidtemp=explode('.', $base['stemid']);
         $otag=$stemidtemp[0];
@@ -65,7 +66,10 @@ class TreeUpdateBase
         $baseWay='0';
         $pass='1';
 
-        if ($newstemid!=$ostemid){
+        if ($base['spcode'] === null) {
+            $datasavenote = '找不到物種「' . $base['csp'] . '」對應的 spcode，不予更新。';
+            $pass = '0';
+        } else if ($newstemid!=$ostemid){
             $check=$tablecensus::where('stemid', 'like', $newstemid)->count();
             if ($check>0){
                 $datasavenote='重號。不予更新。';
@@ -147,7 +151,38 @@ class TreeUpdateBase
                     $basetable='r';
                 }
 
+                if ($basetable === 'r') {
+                    $mainBase = $tablebase::where('tag', 'like', $otag)->first();
+
+                    if ($mainBase && (string) $mainBase->spcode !== (string) $base['spcode']) {
+                        $tablebase::where('tag', 'like', $otag)->update([
+                            'spcode' => $base['spcode'],
+                            'updated_id' => $user,
+                        ]);
+
+                        $speciesFixlog = [];
+                        $speciesFixlog['id'] = '0';
+                        $speciesFixlog['from'] = $from;
+                        $speciesFixlog['type'] = 'update';
+                        $speciesFixlog['sheet'] = $baseSheet;
+                        $speciesFixlog['qx'] = $base['qx'];
+                        $speciesFixlog['stemid'] = $otag;
+                        $speciesFixlog['descript'] = json_encode([
+                            'spcode' => $mainBase->spcode . '=>' . $base['spcode'],
+                        ], JSON_UNESCAPED_UNICODE);
+                        $speciesFixlog['updated_id'] = $user;
+                        $speciesFixlog['updated_at'] = date("Y-m-d H:i:s");
+                        $tablefixlog::insert($speciesFixlog);
+
+                        $datasavenote = '已更新資料';
+                    }
+                }
+
                 $exarray=['updated_id', 'updated_at', 'deleted_at'];
+
+                if ($basetable === 'r') {
+                    $exarray[] = 'spcode';
+                }
                 foreach($obase as $key=>$value){
                     if (!in_array($key, $exarray)){
                         if ($value != $base[$key]){
@@ -219,10 +254,28 @@ class TreeUpdateBase
             }
         }
 
-        $result=['datasavenote'=>$datasavenote, 'thisstemid'=>$thisstemid, 'ostemid'=>$ostemid, 'newstemid' => $newstemid, 'pass'=>$pass];
+        $result=[
+            'datasavenote'=>$datasavenote,
+            'thisstemid'=>$thisstemid,
+            'ostemid'=>$ostemid,
+            'newstemid' => $newstemid,
+            'pass'=>$pass,
+            'spcode'=>$base['spcode'],
+            'csp'=>$base['csp'],
+        ];
 
 		return $result;
 
     }
-}
 
+    private function spcodeFromCsp(string $csp, array $splist): ?string
+    {
+        foreach ($splist as $spcode => $speciesName) {
+            if (trim((string) $speciesName) === $csp) {
+                return (string) $spcode;
+            }
+        }
+
+        return null;
+    }
+}

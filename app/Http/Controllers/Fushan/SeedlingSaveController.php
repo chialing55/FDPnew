@@ -23,11 +23,13 @@ use App\Jobs\FsSeedlingDataCheck;
 use App\Jobs\FsSeedlingRecruitCheck;
 
 use App\Jobs\SeedlingAddButton;
+use App\Support\ResolvesActorAccount;
 
 //小苗資料輸入後的所有儲存與刪除
 
 class SeedlingSaveController extends Controller
 {
+    use ResolvesActorAccount;
     private function noteTypeFromMessage(string $message, bool $hasError = false): string
     {
         if ($message === '') {
@@ -43,13 +45,6 @@ class SeedlingSaveController extends Controller
             $name => $message,
             $name . '_type' => $this->noteTypeFromMessage($message, $hasError),
         ];
-    }
-
-    private function actorAccount(Request $request): string
-    {
-        $user = $request->user();
-
-        return (string) ($user?->account ?? $user?->name ?? '');
     }
 
     private function previousSeedlingRows(string $tag)
@@ -414,7 +409,7 @@ class SeedlingSaveController extends Controller
         $workRows = $payload['workRows'] ?? [];
         $identityRows = $payload['identityRows'] ?? [];
         $masterRows = $payload['masterRows'] ?? [];
-        $user = (string) ($payload['user'] ?? $request->user()?->account ?? $request->user()?->name ?? '');
+        $user = $this->actorAccount($request);
         $from = (string) ($payload['from'] ?? '');
         $currentTag = (string) ($payload['tag'] ?? '');
 
@@ -650,7 +645,7 @@ class SeedlingSaveController extends Controller
         $payload = $request->all();
         $tableType = (string) ($payload["tableType"] ?? "");
         $rows = $payload["rows"] ?? [];
-        $user = (string) ($payload["user"] ?? $request->user()?->account ?? $request->user()?->name ?? "");
+        $user = $this->actorAccount($request);
         $deletedAt = now()->toDateTimeString();
 
         if (!in_array($tableType, ["work", "identity", "records", "all"], true) || !is_array($rows)) {
@@ -944,7 +939,7 @@ class SeedlingSaveController extends Controller
         // // print_r($savecov);
         $data = $data_all['data'];
         $entry = $data_all['entry'];
-        $user = $data_all['user'];
+        $user = $this->actorAccount($request);
 
         // $user=$data[0]['user'];
         // // $temp=[];
@@ -1048,7 +1043,7 @@ class SeedlingSaveController extends Controller
         // print_r($savecov);
         $recruit = $data['data'];
         $entry = $data['entry'];
-        $user = $data['user'];
+        $user = $this->actorAccount($request);
         $pps = (int) ($data['pps'] ?? 20);
         if (!in_array($pps, [20, 40], true)) {
             $pps = 20;

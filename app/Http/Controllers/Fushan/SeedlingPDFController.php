@@ -6,6 +6,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\App;
 use App\Http\Controllers\Controller;
+use App\Support\ResolvesActorAccount;
 
 use Dompdf\Dompdf;
 use setasign\Fpdi\Fpdi;
@@ -17,6 +18,7 @@ use App\Models\FsSeedlingSlrecord;
 
 class SeedlingPDFController extends Controller
 {
+    use ResolvesActorAccount;
     public function record($start, $end){
         $start = (int) $start;
         $end = (int) $end;
@@ -37,7 +39,7 @@ class SeedlingPDFController extends Controller
             return view('pages.fushan.seedling_record_split', [
                 'site' => 'fushan',
                 'project' => '小苗',
-                'user' => auth()->user()?->name ?? '',
+                'user' => $this->actorAccount(request(), ''),
                 'title' => '小苗紀錄紙分段下載',
                 'start' => $start,
                 'end' => $end,

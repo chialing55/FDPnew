@@ -13,11 +13,19 @@ function toggleTip(element) {
     $(".tiptriangle").toggleClass("tiptriangletoggled");
 }
 
+function dispatchLivewireEvent(eventName, payload) {
+    if (window.Livewire?.dispatch) {
+        Livewire.dispatch(eventName, payload);
+    } else if (window.Livewire?.emit) {
+        Livewire.emit(eventName, payload);
+    }
+}
+
 // 使用
 handleHoverEvents(".list4", ".list4inner");
 handleHoverEvents(".list6", ".list6inner");
 
-let urlbase = "/admin/fstree";
+let urlbase = "/admin/fushan/tree";
 //download record
 $(".button1").click(function () {
     let qx = $("select[name='qx']").val();
@@ -25,7 +33,7 @@ $(".button1").click(function () {
     // console.log(qx, qy);
     // var tempwindow1=window.open('_blank');
     if (qx != "" && qy != "") {
-        let url = `${urlbase}/record-pdf/${qx}/${qy}/1`;
+        let url = `${urlbase}/pdf/record/${qx}/${qy}/1`;
         window.open(url);
     }
 });
@@ -40,7 +48,7 @@ $(".button2").click(function () {
     for (let i = 0; i < totalRequests; i++) {
         let qx = $("select[name='qx2']").val();
         let qy = i;
-        let url = `${urlbase}/record-pdf/${qx}/${qy}/2`;
+        let url = `${urlbase}/pdf/record/${qx}/${qy}/2`;
         $("#downloadMessage2").text("載入中...").show();
         $.ajax({
             url: url,
@@ -188,12 +196,12 @@ function cellfunction(tableType, container, row, col, prop) {
 
 function alternote(stemid, entry, thispage, event) {
     // console.log(stemid);
-    var saveUrl = `${urlbase}/addalternote/${stemid}/${entry}/${thispage}`;
+    var saveUrl = `${urlbase}/alternote/${stemid}/${entry}/${thispage}`;
     handleAlternote(stemid, entry, thispage, saveUrl);
 }
 
 function deletealternote(stemid, thispage) {
-    var saveUrl = `${urlbase}/deletealter/${stemid}/${entry}/${thispage}`;
+    var saveUrl = `${urlbase}/alter/${stemid}/${entry}/${thispage}`;
     handleDeleteAlternote(stemid, plotType, saveUrl);
 }
 
@@ -253,7 +261,7 @@ function alternotetable(alterdata, stemid, entry, thispage) {
         columns,
         alterdata,
         saveButtonName,
-        `${urlbase}/savealternote`,
+        `${urlbase}/alternote`,
         tableType,
         colWidths,
         hiddenColumns,
@@ -264,7 +272,7 @@ function alternotetable(alterdata, stemid, entry, thispage) {
 
 function deleteid(stemid, entry, thispage) {
     //刪除新增樹資料
-    var saveUrl = `${urlbase}/deletedata/${stemid}/${entry}/${thispage}`;
+    var saveUrl = `${urlbase}/data/${stemid}/${entry}/${thispage}`;
     handleDeleteid(stemid, saveUrl);
 }
 
@@ -353,7 +361,7 @@ function fstreetable(data, thispage, pps) {
         columns,
         data2,
         saveButtonName,
-        `${urlbase}/savedata`,
+        `${urlbase}/data`,
         tabletype,
         colWidths,
         hiddenColumns,
@@ -448,7 +456,7 @@ function recruittable(data, emptytable, csplist) {
         columns,
         emptytable,
         saveButtonName,
-        `${urlbase}/saverecruit`,
+        `${urlbase}/recruit`,
         tableType,
         colWidths,
         hiddenColumns,
@@ -522,7 +530,7 @@ function MouseDownSite(sqx, sqy) {
             return 0; // 如果 sqx 和 sqy 都相同，保持原始順序
         });
     }
-    Livewire.emit("updateValue", value);
+    dispatchLivewireEvent("updateValue", value);
 }
 
 document.addEventListener("livewire:init", () => {
@@ -741,7 +749,7 @@ function fstreeupdatatable(stemid, stemdata, csplist, from) {
                     $(".datasavenote").html(res.datasavenote);
                 }
                 if (res.thisstemid != "") {
-                    Livewire.emit("updateStemidlist", {
+                    dispatchLivewireEvent("updateStemidlist", {
                         thisstemid: res.thisstemid,
                         from: res.from,
                     });
@@ -767,7 +775,7 @@ function deleteCensusData(stemid, from) {
     if (confirm("確定刪除 " + stemid + " 的所有資料??")) {
         $(".altersavenote").html("");
 
-        var saveUrl = `${urlbase}/deletecensusdata`;
+        var saveUrl = `${urlbase}/census/delete`;
         var ajaxData = {
             stemid: stemid,
             from: from,
@@ -781,10 +789,10 @@ function deleteCensusData(stemid, from) {
                 $(".datasavenote").html(res.datasavenote);
             }
             if (res.thisstemid != "") {
-                Livewire.emit("updateStemidlist", {
-                    thisstemid: res.thisstemid,
-                    from: res.from,
-                });
+                dispatchLivewireEvent("updateStemidlist", {
+                        thisstemid: res.thisstemid,
+                        from: res.from,
+                    });
             }
         }
         makeAjaxRequest(
