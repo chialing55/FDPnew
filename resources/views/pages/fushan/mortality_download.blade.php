@@ -8,6 +8,40 @@
 @endsection
 
 @section('rightbox')
+    <style>
+        .mortality-download-button {
+            display: inline-block;
+            padding: 7px 14px;
+            border: 0;
+            border-radius: 6px;
+            background: #5f857b;
+            color: #fff !important;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 500;
+            line-height: 15px;
+            text-decoration: none !important;
+            transition: background-color 0.2s cubic-bezier(0.3, 0, 0.5, 1);
+        }
+
+        .mortality-download-button:hover,
+        .mortality-download-button:active,
+        .mortality-download-button:visited {
+            color: #fff !important;
+            text-decoration: none !important;
+        }
+
+        .mortality-download-button:hover {
+            background: #52756d;
+        }
+
+        .mortality-download-button:disabled {
+            background: #d1d5db;
+            color: #6b7280 !important;
+            cursor: default;
+        }
+    </style>
+
     <div class='flex text_outbox' style='flex-direction: column; align-items: center;'>
         <div class='text_box'>
             <h2>死亡率調查資料下載</h2>
@@ -28,11 +62,9 @@
                         <td>最新 census {{ $latestCensusText }} 的死亡率調查資料。</td>
                         <td>
                             @if ($latestCensus)
-                                <a href="{{ route('admin.fushan.mortality.download.latest-census-records') }}">
-                                    <button type="button">下載 txt</button>
-                                </a>
+                                <a class="mortality-download-button" href="{{ route('admin.fushan.mortality.download.latest-census-records') }}">下載 txt</a>
                             @else
-                                <button type="button" disabled>尚無資料</button>
+                                <button type="button" class="mortality-download-button" disabled>尚無資料</button>
                             @endif
                         </td>
                     </tr>

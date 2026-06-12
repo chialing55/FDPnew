@@ -34,7 +34,8 @@ $(function() {
                 <p style='margin-top: 10px; text-align: right;'><button class="button1"  >送出</button></p>
             </div>
         </div>
-        @if($user=='chialing')
+        @php($isAdmin = (int) (auth()->user()?->is_admin ?? 0) === 1)
+        @if($isAdmin)
         <div style='flex-direction: column;' >            
             <div style='margin: 20px 0px;' class='iflex'>
                 輸出樣線 

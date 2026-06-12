@@ -42,6 +42,7 @@
 @endsection
 
 @section('headerList')
+  @php($isAdmin = (int) (auth()->user()?->is_admin ?? 0) === 1)
   <div class='headerlist iflex'>
       <div class='list list1 listlink' type='doc'>相關文件<hr></div>
       <div class='list list3 listlink' type='progress'>調查進度<hr></div>
@@ -64,6 +65,7 @@
 @endsection
 
 @section('headerListinner')
+      @php($isAdmin = (int) (auth()->user()?->is_admin ?? 0) === 1)
       <div class='listinner list4inner'>
           <li class='innerlist list41 listlink' type='note'>資料輸入注意事項<hr></li>
           <li class='innerlist list42 listlink' type='entry1' >第一次輸入<hr></li>
@@ -72,12 +74,12 @@
           <li class='innerlist list45 listlink' type='entryprogress'>資料輸入進度<hr></li>
       </div>
       <div class='listinner list6inner'>
-          <li class='innerlist list61 listlink' type='modifyPathway'>每木調查資料修改流程<hr></li>
-           @if($user=='chialing')
-          <li class='innerlist list62 listlink' type='updateTable' >更新census5資料表<hr></li>
-          <li class='innerlist list63 listlink' type='updateBackData' >後端資料更正<hr></li>
+          <li class='innerlist list61 listlink' type='modify-pathway'>每木調查資料修改流程<hr></li>
+           @if($isAdmin)
+          <li class='innerlist list62 listlink admin-only-link' type='update-table' >更新census5資料表<hr></li>
+          <li class='innerlist list63 listlink admin-only-link' type='update-back-data' >後端資料更正<hr></li>
            @endif
-          <li class='innerlist list64 listlink' type='addData'>新增資料<hr></li>
+          <li class='innerlist list64 listlink' type='add-data'>新增資料<hr></li>
 
       </div>
 @endsection

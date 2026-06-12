@@ -60,7 +60,6 @@ class MortalityDataviewer extends Component
         $this->site = $site;
 
         $this->latestSurveyYear = $this->loadLatestSurveyYear();
-        $this->refreshFilterOptions();
         $this->search();
     }
 
@@ -243,7 +242,6 @@ class MortalityDataviewer extends Component
     {
         $query = DB::connection('fs_mortality')
             ->table('census_records as cr')
-            ->leftJoin('tree_individuals as ti', 'cr.stemid', '=', 'ti.stemid')
             ->leftJoin(DB::raw($this->qualifiedBaseTable() . ' as b'), function ($join) {
                 $join->on('b.tag', '=', DB::raw("LEFT(SUBSTRING_INDEX(cr.stemid, '.', 1), 6)"));
             })
@@ -281,17 +279,36 @@ class MortalityDataviewer extends Component
         return $this->applyFilters($query);
     }
 
-    private function optionBaseQuery(?string $except = null)
+    private function optionBaseQuery(?string $except = null, bool $withBase = false, bool $withCensus = false)
     {
-        $query = DB::connection('fs_mortality')
-            ->table('census_records as cr')
-            ->leftJoin('tree_individuals as ti', 'cr.stemid', '=', 'ti.stemid')
-            ->leftJoin(DB::raw($this->qualifiedBaseTable() . ' as b'), function ($join) {
-                $join->on('b.tag', '=', DB::raw("LEFT(SUBSTRING_INDEX(cr.stemid, '.', 1), 6)"));
-            })
-            ->leftJoin('censuses as c', 'cr.census', '=', 'c.census');
+        $query = DB::connection("fs_mortality")
+            ->table("census_records as cr");
+
+        if ($withBase || $this->usesBaseFilter($except)) {
+            $query->leftJoin(DB::raw($this->qualifiedBaseTable() . " as b"), function ($join) {
+                $join->on("b.tag", "=", DB::raw("LEFT(SUBSTRING_INDEX(cr.stemid, CHAR(46), 1), 6)"));
+            });
+        }
+
+        if ($withCensus || $this->usesCensusFilter($except)) {
+            $query->leftJoin("censuses as c", "cr.census", "=", "c.census");
+        }
 
         return $this->applyFilters($query, $except);
+    }
+
+    private function usesBaseFilter(?string $except): bool
+    {
+        $species = trim($this->species);
+
+        return ($except !== "species" && $species !== "" && $species !== "all")
+            || ($except !== "qx" && $this->qx !== "all")
+            || ($except !== "qy" && $this->qy !== "all");
+    }
+
+    private function usesCensusFilter(?string $except): bool
+    {
+        return $except !== "year" && $this->year !== "all";
     }
 
     private function applyFilters($query, ?string $except = null)
@@ -333,7 +350,7 @@ class MortalityDataviewer extends Component
 
     private function distinctBaseOptions(string $column, ?string $except = null): array
     {
-        return $this->optionBaseQuery($except)
+        return $this->optionBaseQuery($except, true)
             ->select("b.{$column}")
             ->whereNotNull("b.{$column}")
             ->distinct()
@@ -361,7 +378,7 @@ class MortalityDataviewer extends Component
 
     private function distinctSurveyYearOptions(): array
     {
-        return $this->optionBaseQuery('year')
+        return $this->optionBaseQuery('year', false, true)
             ->select('c.survey_year')
             ->whereNotNull('c.survey_year')
             ->distinct()
