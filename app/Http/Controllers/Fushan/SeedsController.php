@@ -13,6 +13,7 @@ use App\Models\FsSeedsDateinfo;
 use App\Models\FsSeedsFulldata;
 use App\Models\FsSeedsRecord1;
 use App\Models\FsSeedsSplist;
+use Symfony\Component\HttpFoundation\StreamedResponse;
 use Symfony\Component\Process\Process;
 
 //分配網址至各頁面
@@ -884,6 +885,115 @@ class SeedsController extends Controller
         $period = $day <= 15 ? '初' : ($day <= 25 ? '中' : '底');
 
         return $this->formatSeedMonth($date) . $period;
+    }
+
+    public function download(Request $request)
+    {
+        $user = $request->user();
+        $site = $request->route('site');
+
+        $dateOptions = FsSeedsDateinfo::query()
+            ->select('census', 'date')
+            ->whereNotNull('census')
+            ->orderByDesc('census')
+            ->get()
+            ->map(fn ($row) => [
+                'census' => $row->census,
+                'date' => $row->date ?? '',
+                'label' => 'census ' . $row->census . ' : ' . ($row->date ?? ''),
+            ])
+            ->values();
+
+        $censusValues = $dateOptions->pluck('census')->map(fn ($census) => (string) $census)->all();
+        $defaultStartCensus = $dateOptions->first()['census'] ?? null;
+        $defaultEndCensus = $dateOptions->last()['census'] ?? null;
+        $selectedStartCensus = $request->input('start_census', $defaultStartCensus);
+        $selectedEndCensus = $request->input('end_census', $defaultEndCensus);
+
+        if (! in_array((string) $selectedStartCensus, $censusValues, true)) {
+            $selectedStartCensus = $defaultStartCensus;
+        }
+
+        if (! in_array((string) $selectedEndCensus, $censusValues, true)) {
+            $selectedEndCensus = $defaultEndCensus;
+        }
+
+        return view('pages/fushan/seeds_download', [
+            'site' => $site,
+            'project' => '種子雨',
+            'user' => $user->account ?? $user->name,
+            'dateOptions' => $dateOptions,
+            'selectedStartCensus' => $selectedStartCensus,
+            'selectedEndCensus' => $selectedEndCensus,
+        ]);
+    }
+
+    public function downloadFulldata(Request $request): StreamedResponse
+    {
+        $validated = $this->validSeedResearchRange($request->input('start_census'), $request->input('end_census'));
+
+        abort_if($validated === null, 422, '資料範圍不正確，請重新選擇。');
+
+        [$minCensus, $maxCensus] = $validated;
+        $excludedFulldataColumns = ['checknote', 'updated_id', 'updated_at'];
+        $fulldataColumns = array_values(array_diff(
+            Schema::connection('mysql2')->getColumnListing('fulldata'),
+            $excludedFulldataColumns
+        ));
+        $dateinfoColumns = Schema::connection('mysql2')->getColumnListing('dateinfo');
+        $joinedDateColumns = array_values(array_intersect(['date', 'dare', 'date1', 'year', 'month', 'period'], $dateinfoColumns));
+        $headers = array_merge($fulldataColumns, $joinedDateColumns);
+        $filename = 'seeds_fulldata_' . $minCensus . '_' . $maxCensus . '_' . now()->format('Ymd') . '.txt';
+
+        return $this->streamTxt($filename, $headers, function ($handle) use ($fulldataColumns, $joinedDateColumns, $minCensus, $maxCensus) {
+            $query = DB::connection('mysql2')
+                ->table('fulldata as f')
+                ->leftJoin('dateinfo as d', 'd.census', '=', 'f.census')
+                ->whereBetween('f.census', [$minCensus, $maxCensus]);
+
+            foreach ($fulldataColumns as $column) {
+                $query->addSelect('f.' . $column);
+            }
+
+            foreach ($joinedDateColumns as $column) {
+                $query->addSelect(DB::raw('d.`' . str_replace('`', '``', $column) . '` as `' . str_replace('`', '``', $column) . '`'));
+            }
+
+            foreach (['census', 'trap', 'csp', 'code'] as $column) {
+                if (in_array($column, $fulldataColumns, true)) {
+                    $query->orderBy('f.' . $column);
+                }
+            }
+
+            $query->chunk(1000, function ($rows) use ($handle, $fulldataColumns, $joinedDateColumns) {
+                foreach ($rows as $row) {
+                    $values = [];
+
+                    foreach ($fulldataColumns as $column) {
+                        $values[] = $row->{$column} ?? '';
+                    }
+
+                    foreach ($joinedDateColumns as $column) {
+                        $values[] = $row->{$column} ?? '';
+                    }
+
+                    fputcsv($handle, $values, "\t");
+                }
+            });
+        });
+    }
+
+    private function streamTxt(string $filename, array $headers, callable $writeRows): StreamedResponse
+    {
+        return response()->streamDownload(function () use ($headers, $writeRows) {
+            $handle = fopen('php://output', 'w');
+            fwrite($handle, "\xEF\xBB\xBF");
+            fputcsv($handle, $headers, "\t");
+            $writeRows($handle);
+            fclose($handle);
+        }, $filename, [
+            'Content-Type' => 'text/plain; charset=UTF-8',
+        ]);
     }
 
     public function unknown(Request $request)

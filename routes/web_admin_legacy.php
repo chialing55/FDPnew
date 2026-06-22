@@ -440,6 +440,16 @@ Route::middleware(['auth'])->prefix('admin')->name('admin.')->group(function () 
                 ->defaults('site', 'fushan')
                 ->name('showdata');
 
+            Route::get('/download', [SeedsController::class, 'download'])
+                ->middleware('admin')
+                ->defaults('site', 'fushan')
+                ->name('download');
+
+            Route::get('/download/fulldata', [SeedsController::class, 'downloadFulldata'])
+                ->middleware('admin')
+                ->defaults('site', 'fushan')
+                ->name('download.fulldata');
+
             Route::get('/research-output', [SeedsController::class, 'researchOutput'])
                 ->defaults('site', 'fushan')
                 ->name('research-output');

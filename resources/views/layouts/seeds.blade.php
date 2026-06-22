@@ -45,6 +45,7 @@
 @endsection
 
 @section('headerList')
+    @php($isAdmin = (int) (auth()->user()?->is_admin ?? 0) === 1)
     <div class='headerlist iflex'>
         <div class='list list1 listlink' type='doc'>相關文件
             <hr>
@@ -58,6 +59,11 @@
         <div class='list list7 listlink' type='research-output'>計畫成果
             <hr>
         </div>
+        @if($isAdmin)
+        <div class='list list8 listlink admin-only-link' type='download'>資料下載
+            <hr>
+        </div>
+        @endif
     </div>
 
 @endsection
