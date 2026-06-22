@@ -19,7 +19,9 @@ FROM php:8.3-fpm-bookworm AS php-base
 RUN apt-get update \
     && apt-get install -y --no-install-recommends \
         bash \
+        ca-certificates \
         default-mysql-client \
+        fonts-noto-cjk \
         libfreetype6-dev \
         libicu-dev \
         libjpeg62-turbo-dev \
@@ -27,6 +29,7 @@ RUN apt-get update \
         libpng-dev \
         libxml2-dev \
         libzip-dev \
+        r-base \
         unzip \
     && docker-php-ext-configure gd --with-freetype --with-jpeg \
     && docker-php-ext-install -j"$(nproc)" \
@@ -38,6 +41,8 @@ RUN apt-get update \
         pdo_mysql \
         zip \
     && rm -rf /var/lib/apt/lists/*
+
+RUN Rscript -e "install.packages(c('showtext','sysfonts','jsonlite'), repos='https://cloud.r-project.org')"
 
 WORKDIR /app
 

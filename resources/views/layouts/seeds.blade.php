@@ -55,6 +55,9 @@
         <div class='list list6 listlink'>資料檢視
             <hr>
         </div>
+        <div class='list list7 listlink' type='research-output'>計畫成果
+            <hr>
+        </div>
     </div>
 
 @endsection

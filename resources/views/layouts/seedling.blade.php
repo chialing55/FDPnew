@@ -42,6 +42,7 @@
 
       <div class='list list4 listlink' >資料輸入<hr></div>
       <div class='list list2 listlink' type='dataviewer'>資料檢視<hr></div>
+      <div class='list list5 listlink' type='research-output'>計畫成果<hr></div>
       @if((int) (auth()->user()?->is_admin ?? 0) === 1)
       <div class='list list3 listlink admin-only-link'>資料處理<hr></div>
       @endif
@@ -62,7 +63,8 @@
       <div class='listinner list3inner' style='display:none;'>
           <li class='innerlist list31 listlink admin-only-link' type='update'>資料修改</li>
           <li class='innerlist list32 listlink admin-only-link' type='import'>將資料匯入大表</li>
-          <li class='innerlist list33 listlink admin-only-link' type='download'>下載資料<hr></li>
+          <li class='innerlist list33 listlink admin-only-link' type='download'>下載資料</li>
+          <li class='innerlist list34 listlink admin-only-link' type='copybook'>硬筆書法練習<hr></li>
       </div>
       @endif
 

@@ -91,8 +91,8 @@ class MortalityRecordPaperExporter
         $targetZip->close();
         $sourceZip->close();
 
-        $census = $records->first()->census ?? 'unknown';
-        $filename = "mortality_record_paper_census_{$census}.xlsx";
+        $census = $records->first()->census ?? null;
+        $filename = $this->filenameForCensus($census);
 
         return [
             'path' => $outputPath,
@@ -100,6 +100,23 @@ class MortalityRecordPaperExporter
             'page_count' => count($sections),
             'record_count' => $records->count(),
         ];
+    }
+
+    private function filenameForCensus($census): string
+    {
+        $surveyYear = $census !== null
+            ? DB::connection("fs_mortality")
+                ->table("censuses")
+                ->where("census", $census)
+                ->value("survey_year")
+            : null;
+
+        $year = preg_replace("/\D+/", "", (string) ($surveyYear ?? ""));
+        if ($year === "") {
+            $year = $census !== null ? "census-" . $census : "unknown-year";
+        }
+
+        return "mortality-form-csp-{$year}-07-01.xlsx";
     }
 
     private function recordRows()

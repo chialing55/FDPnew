@@ -182,10 +182,45 @@ Route::middleware(['auth'])->prefix('admin')->name('admin.')->group(function () 
                 ->defaults('site', 'fushan')
                 ->name('download.seedling');
 
+            Route::get('/download/all-data', [SeedlingController::class, 'downloadAllSeedling'])
+                ->middleware('admin')
+                ->defaults('site', 'fushan')
+                ->name('download.all-data');
+
+            Route::get('/copybook', [SeedlingController::class, 'copybook'])
+                ->middleware('admin')
+                ->defaults('site', 'fushan')
+                ->name('copybook');
+
             // 舊：/admin/fushan/seedling/dataviewer
             Route::get('/dataviewer', [SeedlingController::class, 'dataviewer'])
                 ->defaults('site', 'fushan')
                 ->name('dataviewer');
+
+            Route::get('/research-output', [SeedlingController::class, 'researchOutput'])
+                ->defaults('site', 'fushan')
+                ->name('research-output');
+
+            Route::get('/research-output/item/{item}', [SeedlingController::class, 'researchOutputItem'])
+                ->defaults('site', 'fushan')
+                ->name('research-output.item');
+
+            Route::get('/research-output/composition-docx', [SeedlingController::class, 'downloadResearchOutputCompositionDocx'])
+                ->defaults('site', 'fushan')
+                ->name('research-output.composition-docx');
+
+            Route::get('/research-output/survival-growth-docx', [SeedlingController::class, 'downloadResearchOutputSurvivalGrowthDocx'])
+                ->defaults('site', 'fushan')
+                ->name('research-output.survival-growth-docx');
+
+            Route::get('/research-output/asset/{token}.{extension}', [SeedlingController::class, 'researchOutputAsset'])
+                ->defaults('site', 'fushan')
+                ->whereIn('extension', ['png', 'pdf'])
+                ->name('research-output.asset');
+
+            Route::post('/research-output/clear-session', [SeedlingController::class, 'clearResearchOutputSession'])
+                ->defaults('site', 'fushan')
+                ->name('research-output.clear-session');
         });
 
         Route::prefix('mortality')->middleware('scope:fushan,mortality')->name('mortality.')->group(function () {
@@ -404,6 +439,18 @@ Route::middleware(['auth'])->prefix('admin')->name('admin.')->group(function () 
             Route::get('/showdata', [SeedsController::class, 'showdata'])
                 ->defaults('site', 'fushan')
                 ->name('showdata');
+
+            Route::get('/research-output', [SeedsController::class, 'researchOutput'])
+                ->defaults('site', 'fushan')
+                ->name('research-output');
+
+            Route::get('/research-output/item/{item}', [SeedsController::class, 'researchOutputItem'])
+                ->defaults('site', 'fushan')
+                ->name('research-output.item');
+
+            Route::post('/research-output/clear-session', [SeedsController::class, 'clearResearchOutputSession'])
+                ->defaults('site', 'fushan')
+                ->name('research-output.clear-session');
 
             // 舊：/admin/fushan/seeds/unknown
             Route::get('/unknown', [SeedsController::class, 'unknown'])

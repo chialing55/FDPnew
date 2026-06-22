@@ -30,6 +30,15 @@
                         </a>
                     </td>
                 </tr>
+                <tr>
+                    <td>全部資料</td>
+                    <td>所有調查期的小苗資料（seedling_records、seedling_stems、seedling_individuals 合併欄位）。</td>
+                    <td>
+                        <a href="{{ route('admin.fushan.seedling.download.all-data') }}">
+                            <button type="button">下載 txt</button>
+                        </a>
+                    </td>
+                </tr>
             </tbody>
         </table>
     </div>

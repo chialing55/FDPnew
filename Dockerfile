@@ -7,11 +7,14 @@ FROM php:8.3-fpm
 # 安裝系統套件 + PHP extensions
 RUN apt-get update && apt-get install -y \
     git \
+    ca-certificates \
     curl \
     unzip \
     zip \
     nodejs \
     npm \
+    r-base \
+    fonts-noto-cjk \
     libpng-dev \
     libjpeg-dev \
     libfreetype6-dev \
@@ -29,6 +32,8 @@ RUN apt-get update && apt-get install -y \
         xml \
         intl \
     && apt-get clean && rm -rf /var/lib/apt/lists/*
+
+RUN Rscript -e "install.packages(c('showtext','sysfonts','jsonlite'), repos='https://cloud.r-project.org')"
 
 
 
