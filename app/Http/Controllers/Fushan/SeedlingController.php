@@ -1064,6 +1064,8 @@ class SeedlingController extends Controller
         $plots = [];
         $assetRecords = is_array($sessionAssets) ? $sessionAssets : [];
 
+        $useLongCompositionFigure = count($summary['surveys']) === 1;
+
         foreach ($summary['surveys'] as $survey) {
             $fileBase = "composition-{$hash}-census-{$survey['census']}";
             $pngToken = "{$fileBase}-png";
@@ -1072,7 +1074,9 @@ class SeedlingController extends Controller
                 'file_base' => $fileBase,
                 'png_token' => $pngToken,
                 'pdf_token' => $pdfToken,
-                'panel_label' => '(' . chr(96 + max(1, min(26, (int) $survey['sequence']))) . ')',
+                'panel_label' => $useLongCompositionFigure ? '' : '(' . chr(96 + max(1, min(26, (int) $survey['sequence']))) . ')',
+                'layout' => $useLongCompositionFigure ? 'long' : 'standard',
+                'focus_species' => '大明橘',
                 'x_label' => '小苗個體數',
                 'legend' => [
                     'survive' => '存活舊苗',
