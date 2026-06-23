@@ -178,8 +178,8 @@ class SeedsController extends Controller
 
         $viewData = [
             'item' => $item,
-            'number' => fn ($value) => ' ' . number_format((float) $value, 0) . ' ',
-            'percent' => fn ($value) => ' ' . number_format((float) $value, 1) . ' ',
+            'number' => fn ($value) => number_format((float) $value, 0),
+            'percent' => fn ($value) => number_format((float) $value, 1),
         ];
 
         if ($item === 'composition') {
@@ -245,7 +245,7 @@ class SeedsController extends Controller
 
     private function seedResearchOutputCacheKey(string $item, int $minCensus, int $maxCensus): string
     {
-        return "seeds_research_output.{$minCensus}.{$maxCensus}.{$item}";
+        return "seeds_research_output.v2.{$minCensus}.{$maxCensus}.{$item}";
     }
 
     private function seedCompositionSummary($startCensus, $endCensus): array

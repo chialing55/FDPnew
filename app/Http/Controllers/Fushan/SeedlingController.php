@@ -407,9 +407,9 @@ class SeedlingController extends Controller
 
         $viewData = [
             'item' => $item,
-            'number' => fn ($value) => ' ' . number_format((float) $value, 0) . ' ',
-            'decimal' => fn ($value, $precision = 1) => ' ' . number_format((float) $value, $precision) . ' ',
-            'percent' => fn ($value) => ' ' . number_format((float) $value, 1) . ' ',
+            'number' => fn ($value) => number_format((float) $value, 0),
+            'decimal' => fn ($value, $precision = 1) => number_format((float) $value, $precision),
+            'percent' => fn ($value) => number_format((float) $value, 1),
         ];
 
         if ($item === 'composition') {
@@ -575,7 +575,7 @@ class SeedlingController extends Controller
 
     private function seedlingResearchOutputCacheKey(string $item, int $minCensus, int $maxCensus): string
     {
-        return "seedling_research_output.v11.{$minCensus}.{$maxCensus}.{$item}";
+        return "seedling_research_output.v12.{$minCensus}.{$maxCensus}.{$item}";
     }
 
     private function seedlingCompositionSummary(int $minCensus, int $maxCensus): array
@@ -1633,9 +1633,9 @@ class SeedlingController extends Controller
             'site' => $site,
             'project' => '小苗',
             'user' => $user->account ?? $user->name,
+            'iansuiFontVersion' => file_exists(public_path('fonts/iansui.ttf')) ? filemtime(public_path('fonts/iansui.ttf')) : time(),
         ]);
     }
-
 
     public function note(Request $request)
     {
