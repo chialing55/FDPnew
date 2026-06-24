@@ -11,7 +11,7 @@ png_path <- research_arg_value(args, "png", required = TRUE)
 font_path <- research_arg_value(args, "font", "")
 research_load_style(
   "resources/scripts/seeds_spatial_species_traps.R",
-  list(cex = 0.9, axis = 0.9, axis_title = 0.9, species_name_dense = 0.58, dense_axis = 0.9, dense_axis_title = 0.9, legend = 0.78),
+  list(cex = 0.9, axis = 0.9, axis_title = 0.9, species_name_dense = 0.58, dense_axis = 0.78, dense_axis_title = 0.78, legend = 0.78),
   list(portrait_width = 5.9, portrait_height = 8, png_res = 300)
 )
 research_require_packages(c("jsonlite", "showtext", "sysfonts"))

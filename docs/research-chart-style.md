@@ -15,8 +15,8 @@ Use `resources/scripts/research_chart_style.R` for new charts. Script bootstrap 
 | Left-aligned panel label x position | 0.06 NDC |
 | Species names | 0.72 |
 | Dense species names | 0.58 |
-| Dense chart axis tick labels | 0.9 |
-| Dense chart axis titles | 0.9 |
+| Dense chart axis tick labels | 0.78 |
+| Dense chart axis titles | 0.78 |
 | Legend text | 0.78 |
 | Small-multiple axis labels | 0.9 |
 | Small-multiple outer axis titles | 0.9 |
@@ -41,7 +41,7 @@ Use `resources/scripts/research_chart_style.R` for new charts. Script bootstrap 
 | Seeds composition | 0.9 | 0.9 | 0.9 | species 0.72 | none | 0.9 | none |
 | Seeds phenology | 0.9 | 0.9 | none | 0.9 | 0.9 via `text()` | none | 0.78 |
 | Seeds spatial distribution | 0.9 | 0.9 | 0.9 | 0.9 | 0.9 | 0.9, left aligned at 0.06 NDC | none |
-| Seeds spatial species traps | 0.9 | dense axis 0.9 | dense axis title 0.9 | dense species 0.58 | none | none | 0.78 |
+| Seeds spatial species traps | 0.9 | dense axis 0.78 | dense axis title 0.78 | dense species 0.58 | none | none | 0.78 |
 | Seedling composition, standard | 0.9 | 0.9 | 0.9 | species 0.72 | none | 0.9 | 0.78 |
 | Seedling composition, focus/long | 0.9 | 0.9 | 0.9 on main panel only | species 0.72 | none | 0.9 when present | 0.78 |
 | Seedling growth histograms | 0.9 | 0.9 | 0.9 outer title | 0.9 | 0.9 outer title | species name 0.9 | none |
