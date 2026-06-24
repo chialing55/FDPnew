@@ -31,6 +31,37 @@ trait ManagesResearchOutputAssets
         ]);
     }
 
+    protected function hasResearchOutputSessionAsset(Request $request, string $token, string $extension, string $assetSessionPrefix): bool
+    {
+        $assets = collect($request->session()->all())
+            ->filter(fn ($value, $key) => str_starts_with((string) $key, $assetSessionPrefix))
+            ->flatMap(fn ($value) => is_array($value) ? $value : [])
+            ->all();
+
+        $asset = $assets[$token] ?? null;
+
+        if (! is_array($asset) || ($asset['extension'] ?? null) !== $extension) {
+            return false;
+        }
+
+        $path = $asset['path'] ?? '';
+
+        return is_string($path) && is_file($path);
+    }
+
+    protected function cachedResearchOutputHtmlHasAssets(Request $request, string $html, string $assetSessionPrefix): bool
+    {
+        preg_match_all('/research-output\/asset\/([^"\'\s<>\/]+)\.(png|pdf)\b/', $html, $matches, PREG_SET_ORDER);
+
+        foreach ($matches as $match) {
+            if (! $this->hasResearchOutputSessionAsset($request, $match[1], $match[2], $assetSessionPrefix)) {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
     protected function inlineResearchOutputImage(?string $path): ?string
     {
         if (! is_string($path) || ! is_file($path)) {

@@ -11,8 +11,8 @@ png_path <- research_arg_value(args, "png", required = TRUE)
 font_path <- research_arg_value(args, "font", "")
 research_load_style(
   "resources/scripts/seeds_spatial_species_traps.R",
-  list(cex = 0.9, axis = 0.9, axis_title = 0.9, species_name_dense = 0.58, legend = 0.78),
-  list()
+  list(cex = 0.9, axis = 0.9, axis_title = 0.9, species_name_dense = 0.58, dense_axis = 0.9, dense_axis_title = 0.9, legend = 0.78),
+  list(portrait_width = 5.9, portrait_height = 8, png_res = 300)
 )
 research_require_packages(c("jsonlite", "showtext", "sysfonts"))
 
@@ -69,8 +69,8 @@ plot_all <- function() {
     family = axis_text_family
   )
   lines(rbind(c(0, min(mids) - 0.7), c(0, max(mids) + 0.7)))
-  axis(1, line = -1.2, cex.axis = research_chart_style$axis, family = axis_text_family)
-  mtext(x_label, 1, line = 1, cex = research_chart_style$axis_title, family = axis_text_family)
+  axis(1, line = -1.2, cex.axis = research_chart_style$dense_axis, family = axis_text_family)
+  mtext(x_label, 1, line = 1, cex = research_chart_style$dense_axis_title, family = axis_text_family)
 
   usr <- par("usr")
   legend_x <- usr[1] + 0.60 * (usr[2] - usr[1])
@@ -92,10 +92,10 @@ draw_output <- function() {
   showtext::showtext_end()
 }
 
-grDevices::pdf(pdf_path, width = 5.5, height = 8.66, onefile = TRUE, family = "sans")
+grDevices::pdf(pdf_path, width = research_chart_device$portrait_width, height = research_chart_device$portrait_height, onefile = TRUE, family = "sans")
 draw_output()
 dev.off()
 
-png(png_path, width = 1650, height = 2598, res = 300, type = "cairo")
+png(png_path, width = research_chart_device$portrait_width * research_chart_device$png_res, height = research_chart_device$portrait_height * research_chart_device$png_res, res = research_chart_device$png_res, type = "cairo")
 draw_output()
 dev.off()

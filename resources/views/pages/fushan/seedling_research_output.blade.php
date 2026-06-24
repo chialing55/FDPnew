@@ -11,6 +11,7 @@ $(function () {
   const itemUrls = @json($itemUrls ?? []);
   const clearSessionUrl = @json($clearSessionUrl ?? null);
   const csrfToken = @json(csrf_token());
+  let skipNextSessionClear = false;
 
   if (!hasAppliedRange) {
     return;
@@ -64,8 +65,21 @@ $(function () {
       });
   });
 
+  document.addEventListener('click', function(event) {
+    const link = event.target.closest('a[href*="/research-output/asset/"]');
+
+    if (!link) {
+      return;
+    }
+
+    skipNextSessionClear = true;
+    window.setTimeout(function() {
+      skipNextSessionClear = false;
+    }, 3000);
+  });
+
   window.addEventListener('pagehide', function() {
-    if (!clearSessionUrl) {
+    if (!clearSessionUrl || skipNextSessionClear) {
       return;
     }
 

@@ -15,6 +15,8 @@ Use `resources/scripts/research_chart_style.R` for new charts. Script bootstrap 
 | Left-aligned panel label x position | 0.06 NDC |
 | Species names | 0.72 |
 | Dense species names | 0.58 |
+| Dense chart axis tick labels | 0.9 |
+| Dense chart axis titles | 0.9 |
 | Legend text | 0.78 |
 | Small-multiple axis labels | 0.9 |
 | Small-multiple outer axis titles | 0.9 |
@@ -27,7 +29,7 @@ Use `resources/scripts/research_chart_style.R` for new charts. Script bootstrap 
 | Seeds composition | 5.9 x 8 in | 1770 x 2400 px, 300 dpi |
 | Seeds phenology | 5.9 x 4 in | 1770 x 1200 px, 300 dpi |
 | Seeds spatial distribution | 5.9 x 8 in | 1770 x 2400 px, 300 dpi |
-| Seeds spatial species traps | 5.5 x 8.66 in | 1650 x 2598 px, 300 dpi |
+| Seeds spatial species traps | 5.9 x 8 in | 1770 x 2400 px, 300 dpi |
 | Seedling composition, standard/focus | 8 x 6 in | 8 x 6 in, 180 dpi |
 | Seedling composition, long | 6 x 8 in | 6 x 8 in, 180 dpi |
 | Seedling growth histograms | 8 x dynamic height in | 8 x dynamic height in, 180 dpi |
@@ -39,7 +41,7 @@ Use `resources/scripts/research_chart_style.R` for new charts. Script bootstrap 
 | Seeds composition | 0.9 | 0.9 | 0.9 | species 0.72 | none | 0.9 | none |
 | Seeds phenology | 0.9 | 0.9 | none | 0.9 | 0.9 via `text()` | none | 0.78 |
 | Seeds spatial distribution | 0.9 | 0.9 | 0.9 | 0.9 | 0.9 | 0.9, left aligned at 0.06 NDC | none |
-| Seeds spatial species traps | 0.9 | 0.9 | 0.9 | dense species 0.58 | none | none | 0.78 |
+| Seeds spatial species traps | 0.9 | dense axis 0.9 | dense axis title 0.9 | dense species 0.58 | none | none | 0.78 |
 | Seedling composition, standard | 0.9 | 0.9 | 0.9 | species 0.72 | none | 0.9 | 0.78 |
 | Seedling composition, focus/long | 0.9 | 0.9 | 0.9 on main panel only | species 0.72 | none | 0.9 when present | 0.78 |
 | Seedling growth histograms | 0.9 | 0.9 | 0.9 outer title | 0.9 | 0.9 outer title | species name 0.9 | none |

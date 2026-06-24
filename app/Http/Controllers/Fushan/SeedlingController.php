@@ -383,11 +383,16 @@ class SeedlingController extends Controller
         $cacheKey = $this->seedlingResearchOutputCacheKey($item, $minCensus, $maxCensus);
         $cached = $request->session()->get($cacheKey);
 
-        if (is_array($cached) && isset($cached['html'])) {
+        if (is_array($cached) && isset($cached['html'])
+            && $this->cachedResearchOutputHtmlHasAssets($request, (string) $cached['html'], 'seedling_research_output_assets_')) {
             return response()->json([
                 'html' => $cached['html'],
                 'cached' => true,
             ]);
+        }
+
+        if (is_array($cached) && isset($cached['html'])) {
+            $request->session()->forget($cacheKey);
         }
 
         $viewData = [
