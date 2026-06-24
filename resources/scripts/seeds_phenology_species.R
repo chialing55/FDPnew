@@ -1,58 +1,34 @@
 #!/usr/bin/env Rscript
 
 args <- commandArgs(trailingOnly = TRUE)
-arg_value <- function(name) {
-  key <- paste0("--", name)
-  idx <- match(key, args)
-  if (is.na(idx) || idx == length(args)) {
-    stop(paste("Missing argument", key), call. = FALSE)
-  }
-  args[[idx + 1]]
-}
+script_arg <- grep("^--file=", commandArgs(FALSE), value = TRUE)
+script_path <- if (length(script_arg) > 0) sub("^--file=", "", script_arg[[1]]) else "resources/scripts/seeds_phenology_species.R"
+source(file.path(dirname(normalizePath(script_path, mustWork = FALSE)), "research_chart_runtime.R"))
 
-input_path <- arg_value("input")
-pdf_path <- arg_value("pdf")
-png_path <- arg_value("png")
-font_path <- if ("--font" %in% args) arg_value("font") else ""
-
-if (!requireNamespace("jsonlite", quietly = TRUE)) {
-  stop("R package jsonlite is required", call. = FALSE)
-}
-if (!requireNamespace("showtext", quietly = TRUE)) {
-  stop("R package showtext is required", call. = FALSE)
-}
-if (!requireNamespace("sysfonts", quietly = TRUE)) {
-  stop("R package sysfonts is required", call. = FALSE)
-}
+input_path <- research_arg_value(args, "input", required = TRUE)
+pdf_path <- research_arg_value(args, "pdf", required = TRUE)
+png_path <- research_arg_value(args, "png", required = TRUE)
+font_path <- research_arg_value(args, "font", "")
+research_load_style(
+  "resources/scripts/seeds_phenology_species.R",
+  list(cex = 0.9, axis = 0.9, axis_title = 0.9, legend = 0.78),
+  list(portrait_width = 5.9, half_height = 4, png_res = 300)
+)
+research_require_packages(c("jsonlite", "showtext", "sysfonts"))
 
 payload <- jsonlite::fromJSON(input_path, simplifyVector = FALSE)
 
-if (!nzchar(font_path) || !file.exists(font_path)) {
-  stop("Chinese font file is required for chart output.", call. = FALSE)
-}
-
-sysfonts::font_add("cjk", regular = font_path)
-axis_text_family <- "cjk"
-showtext::showtext_opts(dpi = 300)
-showtext::showtext_auto()
+axis_text_family <- research_setup_cjk_font(font_path)
 
 num <- function(x) {
   if (is.null(x) || length(x) == 0 || is.na(x)) 0 else as.numeric(x)
 }
 
 
-label_value <- function(value, fallback) {
-  if (is.null(value) || length(value) == 0 || is.na(value)) {
-    return(enc2utf8(fallback))
-  }
-
-  enc2utf8(as.character(value))
-}
-
-y_label <- label_value(payload$y_label, "species count")
-empty_label <- label_value(payload$empty_label, "no data")
-legend_flower <- label_value(payload$legend$flower, "flower")
-legend_fruit <- label_value(payload$legend$fruit, "fruit")
+y_label <- research_label_value(payload$y_label, "species count")
+empty_label <- research_label_value(payload$empty_label, "no data")
+legend_flower <- research_label_value(payload$legend$flower, "flower")
+legend_fruit <- research_label_value(payload$legend$fruit, "fruit")
 
 rows <- payload$rows
 if (length(rows) == 0) {
@@ -74,11 +50,11 @@ month_ticks <- function(dates) {
 }
 
 plot_all <- function() {
-  par(family = axis_text_family, mar = c(6, 4, 2, 1))
+  par(family = axis_text_family, mar = c(6, 4, 2, 1), cex = research_chart_style$cex)
 
   if (nrow(dat) == 0) {
     plot.new()
-    text(0.5, 0.5, empty_label, family = axis_text_family)
+    text(0.5, 0.5, empty_label, cex = research_chart_style$cex, family = axis_text_family)
     return(invisible(NULL))
   }
 
@@ -108,11 +84,11 @@ plot_all <- function() {
     family = axis_text_family
   )
   lines(fruit ~ date, data = dat, lty = 2, type = "o", pch = 1)
-  axis(2, las = 1, family = axis_text_family)
+  axis(2, las = 1, cex.axis = research_chart_style$axis, family = axis_text_family)
   usr <- par("usr")
   x_span <- usr[2] - usr[1]
   y_span <- usr[4] - usr[3]
-  text(usr[1] - 0.11 * x_span, mean(usr[3:4]), labels = y_label, srt = 90, xpd = NA, family = axis_text_family)
+  text(usr[1] - 0.11 * x_span, mean(usr[3:4]), labels = y_label, srt = 90, xpd = NA, cex = research_chart_style$axis_title, family = axis_text_family)
   box()
 
   legend_y <- usr[4] + 0.07 * y_span
@@ -122,13 +98,13 @@ plot_all <- function() {
   fruit_x2 <- usr[1] + 0.56 * x_span
   segments(flower_x1, legend_y, flower_x2, legend_y, lty = 1, xpd = NA)
   points(mean(c(flower_x1, flower_x2)), legend_y, pch = 16, xpd = NA)
-  text(flower_x2 + 0.025 * x_span, legend_y, labels = legend_flower, adj = 0, xpd = NA, family = axis_text_family)
+  text(flower_x2 + 0.025 * x_span, legend_y, labels = legend_flower, adj = 0, xpd = NA, cex = research_chart_style$legend, family = axis_text_family)
   segments(fruit_x1, legend_y, fruit_x2, legend_y, lty = 2, xpd = NA)
   points(mean(c(fruit_x1, fruit_x2)), legend_y, pch = 1, xpd = NA)
-  text(fruit_x2 + 0.025 * x_span, legend_y, labels = legend_fruit, adj = 0, xpd = NA, family = axis_text_family)
+  text(fruit_x2 + 0.025 * x_span, legend_y, labels = legend_fruit, adj = 0, xpd = NA, cex = research_chart_style$legend, family = axis_text_family)
 
   dates <- month_ticks(dat$date)
-  axis(1, at = dates, labels = format(dates, "%Y-%m-%d"), las = 2, family = axis_text_family)
+  axis(1, at = dates, labels = format(dates, "%Y-%m-%d"), las = 2, cex.axis = research_chart_style$axis, family = axis_text_family)
 }
 
 draw_output <- function() {
@@ -137,10 +113,10 @@ draw_output <- function() {
   showtext::showtext_end()
 }
 
-grDevices::pdf(pdf_path, width = 5.9, height = 4, onefile = TRUE, family = "sans")
+grDevices::pdf(pdf_path, width = research_chart_device$portrait_width, height = research_chart_device$half_height, onefile = TRUE, family = "sans")
 draw_output()
 dev.off()
 
-png(png_path, width = 1770, height = 1200, res = 300, type = "cairo")
+png(png_path, width = research_chart_device$portrait_width * research_chart_device$png_res, height = research_chart_device$half_height * research_chart_device$png_res, res = research_chart_device$png_res, type = "cairo")
 draw_output()
 dev.off()

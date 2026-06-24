@@ -31,6 +31,38 @@ trait ManagesResearchOutputAssets
         ]);
     }
 
+    protected function inlineResearchOutputImage(?string $path): ?string
+    {
+        if (! is_string($path) || ! is_file($path)) {
+            return null;
+        }
+
+        $extension = strtolower(pathinfo($path, PATHINFO_EXTENSION));
+        $mime = match ($extension) {
+            'jpg', 'jpeg' => 'image/jpeg',
+            'webp' => 'image/webp',
+            default => 'image/png',
+        };
+
+        return 'data:' . $mime . ';base64,' . base64_encode((string) file_get_contents($path));
+    }
+
+    protected function researchOutputAssetRecord(string $path, string $extension, string $download): array
+    {
+        return [
+            'path' => $path,
+            'extension' => $extension,
+            'mime' => match ($extension) {
+                'png' => 'image/png',
+                'jpg', 'jpeg' => 'image/jpeg',
+                'webp' => 'image/webp',
+                'pdf' => 'application/pdf',
+                default => 'application/octet-stream',
+            },
+            'download' => $download,
+        ];
+    }
+
     protected function forgetResearchOutputSessionAssets(
         Request $request,
         string $htmlSessionPrefix,

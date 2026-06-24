@@ -261,7 +261,14 @@ class SeedsController extends Controller
 
     private function seedResearchOutputCacheKey(string $item, int $minCensus, int $maxCensus): string
     {
-        return "seeds_research_output.v3.{$minCensus}.{$maxCensus}.{$item}";
+        return "seeds_research_output.v4.{$minCensus}.{$maxCensus}.{$item}";
+    }
+
+    private function researchChartStyleVersion(): int
+    {
+        $stylePath = resource_path('scripts/research_chart_style.R');
+
+        return file_exists($stylePath) ? filemtime($stylePath) : 0;
     }
 
     private function seedResearchOutputTemporaryPrefixes(): array
@@ -596,7 +603,7 @@ class SeedsController extends Controller
             ];
         }
 
-        $hash = substr(sha1($minCensus . '-' . $maxCensus . '-' . $prefix . '-asset-v1-' . filemtime($scriptPath) . '-' . md5((string) $payloadJson)), 0, 12);
+        $hash = substr(sha1($minCensus . '-' . $maxCensus . '-' . $prefix . '-asset-v2-' . filemtime($scriptPath) . '-' . $this->researchChartStyleVersion() . '-' . md5((string) $payloadJson)), 0, 12);
         $fileBase = "{$prefix}-{$hash}";
         $pngToken = "{$fileBase}-png";
         $pdfToken = "{$fileBase}-pdf";
@@ -673,18 +680,8 @@ class SeedsController extends Controller
             }
 
             $assetRecords = [
-                $pngToken => [
-                    'path' => $pngPath,
-                    'extension' => 'png',
-                    'mime' => 'image/png',
-                    'download' => "{$fileBase}.png",
-                ],
-                $pdfToken => [
-                    'path' => $pdfPath,
-                    'extension' => 'pdf',
-                    'mime' => 'application/pdf',
-                    'download' => "{$fileBase}.pdf",
-                ],
+                $pngToken => $this->researchOutputAssetRecord($pngPath, 'png', "{$fileBase}.png"),
+                $pdfToken => $this->researchOutputAssetRecord($pdfPath, 'pdf', "{$fileBase}.pdf"),
             ];
 
             @unlink($jsonPath);
@@ -694,9 +691,7 @@ class SeedsController extends Controller
         $pngPath = $assetRecords[$pngToken]['path'] ?? null;
 
         return [
-            'png_url' => is_string($pngPath) && is_file($pngPath)
-                ? 'data:image/png;base64,' . base64_encode((string) file_get_contents($pngPath))
-                : null,
+            'png_url' => $this->inlineResearchOutputImage($pngPath),
             'pdf_url' => route('admin.fushan.seeds.research-output.asset', ['token' => $pdfToken, 'extension' => 'pdf']),
             'error' => null,
         ];

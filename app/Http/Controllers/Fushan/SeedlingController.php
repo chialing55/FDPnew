@@ -533,7 +533,14 @@ class SeedlingController extends Controller
 
     private function seedlingResearchOutputCacheKey(string $item, int $minCensus, int $maxCensus): string
     {
-        return "seedling_research_output.v12.{$minCensus}.{$maxCensus}.{$item}";
+        return "seedling_research_output.v13.{$minCensus}.{$maxCensus}.{$item}";
+    }
+
+    private function researchChartStyleVersion(): int
+    {
+        $stylePath = resource_path('scripts/research_chart_style.R');
+
+        return file_exists($stylePath) ? filemtime($stylePath) : 0;
     }
 
     private function seedlingResearchOutputTemporaryPrefixes(): array
@@ -890,7 +897,7 @@ class SeedlingController extends Controller
         $plots = [];
         $figures = [];
         $scriptPath = resource_path('scripts/seedling_growth_histograms.R');
-        $hash = substr(sha1($minCensus . '-' . $maxCensus . '-' . filemtime($scriptPath) . '-' . md5(json_encode($summary, JSON_UNESCAPED_UNICODE))), 0, 12);
+        $hash = substr(sha1($minCensus . '-' . $maxCensus . '-style-v1-' . filemtime($scriptPath) . '-' . $this->researchChartStyleVersion() . '-' . md5(json_encode($summary, JSON_UNESCAPED_UNICODE))), 0, 12);
         $assetKey = "seedling_research_output_assets_{$minCensus}_{$maxCensus}_growth_histograms";
         $assetRecords = $request->session()->get($assetKey, []);
         $assetRecords = is_array($assetRecords) ? $assetRecords : [];
@@ -991,12 +998,7 @@ class SeedlingController extends Controller
                         return ['figures' => $figures, 'error' => "圖檔沒有成功產生：{$path}"];
                     }
 
-                    $assetRecords[$token] = [
-                        'path' => $path,
-                        'extension' => $extension,
-                        'mime' => $extension === 'png' ? 'image/png' : 'application/pdf',
-                        'download' => $plot['file_base'] . '.' . $extension,
-                    ];
+                    $assetRecords[$token] = $this->researchOutputAssetRecord($path, $extension, $plot['file_base'] . '.' . $extension);
                 }
             }
 
@@ -1007,9 +1009,7 @@ class SeedlingController extends Controller
         foreach ($figures as &$figure) {
             $pngPath = $assetRecords[$figure['png_token']]['path'] ?? null;
 
-            if (is_string($pngPath) && is_file($pngPath)) {
-                $figure['png_url'] = 'data:image/png;base64,' . base64_encode((string) file_get_contents($pngPath));
-            }
+            $figure['png_url'] = $this->inlineResearchOutputImage($pngPath);
         }
         unset($figure);
 
@@ -1023,7 +1023,7 @@ class SeedlingController extends Controller
         }
 
         $scriptPath = resource_path('scripts/seedling_composition.R');
-        $hash = substr(sha1($minCensus . '-' . $maxCensus . '-composition-layout-v3-' . filemtime($scriptPath) . '-' . md5(json_encode($summary, JSON_UNESCAPED_UNICODE))), 0, 12);
+        $hash = substr(sha1($minCensus . '-' . $maxCensus . '-composition-layout-v4-' . filemtime($scriptPath) . '-' . $this->researchChartStyleVersion() . '-' . md5(json_encode($summary, JSON_UNESCAPED_UNICODE))), 0, 12);
         $assetKey = "seedling_research_output_assets_{$minCensus}_{$maxCensus}_composition";
         $sessionAssets = $request->session()->get($assetKey, []);
         $figures = [];
@@ -1130,12 +1130,7 @@ class SeedlingController extends Controller
                         ];
                     }
 
-                    $assetRecords[$token] = [
-                        'path' => $path,
-                        'extension' => $extension,
-                        'mime' => $extension === 'png' ? 'image/png' : 'application/pdf',
-                        'download' => $plot['file_base'] . '.' . $extension,
-                    ];
+                    $assetRecords[$token] = $this->researchOutputAssetRecord($path, $extension, $plot['file_base'] . '.' . $extension);
                 }
             }
 
@@ -1149,7 +1144,7 @@ class SeedlingController extends Controller
             if (is_string($pngPath) && is_file($pngPath)) {
                 foreach ($summary['surveys'] as $survey) {
                     if ($plot['file_base'] === "composition-{$hash}-census-{$survey['census']}") {
-                        $figures[$survey['census']]['png_url'] = 'data:image/png;base64,' . base64_encode((string) file_get_contents($pngPath));
+                        $figures[$survey['census']]['png_url'] = $this->inlineResearchOutputImage($pngPath);
                         break;
                     }
                 }

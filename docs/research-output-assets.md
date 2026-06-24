@@ -17,3 +17,9 @@ To add another page:
 4. Generate assets into a temp directory using one of those prefixes.
 5. Store session records with `path`, `extension`, `mime`, and `download`.
 6. Clear the page's HTML cache and asset session keys with `forgetResearchOutputSessionAssets()`.
+
+Useful controller helpers:
+
+- `researchOutputAssetRecord($path, $extension, $download)` creates a standard session asset record.
+- `inlineResearchOutputImage($path)` returns a `data:image/...;base64` URL for previews.
+- `researchOutputAssetFromSession($request, $token, $extension, $assetPrefix)` serves registered assets through the asset route.

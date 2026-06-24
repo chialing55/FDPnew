@@ -1,64 +1,40 @@
 #!/usr/bin/env Rscript
 
 args <- commandArgs(trailingOnly = TRUE)
-arg_value <- function(name) {
-  key <- paste0("--", name)
-  idx <- match(key, args)
-  if (is.na(idx) || idx == length(args)) {
-    stop(paste("Missing argument", key), call. = FALSE)
-  }
-  args[[idx + 1]]
-}
+script_arg <- grep("^--file=", commandArgs(FALSE), value = TRUE)
+script_path <- if (length(script_arg) > 0) sub("^--file=", "", script_arg[[1]]) else "resources/scripts/seeds_spatial_species_traps.R"
+source(file.path(dirname(normalizePath(script_path, mustWork = FALSE)), "research_chart_runtime.R"))
 
-input_path <- arg_value("input")
-pdf_path <- arg_value("pdf")
-png_path <- arg_value("png")
-font_path <- if ("--font" %in% args) arg_value("font") else ""
-
-if (!requireNamespace("jsonlite", quietly = TRUE)) {
-  stop("R package jsonlite is required", call. = FALSE)
-}
-if (!requireNamespace("showtext", quietly = TRUE)) {
-  stop("R package showtext is required", call. = FALSE)
-}
-if (!requireNamespace("sysfonts", quietly = TRUE)) {
-  stop("R package sysfonts is required", call. = FALSE)
-}
+input_path <- research_arg_value(args, "input", required = TRUE)
+pdf_path <- research_arg_value(args, "pdf", required = TRUE)
+png_path <- research_arg_value(args, "png", required = TRUE)
+font_path <- research_arg_value(args, "font", "")
+research_load_style(
+  "resources/scripts/seeds_spatial_species_traps.R",
+  list(cex = 0.9, axis = 0.9, axis_title = 0.9, species_name_dense = 0.58, legend = 0.78),
+  list()
+)
+research_require_packages(c("jsonlite", "showtext", "sysfonts"))
 
 payload <- jsonlite::fromJSON(input_path, simplifyVector = FALSE)
 
-if (!nzchar(font_path) || !file.exists(font_path)) {
-  stop("Chinese font file is required for chart output.", call. = FALSE)
-}
-
-sysfonts::font_add("cjk", regular = font_path)
-axis_text_family <- "cjk"
-showtext::showtext_opts(dpi = 300)
-showtext::showtext_auto()
+axis_text_family <- research_setup_cjk_font(font_path)
 
 num <- function(x) {
   if (is.null(x) || length(x) == 0 || is.na(x)) 0 else as.numeric(x)
 }
 
-label_value <- function(value, fallback) {
-  if (is.null(value) || length(value) == 0 || is.na(value)) {
-    return(enc2utf8(fallback))
-  }
-
-  enc2utf8(as.character(value))
-}
-
-x_label <- label_value(payload$labels$x, "trap count")
-fruit_label <- label_value(payload$labels$fruit, "fruit and seed")
-flower_label <- label_value(payload$labels$flower, "flower")
-empty_label <- label_value(payload$labels$empty, "no data")
+x_label <- research_label_value(payload$labels$x, "trap count")
+fruit_label <- research_label_value(payload$labels$fruit, "fruit and seed")
+flower_label <- research_label_value(payload$labels$flower, "flower")
+empty_label <- research_label_value(payload$labels$empty, "no data")
 rows <- payload$rows
 
 if (length(rows) == 0) {
   dat <- data.frame(csp = character(), fruit = numeric(), flower = numeric())
 } else {
   dat <- data.frame(
-    csp = vapply(rows, function(row) label_value(row$csp, ""), character(1)),
+    csp = vapply(rows, function(row) research_label_value(row$csp, ""), character(1)),
     fruit = vapply(rows, function(row) num(row$fruit), numeric(1)),
     flower = vapply(rows, function(row) num(row$flower), numeric(1)),
     stringsAsFactors = FALSE
@@ -66,7 +42,7 @@ if (length(rows) == 0) {
 }
 
 plot_all <- function() {
-  par(family = axis_text_family, mar = c(3, 6, 2, 1), xpd = NA)
+  par(family = axis_text_family, mar = c(3, 6, 2, 1), cex = research_chart_style$cex, xpd = NA)
 
   if (nrow(dat) == 0) {
     plot.new()
@@ -89,12 +65,12 @@ plot_all <- function() {
     col = c("grey", "black"),
     xaxt = "n",
     names.arg = dat$csp,
-    cex.names = 0.58,
+    cex.names = research_chart_style$species_name_dense,
     family = axis_text_family
   )
   lines(rbind(c(0, min(mids) - 0.7), c(0, max(mids) + 0.7)))
-  axis(1, line = -1.2, family = axis_text_family)
-  mtext(x_label, 1, line = 1, family = axis_text_family)
+  axis(1, line = -1.2, cex.axis = research_chart_style$axis, family = axis_text_family)
+  mtext(x_label, 1, line = 1, cex = research_chart_style$axis_title, family = axis_text_family)
 
   usr <- par("usr")
   legend_x <- usr[1] + 0.60 * (usr[2] - usr[1])
@@ -106,7 +82,7 @@ plot_all <- function() {
     fill = c("grey", "black"),
     bty = "n",
     xpd = NA,
-    cex = 0.82
+    cex = research_chart_style$legend
   )
 }
 

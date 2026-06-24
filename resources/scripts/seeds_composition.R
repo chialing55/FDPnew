@@ -1,47 +1,28 @@
 #!/usr/bin/env Rscript
 
 args <- commandArgs(trailingOnly = TRUE)
-arg_value <- function(name) {
-  key <- paste0("--", name)
-  idx <- match(key, args)
-  if (is.na(idx) || idx == length(args)) {
-    stop(paste("Missing argument", key), call. = FALSE)
-  }
-  args[[idx + 1]]
-}
+script_arg <- grep("^--file=", commandArgs(FALSE), value = TRUE)
+script_path <- if (length(script_arg) > 0) sub("^--file=", "", script_arg[[1]]) else "resources/scripts/seeds_composition.R"
+source(file.path(dirname(normalizePath(script_path, mustWork = FALSE)), "research_chart_runtime.R"))
 
-input_path <- arg_value("input")
-pdf_path <- arg_value("pdf")
-png_path <- arg_value("png")
-font_path <- if ("--font" %in% args) arg_value("font") else ""
-times_path <- if ("--times" %in% args) arg_value("times") else ""
-
-if (!requireNamespace("jsonlite", quietly = TRUE)) {
-  stop("R package jsonlite is required", call. = FALSE)
-}
-if (!requireNamespace("showtext", quietly = TRUE)) {
-  stop("R package showtext is required", call. = FALSE)
-}
-if (!requireNamespace("sysfonts", quietly = TRUE)) {
-  stop("R package sysfonts is required", call. = FALSE)
-}
+input_path <- research_arg_value(args, "input", required = TRUE)
+pdf_path <- research_arg_value(args, "pdf", required = TRUE)
+png_path <- research_arg_value(args, "png", required = TRUE)
+font_path <- research_arg_value(args, "font", "")
+times_path <- research_arg_value(args, "times", "")
+research_load_style(
+  "resources/scripts/seeds_composition.R",
+  list(cex = 0.9, axis = 0.9, axis_title = 0.9, panel_label = 0.9, species_name = 0.72),
+  list(portrait_width = 5.9, portrait_height = 8, png_res = 300)
+)
+research_require_packages(c("jsonlite", "showtext", "sysfonts"))
 
 payload <- jsonlite::fromJSON(input_path, simplifyVector = FALSE)
 
-if (!nzchar(font_path) || !file.exists(font_path)) {
-  stop("Chinese font file is required for chart output.", call. = FALSE)
-}
-
-sysfonts::font_add("cjk", regular = font_path)
+axis_text_family <- research_setup_cjk_font(font_path)
 if (nzchar(times_path) && file.exists(times_path)) {
   sysfonts::font_add("times", regular = times_path)
-  number_family <- "cjk"
-} else {
-  number_family <- "cjk"
 }
-axis_text_family <- "cjk"
-showtext::showtext_opts(dpi = 300)
-showtext::showtext_auto()
 
 num <- function(x) {
   if (is.null(x) || length(x) == 0 || is.na(x)) 0 else as.numeric(x)
@@ -99,8 +80,8 @@ plot_panel <- function(panel, log_axis = FALSE, flower_axis = FALSE, title_at = 
 
   if (nrow(dat) == 0) {
     plot.new()
-    mtext(tag, 3, at = par("usr")[1], line = 0.5, family = axis_text_family)
-    text(0.5, 0.5, "無資料", family = axis_text_family)
+    mtext(tag, 3, at = par("usr")[1], line = 0.5, cex = research_chart_style$panel_label, family = axis_text_family)
+    text(0.5, 0.5, "無資料", cex = research_chart_style$cex, family = axis_text_family)
     return(invisible(NULL))
   }
 
@@ -121,16 +102,17 @@ plot_panel <- function(panel, log_axis = FALSE, flower_axis = FALSE, title_at = 
       xlab = "",
       names.arg = labels,
       axes = FALSE,
+      cex.names = research_chart_style$species_name,
       col = "#c9c9c9",
       border = "#222222",
       family = axis_text_family
     )
     ticks <- log_ticks(log_x_max)
-    axis(1, at = ticks, labels = format(ticks, scientific = FALSE), line = -0.5, cex.axis = 1, family = axis_text_family)
+    axis(1, at = ticks, labels = format(ticks, scientific = FALSE), line = -0.5, cex.axis = research_chart_style$axis, family = axis_text_family)
     lines(rbind(c(1, -0.5), c(1, 61)))
-    mtext(x_label, 1, line = 2.5, family = axis_text_family)
+    mtext(x_label, 1, line = 2.5, cex = research_chart_style$axis_title, family = axis_text_family)
     title_pos <- (if (is.null(title_at)) 0.2 else title_at) + title_offset
-    mtext(tag, 3, at = title_pos, line = 0.5, adj = title_adj, family = axis_text_family)
+    mtext(tag, 3, at = title_pos, line = 0.5, adj = title_adj, cex = research_chart_style$panel_label, family = axis_text_family)
   } else {
     x_max <- if (flower_axis) flower_limit(max(values)) else max(pretty(c(0, max(values))))
     barplot(
@@ -143,20 +125,21 @@ plot_panel <- function(panel, log_axis = FALSE, flower_axis = FALSE, title_at = 
       xlab = "",
       names.arg = labels,
       axes = FALSE,
+      cex.names = research_chart_style$species_name,
       col = "#c9c9c9",
       border = "#222222",
       family = axis_text_family
     )
-    axis(1, line = -0.5, cex.axis = 1, family = axis_text_family)
+    axis(1, line = -0.5, cex.axis = research_chart_style$axis, family = axis_text_family)
     lines(rbind(c(0, -0.5), c(0, line_ymax(length(values)))))
-    mtext(x_label, 1, line = 2.5, family = axis_text_family)
+    mtext(x_label, 1, line = 2.5, cex = research_chart_style$axis_title, family = axis_text_family)
     title_pos <- (if (is.null(title_at)) -0.13 * x_max else title_at) + title_offset + title_offset_ratio * x_max
-    mtext(tag, 3, at = title_pos, line = 0.5, adj = title_adj, family = axis_text_family)
+    mtext(tag, 3, at = title_pos, line = 0.5, adj = title_adj, cex = research_chart_style$panel_label, family = axis_text_family)
   }
 }
 
 plot_all <- function() {
-  par(family = axis_text_family)
+  par(family = axis_text_family, cex = research_chart_style$cex)
   layout(matrix(c(1, 1, 2, 3), 2, 2, byrow = TRUE))
   plot_panel(payload$flower, FALSE, TRUE, mar = c(4, 6, 2, 1))
   plot_panel(payload$fruit, TRUE, FALSE, mar = c(4, 6, 2, 1))
@@ -169,10 +152,10 @@ draw_output <- function() {
   showtext::showtext_end()
 }
 
-grDevices::pdf(pdf_path, width = 5.9, height = 8, onefile = TRUE, family = "sans")
+grDevices::pdf(pdf_path, width = research_chart_device$portrait_width, height = research_chart_device$portrait_height, onefile = TRUE, family = "sans")
 draw_output()
 dev.off()
 
-png(png_path, width = 1770, height = 2400, res = 300, type = "cairo")
+png(png_path, width = research_chart_device$portrait_width * research_chart_device$png_res, height = research_chart_device$portrait_height * research_chart_device$png_res, res = research_chart_device$png_res, type = "cairo")
 draw_output()
 dev.off()
