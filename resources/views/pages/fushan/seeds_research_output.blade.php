@@ -12,6 +12,7 @@ $(function() {
   const itemUrls = @json($itemUrls ?? []);
   const clearSessionUrl = @json($clearSessionUrl ?? null);
   const csrfToken = @json(csrf_token());
+  let researchOutputQueue = Promise.resolve();
 
   if (!hasAppliedRange) {
     return;
@@ -39,13 +40,19 @@ $(function() {
       end_census: endCensus,
     });
 
-    fetch(url + '?' + params.toString(), {
-      headers: {
-        'Accept': 'application/json',
-        'X-Requested-With': 'XMLHttpRequest',
-      },
-      credentials: 'same-origin',
-    })
+    researchOutputQueue = researchOutputQueue
+      .catch(function() {})
+      .then(function() {
+        return fetch(url + '?' + params.toString(), {
+          headers: {
+            'Accept': 'application/json',
+            'X-Requested-With': 'XMLHttpRequest',
+          },
+          credentials: 'same-origin',
+        });
+      });
+
+    researchOutputQueue
       .then(function(response) {
         return response.json().then(function(data) {
           if (!response.ok) {

@@ -58,7 +58,7 @@ plot_one <- function(plot, file, device = c('png', 'pdf')) {
   data$dead_truncated <- data$dead > dead_cap
 
 
-  if (!is.null(plot$layout) && plot$layout == 'long') {
+  if (!is.null(plot$layout) && plot$layout %in% c('long', 'focus-standard')) {
     focus_name <- plot$focus_species %||% '大明橘'
     focus <- data[data$csp == focus_name, , drop = FALSE]
     main <- data[data$csp != focus_name, , drop = FALSE]
@@ -100,22 +100,28 @@ plot_one <- function(plot, file, device = c('png', 'pdf')) {
       if (show_axis) axis(1, line = axis_line, cex.axis = 0.9)
       lines(rbind(c(0, -0.5), c(0, max(bp) + 1)))
       if (show_x_label) mtext(plot$x_label %||% '小苗個體數', 1, line = 2, cex = 0.9)
-      if (show_panel_label && !is.null(plot$panel_label) && nzchar(plot$panel_label)) mtext(plot$panel_label, 3, at = par('usr')[1] - 25, line = -0.1, adj = 0, cex = 0.9)
+      if (show_panel_label && !is.null(plot$panel_label) && nzchar(plot$panel_label)) {
+        usr <- par('usr')
+        label_y <- usr[4] - 0.08 * (usr[4] - usr[3])
+        text(grconvertX(0.06, from = 'ndc', to = 'user'), grconvertY(grconvertY(label_y, from = 'user', to = 'ndc') - 0.03, from = 'ndc', to = 'user'), labels = plot$panel_label, adj = c(0, 1), cex = 0.9, xpd = NA, family = font_family)
+      }
       if (show_legend) draw_legend(par('usr'))
     }
 
+    is_standard_size <- plot$layout == 'focus-standard'
     if (device == 'png') {
-      png(file, width = 6, height = 8, units = 'in', res = 180, type = 'cairo')
+      png(file, width = if (is_standard_size) 8 else 6, height = if (is_standard_size) 6 else 8, units = 'in', res = 180, type = 'cairo')
     } else {
-      pdf(file, width = 6, height = 8)
+      pdf(file, width = if (is_standard_size) 8 else 6, height = if (is_standard_size) 6 else 8)
     }
     showtext_begin()
     par(family = font_family, cex = 0.9, xpd = FALSE)
-    layout(matrix(c(1, 2), ncol = 1), heights = c(1, 7))
+    layout(matrix(c(1, 2), ncol = 1), heights = if (is_standard_size) c(1, 4) else c(1, 7))
 
     if (nrow(focus) > 0) {
       par(mar = c(1.8, 7, 1, 1))
-      draw_panel(focus, xlim_for(focus), ylim = c(0, 4), axis_line = 0.5, show_axis = TRUE, show_x_label = FALSE, show_legend = FALSE, show_panel_label = TRUE, cex_names = 0.72)
+      focus_ylim <- if (is_standard_size) c(0, max(4, (nrow(main) * 1.2 + 1) / 4)) else c(0, 4)
+      draw_panel(focus, xlim_for(focus), ylim = focus_ylim, axis_line = 0.5, show_axis = TRUE, show_x_label = FALSE, show_legend = FALSE, show_panel_label = TRUE, cex_names = 0.72)
     } else {
       par(mar = c(0, 7, 1, 1))
       plot.new()

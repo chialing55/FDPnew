@@ -8,6 +8,7 @@ use Illuminate\Support\Facades\App;
 use Illuminate\Support\Facades\Schema;
 // use Illuminate\Support\Facades\Input;
 use App\Http\Controllers\Controller;
+use App\Http\Controllers\Concerns\ManagesResearchOutputAssets;
 
 use App\Models\FsSeedsDateinfo;
 use App\Models\FsSeedsFulldata;
@@ -20,6 +21,8 @@ use Symfony\Component\Process\Process;
 
 class SeedsController extends Controller
 {
+    use ManagesResearchOutputAssets;
+
 
 
     public function seeds(Request $request)
@@ -136,6 +139,10 @@ class SeedsController extends Controller
 
         $hasAppliedRange = $request->has('start_census') && $request->has('end_census');
 
+        if ($hasAppliedRange) {
+            $this->forgetSeedResearchOutputSession($request);
+        }
+
         return view('pages/fushan/seeds_research_output', [
             'site' => $site,
             'project' => '種子雨',
@@ -185,16 +192,16 @@ class SeedsController extends Controller
         if ($item === 'composition') {
             $compositionSummary = $this->seedCompositionSummary($minCensus, $maxCensus);
             $viewData['compositionSummary'] = $compositionSummary;
-            $viewData['compositionFigure'] = $this->renderSeedCompositionFigure($minCensus, $maxCensus, $compositionSummary);
+            $viewData['compositionFigure'] = $this->renderSeedCompositionFigure($request, $minCensus, $maxCensus, $compositionSummary);
         } elseif ($item === 'phenology') {
             $phenologySummary = $this->seedPhenologySummary($minCensus, $maxCensus);
             $viewData['phenologySummary'] = $phenologySummary;
-            $viewData['phenologyFigure'] = $this->renderSeedPhenologyFigure($minCensus, $maxCensus, $phenologySummary);
+            $viewData['phenologyFigure'] = $this->renderSeedPhenologyFigure($request, $minCensus, $maxCensus, $phenologySummary);
         } elseif ($item === 'distribution') {
             $distributionSummary = $this->seedSpatialDistributionSummary($minCensus, $maxCensus);
             $viewData['distributionSummary'] = $distributionSummary;
-            $viewData['distributionFigure'] = $this->renderSeedSpatialDistributionFigure($minCensus, $maxCensus, $distributionSummary);
-            $viewData['distributionSpeciesFigure'] = $this->renderSeedSpatialSpeciesFigure($minCensus, $maxCensus, $distributionSummary);
+            $viewData['distributionFigure'] = $this->renderSeedSpatialDistributionFigure($request, $minCensus, $maxCensus, $distributionSummary);
+            $viewData['distributionSpeciesFigure'] = $this->renderSeedSpatialSpeciesFigure($request, $minCensus, $maxCensus, $distributionSummary);
         } else {
             return response()->json(['error' => '未知的成果項目。'], 404);
         }
@@ -210,15 +217,24 @@ class SeedsController extends Controller
 
     public function clearResearchOutputSession(Request $request)
     {
-        $prefix = 'seeds_research_output.';
-        $keys = collect(array_keys($request->session()->all()))
-            ->filter(fn ($key) => str_starts_with((string) $key, $prefix));
-
-        foreach ($keys as $key) {
-            $request->session()->forget($key);
-        }
+        $this->forgetSeedResearchOutputSession($request);
 
         return response()->noContent();
+    }
+
+    public function researchOutputAsset(Request $request, string $token, string $extension)
+    {
+        return $this->researchOutputAssetFromSession($request, $token, $extension, 'seeds_research_output_assets_');
+    }
+
+    private function forgetSeedResearchOutputSession(Request $request): void
+    {
+        $this->forgetResearchOutputSessionAssets(
+            $request,
+            'seeds_research_output.',
+            'seeds_research_output_assets_',
+            $this->seedResearchOutputTemporaryPrefixes()
+        );
     }
 
     private function validSeedResearchRange($startCensus, $endCensus): ?array
@@ -245,7 +261,14 @@ class SeedsController extends Controller
 
     private function seedResearchOutputCacheKey(string $item, int $minCensus, int $maxCensus): string
     {
-        return "seeds_research_output.v2.{$minCensus}.{$maxCensus}.{$item}";
+        return "seeds_research_output.v3.{$minCensus}.{$maxCensus}.{$item}";
+    }
+
+    private function seedResearchOutputTemporaryPrefixes(): array
+    {
+        return [
+            sys_get_temp_dir() . '/seeds-research-output-',
+        ];
     }
 
     private function seedCompositionSummary($startCensus, $endCensus): array
@@ -339,7 +362,7 @@ class SeedsController extends Controller
         ];
     }
 
-    private function renderSeedCompositionFigure($startCensus, $endCensus, array $compositionSummary): array
+    private function renderSeedCompositionFigure(Request $request, $startCensus, $endCensus, array $compositionSummary): array
     {
         if (($compositionSummary['survey_count'] ?? 0) === 0) {
             return ['png_url' => null, 'pdf_url' => null, 'error' => null];
@@ -347,66 +370,16 @@ class SeedsController extends Controller
 
         $minCensus = min((int) $startCensus, (int) $endCensus);
         $maxCensus = max((int) $startCensus, (int) $endCensus);
-        $hash = substr(sha1($minCensus . '-' . $maxCensus . '-' . filemtime(resource_path('scripts/seeds_composition.R'))), 0, 12);
-        $directory = storage_path('app/public/seeds/research-output');
-        $jsonPath = $directory . "/composition-{$hash}.json";
-        $pdfPath = $directory . "/composition-{$hash}.pdf";
-        $pngPath = $directory . "/composition-{$hash}.png";
+        $scriptPath = resource_path('scripts/seeds_composition.R');
 
-        if (! is_dir($directory)) {
-            mkdir($directory, 0775, true);
-        }
-
-        if (! is_writable($directory)) {
-            chmod($directory, 0775);
-        }
-
-        if (! file_exists($pdfPath) || ! file_exists($pngPath)) {
-            $payload = $this->seedCompositionFigurePayload($minCensus, $maxCensus, $compositionSummary);
-            $jsonWritten = @file_put_contents($jsonPath, json_encode($payload, JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT));
-
-            if ($jsonWritten === false) {
-                return [
-                    'png_url' => null,
-                    'pdf_url' => null,
-                    'error' => "無法寫入圖表資料檔：{$jsonPath}",
-                ];
-            }
-
-            $scriptPath = resource_path('scripts/seeds_composition.R');
-            $fontPath = storage_path('fonts/msjh.ttf');
-            $timesPath = resource_path('fonts/times.ttf');
-            $process = new Process([
-                'Rscript',
-                $scriptPath,
-                '--input',
-                $jsonPath,
-                '--pdf',
-                $pdfPath,
-                '--png',
-                $pngPath,
-                '--font',
-                $fontPath,
-                '--times',
-                $timesPath,
-            ]);
-            $process->setTimeout(120);
-            $process->run();
-
-            if (! $process->isSuccessful()) {
-                return [
-                    'png_url' => null,
-                    'pdf_url' => null,
-                    'error' => trim($process->getErrorOutput() ?: $process->getOutput()),
-                ];
-            }
-        }
-
-        return [
-            'png_url' => asset("storage/seeds/research-output/composition-{$hash}.png"),
-            'pdf_url' => asset("storage/seeds/research-output/composition-{$hash}.pdf"),
-            'error' => null,
-        ];
+        return $this->renderSeedResearchFigure(
+            $request,
+            'composition',
+            $minCensus,
+            $maxCensus,
+            $scriptPath,
+            $this->seedCompositionFigurePayload($minCensus, $maxCensus, $compositionSummary)
+        );
     }
 
     private function seedCompositionFigurePayload(int $minCensus, int $maxCensus, array $summary): array
@@ -566,7 +539,7 @@ class SeedsController extends Controller
         ];
     }
 
-    private function renderSeedPhenologyFigure($startCensus, $endCensus, array $phenologySummary): array
+    private function renderSeedPhenologyFigure(Request $request, $startCensus, $endCensus, array $phenologySummary): array
     {
         if (($phenologySummary['survey_count'] ?? 0) === 0 || count($phenologySummary['rows'] ?? []) === 0) {
             return ['png_url' => null, 'pdf_url' => null, 'error' => null];
@@ -576,7 +549,7 @@ class SeedsController extends Controller
         $maxCensus = max((int) $startCensus, (int) $endCensus);
         $scriptPath = resource_path('scripts/seeds_phenology_species.R');
 
-        return $this->renderSeedResearchFigure('phenology-species', $minCensus, $maxCensus, $scriptPath, [
+        return $this->renderSeedResearchFigure($request, 'phenology-species', $minCensus, $maxCensus, $scriptPath, [
             'y_label' => '物種數',
             'legend' => [
                 'flower' => '花',
@@ -611,26 +584,50 @@ class SeedsController extends Controller
             ->all();
     }
 
-    private function renderSeedResearchFigure(string $prefix, int $minCensus, int $maxCensus, string $scriptPath, array $payload): array
+    private function renderSeedResearchFigure(Request $request, string $prefix, int $minCensus, int $maxCensus, string $scriptPath, array $payload): array
     {
-        $hash = substr(sha1($minCensus . '-' . $maxCensus . '-' . filemtime($scriptPath)), 0, 12);
-        $directory = storage_path('app/public/seeds/research-output');
-        $jsonPath = $directory . "/{$prefix}-{$hash}.json";
-        $pdfPath = $directory . "/{$prefix}-{$hash}.pdf";
-        $pngPath = $directory . "/{$prefix}-{$hash}.png";
+        $payloadJson = json_encode($payload, JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT);
 
-        if (! is_dir($directory)) {
-            mkdir($directory, 0775, true);
+        if ($payloadJson === false) {
+            return [
+                'png_url' => null,
+                'pdf_url' => null,
+                'error' => '無法編碼圖表資料。',
+            ];
         }
 
-        if (! is_writable($directory)) {
-            chmod($directory, 0775);
-        }
+        $hash = substr(sha1($minCensus . '-' . $maxCensus . '-' . $prefix . '-asset-v1-' . filemtime($scriptPath) . '-' . md5((string) $payloadJson)), 0, 12);
+        $fileBase = "{$prefix}-{$hash}";
+        $pngToken = "{$fileBase}-png";
+        $pdfToken = "{$fileBase}-pdf";
+        $assetKey = "seeds_research_output_assets_{$minCensus}_{$maxCensus}_{$prefix}";
+        $assetRecords = $request->session()->get($assetKey, []);
+        $assetRecords = is_array($assetRecords) ? $assetRecords : [];
 
-        if (! file_exists($pdfPath) || ! file_exists($pngPath)) {
-            $jsonWritten = @file_put_contents($jsonPath, json_encode($payload, JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT));
+        $pngPath = $assetRecords[$pngToken]['path'] ?? null;
+        $pdfPath = $assetRecords[$pdfToken]['path'] ?? null;
+        $missingFigure = ! is_string($pngPath) || ! is_file($pngPath) || ! is_string($pdfPath) || ! is_file($pdfPath);
+
+        if ($missingFigure) {
+            $this->deleteResearchOutputAssets($assetRecords, $this->seedResearchOutputTemporaryPrefixes());
+            $temporaryDirectory = sys_get_temp_dir() . "/seeds-research-output-{$prefix}-{$hash}-" . uniqid();
+            $jsonPath = $temporaryDirectory . "/{$fileBase}.json";
+            $pngPath = $temporaryDirectory . "/{$fileBase}.png";
+            $pdfPath = $temporaryDirectory . "/{$fileBase}.pdf";
+
+            if (! @mkdir($temporaryDirectory, 0775, true) && ! is_dir($temporaryDirectory)) {
+                return [
+                    'png_url' => null,
+                    'pdf_url' => null,
+                    'error' => "無法建立圖表暫存資料夾：{$temporaryDirectory}",
+                ];
+            }
+
+            $jsonWritten = @file_put_contents($jsonPath, $payloadJson);
 
             if ($jsonWritten === false) {
+                $this->removeResearchOutputTemporaryDirectory($temporaryDirectory);
+
                 return [
                     'png_url' => null,
                     'pdf_url' => null,
@@ -656,17 +653,51 @@ class SeedsController extends Controller
             $process->run();
 
             if (! $process->isSuccessful()) {
+                $this->removeResearchOutputTemporaryDirectory($temporaryDirectory);
+
                 return [
                     'png_url' => null,
                     'pdf_url' => null,
                     'error' => trim($process->getErrorOutput() ?: $process->getOutput()),
                 ];
             }
+
+            if (! is_file($pngPath) || ! is_file($pdfPath)) {
+                $this->removeResearchOutputTemporaryDirectory($temporaryDirectory);
+
+                return [
+                    'png_url' => null,
+                    'pdf_url' => null,
+                    'error' => "圖檔沒有成功產生：{$fileBase}",
+                ];
+            }
+
+            $assetRecords = [
+                $pngToken => [
+                    'path' => $pngPath,
+                    'extension' => 'png',
+                    'mime' => 'image/png',
+                    'download' => "{$fileBase}.png",
+                ],
+                $pdfToken => [
+                    'path' => $pdfPath,
+                    'extension' => 'pdf',
+                    'mime' => 'application/pdf',
+                    'download' => "{$fileBase}.pdf",
+                ],
+            ];
+
+            @unlink($jsonPath);
+            $request->session()->put($assetKey, $assetRecords);
         }
 
+        $pngPath = $assetRecords[$pngToken]['path'] ?? null;
+
         return [
-            'png_url' => asset("storage/seeds/research-output/{$prefix}-{$hash}.png"),
-            'pdf_url' => asset("storage/seeds/research-output/{$prefix}-{$hash}.pdf"),
+            'png_url' => is_string($pngPath) && is_file($pngPath)
+                ? 'data:image/png;base64,' . base64_encode((string) file_get_contents($pngPath))
+                : null,
+            'pdf_url' => route('admin.fushan.seeds.research-output.asset', ['token' => $pdfToken, 'extension' => 'pdf']),
             'error' => null,
         ];
     }
@@ -722,7 +753,7 @@ class SeedsController extends Controller
         ];
     }
 
-    private function renderSeedSpatialDistributionFigure(int $minCensus, int $maxCensus, array $summary): array
+    private function renderSeedSpatialDistributionFigure(Request $request, int $minCensus, int $maxCensus, array $summary): array
     {
         if (count($summary['flower_trap_rows'] ?? []) === 0 && count($summary['fruit_trap_rows'] ?? []) === 0) {
             return ['png_url' => null, 'pdf_url' => null, 'error' => null];
@@ -730,7 +761,7 @@ class SeedsController extends Controller
 
         $scriptPath = resource_path('scripts/seeds_spatial_distribution.R');
 
-        return $this->renderSeedResearchFigure('spatial-distribution', $minCensus, $maxCensus, $scriptPath, [
+        return $this->renderSeedResearchFigure($request, 'spatial-distribution', $minCensus, $maxCensus, $scriptPath, [
             'labels' => [
                 'y' => '收集網數量',
                 'x' => '物種數',
@@ -745,7 +776,7 @@ class SeedsController extends Controller
     }
 
 
-    private function renderSeedSpatialSpeciesFigure(int $minCensus, int $maxCensus, array $summary): array
+    private function renderSeedSpatialSpeciesFigure(Request $request, int $minCensus, int $maxCensus, array $summary): array
     {
         if (count($summary['species_trap_rows'] ?? []) === 0) {
             return ['png_url' => null, 'pdf_url' => null, 'error' => null];
@@ -753,7 +784,7 @@ class SeedsController extends Controller
 
         $scriptPath = resource_path('scripts/seeds_spatial_species_traps.R');
 
-        return $this->renderSeedResearchFigure('spatial-species-traps', $minCensus, $maxCensus, $scriptPath, [
+        return $this->renderSeedResearchFigure($request, 'spatial-species-traps', $minCensus, $maxCensus, $scriptPath, [
             'labels' => [
                 'x' => '收集網數量',
                 'fruit' => '成熟果實及種子',

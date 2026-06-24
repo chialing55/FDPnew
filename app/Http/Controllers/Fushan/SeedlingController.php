@@ -8,6 +8,7 @@ use Illuminate\Support\Facades\App;
 use Illuminate\Support\Facades\Schema;
 // use Illuminate\Support\Facades\Input;
 use App\Http\Controllers\Controller;
+use App\Http\Controllers\Concerns\ManagesResearchOutputAssets;
 
 use App\Models\FsSeedlingCov;
 use App\Models\FsSeedlingRecord;
@@ -26,6 +27,8 @@ use Symfony\Component\Process\Process;
 
 class SeedlingController extends Controller
 {
+    use ManagesResearchOutputAssets;
+
     private function quoteIdentifier(string $identifier): string
     {
         return '`' . str_replace('`', '``', $identifier) . '`';
@@ -470,67 +473,18 @@ class SeedlingController extends Controller
 
     public function researchOutputAsset(Request $request, string $token, string $extension)
     {
-        $assets = collect($request->session()->all())
-            ->filter(fn ($value, $key) => str_starts_with((string) $key, 'seedling_research_output_assets_'))
-            ->flatMap(fn ($value) => is_array($value) ? $value : [])
-            ->all();
-
-        $asset = $assets[$token] ?? null;
-
-        if (! is_array($asset) || ($asset['extension'] ?? null) !== $extension) {
-            abort(404);
-        }
-
-        $path = $asset['path'] ?? '';
-
-        if (! is_string($path) || ! is_file($path)) {
-            abort(404);
-        }
-
-        return response()->file($path, [
-            'Content-Type' => $asset['mime'] ?? 'application/octet-stream',
-            'Content-Disposition' => ($extension === 'pdf' ? 'inline' : 'inline') . '; filename="' . ($asset['download'] ?? basename($path)) . '"',
-        ]);
+        return $this->researchOutputAssetFromSession($request, $token, $extension, 'seedling_research_output_assets_');
     }
 
     private function forgetSeedlingResearchOutputSession(Request $request): void
     {
-        $prefix = 'seedling_research_output.';
-        $session = $request->session();
-        $directories = [];
-
-        collect($session->all())
-            ->filter(fn ($value, $key) => str_starts_with((string) $key, 'seedling_research_output_assets_'))
-            ->each(function ($assets) use (&$directories) {
-                if (! is_array($assets)) {
-                    return;
-                }
-
-                foreach ($assets as $asset) {
-                    $path = is_array($asset) ? ($asset['path'] ?? null) : null;
-
-                    if (! is_string($path) || ! str_starts_with($path, sys_get_temp_dir() . '/seedling-composition-') && ! str_starts_with($path, sys_get_temp_dir() . '/seedling-growth-histogram-')) {
-                        continue;
-                    }
-
-                    if (is_file($path)) {
-                        @unlink($path);
-                    }
-
-                    $directories[] = dirname($path);
-                }
-            });
-
-        foreach (array_unique($directories) as $directory) {
-            $this->removeSeedlingTemporaryDirectory($directory);
-        }
-
-        $keys = collect(array_keys($session->all()))
-            ->filter(fn ($key) => (string) $key === 'seedling_research_output' || str_starts_with((string) $key, $prefix) || str_starts_with((string) $key, 'seedling_research_output_assets_'));
-
-        foreach ($keys as $key) {
-            $session->forget($key);
-        }
+        $this->forgetResearchOutputSessionAssets(
+            $request,
+            'seedling_research_output.',
+            'seedling_research_output_assets_',
+            $this->seedlingResearchOutputTemporaryPrefixes(),
+            ['seedling_research_output']
+        );
     }
 
     private function validSeedlingResearchRange($startCensus, $endCensus): ?array
@@ -580,6 +534,14 @@ class SeedlingController extends Controller
     private function seedlingResearchOutputCacheKey(string $item, int $minCensus, int $maxCensus): string
     {
         return "seedling_research_output.v12.{$minCensus}.{$maxCensus}.{$item}";
+    }
+
+    private function seedlingResearchOutputTemporaryPrefixes(): array
+    {
+        return [
+            sys_get_temp_dir() . '/seedling-composition-',
+            sys_get_temp_dir() . '/seedling-growth-histogram-',
+        ];
     }
 
     private function seedlingCompositionSummary(int $minCensus, int $maxCensus): array
@@ -1061,14 +1023,14 @@ class SeedlingController extends Controller
         }
 
         $scriptPath = resource_path('scripts/seedling_composition.R');
-        $hash = substr(sha1($minCensus . '-' . $maxCensus . '-' . filemtime($scriptPath) . '-' . md5(json_encode($summary, JSON_UNESCAPED_UNICODE))), 0, 12);
+        $hash = substr(sha1($minCensus . '-' . $maxCensus . '-composition-layout-v3-' . filemtime($scriptPath) . '-' . md5(json_encode($summary, JSON_UNESCAPED_UNICODE))), 0, 12);
         $assetKey = "seedling_research_output_assets_{$minCensus}_{$maxCensus}_composition";
         $sessionAssets = $request->session()->get($assetKey, []);
         $figures = [];
         $plots = [];
         $assetRecords = is_array($sessionAssets) ? $sessionAssets : [];
 
-        $useLongCompositionFigure = count($summary['surveys']) === 1;
+        $isSingleCompositionFigure = count($summary['surveys']) === 1;
 
         foreach ($summary['surveys'] as $survey) {
             $fileBase = "composition-{$hash}-census-{$survey['census']}";
@@ -1078,8 +1040,8 @@ class SeedlingController extends Controller
                 'file_base' => $fileBase,
                 'png_token' => $pngToken,
                 'pdf_token' => $pdfToken,
-                'panel_label' => $useLongCompositionFigure ? '' : '(' . chr(96 + max(1, min(26, (int) $survey['sequence']))) . ')',
-                'layout' => $useLongCompositionFigure ? 'long' : 'standard',
+                'panel_label' => $isSingleCompositionFigure ? '' : '(' . chr(96 + max(1, min(26, (int) $survey['sequence']))) . ')',
+                'layout' => $isSingleCompositionFigure ? 'long' : 'focus-standard',
                 'focus_species' => '大明橘',
                 'x_label' => '小苗個體數',
                 'legend' => [
@@ -1203,38 +1165,12 @@ class SeedlingController extends Controller
 
     private function deleteSeedlingResearchAssets(array $assets): void
     {
-        $directories = [];
-
-        foreach ($assets as $asset) {
-            $path = is_array($asset) ? ($asset['path'] ?? null) : null;
-
-            if (! is_string($path) || ! str_starts_with($path, sys_get_temp_dir() . '/seedling-composition-') && ! str_starts_with($path, sys_get_temp_dir() . '/seedling-growth-histogram-')) {
-                continue;
-            }
-
-            if (is_file($path)) {
-                @unlink($path);
-            }
-
-            $directories[] = dirname($path);
-        }
-
-        foreach (array_unique($directories) as $directory) {
-            $this->removeSeedlingTemporaryDirectory($directory);
-        }
+        $this->deleteResearchOutputAssets($assets, $this->seedlingResearchOutputTemporaryPrefixes());
     }
 
     private function removeSeedlingTemporaryDirectory(string $directory): void
     {
-        if (! is_dir($directory)) {
-            return;
-        }
-
-        foreach (glob($directory . '/*') ?: [] as $file) {
-            @unlink($file);
-        }
-
-        @rmdir($directory);
+        $this->removeResearchOutputTemporaryDirectory($directory);
     }
 
     private function seedlingCompositionFigureRows(array $aliveRows, array $newRows, array $deadRows): array

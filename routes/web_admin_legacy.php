@@ -458,6 +458,11 @@ Route::middleware(['auth'])->prefix('admin')->name('admin.')->group(function () 
                 ->defaults('site', 'fushan')
                 ->name('research-output.item');
 
+            Route::get('/research-output/asset/{token}.{extension}', [SeedsController::class, 'researchOutputAsset'])
+                ->defaults('site', 'fushan')
+                ->whereIn('extension', ['png', 'pdf'])
+                ->name('research-output.asset');
+
             Route::post('/research-output/clear-session', [SeedsController::class, 'clearResearchOutputSession'])
                 ->defaults('site', 'fushan')
                 ->name('research-output.clear-session');
