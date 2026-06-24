@@ -327,25 +327,7 @@ class SeedlingController extends Controller
         $user = $request->user();
         $site = $request->route('site');
 
-        $dateOptions = FsSeedlingRecord::query()
-            ->select('census', 'year', 'month')
-            ->whereNotNull('census')
-            ->whereNotNull('year')
-            ->whereNotNull('month')
-            ->groupBy('census', 'year', 'month')
-            ->orderByDesc('census')
-            ->get()
-            ->map(function ($row) {
-                $year = (int) $row->year;
-                $month = (int) $row->month;
-
-                return [
-                    'census' => $row->census,
-                    'label' => sprintf('census %s: %04d-%02d', $row->census, $year, $month),
-                ];
-            })
-            ->values();
-
+        $dateOptions = $this->seedlingCensusOptions();
         $censusValues = $dateOptions->pluck('census')->map(fn ($census) => (string) $census)->all();
         $defaultStartCensus = $dateOptions->first()['census'] ?? null;
         $defaultEndCensus = $dateOptions->last()['census'] ?? null;
@@ -571,6 +553,28 @@ class SeedlingController extends Controller
         }
 
         return [min((int) $startCensus, (int) $endCensus), max((int) $startCensus, (int) $endCensus)];
+    }
+
+    private function seedlingCensusOptions()
+    {
+        return FsSeedlingRecord::query()
+            ->select('census', 'year', 'month')
+            ->whereNotNull('census')
+            ->whereNotNull('year')
+            ->whereNotNull('month')
+            ->groupBy('census', 'year', 'month')
+            ->orderByDesc('census')
+            ->get()
+            ->map(function ($row) {
+                $year = (int) $row->year;
+                $month = (int) $row->month;
+
+                return [
+                    'census' => $row->census,
+                    'label' => sprintf('census %s: %04d-%02d', $row->census, $year, $month),
+                ];
+            })
+            ->values();
     }
 
     private function seedlingResearchOutputCacheKey(string $item, int $minCensus, int $maxCensus): string
@@ -1672,21 +1676,29 @@ class SeedlingController extends Controller
     {
         $user = $request->user();
         $site = $request->route('site');
-        $latestSeedling = DB::connection('mysql3')
-            ->table('seedling')
-            ->select('year', 'month')
-            ->orderByDesc('census')
-            ->first();
 
-        $latestSeedlingYm = $latestSeedling
-            ? sprintf('%04d-%02d', (int) $latestSeedling->year, (int) $latestSeedling->month)
-            : '尚無資料';
+        $dateOptions = $this->seedlingCensusOptions();
+        $censusValues = $dateOptions->pluck('census')->map(fn ($census) => (string) $census)->all();
+        $defaultStartCensus = $dateOptions->first()['census'] ?? null;
+        $defaultEndCensus = $dateOptions->last()['census'] ?? null;
+        $selectedStartCensus = $request->input('start_census', $defaultStartCensus);
+        $selectedEndCensus = $request->input('end_census', $defaultEndCensus);
+
+        if (! in_array((string) $selectedStartCensus, $censusValues, true)) {
+            $selectedStartCensus = $defaultStartCensus;
+        }
+
+        if (! in_array((string) $selectedEndCensus, $censusValues, true)) {
+            $selectedEndCensus = $defaultEndCensus;
+        }
 
         return view('pages/fushan/seedling_download', [
             'site' => $site,
             'project' => '小苗',
             'user' => $user->account ?? $user->name,
-            'latestSeedlingYm' => $latestSeedlingYm,
+            'dateOptions' => $dateOptions,
+            'selectedStartCensus' => $selectedStartCensus,
+            'selectedEndCensus' => $selectedEndCensus,
         ]);
     }
 
@@ -1712,8 +1724,13 @@ class SeedlingController extends Controller
         });
     }
 
-    public function downloadAllSeedling(): StreamedResponse
+    public function downloadAllSeedling(Request $request): StreamedResponse
     {
+        $validated = $this->validSeedlingResearchRange($request->input('start_census'), $request->input('end_census'));
+
+        abort_if($validated === null, 422, '資料範圍不正確，請重新選擇。');
+
+        [$minCensus, $maxCensus] = $validated;
         $columns = [
             'id',
             'census',
@@ -1737,13 +1754,14 @@ class SeedlingController extends Controller
             'y',
             'updated_id',
         ];
-        $filename = 'seedling_all_data_' . now()->format('Ymd') . '.txt';
+        $filename = 'seedling_all_data_' . $minCensus . '_' . $maxCensus . '_' . now()->format('Ymd') . '.txt';
 
-        return $this->streamTxt($filename, $columns, function ($handle) use ($columns) {
+        return $this->streamTxt($filename, $columns, function ($handle) use ($columns, $minCensus, $maxCensus) {
             DB::connection('mysql3')
                 ->table('seedling_records as r')
                 ->join('seedling_stems as st', 'r.tag', '=', 'st.tag')
                 ->join('seedling_individuals as i', 'st.mtag', '=', 'i.mtag')
+                ->whereBetween('r.census', [$minCensus, $maxCensus])
                 ->whereNull('r.deleted_at')
                 ->whereNull('st.deleted_at')
                 ->whereNull('i.deleted_at')

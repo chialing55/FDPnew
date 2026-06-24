@@ -30,14 +30,18 @@ plot_one <- function(plot, file, device = c('png','pdf')) {
   device <- match.arg(device)
   panels <- plot$panels
   if (length(panels) == 0) return(FALSE)
+  panel_count <- length(panels)
+  columns <- if (panel_count == 1) 1 else 2
+  rows <- min(8, ceiling(panel_count / columns))
+  device_height <- if (rows >= 8) 12 else max(3.2, rows * 1.35 + 1.3)
   if (device == 'png') {
-    png(file, width = 8, height = 12, units = 'in', res = 180, type = 'cairo')
+    png(file, width = 8, height = device_height, units = 'in', res = 180, type = 'cairo')
   } else {
-    pdf(file, width = 8, height = 12)
+    pdf(file, width = 8, height = device_height)
   }
   font_family <- if (!is.null(font_path) && file.exists(font_path)) 'msjh' else ''
   showtext_begin()
-  par(family = font_family, mfrow = c(8, 2), mar = c(2, 3, 1, 1), oma = c(3, 3, 1, 1), las = 1)
+  par(family = font_family, mfrow = c(rows, columns), mar = c(2, 3, 1, 1), oma = c(3, 3, 1, 1), las = 1)
   for (i in seq_along(panels)) {
     panel <- panels[[i]]
     values <- as.numeric(unlist(panel$values))
@@ -62,8 +66,9 @@ plot_one <- function(plot, file, device = c('png','pdf')) {
     axis(1, at = ticks, labels = ticks, cex.axis = 1.0, family = font_family)
     axis(2, las = 1, cex.axis = 1.0, family = font_family)
   }
-  if (length(panels) < 16) {
-    for (i in seq_len(16 - length(panels))) plot.new()
+  empty_panels <- rows * columns - panel_count
+  if (empty_panels > 0) {
+    for (i in seq_len(empty_panels)) plot.new()
   }
   mtext(plot$y_label %||% '個體數', 2, line = 1, cex = 1.2, outer = TRUE, las = 0, family = font_family)
   mtext(plot$x_label %||% '生長率 (cm/year)', 1, line = 1, cex = 1.2, outer = TRUE, family = font_family)
