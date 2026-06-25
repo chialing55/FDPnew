@@ -1,12 +1,12 @@
 <?php
 
-namespace App\Http\Livewire\PlantPhotos;
+namespace App\Http\Livewire\PlantCatalog;
 
 use App\Models\FsBaseSpinfo;
 use App\Models\Web\Photo;
 use Livewire\Component;
 
-class Index extends Component
+class Photos extends Component
 {
     public array $splist = [];
 
@@ -33,6 +33,6 @@ class Index extends Component
 
     public function render()
     {
-        return view('livewire.plant-photos.index');
+        return view('livewire.plant-catalog.photos');
     }
 }

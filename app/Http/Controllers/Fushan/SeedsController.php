@@ -266,7 +266,7 @@ class SeedsController extends Controller
 
     private function seedResearchOutputCacheKey(string $item, int $minCensus, int $maxCensus): string
     {
-        return "seeds_research_output.v4.{$minCensus}.{$maxCensus}.{$item}";
+        return "seeds_research_output.v5.{$this->researchChartRuntimeVersion($item)}.{$minCensus}.{$maxCensus}.{$item}";
     }
 
     private function researchChartStyleVersion(): int
@@ -274,6 +274,29 @@ class SeedsController extends Controller
         $stylePath = resource_path('scripts/research_chart_style.R');
 
         return file_exists($stylePath) ? filemtime($stylePath) : 0;
+    }
+
+    private function researchChartRuntimeVersion(string $item): string
+    {
+        $paths = [
+            resource_path('scripts/research_chart_style.R'),
+            resource_path('scripts/research_chart_runtime.R'),
+        ];
+
+        $paths = array_merge($paths, match ($item) {
+            'composition' => [resource_path('scripts/seeds_composition.R')],
+            'phenology' => [resource_path('scripts/seeds_phenology_species.R')],
+            'distribution' => [
+                resource_path('scripts/seeds_spatial_distribution.R'),
+                resource_path('scripts/seeds_spatial_species_traps.R'),
+            ],
+            default => [],
+        });
+
+        return substr(sha1(implode('|', array_map(
+            fn ($path) => file_exists($path) ? $path . ':' . filemtime($path) : $path . ':missing',
+            $paths
+        ))), 0, 12);
     }
 
     private function seedResearchOutputTemporaryPrefixes(): array

@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Http\Livewire\PlantPhotos;
+namespace App\Http\Livewire\PlantCatalog;
 
 use App\Models\FsBaseSpinfo;
 use App\Models\Web\DisNote;
@@ -11,7 +11,7 @@ use Illuminate\Support\Facades\Schema;
 use Livewire\Component;
 use Livewire\WithFileUploads;
 
-class Edit extends Component
+class PhotoEdit extends Component
 {
     use WithFileUploads;
 
@@ -201,7 +201,7 @@ class Edit extends Component
 
     public function render()
     {
-        return view('livewire.plant-photos.edit');
+        return view('livewire.plant-catalog.photo-edit');
     }
 
     private function reloadPhotos(): void

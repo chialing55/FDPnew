@@ -538,7 +538,7 @@ class SeedlingController extends Controller
 
     private function seedlingResearchOutputCacheKey(string $item, int $minCensus, int $maxCensus): string
     {
-        return "seedling_research_output.v13.{$minCensus}.{$maxCensus}.{$item}";
+        return "seedling_research_output.v14.{$this->researchChartRuntimeVersion($item)}.{$minCensus}.{$maxCensus}.{$item}";
     }
 
     private function researchChartStyleVersion(): int
@@ -546,6 +546,25 @@ class SeedlingController extends Controller
         $stylePath = resource_path('scripts/research_chart_style.R');
 
         return file_exists($stylePath) ? filemtime($stylePath) : 0;
+    }
+
+    private function researchChartRuntimeVersion(string $item): string
+    {
+        $paths = [
+            resource_path('scripts/research_chart_style.R'),
+            resource_path('scripts/research_chart_runtime.R'),
+        ];
+
+        $paths = array_merge($paths, match ($item) {
+            'composition' => [resource_path('scripts/seedling_composition.R')],
+            'survival-growth' => [resource_path('scripts/seedling_growth_histograms.R')],
+            default => [],
+        });
+
+        return substr(sha1(implode('|', array_map(
+            fn ($path) => file_exists($path) ? $path . ':' . filemtime($path) : $path . ':missing',
+            $paths
+        ))), 0, 12);
     }
 
     private function seedlingResearchOutputTemporaryPrefixes(): array

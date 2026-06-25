@@ -2,14 +2,17 @@
 
 namespace App\Http\Middleware;
 
+use App\Support\EnsuresAdmin;
 use Closure;
 use Illuminate\Http\Request;
 
 class EnsureAdmin
 {
+    use EnsuresAdmin;
+
     public function handle(Request $request, Closure $next)
     {
-        abort_unless((int) ($request->user()?->is_admin ?? 0) === 1, 403);
+        $this->ensureAdmin();
 
         return $next($request);
     }

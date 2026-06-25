@@ -65,6 +65,10 @@
             object-fit: cover;
             display: block;
         }
+
+        .choice-card-image--blank {
+            background: #f7f7f7;
+        }
     </style>
 @endsection
 
@@ -114,9 +118,9 @@
                         'new_tab' => true,
                     ],
                     [
-                        'key' => 'plant.photos',
-                        'label' => '植物照片編輯',
-                        'url' => route('admin.plant-photos.index'),
+                        'key' => 'plant.catalog',
+                        'label' => '植物資料管理',
+                        'url' => route('admin.plant-catalog.index'),
                         'img' => asset('/images/research/毬蘭_03.JPG'),
                         'style' => 'box3',
                         'new_tab' => false,
@@ -215,6 +219,8 @@
                         <div class="choice-card-image">
                             <img src="{{ $card['img'] }}" alt="{{ $card['label'] }}" />
                         </div>
+                    @elseif (!empty($card['blank_image']))
+                        <div class="choice-card-image choice-card-image--blank" aria-hidden="true"></div>
                     @endif
                     <div class='boxtext'>{{ $card['label'] }}</div>
                 </div>

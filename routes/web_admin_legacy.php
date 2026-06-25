@@ -10,6 +10,7 @@ use App\Http\Controllers\Fushan\SeedlingController;
 use App\Http\Controllers\Fushan\TreeController;
 use App\Http\Controllers\Fushan\SeedsController;
 use App\Http\Controllers\Fushan\MortalityController;
+use App\Http\Controllers\PlantCatalog\PlantCatalogController;
 use App\Http\Controllers\Nanjenshan\SeedlingController as NanjenshanSeedlingController;
 
 use App\Http\Controllers\Shoushan\PlotController;
@@ -84,12 +85,23 @@ Route::middleware(['auth'])->prefix('admin')->name('admin.')->group(function () 
     Route::get('/choice', [ChoiceController::class, 'check'])
         ->name('choice');
 
-    Route::view('/plant-photos', 'pages.plant-photos.index')
-        ->name('plant-photos.index');
+    Route::prefix('plant-catalog')->name('plant-catalog.')->group(function () {
+        Route::get('/', [PlantCatalogController::class, 'photos'])
+            ->name('index');
 
-    Route::get('/plant-photos/{spcode}', function (string $spcode) {
-        return view('pages.plant-photos.edit', ['spcode' => $spcode]);
-    })->name('plant-photos.edit');
+        Route::get('/upload', [PlantCatalogController::class, 'upload'])
+            ->middleware('admin')
+            ->name('upload');
+
+        Route::get('/download', [PlantCatalogController::class, 'download'])
+            ->name('download');
+
+        Route::get('/photos', [PlantCatalogController::class, 'photos'])
+            ->name('photos');
+
+        Route::get('/photos/{spcode}', [PlantCatalogController::class, 'editPhoto'])
+            ->name('photos.edit');
+    });
 
     Route::get('/profile', [ProfileController::class, 'edit'])
         ->name('profile.edit');

@@ -34,7 +34,7 @@
             </thead>
             <tbody>
                 @foreach($splist as $sp)
-                    <tr @if(!empty($sp['spcode'])) onclick="window.location='{{ route('admin.plant-photos.edit', ['spcode' => $sp['spcode']]) }}'" style="cursor: pointer" @endif>
+                    <tr @if(!empty($sp['spcode'])) onclick="window.location='{{ route('admin.plant-catalog.photos.edit', ['spcode' => $sp['spcode']]) }}'" style="cursor: pointer" @endif>
                         <td>{{ $sp['apgfamily'] }} {{ $sp['chapgfamily'] }}</td>
                         <td>{{ $sp['now_simname'] }}</td>
                         <td>{{ $sp['csp'] }}</td>
