@@ -7,8 +7,10 @@ use App\Support\SimpleDocx;
 use App\Support\SimpleXlsx;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Schema;
 use Livewire\Component;
+use Throwable;
 
 class ChecklistDownload extends Component
 {
@@ -57,6 +59,24 @@ class ChecklistDownload extends Component
     }
 
     private function buildDownloadRows(): ?array
+    {
+        try {
+            return $this->prepareDownloadRows();
+        } catch (Throwable $exception) {
+            Log::error('Plant catalog download failed.', [
+                'site' => $this->site,
+                'selected_types' => $this->selectedTypes,
+                'ranges' => $this->ranges,
+                'exception' => $exception,
+            ]);
+
+            $this->message = '下載名錄失敗，請確認資料表欄位或資料庫連線設定。';
+
+            return null;
+        }
+    }
+
+    private function prepareDownloadRows(): ?array
     {
         $this->message = '';
 
