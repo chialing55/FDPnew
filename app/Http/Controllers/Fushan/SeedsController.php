@@ -1079,25 +1079,34 @@ class SeedsController extends Controller
         abort_if($validated === null, 422, '資料範圍不正確，請重新選擇。');
 
         [$minCensus, $maxCensus] = $validated;
-        $columns = Schema::connection('mysql2')->getColumnListing('dateinfo');
+        $dateinfoColumns = Schema::connection('mysql2')->getColumnListing('dateinfo');
+        $columns = array_values(array_diff($dateinfoColumns, ['status']));
         $filename = 'seeds_datainfo_' . $minCensus . '_' . $maxCensus . '_' . now()->format('Ymd') . '.txt';
 
-        return $this->streamTxt($filename, $columns, function ($handle) use ($columns, $minCensus, $maxCensus) {
-            DB::connection('mysql2')
+        return $this->streamTxt($filename, $columns, function ($handle) use ($columns, $dateinfoColumns, $minCensus, $maxCensus) {
+            $query = DB::connection('mysql2')
                 ->table('dateinfo')
                 ->whereBetween('census', [$minCensus, $maxCensus])
-                ->orderBy('census')
-                ->chunk(1000, function ($rows) use ($handle, $columns) {
-                    foreach ($rows as $row) {
-                        $values = [];
+                ->orderBy('census');
 
-                        foreach ($columns as $column) {
-                            $values[] = $row->{$column} ?? '';
-                        }
-
-                        fputcsv($handle, $values, "\t");
-                    }
+            if (in_array('status', $dateinfoColumns, true)) {
+                $query->where(function ($q) {
+                    $q->whereNull('status')
+                        ->orWhere('status', '!=', 'skipped');
                 });
+            }
+
+            $query->chunk(1000, function ($rows) use ($handle, $columns) {
+                foreach ($rows as $row) {
+                    $values = [];
+
+                    foreach ($columns as $column) {
+                        $values[] = $row->{$column} ?? '';
+                    }
+
+                    fputcsv($handle, $values, "\t");
+                }
+            });
         });
     }
 
