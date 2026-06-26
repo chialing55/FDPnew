@@ -137,6 +137,7 @@ class UserController extends Controller
 
             $user->unit = $validated['unit'] ?? null;
             $user->role = $validated['role'];
+            $user->is_admin = $validated['role'] === 'admin';
             $user->site_id = $validated['site_id'] ?? null;
             $user->can_access_filament = $canAccessFilament;
             $user->save();

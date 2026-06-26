@@ -28,6 +28,7 @@ class User extends Authenticatable implements FilamentUser
         'password',
         'status',
         'role',
+        'is_admin',
         'unit',
         'site_id',
         'approved_at',
@@ -53,6 +54,7 @@ class User extends Authenticatable implements FilamentUser
      * @var array<string, string>
      */
     protected $casts = [
+        'is_admin' => 'boolean',
         'can_access_filament' => 'boolean',
         'force_password_reset' => 'boolean',
     ];

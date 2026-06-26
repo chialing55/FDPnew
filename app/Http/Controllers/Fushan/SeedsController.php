@@ -1037,6 +1037,70 @@ class SeedsController extends Controller
         });
     }
 
+    public function downloadFulldataTable(Request $request): StreamedResponse
+    {
+        $validated = $this->validSeedResearchRange($request->input('start_census'), $request->input('end_census'));
+
+        abort_if($validated === null, 422, '資料範圍不正確，請重新選擇。');
+
+        [$minCensus, $maxCensus] = $validated;
+        $columns = Schema::connection('mysql2')->getColumnListing('fulldata');
+        $filename = 'seeds_fulldata_table_' . $minCensus . '_' . $maxCensus . '_' . now()->format('Ymd') . '.txt';
+
+        return $this->streamTxt($filename, $columns, function ($handle) use ($columns, $minCensus, $maxCensus) {
+            $query = DB::connection('mysql2')
+                ->table('fulldata')
+                ->whereBetween('census', [$minCensus, $maxCensus]);
+
+            foreach (['census', 'trap', 'csp', 'code'] as $column) {
+                if (in_array($column, $columns, true)) {
+                    $query->orderBy($column);
+                }
+            }
+
+            $query->chunk(1000, function ($rows) use ($handle, $columns) {
+                foreach ($rows as $row) {
+                    $values = [];
+
+                    foreach ($columns as $column) {
+                        $values[] = $row->{$column} ?? '';
+                    }
+
+                    fputcsv($handle, $values, "\t");
+                }
+            });
+        });
+    }
+
+    public function downloadDatainfo(Request $request): StreamedResponse
+    {
+        $validated = $this->validSeedResearchRange($request->input('start_census'), $request->input('end_census'));
+
+        abort_if($validated === null, 422, '資料範圍不正確，請重新選擇。');
+
+        [$minCensus, $maxCensus] = $validated;
+        $columns = Schema::connection('mysql2')->getColumnListing('dateinfo');
+        $filename = 'seeds_datainfo_' . $minCensus . '_' . $maxCensus . '_' . now()->format('Ymd') . '.txt';
+
+        return $this->streamTxt($filename, $columns, function ($handle) use ($columns, $minCensus, $maxCensus) {
+            DB::connection('mysql2')
+                ->table('dateinfo')
+                ->whereBetween('census', [$minCensus, $maxCensus])
+                ->orderBy('census')
+                ->chunk(1000, function ($rows) use ($handle, $columns) {
+                    foreach ($rows as $row) {
+                        $values = [];
+
+                        foreach ($columns as $column) {
+                            $values[] = $row->{$column} ?? '';
+                        }
+
+                        fputcsv($handle, $values, "\t");
+                    }
+                });
+        });
+    }
+
     private function streamTxt(string $filename, array $headers, callable $writeRows): StreamedResponse
     {
         return response()->streamDownload(function () use ($headers, $writeRows) {
