@@ -212,6 +212,31 @@ class UserController extends Controller
             ->with('temp_password', $temp);
     }
 
+    /**
+     * 刪除一般使用者及其工作權限。
+     */
+    public function destroy(User $user)
+    {
+        $this->ensureAdmin();
+
+        if (Auth::id() === $user->id) {
+            return back()->with('status', '不能刪除目前登入的帳號。');
+        }
+
+        if ($user->is_admin) {
+            return back()->with('status', '不能刪除管理員帳號。');
+        }
+
+        DB::transaction(function () use ($user) {
+            $user->userScopes()->delete();
+            $user->delete();
+        });
+
+        return redirect()
+            ->route('admin.users.index')
+            ->with('status', '已刪除使用者與其權限範圍。');
+    }
+
 
     public function approve(Request $request, User $user)
     {

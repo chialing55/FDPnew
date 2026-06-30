@@ -5,8 +5,6 @@ namespace App\Http\Controllers\Auth;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
-use App\Models\User;
-use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\Rules\Password;
 
 class ForcePasswordResetController extends Controller
@@ -66,23 +64,4 @@ class ForcePasswordResetController extends Controller
         return redirect()->route('login')->with('status', '密碼已更新，請用新密碼繼續使用。');
     }
 
-    public function destroy(User $user)
-    {
-        $this->ensureAdmin();
-
-        // // 避免刪到自己（強烈建議）
-        // if (auth()->id() === $user->id) {
-        //     return back()->with('status', '不能刪除自己');
-        // }
-
-        DB::transaction(function () use ($user) {
-            // 先刪關聯（user_scope / user_scopes）
-            $user->userScopes()->delete();
-
-            // 再刪 user（如果你有 SoftDeletes，這裡會是 soft delete）
-            $user->delete();
-        });
-
-        return redirect()->route('admin.users.index')->with('status', '已刪除使用者與其權限範圍');
-    }
 }

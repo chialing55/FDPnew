@@ -174,7 +174,7 @@
                         'img' => asset('/images/research/DSC04347.JPG'),
                         'image_position' => 'center 33%',
                         'style' => 'box1',
-                        'label' => '福山 Geo.Tree.Survey',
+                        'label' => '福山 GEO-TREES',
                     ],
                     'shoushan.tree' => [
                         'img' => asset('/images/research/monkey.png'),

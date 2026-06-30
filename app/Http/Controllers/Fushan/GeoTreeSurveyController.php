@@ -24,7 +24,7 @@ class GeoTreeSurveyController extends Controller
 
         return view($view, [
             'site' => $request->route('site'),
-            'project' => 'Geo.Tree.Survey',
+            'project' => 'GEO-TREES',
             'user' => $user->account ?? $user->name,
         ]);
     }

@@ -10,7 +10,7 @@
 @section('rightbox')
     <div class="flex text_outbox">
         <div class="text_box">
-            <h2>Geo.Tree.Survey 資料輸入</h2>
+            <h2>GEO-TREES 資料輸入</h2>
             <hr>
             <p>資料輸入功能建置中。</p>
         </div>

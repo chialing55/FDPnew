@@ -10,7 +10,7 @@ return new class extends Migration
         DB::table('modules')->updateOrInsert(
             ['code' => 'geo-tree-survey'],
             [
-                'name' => 'Geo.Tree.Survey',
+                'name' => 'GEO-TREES',
                 'is_active' => true,
                 'updated_at' => now(),
                 'created_at' => now(),
