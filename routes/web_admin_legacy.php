@@ -10,6 +10,8 @@ use App\Http\Controllers\Fushan\SeedlingController;
 use App\Http\Controllers\Fushan\TreeController;
 use App\Http\Controllers\Fushan\SeedsController;
 use App\Http\Controllers\Fushan\MortalityController;
+use App\Http\Controllers\Fushan\GeoTreeSurveyController;
+use App\Http\Controllers\Fushan\GeoTreeSurveyRecordPaperController;
 use App\Http\Controllers\PlantCatalog\PlantCatalogController;
 use App\Http\Controllers\Nanjenshan\SeedlingController as NanjenshanSeedlingController;
 
@@ -139,6 +141,24 @@ Route::middleware(['auth'])->prefix('admin')->name('admin.')->group(function () 
         ->name('password.force.update');
 
     Route::prefix('fushan')->name('fushan.')->group(function () {
+
+        Route::prefix('geo-tree-survey')->middleware('scope:fushan,geo-tree-survey')->name('geo-tree-survey.')->group(function () {
+            Route::get('/', [GeoTreeSurveyController::class, 'documents'])
+                ->defaults('site', 'fushan')
+                ->name('index');
+
+            Route::get('/doc', [GeoTreeSurveyController::class, 'documents'])
+                ->defaults('site', 'fushan')
+                ->name('doc');
+
+            Route::get('/entry', [GeoTreeSurveyController::class, 'entry'])
+                ->defaults('site', 'fushan')
+                ->name('entry');
+
+            Route::get('/record-paper/{qx}', GeoTreeSurveyRecordPaperController::class)
+                ->whereNumber('qx')
+                ->name('record-paper');
+        });
 
         // ===== Seedling pages =====
         // 舊：GET /admin/fushan/seedling -> SeedlingController@seedling

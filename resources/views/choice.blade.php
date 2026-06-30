@@ -46,6 +46,11 @@
             display: flex;
             align-items: center;
             justify-content: center;
+            flex: 1 1 100px;
+            min-width: 0;
+            overflow-wrap: anywhere;
+            word-break: break-word;
+            text-align: center;
         }
 
         .choice-card img {
@@ -116,6 +121,7 @@
                         'img' => asset('/images/research/splist.png'),
                         'style' => 'box3',
                         'new_tab' => true,
+                        'new_tab' => true,
                     ],
                     [
                         'key' => 'plant.catalog',
@@ -164,6 +170,12 @@
                         'style' => 'box1',
                         'label' => '福山 死亡率調查',
                     ],
+                    'fushan.geo-tree-survey' => [
+                        'img' => asset('/images/research/DSC04347.JPG'),
+                        'image_position' => 'center 33%',
+                        'style' => 'box1',
+                        'label' => '福山 Geo.Tree.Survey',
+                    ],
                     'shoushan.tree' => [
                         'img' => asset('/images/research/monkey.png'),
                         'style' => 'box2',
@@ -181,6 +193,7 @@
                     'fushan.seeds',
                     'fushan.seedling',
                     'fushan.mortality',
+                    'fushan.geo-tree-survey',
                     'shoushan.tree',
                     'nanjenshan.seedling',
                 ];
@@ -203,6 +216,8 @@
                             'label' => $ui['label'],
                             'url' => $w['url'],
                             'img' => $ui['img'],
+                            'blank_image' => $ui['blank_image'] ?? false,
+                            'image_position' => $ui['image_position'] ?? 'center',
                             'style' => $ui['style'],
                             'new_tab' => false,
                         ];
@@ -217,7 +232,8 @@
                 <div class='choice choice-card choice-card--{{ $card['style'] }}' data-url="{{ $card['url'] }}" data-new-tab="{{ !empty($card['new_tab']) ? '1' : '0' }}">
                     @if ($card['img'])
                         <div class="choice-card-image">
-                            <img src="{{ $card['img'] }}" alt="{{ $card['label'] }}" />
+                            <img src="{{ $card['img'] }}" alt="{{ $card['label'] }}"
+                                style="object-position: {{ $card['image_position'] ?? 'center' }};" />
                         </div>
                     @elseif (!empty($card['blank_image']))
                         <div class="choice-card-image choice-card-image--blank" aria-hidden="true"></div>

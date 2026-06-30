@@ -23,6 +23,13 @@ return [
         'module' => 'mortality',
     ],
     [
+        'key' => 'fushan.geo-tree-survey',
+        'title' => '福山｜Geo.Tree.Survey',
+        'route' => 'admin.fushan.geo-tree-survey.index',
+        'site' => 'fushan',
+        'module' => 'geo-tree-survey',
+    ],
+    [
         'key' => 'fushan.seeds',
         'title' => '福山｜種子',
         'route' => 'admin.fushan.seeds.index',

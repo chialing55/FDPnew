@@ -49,6 +49,7 @@ class ChoiceController extends Controller
                 return $w;
             })
 
+            ->unique('key')
             ->values()
             ->all();
 
