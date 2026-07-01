@@ -52,10 +52,9 @@ services:
   phpmyadmin:
     image: phpmyadmin/phpmyadmin
     container_name: fdp_pma
-    # environment:
-    #   PMA_HOST: mysql
-    #   PMA_PORT: 3306
-    #   # PMA_ABSOLUTE_URI: http://localhost:8081/
+    environment:
+      PMA_HOST: db
+      PMA_PORT: 3306
     ports:
       - "8081:80"
     depends_on:
@@ -63,5 +62,6 @@ services:
 
 volumes:
   db_data:
+    name: fdpnew_db_data
 
 

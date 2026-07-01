@@ -38,6 +38,20 @@
                     下載
                 </button>
             </div>
+
+            <p style="margin-top: 12px; color: #666;">
+                說明：若某個 20×20 樣區（qx, qy）的需調查筆數為 0，
+                代表該區資料全部標示為 M 或 ---，該樣區不會輸出至紀錄紙。
+            </p>
+
+            <p style="color: #666;">
+                不輸出的樣區：
+                @forelse ($excludedQuadrats as $quadrat)
+                    ({{ $quadrat['qx'] }}, {{ $quadrat['qy'] }}){{ !$loop->last ? '、' : '' }}
+                @empty
+                    無
+                @endforelse
+            </p>
         </div>
     </div>
 @endsection

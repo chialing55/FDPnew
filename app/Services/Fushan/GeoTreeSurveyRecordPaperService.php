@@ -19,6 +19,33 @@ class GeoTreeSurveyRecordPaperService
         return range(0, 24);
     }
 
+    public function excludedQuadrats(): array
+    {
+        $rows = Census5Part::query()
+            ->select(['qx', 'qy', 'stemid', 'dbh'])
+            ->get();
+
+        $activeMortalityStemids = TreeIndividual::query()
+            ->where('is_active', 1)
+            ->whereIn('stemid', $rows->pluck('stemid'))
+            ->pluck('stemid')
+            ->mapWithKeys(fn ($stemid) => [(string) $stemid => true]);
+
+        return $rows
+            ->groupBy(fn (Census5Part $row) => "{$row->qx}:{$row->qy}")
+            ->filter(fn ($quadratRows) => !$quadratRows->contains(
+                fn (Census5Part $row) => (float) $row->dbh >= 9.5
+                    && !$activeMortalityStemids->has((string) $row->stemid)
+            ))
+            ->map(fn ($quadratRows) => [
+                'qx' => (int) $quadratRows->first()->qx,
+                'qy' => (int) $quadratRows->first()->qy,
+            ])
+            ->sortBy(fn (array $quadrat) => sprintf('%03d:%03d', $quadrat['qx'], $quadrat['qy']))
+            ->values()
+            ->all();
+    }
+
     public function build(int $selectedQx): array
     {
         if (!in_array($selectedQx, $this->qxValues(), true)) {
@@ -50,23 +77,32 @@ class GeoTreeSurveyRecordPaperService
 
         $quadrats = [];
         foreach ($rows->keys()->map(fn (string $key) => (int) explode(':', $key)[1])->sort()->values() as $qy) {
-                $quadratRows = collect($rows->get("{$selectedQx}:{$qy}", []));
-                $subquadrats = [];
+            $quadratRows = collect($rows->get("{$selectedQx}:{$qy}", []));
 
-                foreach (self::SUBQUADRAT_ORDER as $subquadrat) {
-                    $sqx = (int) $subquadrat[0];
-                    $sqy = (int) $subquadrat[1];
-                    $subquadrats[$subquadrat] = $quadratRows
-                        ->filter(fn (array $row) => (int) $row['sqx'] === $sqx && (int) $row['sqy'] === $sqy)
-                        ->values()
-                        ->all();
-                }
+            $hasSurveyRows = $quadratRows->contains(
+                fn (array $row) => ($row['survey_dbh_mark'] ?? '') === ''
+            );
 
-                $quadrats[] = [
-                    'qx' => $selectedQx,
-                    'qy' => $qy,
-                    'subquadrats' => $subquadrats,
-                ];
+            if (!$hasSurveyRows) {
+                continue;
+            }
+
+            $subquadrats = [];
+
+            foreach (self::SUBQUADRAT_ORDER as $subquadrat) {
+                $sqx = (int) $subquadrat[0];
+                $sqy = (int) $subquadrat[1];
+                $subquadrats[$subquadrat] = $quadratRows
+                    ->filter(fn (array $row) => (int) $row['sqx'] === $sqx && (int) $row['sqy'] === $sqy)
+                    ->values()
+                    ->all();
+            }
+
+            $quadrats[] = [
+                'qx' => $selectedQx,
+                'qy' => $qy,
+                'subquadrats' => $subquadrats,
+            ];
         }
 
         return [
