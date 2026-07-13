@@ -13,16 +13,46 @@ use App\Models\Web\Page;
 use Filament\Forms\Set;
 use Filament\Forms\Get;
 use Illuminate\Database\Eloquent\Builder;
+use Filament\Navigation\NavigationItem;
+use App\Filament\Resources\PageResource;
 
 class SubjectResource extends Resource
 {
     protected static ?string $model = Subject::class;
 
     protected static ?string $navigationIcon = 'heroicon-o-book-open';
-    protected static ?string $navigationGroup = '內容管理';
+    protected static ?string $navigationGroup = '研究主題';
+    protected static ?int $navigationSort = 3;
     protected static ?string $navigationLabel = '研究主題';
     protected static ?string $modelLabel = '研究主題';
     protected static ?string $pluralModelLabel = '研究主題';
+
+    public static function getNavigationItems(): array
+    {
+        $items = [];
+
+        try {
+            Subject::query()->with('page')->orderBy('sort_order')->orderBy('id')->get()->each(function (Subject $subject) use (&$items): void {
+                if (! $subject->page) {
+                    return;
+                }
+                $items[] = NavigationItem::make($subject->short_name_zh_tw ?: $subject->name_zh_tw)
+                    ->group('研究主題')->icon('heroicon-o-book-open')->sort($subject->sort_order ?? $subject->id)
+                    ->url(PageResource::getUrl('edit', ['record' => $subject->page], isAbsolute: false))
+                    ->isActiveWhen(fn (): bool => request()->routeIs('filament.cms.resources.pages.edit')
+                        && (int) request()->route('record') === (int) $subject->page->getKey());
+            });
+        } catch (\Throwable) {
+            // 資料庫尚未就緒時仍保留新增入口。
+        }
+
+        $items[] = NavigationItem::make('新增研究主題')
+            ->group('研究主題')->icon('heroicon-o-plus-circle')->sort(999)
+            ->url(static::getUrl('create'))
+            ->isActiveWhen(fn (): bool => request()->routeIs('filament.cms.resources.subjects.create'));
+
+        return $items;
+    }
 
     public static function form(Form $form): Form
     {

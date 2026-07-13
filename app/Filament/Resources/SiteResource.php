@@ -10,10 +10,11 @@ use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
 use App\Models\Web\Page;
-use Filament\Forms\Set;
-use Filament\Forms\Get;
-use Filament\Forms\Components\Select;
 use App\Filament\Resources\SiteResource\RelationManagers\SiteTeamsRelationManager;
+use Filament\Navigation\NavigationItem;
+use App\Filament\Resources\PageResource;
+use App\Forms\Components\HtmlContentEditor;
+use Illuminate\Support\Facades\Storage;
 
 class SiteResource extends Resource
 {
@@ -21,10 +22,38 @@ class SiteResource extends Resource
 
     protected static ?string $navigationIcon = 'heroicon-o-map-pin';
 
-    protected static ?string $navigationGroup = '內容管理'; // 看你要放哪一組
-    protected static ?string $navigationLabel = '樣區';
+    protected static ?string $navigationGroup = '首頁';
+    protected static ?string $navigationLabel = '樣區介紹';
+    protected static ?int $navigationSort = 1;
     protected static ?string $modelLabel = '樣區';
     protected static ?string $pluralModelLabel = '樣區';
+
+    public static function getNavigationItems(): array
+    {
+        $items = [];
+
+        try {
+            Site::query()->with('page')->orderBy('id')->get()->each(function (Site $site) use (&$items): void {
+                if (! $site->page) {
+                    return;
+                }
+                $items[] = NavigationItem::make($site->short_name_zh_tw ?: $site->name_zh_tw)
+                    ->group('動態樣區')->icon('heroicon-o-map-pin')->sort($site->id)
+                    ->url(PageResource::getUrl('edit', ['record' => $site->page], isAbsolute: false))
+                    ->isActiveWhen(fn (): bool => request()->routeIs('filament.cms.resources.pages.edit')
+                        && (int) request()->route('record') === (int) $site->page->getKey());
+            });
+        } catch (\Throwable) {
+            // 資料庫尚未就緒時仍保留管理入口。
+        }
+
+        $items[] = NavigationItem::make('新增樣區')
+            ->group('動態樣區')->icon('heroicon-o-plus-circle')->sort(999)
+            ->url(static::getUrl('create'))
+            ->isActiveWhen(fn (): bool => request()->routeIs('filament.cms.resources.sites.create'));
+
+        return $items;
+    }
 
     public static function form(Form $form): Form
     {
@@ -32,51 +61,15 @@ class SiteResource extends Resource
             ->schema([
                 Forms\Components\Section::make('基本資訊')
                     ->schema([
-                        Forms\Components\Grid::make(2)->schema([
-                            Select::make('page_id')
-                                ->label('對應頁面（Slug）')
-                                ->required()
-                                ->options(function (?Site $record) {
-                                    // 取出已經被其它 site 使用的 page_id（排除目前正在編輯的這筆）
-                                    $usedPageIds = Site::query()
-                                        ->when($record?->id, fn ($q) => $q->where('id', '!=', $record->id))
-                                        ->pluck('page_id')
-                                        ->filter()
-                                        ->all();
-
-                                    return Page::query()
-                                        ->where('nav_group', 'sites')
-                                        ->when($usedPageIds, fn ($q) => $q->whereNotIn('id', $usedPageIds))
-                                        ->orderBy('nav_order')
-                                        ->get()
-                                        ->mapWithKeys(function (Page $page) {
-                                            // 下拉顯示：slug - 中文標題
-                                            return [
-                                                $page->id => $page->slug . ' - ' . $page->title_zh_tw,
-                                            ];
-                                        });
-                                })
-                                ->searchable()
-                                ->native(false)  // 使用 Filament 的美化選單
-                                ->helperText('從 sites 群組的頁面中選擇一個 slug 對應這個樣區')
-                                // 確保每個 page_id 只被一個 site 用
-                                ->unique(ignoreRecord: true, column: 'page_id')
-                                ->live()
-                                ->afterStateUpdated(function (Get $get, Set $set) {
-                                    $pageId = $get('page_id');
-                                    if (! $pageId) {
-                                        return;
-                                    }
-
-                                    $page = Page::find($pageId);
-
-                                    if ($page) {
-                                        // 自動填入樣區名稱
-                                        $set('name_zh_tw', $page->title_zh_tw);
-                                        $set('name_en', $page->title_en);
-                                    }
-                                }),
-                        ]), 
+                        Forms\Components\TextInput::make('page_slug')
+                            ->label('頁面網址')
+                            ->prefix(url('/') . '/')
+                            ->placeholder('sites/example')
+                            ->required(fn (?Site $record): bool => $record === null)
+                            ->visible(fn (?Site $record): bool => $record === null)
+                            ->unique(table: Page::class, column: 'slug')
+                            ->helperText('建議使用 sites/英文樣區名稱，例如 sites/fushan。')
+                            ->columnSpanFull(),
                         Forms\Components\Grid::make(2)->schema([        
                             Forms\Components\TextInput::make('name_zh_tw')
                                 ->label('樣區名稱（中）')
@@ -88,15 +81,25 @@ class SiteResource extends Resource
                                 ->required()
                                 ->maxLength(255),
                         ]), 
-                        Forms\Components\Grid::make(2)->schema([ 
-                            Forms\Components\Textarea::make('description_zh_tw')
-                                ->label('樣區簡介（中）')
-                                ->rows(5),
-
-                            Forms\Components\Textarea::make('description_en')
-                                ->label('樣區簡介（英）')
-                                ->rows(5),
-                        ]), 
+                        Forms\Components\Tabs::make('樣區簡介')->tabs([
+                            Forms\Components\Tabs\Tab::make('中文')->schema([
+                                HtmlContentEditor::make('description_zh_tw')->label('樣區簡介（中）'),
+                            ]),
+                            Forms\Components\Tabs\Tab::make('English')->schema([
+                                HtmlContentEditor::make('description_en')->label('Site introduction (English)'),
+                            ]),
+                        ])->columnSpanFull(),
+                        Forms\Components\FileUpload::make('homepage_image')
+                            ->label('首頁樣區卡片圖片')
+                            ->disk('public')->directory('plot-cards')->visibility('public')
+                            ->image()->imageEditor()->imagePreviewHeight('240')
+                            ->columnSpanFull(),
+                        Forms\Components\TextInput::make('homepage_image_position')
+                            ->label('圖片垂直顯示位置')
+                            ->numeric()->minValue(1)->maxValue(100)->default(50)
+                            ->suffix('%')
+                            ->helperText('1 接近頂端、50 置中、100 接近底端；只調整前台顯示焦點，不會修改原圖。')
+                            ->columnSpanFull(),
                         Forms\Components\Grid::make(1)->schema([    
                             Forms\Components\Toggle::make('is_active')
                                 ->label('是否顯示於前台')

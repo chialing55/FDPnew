@@ -18,7 +18,8 @@
     <link rel="stylesheet" href="{{ asset('/css/webstr.css') }}">
     <link rel="stylesheet" href="{{ asset('/css/fancybox.css') }}">
     <link rel="stylesheet" href="{{ asset('/css/theme.green.min.css') }}">
-    <link rel="stylesheet" href="{{ asset('/css/tailwind.css') }}">
+    <link rel="stylesheet" href="{{ asset('/css/tailwind.css') }}?v={{ filemtime(public_path('css/tailwind.css')) }}">
+    <link rel="stylesheet" href="{{ asset('/css/web-content.css') }}">
     <link href="{{ asset('/css/all.min.css') }}" rel="stylesheet"> {{-- Font Awesome --}}
     @yield('css')
 

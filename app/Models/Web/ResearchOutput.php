@@ -12,7 +12,6 @@ class ResearchOutput extends Model
     protected $table = 'research_outputs';
     protected $connection = 'mysql_web';
     protected $casts = [
-        'params' => 'array',
         'is_public' => 'boolean',
     ];
 
@@ -20,10 +19,6 @@ class ResearchOutput extends Model
         'slug',
         'title_zh_tw',
         'title_en',
-        'body_zh_tw',
-        'body_en',
-        'view',
-        'params',
         'hero_image',
         'is_public',
     ];
@@ -35,15 +30,6 @@ class ResearchOutput extends Model
             ? $this->title_en
             : $this->title_zh_tw;
     }
-
-    /** 依語系回傳摘要 */
-    public function getBodyAttribute(): ?string
-    {
-        return app()->getLocale() === 'en'
-            ? $this->body_en
-            : $this->body_zh_tw;
-    }
-
 
     public function contentBlocks()
     {

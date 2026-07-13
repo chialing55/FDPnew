@@ -20,6 +20,8 @@ class Site extends Model
         'short_name_en',
         'description_zh_tw',
         'description_en',
+        'homepage_image',
+        'homepage_image_position',
         'is_active',
         'latitude',
         'longitude',
@@ -71,5 +73,10 @@ class Site extends Model
             ResearchOutput::class,
             'research_output_site'
         );
-    }    
+    }
+
+    public function publications()
+    {
+        return $this->belongsToMany(Publication::class, 'publication_site');
+    }
 }

@@ -2,7 +2,7 @@
     @if ($hero !== '')
         <div class="relative z-10 h-[45vh] w-full overflow-hidden md:h-[60vh]" oncontextmenu="return false">
             {{-- Hero 背景圖 --}}
-            <img src="{{ asset('images/hero/' . $hero) }}" alt="Hero" class="h-full w-full object-cover" loading="eager"
+            <img src="{{ $hero }}" alt="Hero" class="h-full w-full object-cover" loading="eager"
                 decoding="async" fetchpriority="high">
 
             {{-- 左下角的漸層遮罩 --}}

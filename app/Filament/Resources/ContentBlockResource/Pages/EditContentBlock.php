@@ -13,6 +13,12 @@ class EditContentBlock extends EditRecord
     protected function getHeaderActions(): array
     {
         return [
+            Actions\Action::make('preview')
+                ->label('預覽前台')
+                ->icon('heroicon-o-eye')
+                ->url(fn () => ContentBlockResource::getFrontendUrl($this->record))
+                ->visible(fn () => filled(ContentBlockResource::getFrontendUrl($this->record)))
+                ->openUrlInNewTab(),
             Actions\DeleteAction::make(),
         ];
     }

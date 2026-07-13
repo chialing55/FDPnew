@@ -3,137 +3,86 @@
 namespace App\Filament\Resources;
 
 use App\Filament\Resources\ResearchOutputResource\Pages;
-use App\Filament\Resources\ResearchOutputResource\RelationManagers;
+use App\Filament\Forms\ContentBlockForm;
+use App\Filament\Forms\ContentRelationForm;
 use App\Models\Web\ResearchOutput;
 use Filament\Forms;
+use Filament\Forms\Components\Tabs;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
-use Filament\Forms\Components\Textarea;
-use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Database\Eloquent\SoftDeletingScope;
 
 class ResearchOutputResource extends Resource
 {
     protected static ?string $model = ResearchOutput::class;
 
-
     protected static ?string $navigationIcon = 'heroicon-o-rectangle-group';
-    protected static ?string $navigationGroup = '內容管理';
-    protected static ?string $navigationLabel = '研究成果';
-    protected static ?string $modelLabel = '研究成果';
-    protected static ?string $pluralModelLabel = '研究成果';
+    protected static ?string $navigationGroup = '研究成果';
+    protected static ?int $navigationSort = 1;
+    protected static ?string $navigationLabel = '成果列表';
+    protected static ?string $modelLabel = '成果';
+    protected static ?string $pluralModelLabel = '成果列表';
 
     public static function form(Form $form): Form
     {
-        return $form
-            ->schema([
-                Forms\Components\Section::make('基本設定')
+        return $form->schema([
+            Tabs::make('成果設定')->tabs([
+                Tabs\Tab::make('基本資料')
+                    ->icon('heroicon-o-document-text')
                     ->schema([
-                        Forms\Components\Grid::make(3)->schema([
-                            Forms\Components\TextInput::make('slug')
-                                ->label('Slug')
-                                ->required()
-                                ->maxLength(150)
-                                ->unique(ignoreRecord: true)
-                                ->helperText('例如：fushan-forest-composition (不用加results/)'),
-                            Forms\Components\Toggle::make('is_public')
-                                ->label('公開')
-                                ->default(true),
-                        ]),
                         Forms\Components\Grid::make(2)->schema([
                             Forms\Components\TextInput::make('title_zh_tw')
-                                ->label('標題（中）')
-                                ->required()
-                                ->maxLength(255),
-
+                                ->label('中文標題')->required()->maxLength(255),
                             Forms\Components\TextInput::make('title_en')
-                                ->label('標題（英）')
-                                ->maxLength(255),
-
-                            ]),
-                            Forms\Components\Grid::make(2)->schema([
-                            
-                            Forms\Components\TextInput::make('view')
-                                ->label('插入view (chat)')
-                                ->maxLength(100),
-                            Forms\Components\KeyValue::make('params')
-                                ->label('參數設定')
-                                ->keyLabel('參數名稱')
-                                ->valueLabel('參數內容')
-                                ->reorderable(),
-                        ])->columns(2),
+                                ->label('英文標題')->maxLength(255),
                         ]),
-
-                Forms\Components\Section::make('關聯')
-                    ->schema([
-                        Forms\Components\Select::make('subjects')
-                            ->label('研究主題（可複選）')
-                            ->relationship('subjects', 'name_zh_tw')
-                            ->multiple()
-                            ->preload()
-                            ->searchable()
-                            ->helperText('可選多個主題，例如：幼苗動態、種子雨'),
-
-                        Forms\Components\Select::make('sites')
-                            ->label('樣區（可複選）')
-                            ->relationship('sites', 'name_zh_tw')  // ← 這裡換成你 Site 真正的欄位
-                            ->multiple()
-                            ->preload()
-                            ->searchable()
-                            ->helperText('可選多個樣區，例如：福山、南仁山'),
-                    ])
-                    ->columns(2),
-
-                Forms\Components\Section::make('內容')
-                    ->schema([
-                        Textarea::make('body_zh_tw')
-                            ->label('內容（中）')
-                            ->rows(10)
-                            ->columnSpanFull(),
-
-
-                        // 英文內容（RichEditor + HTML）
-                        Textarea::make('body_en')
-                            ->label('內容（英）')
-                            ->rows(10)
-                            ->columnSpanFull(),
+                        Forms\Components\Grid::make(2)->schema([
+                            Forms\Components\TextInput::make('slug')
+                                ->label('成果網址')->prefix(url('/results') . '/')
+                                ->required()->maxLength(150)->unique(ignoreRecord: true)
+                                ->helperText('例如 fushan-forest-composition；不需輸入 results/。'),
+                            Forms\Components\Toggle::make('is_public')
+                                ->label('發布到前台')->default(true),
+                        ]),
                     ]),
-            ]);
-    }
 
+                Tabs\Tab::make('關聯設定')
+                    ->icon('heroicon-o-link')
+                    ->schema([
+                        ...ContentRelationForm::fields(),
+                    ])->columns(2),
+
+                Tabs\Tab::make('頁面內容')
+                    ->icon('heroicon-o-rectangle-stack')
+                    ->schema([
+                        Forms\Components\Placeholder::make('content_notice')
+                            ->label('頁面內容說明')
+                            ->content('成果頁面的內容全部由下方內容區塊組成；「研究計畫」與「文章發表」為前台固定區塊，不需在此重複建立。'),
+                        ContentBlockForm::make()->columnSpanFull(),
+                    ]),
+            ])->persistTabInQueryString()->columnSpanFull(),
+        ]);
+    }
 
     public static function table(Table $table): Table
     {
         return $table
+            ->recordUrl(fn (ResearchOutput $record): string => static::getUrl('edit', ['record' => $record]))
             ->columns([
-                Tables\Columns\TextColumn::make('slug')
-                    ->searchable()
-                    ->sortable(),
-
                 Tables\Columns\TextColumn::make('title_zh_tw')
-                    ->label('標題（中）')
-                    ->searchable()
-                    ->sortable(),
-
-                Tables\Columns\TextColumn::make('sites.name_zh_tw') // ← 改成你的欄位
-                    ->label('樣區')
-                    ->badge()
-                    ->separator(', '),
-
+                    ->label('成果名稱')->searchable()->sortable()->wrap(),
+                Tables\Columns\TextColumn::make('slug')
+                    ->label('網址')->searchable()->toggleable(),
+                Tables\Columns\TextColumn::make('sites.name_zh_tw')
+                    ->label('樣區')->badge()->separator(', '),
                 Tables\Columns\TextColumn::make('subjects.name_zh_tw')
-                    ->label('主題')
-                    ->badge()
-                    ->separator(', '),
-
-                Tables\Columns\IconColumn::make('is_public')
-                    ->label('公開')
-                    ->boolean(),
+                    ->label('研究主題')->badge()->separator(', '),
+                Tables\Columns\IconColumn::make('is_public')->label('公開')->boolean(),
             ])
             ->defaultSort('id', 'desc')
             ->actions([
-                Tables\Actions\EditAction::make(),
+                Tables\Actions\EditAction::make()->label('編輯內容'),
             ])
             ->bulkActions([
                 Tables\Actions\DeleteBulkAction::make(),
@@ -142,9 +91,7 @@ class ResearchOutputResource extends Resource
 
     public static function getRelations(): array
     {
-        return [
-            //
-        ];
+        return [];
     }
 
     public static function getPages(): array

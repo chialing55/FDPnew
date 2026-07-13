@@ -20,6 +20,6 @@ class ListPages extends ListRecords
 
     public function getSubheading(): string|Htmlable|null
     {
-        return '這裡管理網站所有頁面的相關資訊';
+        return '管理前台頁面標題、導覽位置與主視覺；頁面內文請到「頁面內容」編輯。';
     }
 }

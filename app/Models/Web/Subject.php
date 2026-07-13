@@ -66,4 +66,9 @@ class Subject extends Model
             'research_output_subject'
         );
     }
+
+    public function publications()
+    {
+        return $this->belongsToMany(Publication::class, 'publication_subject');
+    }
 }

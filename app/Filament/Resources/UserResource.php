@@ -14,9 +14,12 @@ use Illuminate\Support\Facades\Hash;
 class UserResource extends Resource
 {
     protected static ?string $model = User::class;
+    protected static bool $shouldRegisterNavigation = false;
 
     protected static ?string $navigationIcon = 'heroicon-o-user-group';
     protected static ?string $navigationLabel = '使用者';
+    protected static ?string $navigationGroup = '系統管理';
+    protected static ?int $navigationSort = 1;
     protected static ?string $pluralModelLabel = '使用者';
     protected static ?string $modelLabel = '使用者';
 

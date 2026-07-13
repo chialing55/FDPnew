@@ -7,6 +7,7 @@ use Illuminate\Support\Facades\App;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\UpdateController;
 use App\Http\Controllers\Web\WebIndexController;
+use App\Http\Controllers\ContentImageController;
 
 /*
 |--------------------------------------------------------------------------
@@ -40,6 +41,8 @@ Route::view('/', 'webindex')->name('webindex');
 |--------------------------------------------------------------------------
 */
 Route::middleware('auth')->group(function () {
+    Route::post('/cms/content-images', [ContentImageController::class, 'store'])
+        ->name('cms.content-images.store');
     Route::get('/profile', [ProfileController::class, 'edit'])
         ->name('profile.edit');
 
@@ -58,4 +61,3 @@ Route::middleware('auth')->group(function () {
 require __DIR__.'/auth.php';             // Breeze 產生（login / logout / register）
 require __DIR__.'/web_admin_legacy.php'; // 舊後台
 require __DIR__.'/web_public.php';       // 新前台
-

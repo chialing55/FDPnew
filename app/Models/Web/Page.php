@@ -19,6 +19,7 @@ class Page extends Model
         'nav_group', 'nav_order',
     ];
 
+
     public function getTitleAttribute()
     {
         return app()->getLocale() === 'en'

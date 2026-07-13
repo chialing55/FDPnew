@@ -13,11 +13,8 @@ class News extends Model
     protected $connection = 'mysql_web';
 
     protected $fillable = [
-        'slug',
         'title_zh_tw',
         'title_en',
-        'summary_zh_tw',
-        'summary_en',
         'content_zh_tw',
         'content_en',
         'cover_image',
@@ -33,14 +30,6 @@ class News extends Model
         return app()->getLocale() === 'en'
             ? $this->title_en
             : $this->title_zh_tw;
-    }
-
-    /** 依語系回傳摘要 */
-    public function getSummaryAttribute(): ?string
-    {
-        return app()->getLocale() === 'en'
-            ? $this->summary_en
-            : $this->summary_zh_tw;
     }
 
     /** 依語系回傳內容 */

@@ -15,8 +15,9 @@ class TeamResource extends Resource
     protected static ?string $model = Team::class;
 
     protected static ?string $navigationIcon = 'heroicon-o-users';
-    protected static ?string $navigationGroup = '內容管理';
-    protected static ?string $navigationLabel = '參與團隊';
+    protected static ?string $navigationGroup = '關於我們';
+    protected static ?string $navigationLabel = '研究團隊';
+    protected static ?int $navigationSort = 2;
     protected static ?string $modelLabel = '參與團隊';
     protected static ?string $pluralModelLabel = '參與團隊';
 

@@ -14,9 +14,7 @@ class ResearchOutputController extends Controller
             ->where('is_public', 1)
             ->firstOrFail();
         // dd($output->toArray());
-        $view = $output->view ?: 'pages.web.default';
-
-        return view($view, [
+        return view('pages.web.default', [
             'slug' => 'results/' . $slug, // ✅ 只拿來做顯示/麵包屑可，但不要拿去查 DB
             'page' => $output,            // ✅ 讓 view 用同一個 $page 變數
             'isOutput' => true,           // ✅ 建議加，讓 view 判斷用

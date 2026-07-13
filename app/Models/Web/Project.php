@@ -20,8 +20,6 @@ class Project extends Model
         'code',             // 計畫編號（有的話）
         'title_zh_tw',
         'title_en',
-        'summary_zh_tw',
-        'summary_en',
         'pi_zh_tw',
         'pi_en',
         'start_date',
@@ -40,14 +38,6 @@ class Project extends Model
         return app()->getLocale() === 'en'
             ? $this->title_en
             : $this->title_zh_tw;
-    }
-
-    /** 依語系回傳摘要 */
-    public function getSummaryAttribute(): ?string
-    {
-        return app()->getLocale() === 'en'
-            ? $this->summary_en
-            : $this->summary_zh_tw;
     }
 
     /** 依語系回傳說明 */
@@ -82,8 +72,13 @@ class Project extends Model
         return $this->belongsToMany(\App\Models\Web\Subject::class, 'project_subject')
             ->withTimestamps();
     }
-     public function projectSubjects()
+    public function projectSubjects()
     {
         return $this->hasMany(ProjectSubject::class);
-    }   
+    }
+
+    public function contentBlocks()
+    {
+        return $this->morphMany(ContentBlock::class, 'owner');
+    }
 }

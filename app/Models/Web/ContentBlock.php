@@ -12,23 +12,29 @@ class ContentBlock extends Model
     protected $table = 'content_blocks';
     protected $connection = 'mysql_web';
     protected $casts = [
-        'attachments' => 'array',
         'params' => 'array',
     ];
     protected $fillable = [
         'owner_type',
         'owner_id',
-        'block_type',
         'title_zh_tw',
         'title_en',
         'body_zh_tw',
         'body_en',
-        'attachments',
+        // 僅供 PageDefault 建立不寫入資料庫的系統固定區塊。
         'view',
         'params',
         'sort_order',
         'is_public',
     ];
+
+    /**
+     * 系統固定區塊使用的暫存屬性，不儲存在 content_blocks 資料表。
+     */
+    public static function systemBlock(array $attributes): self
+    {
+        return (new self())->forceFill($attributes);
+    }
 
     /** 依語系回傳標題 */
     public function getTitleAttribute(): ?string

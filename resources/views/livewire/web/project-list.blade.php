@@ -44,7 +44,7 @@
     <ul class="divide-y divide-gray-200 bg-white">
         @forelse ($projects as $p)
             <li class="relative cursor-pointer px-4 py-3 transition hover:bg-gray-50 hover:font-bold">
-                <a href="{{ url('projects/' . $p->code) }}" class="absolute inset-0"
+                <a href="{{ route('projects.show', $p) }}" class="absolute inset-0"
                     aria-label="{{ $p->title }}"></a>
 
                 <div class="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">

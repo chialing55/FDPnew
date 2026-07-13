@@ -63,6 +63,7 @@ class AppServiceProvider extends ServiceProvider
 
             'pages'            => Page::class,
             'research_outputs' => ResearchOutput::class,
+            'projects'         => \App\Models\Web\Project::class,
 
             // 如果你想改成簡短一點也可以：
             // 'page'   => Page::class,

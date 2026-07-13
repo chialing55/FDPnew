@@ -1,0 +1,50 @@
+.web-content {
+    color: #374151;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Microsoft JhengHei", "Noto Sans TC", sans-serif;
+    font-size: 1rem;
+    line-height: 1.8;
+    overflow-wrap: anywhere;
+}
+
+.web-content > :first-child { margin-top: 0; }
+.web-content > :last-child { margin-bottom: 0; }
+.web-content p { margin: .75rem 0; }
+.web-content h1, .web-content h2, .web-content h3, .web-content h4 {
+    margin: 1.5rem 0 .75rem;
+    color: #31572c;
+    font-weight: 700;
+    line-height: 1.4;
+}
+.web-content h1 { font-size: 1.75rem; }
+.web-content h2 { font-size: 1.5rem; }
+.web-content h3 { font-size: 1.25rem; color: #4f772d; }
+.web-content h4 { font-size: 1.1rem; color: #4f772d; }
+.web-content ul, .web-content ol { margin: .75rem 0; padding-left: 1.75rem; }
+.web-content ul { list-style: disc; }
+.web-content ol { list-style: decimal; }
+.web-content li { margin: .25rem 0; }
+.web-content a { color: #4f772d; text-decoration: underline; text-underline-offset: 2px; }
+.web-content a:hover { color: #31572c; }
+.web-content strong { font-weight: 700; }
+.web-content img { display: block; max-width: 100%; height: auto; margin: 1rem auto; border-radius: .5rem; }
+.web-content .page-two-column {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    gap: 1.5rem;
+}
+.web-content .with-b { padding: 1rem; border: 1px solid #6b7280; border-radius: .5rem; }
+.web-content figure { margin: 1rem 0; text-align: center; }
+.web-content figure img { margin: 0 auto; }
+.web-content figcaption { margin-top: .3rem; color: #666; font-size: .85rem; line-height: 1.4; }
+.web-content blockquote { margin: 1rem 0; padding: .5rem 1rem; border-left: 4px solid #90a955; background: #f4f7ef; }
+.web-content hr { margin: 1.5rem 0; border: 0; border-top: 1px solid #d1d5db; }
+.web-content table { width: 100%; margin: 1rem 0; border-collapse: collapse; }
+.web-content th, .web-content td { padding: .6rem .75rem; border: 1px solid #d1d5db; text-align: left; vertical-align: top; }
+.web-content th { background: #f4f7ef; color: #31572c; font-weight: 700; }
+.web-content pre, .web-content code { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; }
+.web-content pre { overflow-x: auto; margin: 1rem 0; padding: 1rem; border-radius: .5rem; background: #1f2937; color: #f9fafb; }
+.web-content :not(pre) > code { padding: .1rem .3rem; border-radius: .25rem; background: #f3f4f6; }
+
+@media (min-width: 1024px) {
+    .web-content .page-two-column { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}

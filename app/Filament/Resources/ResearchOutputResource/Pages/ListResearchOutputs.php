@@ -10,10 +10,12 @@ class ListResearchOutputs extends ListRecords
 {
     protected static string $resource = ResearchOutputResource::class;
 
+    protected ?string $subheading = '先從列表選擇一筆成果；點擊整列或「編輯內容」即可進入編輯頁面。';
+
     protected function getHeaderActions(): array
     {
         return [
-            Actions\CreateAction::make(),
+            Actions\CreateAction::make()->label('新增研究成果'),
         ];
     }
 }

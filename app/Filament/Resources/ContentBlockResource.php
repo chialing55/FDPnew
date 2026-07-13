@@ -10,7 +10,6 @@ use App\Models\Web\Page;
 use App\Models\Web\ResearchOutput;
 use Filament\Forms;
 use Filament\Forms\Form;
-use Filament\Forms\Get;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
@@ -19,25 +18,27 @@ use Wiebenieuwenhuis\FilamentCodeEditor\Components\CodeEditor;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\Tabs;
 use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Support\Facades\Storage;
-use Illuminate\Support\Facades\View;
 use Filament\Forms\Set;
+use Filament\Navigation\NavigationItem;
 
 class ContentBlockResource extends Resource
 {
     protected static ?string $model = ContentBlock::class;
 
     protected static ?string $navigationIcon = 'heroicon-o-rectangle-group';
-    protected static ?string $navigationGroup = '內容管理';
-    protected static ?string $navigationLabel = '內容區塊';
+    protected static ?string $navigationGroup = '首頁';
+    protected static ?string $navigationLabel = '網站介紹';
+    protected static ?int $navigationSort = 2;
     protected static ?string $modelLabel = '內容區塊';
     protected static ?string $pluralModelLabel = '內容區塊';
 
+    public static function getNavigationItems(): array
+    {
+        return [];
+    }
+
     public static function form(Form $form): Form
     {
-/** @var \Illuminate\Contracts\Support\Htmlable $imageExampleView */
-$imageExampleView = View::make('filament.partials.image_example');
-
         return $form
             ->schema([
                 Forms\Components\Hidden::make('owner_type'),
@@ -46,8 +47,9 @@ $imageExampleView = View::make('filament.partials.image_example');
                 Forms\Components\Section::make('基本設定')
                     ->schema([
 Forms\Components\Select::make('owner_selector')
-    ->label('對應物件（頁面或成果）')
-    ->helperText('從 Page 或 ResearchOutput 中選擇一個作為這個內容區塊的擁有者')
+    ->label('這段內容要放在哪裡？')
+    ->helperText('可以輸入頁面標題或網址關鍵字搜尋。')
+    ->required()
     ->searchable()
     ->preload()
     ->native(false) // 用 Filament 的美化 select
@@ -164,39 +166,15 @@ Forms\Components\Select::make('owner_selector')
     ->dehydrated(false), // 這個欄位本身不寫入資料庫，只用來填 owner_type / owner_id
 
 
-                        Forms\Components\Grid::make(3)->schema([
-                            Forms\Components\Select::make('block_type')
-                                ->label('區塊類型')
-                                ->required()
-                                ->options([
-                                    'intro'     => '簡介區塊（intro）',
-                                    'content'   => '一般內容（content）',
-                                    'view'      => '自訂view區塊（view）',
-                                    'gallery'   => '相片區塊（gallery）',
-                                    'map'       => '地圖區塊（map）',
-                                    'stats'     => '統計數據區塊（stats）',
-                                    'quote'     => '重點引言（quote）',
-                                    'table'     => '表格內容（table）',
-                                    'download'  => '附件下載（download）',
-                                ]),
-                                
-
+                        Forms\Components\Grid::make(2)->schema([
                             Forms\Components\TextInput::make('sort_order')
-                                ->label('區塊排序')
+                                ->label('顯示順序')
                                 ->numeric()
-                                ->default(0),
+                                ->default(0)
+                                ->helperText('數字越小越前面。'),
                             Forms\Components\Toggle::make('is_public')
-                                ->label('是否顯示於前台')
+                                ->label('發布到前台')
                                 ->default(true),
-                            Forms\Components\TextInput::make('view')
-                                ->label('插入view')
-                                ->maxLength(100),
-                            Forms\Components\KeyValue::make('params')
-                                ->label('參數設定')
-                                ->keyLabel('參數名稱')
-                                ->valueLabel('參數內容')
-                                ->reorderable()
-                            
                         ]),
                     ])
                     ->columns(1),
@@ -219,8 +197,7 @@ Forms\Components\Select::make('owner_selector')
                                 Textarea::make('body_zh_tw')
                                     ->label('內容（中）')
                                     ->rows(10)
-                                    ->columnSpanFull()
-                                    ->helperText($imageExampleView),
+                                    ->columnSpanFull(),
 
 
                                 // 英文內容（RichEditor + HTML）
@@ -229,67 +206,6 @@ Forms\Components\Select::make('owner_selector')
                                     ->rows(10)
                                     ->columnSpanFull(),
                         ]),
-                        Forms\Components\Grid::make()
-                            ->schema([
-                            Textarea::make('attachments_preview')
-                                ->label('已上傳圖片路徑')
-                                ->disabled()
-                                ->dehydrated(false) // 不寫回資料庫
-                                ->rows(4)
-                                ->formatStateUsing(function ($state, Get $get) {
-                                    $files = $get('attachments') ?? [];
-
-                                    if (! is_array($files)) {
-                                        return '';
-                                    }
-
-                                    return collect($files)
-                                        ->map(fn ($path) => '/storage/' . ltrim($path, '/'))
-                                        ->implode("\n");
-                                })
-                                ->helperText('複製上方路徑，貼到內文中作為 <img src="..."> 使用。')
-                                ->columnSpanFull(),
-                        ]),
-
-                        Forms\Components\Grid::make()
-                            ->schema([
-                            Forms\Components\FileUpload::make('attachments')
-                                ->label('附加圖片')
-                                ->disk('public')
-                                ->directory(function (?ContentBlock $record, Get $get) {
-                                    if ($record && $record->id) {
-                                        return "content_blocks/{$record->id}";
-                                    }
-                                    return 'content_blocks/pending';
-                                })
-                                ->image()
-                                ->multiple()
-                                ->preserveFilenames()
-                                ->imagePreviewHeight('150')
-                                ->panelLayout('grid')
-                                ->enableOpen()
-                                ->helperText('可上傳多張圖片，儲存後可使用 /storage/... 路徑插入到內文中')
-                                ->deleteUploadedFileUsing(function (string $file) {
-                                    Storage::disk('public')->delete($file);
-                                })
-                                // ⭐ 關鍵：attachments 變動時，順便更新 attachments_preview
-                                ->afterStateUpdated(function ($state, callable $set) {
-                                    $files = $state ?? [];
-
-                                    if (! is_array($files)) {
-                                        $files = [];
-                                    }
-
-                                    $text = collect($files)
-                                        ->map(fn ($path) => '/storage/' . ltrim($path, '/'))
-                                        ->implode("\n");
-
-                                    $set('attachments_preview', $text);
-                                })
-                                ->columnSpanFull(),
-
-                            ]),
-  
                 ]),
             ]);
     }
@@ -298,16 +214,15 @@ Forms\Components\Select::make('owner_selector')
     {
         return $table
             ->columns([
-            Tables\Columns\TextColumn::make('id')
-                ->sortable(),
-
             Tables\Columns\TextColumn::make('owner_type')
                 ->label('類型')
                 ->formatStateUsing(fn ($state) => match ($state) {
-                    Page::class => '頁面 Page',
-                    ResearchOutput::class => '成果 Result',
+                    Page::class, 'pages' => '網站頁面',
+                    ResearchOutput::class, 'research_outputs' => '研究成果',
                     default => class_basename($state),
                 })
+                ->badge()
+                ->color(fn ($state) => in_array($state, [Page::class, 'pages'], true) ? 'success' : 'info')
                 ->sortable(),
 
             Tables\Columns\TextColumn::make('owner')
@@ -333,17 +248,13 @@ Forms\Components\Select::make('owner_selector')
                 ->sortable()
                 ->searchable(),
 
-                Tables\Columns\TextColumn::make('block_type')
-                    ->label('區塊類型')
-                    ->sortable(),
-
                 Tables\Columns\TextColumn::make('title_zh_tw')
                     ->label('標題（中）')
                     ->limit(20)
                     ->searchable(),
 
                 Tables\Columns\IconColumn::make('is_public')
-                    ->label('前台顯示')
+                    ->label('發布狀態')
                     ->boolean(),
 
                 Tables\Columns\TextColumn::make('sort_order')
@@ -355,7 +266,21 @@ Forms\Components\Select::make('owner_selector')
                     ->dateTime('Y-m-d H:i')
                     ->sortable(),
             ])
+            ->filters([
+                Tables\Filters\SelectFilter::make('owner_type')
+                    ->label('內容類型')
+                    ->options(['pages' => '網站頁面', 'research_outputs' => '研究成果']),
+                Tables\Filters\TernaryFilter::make('is_public')
+                    ->label('發布狀態')
+                    ->trueLabel('前台顯示')->falseLabel('已隱藏')->placeholder('全部'),
+            ])
+            ->defaultSort('updated_at', 'desc')
             ->actions([
+                Tables\Actions\Action::make('preview')
+                    ->label('預覽')->icon('heroicon-o-eye')
+                    ->url(fn (ContentBlock $record) => static::getFrontendUrl($record))
+                    ->visible(fn (ContentBlock $record) => filled(static::getFrontendUrl($record)))
+                    ->openUrlInNewTab(),
                 Tables\Actions\EditAction::make(),
             ])
             ->bulkActions([
@@ -370,5 +295,16 @@ Forms\Components\Select::make('owner_selector')
             'create' => Pages\CreateContentBlock::route('/create'),
             'edit' => Pages\EditContentBlock::route('/{record}/edit'),
         ];
+    }
+
+    public static function getFrontendUrl(ContentBlock $record): ?string
+    {
+        $owner = $record->owner;
+
+        return match (true) {
+            $owner instanceof Page => url('/' . ltrim($owner->slug, '/')),
+            $owner instanceof ResearchOutput => url('/results/' . ltrim($owner->slug, '/')),
+            default => null,
+        };
     }
 }

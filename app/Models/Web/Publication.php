@@ -13,17 +13,14 @@ class Publication extends Model
     protected $connection = 'mysql_web';
 
     protected $fillable = [
-        'slug',
-        'title_zh_tw',
-        'title_en',
-        'citation_zh_tw',   // 完整引用（中）
-        'citation_en',      // 完整引用（英）
+        'authors',
+        'title',
         'year',
-        'journal_zh_tw',
-        'journal_en',
+        'journal',
         'volume',
         'issue',
         'pages',
+        'pdf_path',
         'doi',
         'url',
         'external_id',
@@ -31,28 +28,33 @@ class Publication extends Model
 
     ];
 
-    /** 依語系回傳標題 */
-    public function getTitleAttribute(): ?string
-    {
-        return app()->getLocale() === 'en'
-            ? $this->title_en
-            : $this->title_zh_tw;
-    }
-
     /** 依語系回傳引用文字 */
     public function getCitationAttribute(): ?string
     {
-        return app()->getLocale() === 'en'
-            ? $this->citation_en
-            : $this->citation_zh_tw;
+        return strip_tags($this->citation_html ?? '');
     }
 
-    /** 依語系回傳期刊名稱 */
-    public function getJournalAttribute(): ?string
+    public function getCitationHtmlAttribute(): ?string
     {
-        return app()->getLocale() === 'en'
-            ? $this->journal_en
-            : $this->journal_zh_tw;
+        $authors = filled($this->authors) ? e(rtrim($this->authors, '.')) : null;
+        $title = filled($this->title) ? e(rtrim($this->title, '.')) : null;
+        $year = filled($this->year) ? '<strong>' . e($this->year) . '</strong>' : null;
+        $source = filled($this->journal) ? '<em>' . e(rtrim($this->journal, '.')) . '</em>' : '';
+        if (filled($this->volume)) {
+            $source .= ($source !== '' ? ' ' : '') . e($this->volume);
+        }
+        if (filled($this->issue)) {
+            $source .= '(' . e($this->issue) . ')';
+        }
+        if (filled($this->pages)) {
+            $source .= ($source !== '' ? ': ' : '') . e($this->pages);
+        }
+
+        $parts = SiteSetting::getValue('publication_citation_style', 'year_after_authors') === 'year_at_end'
+            ? array_filter([$authors, $title, $source ?: null, $year ? '(' . $year . ')' : null])
+            : array_filter([$authors, $year, $title, $source ?: null]);
+
+        return $parts === [] ? null : implode('. ', $parts) . '.';
     }
 
     /** scope：依年份倒序 */
@@ -61,10 +63,15 @@ class Publication extends Model
         return $query->orderByDesc('year');
     }
 
-    /** 此論文對應的 entity_tags 記錄 */
-    public function entityTags()
+    public function sites()
     {
-        return $this->hasMany(EntityTag::class, 'entity_id')
-            ->where('entity_type', 'publication');
+        return $this->belongsToMany(Site::class, 'publication_site')
+            ->withTimestamps();
+    }
+
+    public function subjects()
+    {
+        return $this->belongsToMany(Subject::class, 'publication_subject')
+            ->withTimestamps();
     }
 }

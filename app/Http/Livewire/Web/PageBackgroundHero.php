@@ -4,7 +4,6 @@ namespace App\Http\Livewire\Web;
 
 use Livewire\Component;
 use Illuminate\Support\Arr;
-use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Storage;
 use App\Helpers\PageTitleHelper;
 use App\Models\Web\Page;
@@ -49,9 +48,11 @@ class PageBackgroundHero extends Component
         $this->breadcrumbs = $breadcrumbs;
 
         if($this->page->hero_image){
-            $this->hero = Storage::url($this->page->hero_image);
+            $this->hero = str_starts_with($this->page->hero_image, 'library:')
+                ? Storage::disk('home_hero')->url(substr($this->page->hero_image, strlen('library:')))
+                : Storage::disk('public')->url($this->page->hero_image);
         } else {
-            $this->hero = asset('images/hero/' . $this->pickRandomHero());
+            $this->hero = $this->pickRandomHero();
         }
 
         // $this->hero = $this->pickRandomHero();
@@ -59,18 +60,8 @@ class PageBackgroundHero extends Component
 
     protected function pickRandomHero(): string
     {
-        $dir = public_path('images/hero');
-
-        if (! is_dir($dir)) {
-            return ''; // 目錄不存在就不顯示
-        }
-
-        // 只取常見圖片副檔名
-        $files = collect(File::files($dir))
-            ->filter(function ($f) {
-                return in_array(strtolower($f->getExtension()), ['jpg','jpeg','png','webp','gif','JPG']);
-            })
-            ->map(fn ($f) => $f->getFilename())
+        $files = collect(Storage::disk('home_hero')->files())
+            ->filter(fn (string $file): bool => in_array(strtolower(pathinfo($file, PATHINFO_EXTENSION)), ['jpg','jpeg','png','webp','gif'], true))
             ->values()
             ->all();
 
@@ -79,7 +70,7 @@ class PageBackgroundHero extends Component
         }
 
         // 隨機取一張
-        return Arr::random($files);
+        return Storage::disk('home_hero')->url(Arr::random($files));
     }
 
     public function render()

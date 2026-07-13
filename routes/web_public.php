@@ -4,6 +4,8 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Web\WebIndexController;
 use App\Http\Controllers\Web\PageController;
 use App\Http\Controllers\Web\ResearchOutputController;
+use App\Http\Controllers\Web\ProjectController;
+use App\Http\Controllers\Web\NewsController;
 
 Route::prefix('web')->group(function () {
     Route::get('/splist', [WebIndexController::class, 'splist'])->name('front.splist.legacy');
@@ -35,6 +37,14 @@ Route::get('results', [PageController::class, 'show'])
 Route::get('results/{slug}', [ResearchOutputController::class, 'show'])
     ->where('slug', '[A-Za-z0-9\-]+')
     ->name('research_outputs.show');
+
+Route::get('projects/{project}', [ProjectController::class, 'show'])
+    ->whereNumber('project')
+    ->name('projects.show');
+
+Route::get('about/news/{news}', [NewsController::class, 'show'])
+    ->whereNumber('news')
+    ->name('news.show');
 
 
 

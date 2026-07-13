@@ -29,10 +29,10 @@
             <div id="{{ $block->anchorId }}" class="m-2 scroll-mt-24">
                 @if (!empty($block->title) || !empty($block->body) || !empty($block->view))
                     <div class="rounded-md border border-gray-300 bg-white px-6 py-4">
-                        <div class="items-start gap-6 md:grid md:grid-cols-[auto_1px_minmax(0,1fr)]">
+                        @if (!empty($block->title))
+                            <div class="items-start gap-6 md:grid md:grid-cols-[auto_1px_minmax(0,1fr)]">
 
-                            {{-- 左側：標題 --}}
-                            @if (!empty($block->title))
+                                {{-- 左側：標題 --}}
                                 <div class="mb-2 flex items-start pr-4">
                                     {{-- 左側黃色 Bar --}}
                                     <div class="mr-2 w-1 self-stretch bg-yellow-400"></div>
@@ -43,18 +43,28 @@
                                         {{ $block->title }}
                                     </div>
                                 </div>
-                            @else
-                                <div></div>
-                            @endif
 
 
-                            {{-- 中間直線 --}}
-                            <div class="mx-auto hidden h-full w-px bg-gray-300 md:block"></div>
+                                {{-- 中間直線 --}}
+                                <div class="mx-auto hidden h-full w-px bg-gray-300 md:block"></div>
 
-                            {{-- 右側內容 --}}
+                                {{-- 右側內容 --}}
+                                <div class="space-y-4">
+                                    @if (!empty($block->body))
+                                        <div class="web-content prose prose-sm max-w-none">
+                                            {!! $block->body !!}
+                                        </div>
+                                    @endif
+
+                                    @if (!empty($block->view))
+                                        @livewire($block->view, $block->params ?? [])
+                                    @endif
+                                </div>
+                            </div>
+                        @else
                             <div class="space-y-4">
                                 @if (!empty($block->body))
-                                    <div class="prose prose-sm max-w-none">
+                                    <div class="web-content prose prose-sm max-w-none">
                                         {!! $block->body !!}
                                     </div>
                                 @endif
@@ -63,8 +73,7 @@
                                     @livewire($block->view, $block->params ?? [])
                                 @endif
                             </div>
-
-                        </div>
+                        @endif
                     </div>
                 @endif
             </div>

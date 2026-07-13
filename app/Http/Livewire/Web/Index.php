@@ -3,18 +3,19 @@
 namespace App\Http\Livewire\Web;
 
 use Livewire\Component;
-use Illuminate\Support\Arr;
-use Illuminate\Support\Facades\File;
 use App\Models\Web\Page;
 use App\Models\Web\Site;
-use App\Models\Web\ContentBlock;
+use App\Models\Web\News;
+use Illuminate\Support\Arr;
 use Illuminate\Support\Str;
+use Illuminate\Support\Facades\Storage;
 
 class Index extends Component
 {
-    public $plots=['fushan', 'nanjenshan', 'shoushan'];
+    public array $plots = [];
     public $indexIntro;
     public $plotsContent=[];
+    public $latestNews;
 
     public function mount(): void
     {
@@ -22,23 +23,45 @@ class Index extends Component
         $page = Page::where('slug', 'index')->firstOrFail();
 
         // 2. 載入該頁的內容區塊
-        $this->indexIntro = $page->contentBlocks()->where('block_type','intro')->first();
+        $this->indexIntro = $page->contentBlocks()
+            ->where('is_public', true)
+            ->orderBy('sort_order')
+            ->first();
+        $this->latestNews = News::public()->latestFirst()->take(6)->get();
 
 
-        // 3. 載入各樣區的內容區塊
-        foreach ($this->plots as $plot) {
-            $slug='sites/'.$plot;
-            // dd($slug);
-            $plotBlock = Page::where('slug', $slug)->firstOrFail();
-            $plotIntro = $plotBlock->site;
-            
-               
-            $this->plotsContent[$plot]['title'] = $plotBlock->title;
-            $this->plotsContent[$plot]['intro'] = $plotIntro->description ?? ''; 
-            $this->plotsContent[$plot]['slug'] = $plotBlock->slug;
+        // 3. 從資料庫動態載入所有顯示於前台的樣區。
+        $sites = Site::query()
+            ->with('page')
+            ->where('is_active', true)
+            ->whereHas('page', fn ($query) => $query->where('nav_group', 'sites'))
+            ->get()
+            ->sortBy(fn (Site $site): array => [$site->page?->nav_order ?? PHP_INT_MAX, $site->id]);
+
+        $fallbackImages = collect(Storage::disk('public')->files('plot-cards'))
+            ->filter(fn (string $file): bool => in_array(
+                strtolower(pathinfo($file, PATHINFO_EXTENSION)),
+                ['jpg', 'jpeg', 'png', 'webp', 'gif'],
+                true,
+            ))
+            ->values()
+            ->all();
+
+        foreach ($sites as $site) {
+            $plot = Str::afterLast($site->page->slug, '/');
+            $this->plots[] = $plot;
+            $this->plotsContent[$plot] = [
+                'title' => $site->page->title,
+                'intro' => $site->description ?? '',
+                'slug' => $site->page->slug,
+                'image' => $site->homepage_image
+                    ? Storage::disk('public')->url($site->homepage_image)
+                    : (! empty($fallbackImages)
+                        ? Storage::disk('public')->url(Arr::random($fallbackImages))
+                        : null),
+                'image_position' => max(1, min(100, (int) ($site->homepage_image_position ?? 50))),
+            ];
         }
-        
-        // dd($this->indexIntro);
 
     }
 

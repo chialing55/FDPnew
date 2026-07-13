@@ -4,7 +4,7 @@ namespace App\Http\Livewire\Web;
 
 use Livewire\Component;
 use Illuminate\Support\Arr;
-use Illuminate\Support\Facades\File;
+use Illuminate\Support\Facades\Storage;
 
 class IndexHero extends Component
 {
@@ -19,7 +19,7 @@ class IndexHero extends Component
 
         // dd($this->title);
         $this->title = $this->title();
-        $this->hero = $this->pickRandomHero();
+        $this->hero = $this->resolveHero();
     } 
 
     protected function title(){
@@ -37,22 +37,12 @@ class IndexHero extends Component
         return __($key); 
     }
 
-    protected function pickRandomHero(): string
+    protected function resolveHero(): string
     {
-        $dir = public_path('images/hero');
-
-        if (! is_dir($dir)) {
-            return ''; // 目錄不存在就不顯示
-        }
-
-        // 只取常見圖片副檔名
-        $files = collect(File::files($dir))
-            ->filter(function ($f) {
-                return in_array(strtolower($f->getExtension()), ['jpg','jpeg','png','webp','gif','JPG']);
-            })
-            ->map(fn ($f) => $f->getFilename())
-            ->values()
-            ->all();
+        $files = collect(Storage::disk('home_hero')->files())
+            ->filter(fn (string $file): bool => in_array(strtolower(pathinfo($file, PATHINFO_EXTENSION)), ['jpg','jpeg','png','webp','gif'], true))
+            ->map(fn (string $file): string => Storage::disk('home_hero')->url($file))
+            ->values()->all();
 
         if (empty($files)) {
             return '';
