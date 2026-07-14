@@ -41,9 +41,6 @@ fi
 # 3. 設定目錄權限（storage、bootstrap/cache、植物照片）
 echo "🛠️ 設定 storage 和 cache 權限..."
 mkdir -p storage/framework/livewire-tmp storage/app/public/content-images storage/app/public/hero storage/app/public/plot-cards public/FDPfiles/splist/photo
-if [ -d public/images/hero ]; then
-  cp -n public/images/hero/. storage/app/public/hero/
-fi
 for image in public/images/plots/*_thumb.jpg; do
   [ -f "$image" ] || continue
   cp -n "$image" storage/app/public/plot-cards/

@@ -25,10 +25,6 @@ mkdir -p \
     bootstrap/cache \
     public/FDPfiles/splist/photo
 
-if [ -d public/images/hero ]; then
-    cp -n public/images/hero/. storage/app/public/hero/
-fi
-
 for image in public/images/plots/*_thumb.jpg; do
     [ -f "$image" ] || continue
     cp -n "$image" storage/app/public/plot-cards/
