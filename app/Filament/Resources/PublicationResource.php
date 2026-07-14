@@ -24,6 +24,30 @@ class PublicationResource extends Resource
 
     public static function form(Form $form): Form
     {
+        if ($form->getOperation() === 'create') {
+            return $form->schema([
+                Forms\Components\Section::make('基本資料')->schema([
+                    Forms\Components\Grid::make(2)->schema([
+                        Forms\Components\TextInput::make('authors')
+                            ->label('Authors')
+                            ->required()
+                            ->maxLength(1000),
+                        Forms\Components\TextInput::make('title')
+                            ->label('Title')
+                            ->required()
+                            ->maxLength(500),
+                        Forms\Components\TextInput::make('year')
+                            ->label('Year')
+                            ->numeric(),
+                        static::typeField(),
+                        Forms\Components\Toggle::make('is_active')
+                            ->label('顯示於前台')
+                            ->default(true),
+                    ]),
+                ]),
+            ]);
+        }
+
         return $form->schema([
             Tabs::make('學術產出設定')->tabs([
                 Tabs\Tab::make('基本資料')
@@ -32,7 +56,8 @@ class PublicationResource extends Resource
                         Forms\Components\Grid::make(12)->schema([
                             Forms\Components\TextInput::make('authors')->label('Authors')->maxLength(1000)->columnSpan(4),
                             Forms\Components\TextInput::make('year')->label('Year')->numeric()->columnSpan(2),
-                            Forms\Components\TextInput::make('title')->label('Title')->maxLength(500)->columnSpan(6),
+                            static::typeField()->columnSpan(2),
+                            Forms\Components\TextInput::make('title')->label('Title')->maxLength(500)->columnSpan(4),
                             Forms\Components\TextInput::make('journal')->label('Journal')->maxLength(255)->columnSpan(4),
                             Forms\Components\TextInput::make('volume')->label('Volume')->maxLength(50)->columnSpan(2),
                             Forms\Components\TextInput::make('issue')->label('Issue')->maxLength(50)->columnSpan(2),
@@ -53,6 +78,7 @@ class PublicationResource extends Resource
                                 ->helperText('有可公開的 PDF 檔案時才上傳。'),
                         ]),
                         Forms\Components\Toggle::make('is_open_access')->label('Open Access'),
+                        Forms\Components\Toggle::make('is_active')->label('顯示於前台')->default(true),
                     ]),
                 Tabs\Tab::make('關聯設定')
                     ->icon('heroicon-o-link')
@@ -67,6 +93,7 @@ class PublicationResource extends Resource
     {
         return $table->columns([
             Tables\Columns\TextColumn::make('year')->label('年份')->sortable(),
+            Tables\Columns\TextColumn::make('type')->label('類型')->badge()->sortable(),
             Tables\Columns\TextColumn::make('authors')->label('作者')->searchable()->wrap()->toggleable(),
             Tables\Columns\TextColumn::make('title')->label('標題')->searchable()->wrap(),
             Tables\Columns\TextColumn::make('journal')->label('期刊')->wrap(),
@@ -76,11 +103,51 @@ class PublicationResource extends Resource
                 ->label('研究主題')->badge()->separator(', '),
             Tables\Columns\TextColumn::make('doi')->label('DOI')->searchable(),
             Tables\Columns\IconColumn::make('is_open_access')->label('Open Access')->boolean(),
+            Tables\Columns\IconColumn::make('is_active')->label('公開')->boolean(),
         ])->defaultSort('year', 'desc')->actions([Tables\Actions\EditAction::make()]);
     }
 
     public static function getPages(): array
     {
         return ['index' => Pages\ListPublications::route('/'), 'create' => Pages\CreatePublication::route('/create'), 'edit' => Pages\EditPublication::route('/{record}/edit')];
+    }
+
+    protected static function typeField(): Forms\Components\Select
+    {
+        return Forms\Components\Select::make('type')
+            ->label('Type')
+            ->options(function (): array {
+                $labels = [
+                    'paper' => 'Paper',
+                    'poster' => 'Poster',
+                    'oral' => 'Oral',
+                    'thesis' => 'Thesis（碩博士論文）',
+                ];
+
+                Publication::query()
+                    ->whereNotNull('type')
+                    ->where('type', '!=', '')
+                    ->distinct()
+                    ->orderBy('type')
+                    ->pluck('type')
+                    ->each(function (string $type) use (&$labels): void {
+                        $labels[$type] ??= $type;
+                    });
+
+                return $labels;
+            })
+            ->default('paper')
+            ->required()
+            ->searchable()
+            ->preload()
+            ->native(false)
+            ->createOptionForm([
+                Forms\Components\TextInput::make('type')
+                    ->label('新增類型')
+                    ->required()
+                    ->maxLength(50),
+            ])
+            ->createOptionUsing(fn (array $data): string => strtolower(trim($data['type'])))
+            ->helperText('可選擇既有類型，或新增其他類型。');
     }
 }

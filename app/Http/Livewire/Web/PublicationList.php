@@ -13,7 +13,7 @@ class PublicationList extends Component
     public function render()
     {
         return view('livewire.web.publication-list', [
-            'publications' => Publication::latestFirst()->paginate(30),
+            'publications' => Publication::active()->latestFirst()->paginate(30),
         ]);
     }
 }

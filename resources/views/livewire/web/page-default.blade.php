@@ -27,7 +27,7 @@
                 w-full    {{-- <3 個 → 置中 + 全寬 --}} @endif space-y-8">
         @foreach ($contentBlocks as $block)
             <div id="{{ $block->anchorId }}" class="m-2 scroll-mt-24">
-                @if (!empty($block->title) || !empty($block->body) || !empty($block->view))
+                @if (!empty($block->title) || $block->items->isNotEmpty() || !empty($block->view))
                     <div class="rounded-md border border-gray-300 bg-white px-6 py-4">
                         @if (!empty($block->title))
                             <div class="items-start gap-6 md:grid md:grid-cols-[auto_1px_minmax(0,1fr)]">
@@ -50,11 +50,13 @@
 
                                 {{-- 右側內容 --}}
                                 <div class="space-y-4">
-                                    @if (!empty($block->body))
-                                        <div class="web-content prose prose-sm max-w-none">
-                                            {!! $block->body !!}
-                                        </div>
-                                    @endif
+                                    @foreach ($block->items as $item)
+                                        @if ($item->type === 'text' && !empty($item->body))
+                                            <div class="web-content prose prose-sm max-w-none">{!! $item->body !!}</div>
+                                        @elseif ($item->type === 'component' && !empty($item->component))
+                                            @livewire($item->component, $item->params ?? [], key('content-item-' . $item->id))
+                                        @endif
+                                    @endforeach
 
                                     @if (!empty($block->view))
                                         @livewire($block->view, $block->params ?? [])
@@ -63,11 +65,13 @@
                             </div>
                         @else
                             <div class="space-y-4">
-                                @if (!empty($block->body))
-                                    <div class="web-content prose prose-sm max-w-none">
-                                        {!! $block->body !!}
-                                    </div>
-                                @endif
+                                @foreach ($block->items as $item)
+                                    @if ($item->type === 'text' && !empty($item->body))
+                                        <div class="web-content prose prose-sm max-w-none">{!! $item->body !!}</div>
+                                    @elseif ($item->type === 'component' && !empty($item->component))
+                                        @livewire($item->component, $item->params ?? [], key('content-item-' . $item->id))
+                                    @endif
+                                @endforeach
 
                                 @if (!empty($block->view))
                                     @livewire($block->view, $block->params ?? [])

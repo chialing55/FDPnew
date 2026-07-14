@@ -10,12 +10,16 @@ return [
     'index_hero_2' => '- 福山與南仁山',
 //nav
     'nav_home'        => '首頁',
-    'nav_about'       => '關於我們',
+    'nav_about'       => '關於本站',
     
     'nav_sites'        => '動態樣區', 
 
     'nav_subjects'    => '研究主題',
     'nav_results'    => '研究成果',
+    'nav_publications' => '學術產出',
+    'nav_plants' => '監測植物',
+    'index_results_overview' => '研究成果總覽',
+    'index_projects_overview' => '研究計畫總覽',
 
     'index_text_1'    => '個樣區',
     'index_text_2'    => '種植物',

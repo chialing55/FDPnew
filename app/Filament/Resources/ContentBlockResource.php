@@ -173,7 +173,7 @@ Forms\Components\Select::make('owner_selector')
                                 ->default(0)
                                 ->helperText('數字越小越前面。'),
                             Forms\Components\Toggle::make('is_public')
-                                ->label('發布到前台')
+                                ->label('顯示於前台')
                                 ->default(true),
                         ]),
                     ])
@@ -192,20 +192,31 @@ Forms\Components\Select::make('owner_selector')
                                 ->maxLength(255),
                         ]),
 
-                        Forms\Components\Grid::make()
+                        Forms\Components\Repeater::make('items')
+                            ->label('章節內容')
+                            ->relationship('items')
+                            ->orderColumn('sort_order')
+                            ->reorderable()
+                            ->addActionLabel('新增內容項目')
                             ->schema([
+                                Forms\Components\Select::make('type')
+                                    ->label('內容類型')
+                                    ->options(['text' => '文字', 'component' => '動態元件'])
+                                    ->default('text')->live()->required(),
+                                Forms\Components\Toggle::make('is_public')
+                                    ->label('顯示於前台')
+                                    ->default(true)
+                                    ->columnSpanFull(),
                                 Textarea::make('body_zh_tw')
-                                    ->label('內容（中）')
-                                    ->rows(10)
-                                    ->columnSpanFull(),
-
-
-                                // 英文內容（RichEditor + HTML）
+                                    ->label('內容（中）')->rows(10)->columnSpanFull()
+                                    ->visible(fn (Forms\Get $get): bool => $get('type') === 'text'),
                                 Textarea::make('body_en')
-                                    ->label('內容（英）')
-                                    ->rows(10)
-                                    ->columnSpanFull(),
-                        ]),
+                                    ->label('內容（英）')->rows(10)->columnSpanFull()
+                                    ->visible(fn (Forms\Get $get): bool => $get('type') === 'text'),
+                                Forms\Components\TextInput::make('component')
+                                    ->label('Livewire 元件名稱')->columnSpanFull()
+                                    ->visible(fn (Forms\Get $get): bool => $get('type') === 'component'),
+                            ])->columns(2),
                 ]),
             ]);
     }
@@ -254,7 +265,7 @@ Forms\Components\Select::make('owner_selector')
                     ->searchable(),
 
                 Tables\Columns\IconColumn::make('is_public')
-                    ->label('發布狀態')
+                    ->label('公開')
                     ->boolean(),
 
                 Tables\Columns\TextColumn::make('sort_order')

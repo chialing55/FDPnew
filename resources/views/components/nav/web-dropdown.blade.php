@@ -17,7 +17,9 @@
             @foreach ($pages as $page)
                 @php
                     $isActive = request()->is($page->slug . '*');
-                    $title = $page->title;
+                    $title = $page->nav_group === 'subjects'
+                        ? ($page->subject?->short_name ?: $page->title)
+                        : $page->title;
                 @endphp
 
                 <a href="{{ url($page->slug) }}"

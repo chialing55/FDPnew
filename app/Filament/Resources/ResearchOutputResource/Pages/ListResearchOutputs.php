@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources\ResearchOutputResource\Pages;
 
+use App\Filament\Actions\ListPageSettingsAction;
 use App\Filament\Resources\ResearchOutputResource;
 use Filament\Actions;
 use Filament\Resources\Pages\ListRecords;
@@ -15,6 +16,7 @@ class ListResearchOutputs extends ListRecords
     protected function getHeaderActions(): array
     {
         return [
+            ListPageSettingsAction::make('results', '研究成果頁'),
             Actions\CreateAction::make()->label('新增研究成果'),
         ];
     }

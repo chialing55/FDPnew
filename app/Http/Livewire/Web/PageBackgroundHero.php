@@ -15,17 +15,30 @@ class PageBackgroundHero extends Component
     public $plants = '';
     public $censuses = '';
     public string $title = '';
+    public ?string $titleZhTw = null;
+    public ?string $titleEn = null;
     public array $breadcrumbs = [];
     public string $slug;
     public $page;
     public $segment1;
     public $segment2;
 
-    public function mount($slug, $page): void
+    public function mount(
+        $slug,
+        $page,
+        ?string $fallbackHeroImage = null,
+        ?string $breadcrumbParentLabel = null,
+        string $breadcrumbParentUrl = ''
+    ): void
     {
         $this->page = $page;
         $this->slug = $slug;
-        $this->title = $this->page->title;
+        $subject = $this->page instanceof Page && $this->page->nav_group === 'subjects'
+            ? $this->page->subject
+            : null;
+        $this->title = $subject?->short_name ?: $this->page->title;
+        $this->titleZhTw = $subject?->name_zh_tw ?: $this->page->title_zh_tw;
+        $this->titleEn = $subject?->name_en ?: $this->page->title_en;
         // $this->title = PageTitleHelper::getTranslatedTitle(); 
         // dd($this->title);
 
@@ -33,7 +46,13 @@ class PageBackgroundHero extends Component
         $this->segment2 = request()->segment(2);  // 'background'
 
 
-        if ($this->page->nav_group) {
+        if ($breadcrumbParentLabel !== null) {
+            $pageNavLabel = $breadcrumbParentLabel;
+            $pageNavUrl = $breadcrumbParentUrl;
+        } elseif ($this->page instanceof Page && in_array($this->page->slug, ['results', 'projects', 'publications'], true)) {
+            $pageNavLabel = null;
+            $pageNavUrl = '';
+        } elseif ($this->page->nav_group) {
             $pageNavLabel = __('web.nav_'.$this->page->nav_group.'');
             $pageNavUrl = '';
         } else {
@@ -42,15 +61,19 @@ class PageBackgroundHero extends Component
         }
 
         $breadcrumbs[] = ['label' => __('web.nav_home'), 'url' => '/'];
-        $breadcrumbs[] = ['label' => $pageNavLabel, 'url' => $pageNavUrl];
-        $breadcrumbs[] = ['label' => __(''.$this->page->title.''), 'url' => ''];
+        if ($pageNavLabel !== null) {
+            $breadcrumbs[] = ['label' => $pageNavLabel, 'url' => $pageNavUrl];
+        }
+        $breadcrumbs[] = ['label' => $this->title, 'url' => ''];
 
         $this->breadcrumbs = $breadcrumbs;
 
-        if($this->page->hero_image){
-            $this->hero = str_starts_with($this->page->hero_image, 'library:')
-                ? Storage::disk('home_hero')->url(substr($this->page->hero_image, strlen('library:')))
-                : Storage::disk('public')->url($this->page->hero_image);
+        $heroImage = $this->page->hero_image ?: $fallbackHeroImage;
+
+        if ($heroImage) {
+            $this->hero = str_starts_with($heroImage, 'library:')
+                ? Storage::disk('home_hero')->url(substr($heroImage, strlen('library:')))
+                : Storage::disk('public')->url($heroImage);
         } else {
             $this->hero = $this->pickRandomHero();
         }

@@ -24,7 +24,9 @@ class Publication extends Model
         'doi',
         'url',
         'external_id',
+        'type',
         'is_open_access',
+        'is_active',
 
     ];
 
@@ -61,6 +63,11 @@ class Publication extends Model
     public function scopeLatestFirst($query)
     {
         return $query->orderByDesc('year');
+    }
+
+    public function scopeActive($query)
+    {
+        return $query->where('is_active', true);
     }
 
     public function sites()

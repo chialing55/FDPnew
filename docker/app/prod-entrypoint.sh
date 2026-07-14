@@ -17,10 +17,14 @@ mkdir -p \
     storage/framework/cache \
     storage/framework/sessions \
     storage/framework/views \
+    storage/framework/livewire-tmp \
     storage/logs \
-    bootstrap/cache
+    bootstrap/cache \
+    public/FDPfiles/splist/photo
 
 chown -R www-data:www-data storage bootstrap/cache || true
+chown -R www-data:www-data public/FDPfiles/splist/photo || true
+chmod -R 775 public/FDPfiles/splist/photo || true
 chown www-data:www-data public || true
 
 if [ ! -f .env ] && [ -f .env.production ]; then

@@ -26,7 +26,16 @@ class Site extends Model
         'latitude',
         'longitude',
         'elevation_m',
+        'plot_area_ha',
+        'established_year',
+        'sort_order',
         // 有其它欄位再自己加進來
+    ];
+
+    protected $casts = [
+        'plot_area_ha' => 'decimal:2',
+        'established_year' => 'integer',
+        'sort_order' => 'integer',
     ];
 
     /** 依語系回傳名稱 */

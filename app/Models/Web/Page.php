@@ -15,7 +15,7 @@ class Page extends Model
     protected $fillable = [
         'slug',
         'title_zh_tw', 'title_en',
-        'view', 'description', 'hero_image',
+        'description', 'hero_image',
         'nav_group', 'nav_order',
     ];
 
@@ -35,6 +35,11 @@ class Page extends Model
     public function site()
     {
         return $this->hasOne(Site::class);
+    }
+
+    public function subject()
+    {
+        return $this->hasOne(Subject::class);
     }
 }
 

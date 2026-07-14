@@ -6,6 +6,7 @@ use Livewire\Component;
 use App\Models\Web\Page;
 use App\Models\Web\Subject;
 use App\Models\Web\ContentBlock;
+use App\Models\Web\ContentBlockItem;
 use App\Models\Web\ResearchOutput;
 use App\Models\Web\Project;
 use Illuminate\Mail\Mailables\Content;
@@ -24,6 +25,7 @@ class PageDefault extends Component
         $this->page = $page;
         // dd($slug);
         $blocks = $page->contentBlocks()
+            ->with(['items' => fn ($query) => $query->where('is_public', true)->orderBy('sort_order')])
             ->where('is_public', true)
             ->orderBy('sort_order')
             ->get();
@@ -110,14 +112,23 @@ class PageDefault extends Component
 
     private function projectInformationBlock(Project $project): ContentBlock
     {
-        return new ContentBlock([
+        $block = new ContentBlock([
             'title_zh_tw' => '計畫資訊',
             'title_en' => 'Project Information',
-            'body_zh_tw' => $this->projectInformationHtml($project, false),
-            'body_en' => $this->projectInformationHtml($project, true),
             'sort_order' => -1,
             'is_public' => true,
         ]);
+
+        $block->setRelation('items', collect([
+            new ContentBlockItem([
+                'type' => 'text',
+                'body_zh_tw' => $this->projectInformationHtml($project, false),
+                'body_en' => $this->projectInformationHtml($project, true),
+                'is_public' => true,
+            ]),
+        ]));
+
+        return $block;
     }
 
     private function projectInformationHtml(Project $project, bool $english): string
@@ -245,14 +256,24 @@ class PageDefault extends Component
             return collect([
                 new ContentBlock([
                     'id'          => null,
-                    'title_zh_tw' => '基礎成果',
+                    'title_zh_tw' => '研究成果',
                     'title_en'    => 'Research Results',
                     'body_zh_tw'  => '',
                     'body_en'     => '',
                     'view'        => 'web.research-output-list', // 可選，指定 Blade 視圖
                     'params'      => [
                         'subject' => $blocks->id,   // 傳給這個 block 的參數
-                        
+                    ],
+                ]),
+                new ContentBlock([
+                    'id'          => null,
+                    'title_zh_tw' => '研究計畫',
+                    'title_en'    => 'Research Projects',
+                    'body_zh_tw'  => '',
+                    'body_en'     => '',
+                    'view'        => 'web.project-list',
+                    'params'      => [
+                        'subject' => $blocks->id,
                     ],
                 ]),
             ]);

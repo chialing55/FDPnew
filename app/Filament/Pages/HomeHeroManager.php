@@ -2,18 +2,21 @@
 
 namespace App\Filament\Pages;
 
+use App\Filament\Forms\ImmediatePublicImage;
 use App\Models\Web\Page as WebPage;
+use Filament\Forms\Components\FileUpload;
+use Filament\Forms\Concerns\InteractsWithForms;
+use Filament\Forms\Contracts\HasForms;
+use Filament\Forms\Form;
 use Filament\Notifications\Notification;
 use Filament\Pages\Page;
-use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Collection;
 use Livewire\Features\SupportFileUploads\TemporaryUploadedFile;
-use Livewire\WithFileUploads;
 
-class HomeHeroManager extends Page
+class HomeHeroManager extends Page implements HasForms
 {
-    use WithFileUploads;
+    use InteractsWithForms;
 
     protected static ?string $navigationGroup = '首頁';
     protected static ?string $navigationLabel = 'Hero 圖片';
@@ -24,22 +27,40 @@ class HomeHeroManager extends Page
     protected static string $view = 'filament.pages.home-hero-manager';
 
     public WebPage $homepage;
-    public array $heroUploads = [];
+    public ?array $data = [];
 
     public function mount(): void
     {
         $this->homepage = WebPage::query()->where('slug', 'index')->firstOrFail();
+        $this->form->fill();
     }
 
-    public function updatedHeroUploads(): void
+    public function form(Form $form): Form
     {
-        $this->validate([
-            'heroUploads' => ['required', 'array', 'min:1'],
-            'heroUploads.*' => ['image', 'max:12288'],
-        ]);
+        return $form
+            ->schema([
+                ImmediatePublicImage::field(
+                    'heroUploads',
+                    '選擇圖片',
+                    disk: 'home_hero',
+                    maxSize: 12288,
+                    multiple: true,
+                )
+                    ->helperText('支援 JPG、PNG、WEBP、GIF，可一次選擇多張，單檔最大 12MB。')
+                    ->live()
+                    ->afterStateUpdated(fn (FileUpload $component, mixed $state) => $this->uploadHeroImages($component, $state)),
+            ])
+            ->statePath('data');
+    }
 
-        $uploads = collect($this->heroUploads)
+    public function uploadHeroImages(FileUpload $component, mixed $state): void
+    {
+        $uploads = collect(is_array($state) ? $state : [$state])
             ->filter(fn (mixed $file): bool => $file instanceof TemporaryUploadedFile);
+
+        if ($uploads->isEmpty()) {
+            return;
+        }
 
         $uploads->each(function (TemporaryUploadedFile $file): void {
             $filename = basename($file->getClientOriginalName());
@@ -53,7 +74,7 @@ class HomeHeroManager extends Page
             $file->storeAs('', $filename, 'home_hero');
         });
 
-        $this->reset('heroUploads');
+        $component->state([]);
         Notification::make()->title($uploads->count() . ' 張 Hero 圖片已上傳')->success()->send();
     }
 

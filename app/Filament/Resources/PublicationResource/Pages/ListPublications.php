@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources\PublicationResource\Pages;
 
+use App\Filament\Actions\ListPageSettingsAction;
 use App\Filament\Resources\PublicationResource;
 use App\Models\Web\SiteSetting;
 use Filament\Actions;
@@ -17,6 +18,7 @@ class ListPublications extends ListRecords
     protected function getHeaderActions(): array
     {
         return [
+            ListPageSettingsAction::make('publications', '學術產出頁'),
             Actions\Action::make('citationSettings')
                 ->label('引用格式設定')
                 ->icon('heroicon-o-cog-6-tooth')

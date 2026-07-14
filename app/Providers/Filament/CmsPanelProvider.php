@@ -2,6 +2,8 @@
 
 namespace App\Providers\Filament;
 
+use App\Filament\Support\CmsFormActions;
+use App\Http\Middleware\EnsureUserIsApproved;
 use Filament\Http\Middleware\Authenticate;
 use Filament\Http\Middleware\AuthenticateSession;
 use Filament\Http\Middleware\DisableBladeIconComponents;
@@ -18,6 +20,7 @@ use Illuminate\Cookie\Middleware\EncryptCookies;
 use Illuminate\Foundation\Http\Middleware\VerifyCsrfToken;
 use Illuminate\Routing\Middleware\SubstituteBindings;
 use Illuminate\Session\Middleware\StartSession;
+use Illuminate\Support\HtmlString;
 use Illuminate\View\Middleware\ShareErrorsFromSession;
 use Filament\Navigation\NavigationItem;
 
@@ -26,14 +29,20 @@ class CmsPanelProvider extends PanelProvider
 {
     public function panel(Panel $panel): Panel
     {
+        CmsFormActions::configure();
+
         return $panel
             ->default()
             ->id('cms')
             ->path('cms')
+            ->homeUrl(url('/cms'))
             ->authGuard('web')
-            ->brandName('森林動態樣區研究成果平台・後台') 
-            ->brandLogo(asset('images/紅楠_葉_72_300.png'))
-            ->brandLogoHeight('2.5rem')
+            ->brandName(new HtmlString(
+                '<span class="cms-brand">'
+                . '<span>台灣森林動態樣區</span>'
+                . '<span>網頁後端管理介面</span>'
+                . '</span>'
+            ))
             ->favicon(asset('images/紅楠_葉_72_300.png'))
             ->sidebarCollapsibleOnDesktop()
             ->navigationGroups([
@@ -44,15 +53,14 @@ class CmsPanelProvider extends PanelProvider
                 NavigationGroup::make()->label('關於我們')->icon('heroicon-o-information-circle'),
             ])
             ->navigationItems([
-                NavigationItem::make('回到前台首頁')
-                    ->url(url('/'))           // 如果有 route('index') 也可以改成 ->url(route('index'))
-                    ->icon('heroicon-o-home')
-                    ->sort(99)
-                    ->openUrlInNewTab(),     // 新分頁打開，比較安全
-                NavigationItem::make('回資料管理系統')
+                NavigationItem::make('研究成果平台')
+                    ->url(url('/'))
+                    ->icon('heroicon-o-globe-alt')
+                    ->sort(97),
+                NavigationItem::make('資料管理系統')
                     ->url(url('/admin/choice'))
-                    ->icon('heroicon-o-arrow-left-on-rectangle')
-                    ->sort(100),
+                    ->icon('heroicon-o-circle-stack')
+                    ->sort(98),
             ])
             ->colors([
                 'primary' => Color::hex('#4f772d'),
@@ -80,6 +88,7 @@ class CmsPanelProvider extends PanelProvider
             ])
             ->authMiddleware([
                 Authenticate::class,
+                EnsureUserIsApproved::class,
             ]);
     }
 }

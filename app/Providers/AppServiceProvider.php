@@ -46,15 +46,10 @@ class AppServiceProvider extends ServiceProvider
                 ->orderBy('nav_order')
                 ->get();
 
-            $resultPages = Page::where('nav_group', 'results')
-                ->orderBy('nav_order')
-                ->get();
-
             $view->with([
                 'navAboutPages' => $aboutPages,
                 'navSitePages'       => $sitePages,
                 'navSubjectPages'    => $subjectPages,
-                'navResultsPages'    => $resultPages,
             ]);
         });
         Relation::morphMap([

@@ -2,7 +2,7 @@
 @section('title', $page->title . ' - ' . __('web.title'))
 
 @section('hero')
-    <livewire:web.page-background-hero :slug="$slug" :page="$page" />
+    <livewire:web.page-background-hero :slug="$slug" :page="$page" :fallback-hero-image="$fallbackHeroImage ?? null" />
 @endsection
 
 @section('content')

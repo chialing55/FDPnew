@@ -5,6 +5,7 @@ namespace App\Filament\Resources;
 use App\Filament\Resources\NewsResource\Pages;
 use App\Forms\Components\HtmlContentEditor;
 use App\Models\Web\News;
+use App\Filament\Forms\PageBasicFields;
 use Filament\Forms;
 use Filament\Forms\Components\Tabs;
 use Filament\Forms\Form;
@@ -24,20 +25,37 @@ class NewsResource extends Resource
 
     public static function form(Form $form): Form
     {
+        if ($form->getOperation() === 'create') {
+            return $form->schema([
+                Forms\Components\Section::make('基本資料')->schema([
+                    Forms\Components\Grid::make(2)->schema([
+                        ...PageBasicFields::make(titleEnRequired: false),
+                    ]),
+                    Forms\Components\DatePicker::make('publish_date')
+                        ->label('發布日期')
+                        ->required()
+                        ->default(now())
+                        ->native(false),
+                ]),
+            ]);
+        }
+
         return $form->schema([
             Tabs::make('消息設定')->tabs([
                 Tabs\Tab::make('基本資料')->schema([
                     Forms\Components\Grid::make(2)->schema([
-                        Forms\Components\TextInput::make('title_zh_tw')->label('中文標題')->required()->maxLength(255),
-                        Forms\Components\TextInput::make('title_en')->label('英文標題')->maxLength(255),
-                        Forms\Components\DatePicker::make('publish_date')->label('發布日期')->required()->default(now())->native(false),
-                        Forms\Components\Toggle::make('is_public')->label('發布到前台')->default(true),
-                        Forms\Components\Toggle::make('is_featured')->label('設為精選消息')->default(false),
+                        ...PageBasicFields::make(titleEnRequired: false),
                     ]),
-                    Forms\Components\FileUpload::make('cover_image')->label('封面圖片')
-                        ->disk('public')->directory('news')->visibility('public')->image()->imageEditor(),
-                    Forms\Components\TextInput::make('external_url')->label('外部連結')->url()
-                        ->helperText('填寫後，首頁點擊此消息會直接前往外部網站；留空則進入本站消息內容頁。'),
+                    Forms\Components\Section::make('其他設定')->schema([
+                        Forms\Components\Grid::make(2)->schema([
+                            Forms\Components\DatePicker::make('publish_date')->label('發布日期')->required()->default(now())->native(false),
+                            Forms\Components\Toggle::make('is_featured')->label('設為精選消息')->default(false),
+                        ]),
+                        Forms\Components\FileUpload::make('cover_image')->label('封面圖片')
+                            ->disk('public')->directory('news')->visibility('public')->image()->imageEditor(),
+                        Forms\Components\TextInput::make('external_url')->label('外部連結')->url()
+                            ->helperText('填寫後，首頁點擊此消息會直接前往外部網站；留空則進入本站消息內容頁。'),
+                    ]),
                 ]),
                 Tabs\Tab::make('消息內容')->schema([
                     Tabs::make('內容語系')->tabs([
@@ -60,7 +78,7 @@ class NewsResource extends Resource
                 Tables\Columns\TextColumn::make('publish_date')->label('發布日期')->date('Y-m-d')->sortable(),
                 Tables\Columns\TextColumn::make('title_zh_tw')->label('消息標題')->searchable()->sortable()->wrap(),
                 Tables\Columns\IconColumn::make('is_featured')->label('精選')->boolean(),
-                Tables\Columns\IconColumn::make('is_public')->label('公開')->boolean(),
+                Tables\Columns\IconColumn::make('is_active')->label('公開')->boolean(),
             ])->defaultSort('publish_date', 'desc')
             ->actions([Tables\Actions\EditAction::make()->label('編輯內容')])
             ->bulkActions([Tables\Actions\DeleteBulkAction::make()]);

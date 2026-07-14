@@ -21,7 +21,7 @@ class News extends Model
         'publish_date',
         'external_url',
         'is_featured',
-        'is_public',
+        'is_active',
     ];
 
     /** 依語系回傳標題 */
@@ -43,7 +43,7 @@ class News extends Model
     /** scope：只抓前台要顯示的 */
     public function scopePublic($query)
     {
-        return $query->where('is_public', 1);
+        return $query->where('is_active', 1);
     }
 
     /** scope：照發布日期倒序 */

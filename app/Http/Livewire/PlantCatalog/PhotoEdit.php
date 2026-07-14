@@ -29,7 +29,11 @@ class PhotoEdit extends Component
     public string $newDisNoteType2 = '';
     public string $newDisNoteNote = '';
     public $newPhotoFile;
-    public string $message = '';
+    public string $disNoteMessage = '';
+    public array $disNoteMessages = [];
+    public string $photoUploadMessage = '';
+    public array $photoMessages = [];
+    public int $messageVersion = 0;
 
     public function mount(string $spcode): void
     {
@@ -43,6 +47,8 @@ class PhotoEdit extends Component
 
     public function saveDisNote(string $noteKey): void
     {
+        $this->clearMessages();
+
         if (!isset($this->editingDisNotes[$noteKey])) {
             return;
         }
@@ -66,11 +72,14 @@ class PhotoEdit extends Component
 
         $this->loadOptions();
         $this->reloadDisNotes();
-        $this->message = '辨識要點已儲存。';
+        $this->disNoteMessages[$noteKey] = '辨識要點已儲存。';
+        $this->messageVersion++;
     }
 
     public function createDisNote(): void
     {
+        $this->clearMessages();
+
         $this->validate([
             'newDisNoteType' => ['required', 'string', 'max:100'],
             'newDisNoteType2' => ['nullable', 'string', 'max:100'],
@@ -94,18 +103,23 @@ class PhotoEdit extends Component
         $this->newDisNoteType2 = '';
         $this->newDisNoteNote = '';
         $this->reloadDisNotes();
-        $this->message = '辨識要點已新增。';
+        $this->disNoteMessage = '辨識要點已新增。';
+        $this->messageVersion++;
     }
 
     public function deleteDisNote(string $noteKey): void
     {
+        $this->clearMessages();
         $this->disNoteQuery($noteKey)->delete();
         $this->reloadDisNotes();
-        $this->message = '辨識要點已刪除。';
+        $this->disNoteMessage = '辨識要點已刪除。';
+        $this->messageVersion++;
     }
 
     public function savePhoto(string $photoKey): void
     {
+        $this->clearMessages();
+
         if (!isset($this->editingPhotos[$photoKey])) {
             return;
         }
@@ -138,11 +152,14 @@ class PhotoEdit extends Component
             ]));
 
         $this->reloadPhotos();
-        $this->message = '照片描述已儲存。';
+        $this->photoMessages[$photoKey] = '照片資料已儲存。';
+        $this->messageVersion++;
     }
 
     public function deletePhoto(string $photoKey): void
     {
+        $this->clearMessages();
+
         $photo = $this->photoQuery($photoKey)->first();
 
         if (!$photo) {
@@ -157,7 +174,8 @@ class PhotoEdit extends Component
 
         $this->photoQuery($photoKey)->delete();
         $this->reloadPhotos();
-        $this->message = '照片已刪除。';
+        $this->photoUploadMessage = '照片已刪除。';
+        $this->messageVersion++;
     }
 
     public function updatedNewPhotoFile(): void
@@ -169,34 +187,49 @@ class PhotoEdit extends Component
 
     public function uploadPhoto(): void
     {
+        $this->clearMessages();
+
         $this->validate([
             'newPhotoFile' => ['required', 'image', 'max:10240'],
         ], [], [
             'newPhotoFile' => '照片檔案',
         ]);
 
-        $filename = $this->storePlantPhoto();
+        try {
+            $filename = $this->storePlantPhoto();
 
-        Photo::query()->create($this->filterPhotoColumns([
-            'spcode' => $this->spcode,
-            'filename' => $filename,
-            'type' => '',
-            'type2' => '',
-            'fresh' => '',
-            'status' => '',
-            'photo_date' => null,
-            'is_public' => 1,
-            'photoby' => '',
-            'des' => '',
-            'uploaded_id' => $this->userName(),
-            'uploaded_at' => now()->toDateString(),
-            'updated_id' => $this->userName(),
-            'updated_at' => now(),
-        ]));
+            Photo::query()->create($this->filterPhotoColumns([
+                'spcode' => $this->spcode,
+                'filename' => $filename,
+                'type' => '',
+                'type2' => '',
+                'fresh' => '',
+                'status' => '',
+                'photo_date' => null,
+                'is_public' => 1,
+                'photoby' => '',
+                'des' => '',
+                'uploaded_id' => $this->userName(),
+                'uploaded_at' => now()->toDateString(),
+                'updated_id' => $this->userName(),
+                'updated_at' => now(),
+            ]));
+        } catch (\Throwable $exception) {
+            if (isset($filename)) {
+                $directory = public_path("FDPfiles/splist/photo/{$this->spcode}");
+                File::delete(["{$directory}/{$filename}", "{$directory}/s_{$filename}"]);
+            }
+
+            report($exception);
+            $this->addError('newPhotoFile', '照片新增失敗，請確認檔案格式或聯絡管理員。');
+
+            return;
+        }
 
         $this->newPhotoFile = null;
         $this->reloadPhotos();
-        $this->message = '照片已新增。';
+        $this->photoUploadMessage = '照片已新增。';
+        $this->messageVersion++;
     }
 
     public function render()
@@ -345,7 +378,11 @@ class PhotoEdit extends Component
             throw new \RuntimeException('Unable to read uploaded plant photo.');
         }
 
-        \imagejpeg($image, "{$directory}/{$filename}", 90);
+        if (! \imagejpeg($image, "{$directory}/{$filename}", 90)) {
+            \imagedestroy($image);
+            throw new \RuntimeException('Unable to write uploaded plant photo.');
+        }
+
         $this->saveThumbnail($image, "{$directory}/s_{$filename}", 500);
         \imagedestroy($image);
 
@@ -358,7 +395,10 @@ class PhotoEdit extends Component
         $height = \imagesy($source);
 
         if ($width <= $maxWidth) {
-            \imagejpeg($source, $targetPath, 85);
+            if (! \imagejpeg($source, $targetPath, 85)) {
+                throw new \RuntimeException('Unable to write plant photo thumbnail.');
+            }
+
             return;
         }
 
@@ -367,7 +407,10 @@ class PhotoEdit extends Component
         $thumbnail = \imagecreatetruecolor($newWidth, $newHeight);
 
         \imagecopyresampled($thumbnail, $source, 0, 0, 0, 0, $newWidth, $newHeight, $width, $height);
-        \imagejpeg($thumbnail, $targetPath, 85);
+        if (! \imagejpeg($thumbnail, $targetPath, 85)) {
+            \imagedestroy($thumbnail);
+            throw new \RuntimeException('Unable to write plant photo thumbnail.');
+        }
         \imagedestroy($thumbnail);
     }
 
@@ -417,5 +460,13 @@ class PhotoEdit extends Component
     private function userName(): string
     {
         return Auth::user()?->name ?? 'system';
+    }
+
+    private function clearMessages(): void
+    {
+        $this->disNoteMessage = '';
+        $this->disNoteMessages = [];
+        $this->photoUploadMessage = '';
+        $this->photoMessages = [];
     }
 }

@@ -40,7 +40,7 @@ Route::view('/', 'webindex')->name('webindex');
 | Breeze / Laravel Auth 相關（只留必要）
 |--------------------------------------------------------------------------
 */
-Route::middleware('auth')->group(function () {
+Route::middleware(['auth', 'approved'])->group(function () {
     Route::post('/cms/content-images', [ContentImageController::class, 'store'])
         ->name('cms.content-images.store');
     Route::get('/profile', [ProfileController::class, 'edit'])

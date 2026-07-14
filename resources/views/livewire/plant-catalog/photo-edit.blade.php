@@ -52,7 +52,7 @@
         }
 
         .plant-photo-message {
-            margin: 0 0 12px;
+            margin: 16px 0 12px;
             padding: 10px 12px;
             color: #1f4d2f;
             border: 1px solid #9ec7a5;
@@ -245,7 +245,7 @@
 
         .plant-photo-upload-card,
         .plant-photo-empty {
-            padding: 18px;
+            padding: 12px;
             border: 1px solid #d8dfd4;
             border-radius: 5px;
             background: #fff;
@@ -254,7 +254,7 @@
         .plant-photo-dropzone {
             display: grid;
             place-items: center;
-            min-height: 150px;
+            min-height: 72px;
             border: 1px dashed #aebca8;
             border-radius: 5px;
             background: #f7faf4;
@@ -305,10 +305,6 @@
         </a>
     </div>
 
-    @if ($message)
-        <p class="plant-photo-message">{{ $message }}</p>
-    @endif
-
     <div class="plant-photo-dis-note-box">
         <h6>辨識要點<span style='padding-left:20px;'>*種子雨收集與小苗調查用</span></h6>
         <datalist id="plant-photo-dis-note-type2-options">
@@ -348,6 +344,14 @@
                             wire:click="deleteDisNote('{{ $noteKey }}')"
                             onclick="return confirm('確定刪除這筆辨識要點？')">刪除</button>
                     </p>
+                    @if (!empty($disNoteMessages[$noteKey]))
+                        <p class="plant-photo-message" style="grid-column: 1 / -1;"
+                            wire:key="dis-note-message-{{ $noteKey }}-{{ $messageVersion }}"
+                            x-data="{ show: true }" x-show="show" x-transition.opacity
+                            x-init="setTimeout(() => show = false, 3000)">
+                            {{ $disNoteMessages[$noteKey] }}
+                        </p>
+                    @endif
                 </form>
             @empty
                 <p style="margin: 0; color: #52604b;">目前尚無辨識要點。</p>
@@ -365,12 +369,12 @@
                 </label>
 
                 <label>
-                    種子雨分類
+                    種子雨分類(可留空)
                     <input type="text" list="plant-photo-dis-note-type2-options" wire:model.defer="newDisNoteType2">
                 </label>
 
                 <label>
-                    新增說明
+                    說明
                     <textarea rows="1" wire:model.defer="newDisNoteNote"></textarea>
                 </label>
 
@@ -379,6 +383,11 @@
                 </p>
             </form>
         </div>
+        @if ($disNoteMessage)
+            <p class="plant-photo-message" wire:key="dis-note-message-{{ $messageVersion }}"
+                x-data="{ show: true }" x-show="show" x-transition.opacity
+                x-init="setTimeout(() => show = false, 3000)">{{ $disNoteMessage }}</p>
+        @endif
     </div>
 
     <div class="plant-photo-editor-panel">
@@ -466,6 +475,12 @@
                             wire:click="deletePhoto('{{ $photoKey }}')"
                             onclick="return confirm('確定刪除這張照片？')">刪除</button>
                     </p>
+                    @if (!empty($photoMessages[$photoKey]))
+                        <p class="plant-photo-message plant-photo-editor-wide"
+                            wire:key="photo-message-{{ $photoKey }}-{{ $messageVersion }}"
+                            x-data="{ show: true }" x-show="show" x-transition.opacity
+                            x-init="setTimeout(() => show = false, 3000)">{{ $photoMessages[$photoKey] }}</p>
+                    @endif
                 </div>
             </form>
         @empty
@@ -486,5 +501,10 @@
             @enderror
             <p class="plant-photo-form-error" wire:loading wire:target="newPhotoFile,uploadPhoto">處理照片中...</p>
         </div>
+        @if ($photoUploadMessage)
+            <p class="plant-photo-message" wire:key="photo-upload-message-{{ $messageVersion }}"
+                x-data="{ show: true }" x-show="show" x-transition.opacity
+                x-init="setTimeout(() => show = false, 3000)">{{ $photoUploadMessage }}</p>
+        @endif
     </div>
 </div>

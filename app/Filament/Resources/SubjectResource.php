@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources;
 
+use App\Filament\Forms\PageBasicFields;
 use App\Filament\Resources\SubjectResource\Pages;
 use App\Models\Web\Subject;
 use Filament\Forms;
@@ -10,9 +11,6 @@ use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
 use App\Models\Web\Page;
-use Filament\Forms\Set;
-use Filament\Forms\Get;
-use Illuminate\Database\Eloquent\Builder;
 use Filament\Navigation\NavigationItem;
 use App\Filament\Resources\PageResource;
 
@@ -58,123 +56,48 @@ class SubjectResource extends Resource
     {
         return $form
             ->schema([
-                // ====== 基本資訊 ======
-                Forms\Components\Section::make('基本資訊')
+                Forms\Components\Section::make('基本資料')
                     ->schema([
-                        // slug 一行獨占
                         Forms\Components\Grid::make(2)->schema([
-                        Forms\Components\Select::make('page_id')
-                            ->label('對應頁面（Subject Page）')
-                            ->required()
-                            ->relationship(
-                                name: 'page',
-                                titleAttribute: 'slug',
-                                modifyQueryUsing: function (Builder $query, Get $get) {
-                                    $usedPageIds = Subject::pluck('page_id')->filter()->toArray();
+                            ...PageBasicFields::make(
+                                urlField: Forms\Components\TextInput::make('page_slug')
+                                    ->label('頁面網址')
+                                    ->prefix(url('/') . '/subjects/')
+                                    ->placeholder('seedling')
+                                    ->required()
+                                    ->rule(function (): \Closure {
+                                        return function (string $attribute, mixed $value, \Closure $fail): void {
+                                            $tail = ltrim((string) $value, '/');
+                                            $slug = str_starts_with($tail, 'subjects/') ? $tail : 'subjects/' . $tail;
 
-                                    // ✅ 保留自己目前選到的 page_id（編輯時）
-                                    $current = $get('page_id');
-                                    if ($current) {
-                                        $usedPageIds = array_values(array_diff($usedPageIds, [(int) $current]));
-                                    }
-
-                                    return $query
-                                        ->where('nav_group', 'subjects')
-                                        ->whereNotIn('id', $usedPageIds)
-                                        ->orderBy('nav_order');
-                                }
-                            )
-                            ->getOptionLabelFromRecordUsing(fn (Page $record) => $record->slug . ' - ' . $record->title_zh_tw)
-                            ->searchable()
-                            ->preload()
-                            ->native(false)
-                            ->helperText('從 subjects 群組的頁面中選擇一個對應頁面')
-                            ->live()
-                            ->afterStateUpdated(function (Get $get, Set $set) {
-                                $pageId = $get('page_id');
-                                if (! $pageId) return;
-
-                                $page = Page::find($pageId);
-                                if (! $page) return;
-
-                                $set('short_name_zh_tw', $page->title_zh_tw);
-                                $set('short_name_en',   $page->title_en);
-                                $set('name_zh_tw',      $page->title_zh_tw);
-                                $set('name_en',         $page->title_en);
-                            }),
+                                            if (Page::query()->where('slug', $slug)->exists()) {
+                                                $fail('此頁面網址已經被使用。');
+                                            }
+                                        };
+                                    })
+                                    ->helperText('只需填最後一段，例如 seedling。頁面公開後請勿隨意修改。'),
+                                visibilityField: Forms\Components\Toggle::make('is_active')
+                                    ->label('顯示於前台')
+                                    ->default(true),
+                                titleZhTwField: 'short_name_zh_tw',
+                                titleEnField: 'short_name_en',
+                            ),
                         ]),
+                    ]),
 
-                        // 中英文主題名稱
+                Forms\Components\Section::make('完整標題')
+                    ->schema([
                         Forms\Components\Grid::make(2)->schema([
                             Forms\Components\TextInput::make('name_zh_tw')
-                                ->label('主題名稱（中）')
+                                ->label('完整標題（中）')
                                 ->required()
                                 ->maxLength(255),
 
                             Forms\Components\TextInput::make('name_en')
-                                ->label('主題名稱（英）')
+                                ->label('完整標題（英）')
                                 ->required()
                                 ->maxLength(255),
                         ]),
-
-                        // 中英文短名
-                        Forms\Components\Grid::make(2)->schema([
-                            Forms\Components\TextInput::make('short_name_zh_tw')
-                                ->label('短名（中）')
-                                ->maxLength(100),
-
-                            Forms\Components\TextInput::make('short_name_en')
-                                ->label('短名（英）')
-                                ->maxLength(100),
-                        ]),
-
-                        // 是否顯示 + 排序
-                        Forms\Components\Grid::make(2)->schema([
-                            Forms\Components\Toggle::make('is_active')
-                                ->label('是否顯示')
-                                ->default(true),
-
-                            Forms\Components\TextInput::make('sort_order')
-                                ->label('排序用')
-                                ->numeric()
-                                ->default(0)
-                                ->helperText('數字越小排序越前面'),
-                        ]),
-                    ])
-                    ->columns(2),
-
-                // ====== 主題簡介 ======
-                Forms\Components\Section::make('主題簡介')
-                    ->schema([
-                        Forms\Components\Grid::make()
-                            ->schema([
-                                Forms\Components\Textarea::make('description_zh_tw')
-                                    ->label('主題簡介（中）')
-                                    ->rows(4)
-                                    ->columnSpanFull(),
-
-                                Forms\Components\Textarea::make('description_en')
-                                    ->label('主題簡介（英）')
-                                    ->rows(4)
-                                    ->columnSpanFull(),
-                            ]),
-                    ]),
-
-                // ====== 研究方法 ======
-                Forms\Components\Section::make('研究方法說明')
-                    ->schema([
-                        Forms\Components\Grid::make()
-                            ->schema([
-                                Forms\Components\Textarea::make('method_zh_tw')
-                                    ->label('研究方法說明（中）')
-                                    ->rows(6)
-                                    ->columnSpanFull(),
-
-                                Forms\Components\Textarea::make('method_en')
-                                    ->label('研究方法說明（英）')
-                                    ->rows(6)
-                                    ->columnSpanFull(),
-                            ]),
                     ]),
             ]);
     }
@@ -182,40 +105,34 @@ class SubjectResource extends Resource
     public static function table(Table $table): Table
     {
         return $table
+            ->recordUrl(fn (Subject $record): string => PageResource::getUrl('edit', ['record' => $record->page_id]))
             ->columns([
-                Tables\Columns\TextColumn::make('page.slug')
-                    ->label('頁面')
-                    ->sortable(),
-
-                Tables\Columns\TextColumn::make('name_zh_tw')
-                    ->label('主題名稱（中）')
-                    ->searchable()
-                    ->sortable(),
-
                 Tables\Columns\TextColumn::make('short_name_zh_tw')
-                    ->label('短名（中）')
-                    ->toggleable()
-                    ->limit(20),
+                    ->label('研究主題')
+                    ->searchable()
+                    ->sortable()
+                    ->wrap(),
+
+                Tables\Columns\TextColumn::make('page.slug')
+                    ->label('網址')
+                    ->searchable()
+                    ->toggleable(),
 
                 Tables\Columns\IconColumn::make('is_active')
-                    ->label('顯示')
+                    ->label('公開')
                     ->boolean(),
-
-                Tables\Columns\TextColumn::make('sort_order')
-                    ->label('排序')
-                    ->sortable(),
-
-                Tables\Columns\TextColumn::make('updated_at')
-                    ->label('更新時間')
-                    ->dateTime('Y-m-d H:i')
-                    ->sortable(),
             ])
             ->filters([
                 Tables\Filters\TernaryFilter::make('is_active')
-                    ->label('是否顯示'),
+                    ->label('公開狀態'),
             ])
+            ->defaultSort('sort_order')
+            ->reorderable('sort_order')
             ->actions([
-                Tables\Actions\EditAction::make(),
+                Tables\Actions\Action::make('edit')
+                    ->label('編輯內容')
+                    ->icon('heroicon-o-pencil-square')
+                    ->url(fn (Subject $record): string => PageResource::getUrl('edit', ['record' => $record->page_id])),
             ])
             ->bulkActions([
                 Tables\Actions\DeleteBulkAction::make(),
@@ -227,7 +144,6 @@ class SubjectResource extends Resource
         return [
             'index' => Pages\ListSubjects::route('/'),
             'create' => Pages\CreateSubject::route('/create'),
-            'edit' => Pages\EditSubject::route('/{record}/edit'),
         ];
     }
 }

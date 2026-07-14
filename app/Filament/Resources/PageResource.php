@@ -4,8 +4,11 @@ namespace App\Filament\Resources;
 
 use App\Filament\Resources\PageResource\Pages;
 use App\Filament\Forms\ContentBlockForm;
+use App\Filament\Forms\ImmediatePublicImage;
 use App\Forms\Components\HtmlContentEditor;
 use App\Models\Web\Page;
+use App\Models\Web\Site;
+use App\Models\Web\Team;
 use Filament\Forms;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
@@ -21,6 +24,8 @@ use Livewire\Features\SupportFileUploads\TemporaryUploadedFile;
 
 class PageResource extends Resource
 {
+    private const FIXED_LIST_PAGE_SLUGS = ['results', 'projects', 'about/news', 'about/team'];
+
     private const IMAGE_EXTENSIONS = ['jpg', 'jpeg', 'png', 'webp', 'gif'];
 
     private const SLUG_SETTINGS = [
@@ -73,19 +78,6 @@ class PageResource extends Resource
             ->url(static::getUrl('create'))
             ->isActiveWhen(fn (): bool => request()->routeIs('filament.cms.resources.pages.create'));
 
-        try {
-            $plantsPage = Page::query()->where('slug', 'plants')->first();
-            if ($plantsPage) {
-                $items[] = NavigationItem::make('監測植物')
-                    ->group('研究成果')->icon('heroicon-o-sparkles')->sort(4)
-                    ->url(static::getUrl('edit', ['record' => $plantsPage], isAbsolute: false))
-                    ->isActiveWhen(fn (): bool => request()->routeIs('filament.cms.resources.pages.edit')
-                        && (int) request()->route('record') === (int) $plantsPage->getKey());
-            }
-        } catch (\Throwable) {
-            // 資料庫尚未就緒時略過動態入口。
-        }
-
         return $items;
     }
 
@@ -103,19 +95,46 @@ class PageResource extends Resource
                                     Forms\Components\TextInput::make('title_zh_tw')
                                         ->label('中文標題')
                                         ->required()
-                                        ->maxLength(255),
+                                        ->maxLength(255)
+                                        ->visible(fn (?Page $record): bool => $record?->nav_group !== 'subjects'),
+                                    Forms\Components\TextInput::make('subject_short_name_zh_tw')
+                                        ->label('中文標題')
+                                        ->required()
+                                        ->maxLength(100)
+                                        ->visible(fn (?Page $record): bool => $record?->nav_group === 'subjects'),
                                     Forms\Components\TextInput::make('title_en')
                                         ->label('英文標題')
                                         ->required()
-                                        ->maxLength(255),
+                                        ->maxLength(255)
+                                        ->visible(fn (?Page $record): bool => $record?->nav_group !== 'subjects'),
+                                    Forms\Components\TextInput::make('subject_short_name_en')
+                                        ->label('英文標題')
+                                        ->required()
+                                        ->maxLength(100)
+                                        ->visible(fn (?Page $record): bool => $record?->nav_group === 'subjects'),
+                                    static::slugField(),
+                                    Forms\Components\Toggle::make('page_visibility')
+                                        ->label('顯示於前台')
+                                        ->visible(fn (?Page $record): bool => in_array($record?->nav_group, ['sites', 'subjects'], true))
+                                        ->afterStateHydrated(function (Forms\Components\Toggle $component, ?Page $record): void {
+                                            $component->state($record?->site?->is_active ?? $record?->subject?->is_active ?? true);
+                                        }),
                                 ]),
-                                static::slugField(),
-                                Forms\Components\TextInput::make('view')
-                                    ->label('自訂 Blade 模板')
-                                    ->maxLength(150)
-                                    ->visible(fn (?Page $record): bool => $record?->nav_group !== 'sites')
-                                    ->helperText('僅特殊頁面需要填寫，一般內容頁請留空。'),
-                                Forms\Components\Section::make('樣區位置資料')
+                                Forms\Components\Section::make('完整標題')
+                                    ->visible(fn (?Page $record): bool => $record?->nav_group === 'subjects')
+                                    ->schema([
+                                        Forms\Components\Grid::make(2)->schema([
+                                            Forms\Components\TextInput::make('subject_name_zh_tw')
+                                                ->label('完整標題（中）')
+                                                ->required()
+                                                ->maxLength(255),
+                                            Forms\Components\TextInput::make('subject_name_en')
+                                                ->label('完整標題（英）')
+                                                ->required()
+                                                ->maxLength(255),
+                                        ]),
+                                    ]),
+                                Forms\Components\Section::make('動態樣區設定')
                                     ->relationship('site')
                                     ->visible(fn (?Page $record): bool => $record?->nav_group === 'sites')
                                     ->schema([
@@ -123,30 +142,25 @@ class PageResource extends Resource
                                             Forms\Components\TextInput::make('latitude')->label('中心點緯度')->numeric(),
                                             Forms\Components\TextInput::make('longitude')->label('中心點經度')->numeric(),
                                             Forms\Components\TextInput::make('elevation_m')->label('海拔（公尺）')->numeric(),
+                                            Forms\Components\TextInput::make('plot_area_ha')
+                                                ->label('樣區面積')
+                                                ->numeric()
+                                                ->minValue(0)
+                                                ->suffix('公頃'),
+                                            Forms\Components\TextInput::make('established_year')
+                                                ->label('設立時間')
+                                                ->integer()
+                                                ->minValue(1800)
+                                                ->maxValue((int) date('Y'))
+                                                ->suffix('年'),
                                         ]),
                                     ]),
                             ]),
                         static::siteIntroductionTab(),
-                        Tabs\Tab::make('導覽與 Hero')
+                        Tabs\Tab::make('頁面 Hero')
                             ->icon('heroicon-o-photo')
                             ->visible(fn (?Page $record): bool => $record?->slug !== 'index')
                             ->schema([
-                                Forms\Components\Grid::make(2)->schema([
-                                    Forms\Components\Select::make('nav_group')
-                                        ->label('前台導覽分類')
-                                        ->options([
-                                            'about' => '關於我們', 'sites' => '動態樣區',
-                                            'subjects' => '研究主題', 'results' => '研究成果', 'others' => '其他頁面',
-                                        ])
-                                        ->default('about')
-                                        ->live()
-                                        ->native(false)
-                                        ->helperText('選擇這個頁面要出現在哪一組導覽中。'),
-                                    Forms\Components\TextInput::make('nav_order')
-                                        ->label('顯示順序')
-                                        ->numeric()->minValue(1)
-                                        ->helperText('數字越小越前面。'),
-                                ]),
                                 Forms\Components\Section::make('選擇頁面 Hero')
                                     ->description('從 Hero 圖庫選擇一張圖片作為此頁面的 Hero，若無指定則隨機顯示。')
                                     ->icon('heroicon-o-photo')
@@ -170,6 +184,7 @@ class PageResource extends Resource
                             ]),
                         Tabs\Tab::make('頁面內容')
                             ->icon('heroicon-o-rectangle-stack')
+                            ->visible(fn (?Page $record): bool => ! in_array($record?->slug, self::FIXED_LIST_PAGE_SLUGS, true))
                             ->schema([
                                 Forms\Components\Placeholder::make('subject_content_notice')
                                     ->label('研究主題內容區塊說明')
@@ -177,6 +192,7 @@ class PageResource extends Resource
                                     ->visible(fn (?Page $record): bool => $record?->nav_group === 'subjects'),
                                 ContentBlockForm::make('')->columnSpanFull(),
                             ]),
+                        static::siteTeamsTab(),
                     ])->persistTabInQueryString()->columnSpanFull(),
             ]);
     }
@@ -238,9 +254,8 @@ class PageResource extends Resource
         }
 
         $example = $settings['example'];
-        $fullExample = $settings['prefix'] . $example;
 
-        return "只需填最後一段，例如 {$example}；系統會自動儲存為 {$fullExample}。頁面公開後請勿隨意修改。";
+        return "只需填最後一段，例如 {$example}。頁面公開後請勿隨意修改。";
     }
 
     protected static function siteIntroductionTab(): Tabs\Tab
@@ -257,11 +272,21 @@ class PageResource extends Resource
                         Tabs\Tab::make('中文')->schema([HtmlContentEditor::make('description_zh_tw')->label('樣區簡介（中）')]),
                         Tabs\Tab::make('English')->schema([HtmlContentEditor::make('description_en')->label('Site introduction (English)')]),
                     ]),
-                    Forms\Components\FileUpload::make('homepage_image')->label('首頁樣區卡片圖片')
-                        ->disk('public')->directory('plot-cards')->visibility('public')->image()->imageEditor()
+                    ImmediatePublicImage::field('homepage_image', '首頁樣區卡片圖片', directory: 'plot-cards')
                         ->live()
-                        ->imagePreviewHeight('240')
-                        ->helperText('更換流程：1. 點圖片左上角 × 刪除目前照片 2. 上傳新照片 3. 點頁面底部「Save changes」儲存。'),
+                        ->afterStateHydrated(fn (Forms\Components\FileUpload $component): Forms\Components\FileUpload => $component->state([]))
+                        ->afterStateUpdated(function (Forms\Components\FileUpload $component, mixed $state, ?Site $record): void {
+                            $upload = ImmediatePublicImage::upload($state);
+
+                            if (! $upload || ! $record) {
+                                return;
+                            }
+
+                            $path = ImmediatePublicImage::replace($upload, 'plot-cards', $record->homepage_image);
+                            $record->update(['homepage_image' => $path]);
+                            $component->state([]);
+                        })
+                        ->helperText('選擇檔案後會立即上傳；重新選擇會直接取代舊照片。'),
                     Forms\Components\TextInput::make('homepage_image_position')
                         ->label('圖片垂直顯示位置')
                         ->numeric()->minValue(1)->maxValue(100)->default(50)
@@ -270,9 +295,92 @@ class PageResource extends Resource
                         ->helperText('1 接近頂端、50 置中、100 接近底端；只調整前台顯示焦點，不會修改原圖。'),
                     Forms\Components\Placeholder::make('homepage_card_preview')
                         ->label('首頁卡片圖片預覽')
-                        ->content(fn (Forms\Get $get): HtmlString => static::homepageCardPreview($get)),
-                    Forms\Components\Toggle::make('is_active')->label('顯示於前台'),
+                        ->content(fn (Forms\Get $get, ?Site $record): HtmlString => static::homepageCardPreview($get, $record)),
+                    Forms\Components\Actions::make([
+                        Forms\Components\Actions\Action::make('deleteHomepageImage')
+                            ->label('刪除照片')
+                            ->icon('heroicon-o-trash')
+                            ->color('danger')
+                            ->requiresConfirmation()
+                            ->action(function (Forms\Set $set, ?Site $record): void {
+                                if (! $record) {
+                                    return;
+                                }
+
+                                ImmediatePublicImage::delete($record->homepage_image);
+                                $record->update(['homepage_image' => null]);
+                                $set('homepage_image', []);
+                            }),
+                    ])->visible(fn (?Site $record): bool => filled($record?->homepage_image)),
                 ]),
+            ]);
+    }
+
+    protected static function siteTeamsTab(): Tabs\Tab
+    {
+        return Tabs\Tab::make('研究團隊')
+            ->icon('heroicon-o-users')
+            ->visible(fn (?Page $record): bool => $record?->nav_group === 'sites')
+            ->schema([
+                Forms\Components\Section::make('研究團隊')
+                    ->description('設定此動態樣區的負責團隊與合作單位；顯示順序數字越小越前面。')
+                    ->schema([
+                        Forms\Components\Placeholder::make('team_creation_notice')
+                            ->label('新增團隊說明')
+                            ->content(fn (): HtmlString => new HtmlString(
+                                '若無符合的研究團隊，請至 <a class="font-semibold text-primary-600 hover:underline" href="'
+                                . e(TeamResource::getUrl('index'))
+                                . '">研究團隊頁面</a> 新增。'
+                            )),
+                        Forms\Components\Repeater::make('site_teams')
+                            ->label('已連結團隊')
+                            ->afterStateHydrated(function (Forms\Components\Repeater $component, ?Page $record): void {
+                                $component->state(
+                                    $record?->site?->siteTeams()
+                                        ->orderBy('sort_order')
+                                        ->get(['id', 'team_id', 'role', 'sort_order'])
+                                        ->map(fn ($siteTeam): array => $siteTeam->toArray())
+                                        ->all() ?? []
+                                );
+                            })
+                            ->schema([
+                                Forms\Components\Hidden::make('id'),
+                                Forms\Components\Select::make('team_id')
+                                    ->label('團隊')
+                                    ->options(fn (): array => Team::query()
+                                        ->orderBy('institution_zh_tw')
+                                        ->get()
+                                        ->mapWithKeys(fn (Team $team): array => [$team->id => $team->display_name])
+                                        ->all())
+                                    ->searchable()
+                                    ->disableOptionsWhenSelectedInSiblingRepeaterItems()
+                                    ->required()
+                                    ->native(false)
+                                    ->columnSpan(2),
+                                Forms\Components\Select::make('role')
+                                    ->label('角色')
+                                    ->options([
+                                        'plot_manager' => '樣區負責人',
+                                        'team_partner' => '合作單位',
+                                    ])
+                                    ->required()
+                                    ->native(false),
+                                Forms\Components\TextInput::make('sort_order')
+                                    ->label('顯示順序')
+                                    ->numeric()
+                                    ->default(0)
+                                    ->required(),
+                            ])
+                            ->columns(4)
+                            ->defaultItems(0)
+                            ->addActionLabel('新增研究團隊')
+                            ->reorderableWithButtons()
+                            ->orderColumn('sort_order')
+                            ->collapsible()
+                            ->collapsed()
+                            ->itemLabel(fn (array $state): ?string => Team::query()->find($state['team_id'] ?? null)?->display_name)
+                            ->columnSpanFull(),
+                    ]),
             ]);
     }
 
@@ -297,9 +405,14 @@ class PageResource extends Resource
         return $options;
     }
 
-    protected static function homepageCardPreview(Forms\Get $get): HtmlString
+    protected static function homepageCardPreview(Forms\Get $get, ?Site $record): HtmlString
     {
-        $url = static::uploadedImageUrl($get('homepage_image'));
+        $image = $record?->homepage_image;
+
+        /** @var FilesystemAdapter $publicDisk */
+        $publicDisk = Storage::disk('public');
+
+        $url = is_string($image) && filled($image) ? $publicDisk->url($image) : null;
 
         if (! $url) {
             return new HtmlString('<div style="padding:24px;border:1px dashed #cbd5e1;border-radius:8px;color:#64748b;text-align:center">尚未選擇圖片</div>');
@@ -378,10 +491,6 @@ class PageResource extends Resource
 
                 Tables\Columns\TextColumn::make('nav_order')
                     ->label('導覽排序')
-                    ->toggleable(isToggledHiddenByDefault: true),
-
-                Tables\Columns\TextColumn::make('view')
-                    ->label('模板 (view)')
                     ->toggleable(isToggledHiddenByDefault: true),
 
                 Tables\Columns\TextColumn::make('description')

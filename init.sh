@@ -38,10 +38,13 @@ else
   echo "🔑 APP Key already exists, skip key generation."
 fi
 
-# 3. 設定目錄權限（storage、bootstrap/cache）
+# 3. 設定目錄權限（storage、bootstrap/cache、植物照片）
 echo "🛠️ 設定 storage 和 cache 權限..."
+mkdir -p storage/framework/livewire-tmp public/FDPfiles/splist/photo
 chmod -R 775 storage bootstrap/cache
 chown -R www-data:www-data storage bootstrap/cache || true
+chown -R www-data:www-data public/FDPfiles/splist/photo || true
+chmod -R 775 public/FDPfiles/splist/photo || true
 
 # 4. 等待資料庫啟動
 echo "⏳ 等待 MySQL 資料庫啟動..."

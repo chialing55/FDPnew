@@ -15,21 +15,32 @@ class CreateSite extends CreateRecord
 {
     protected static string $resource = SiteResource::class;
 
+    public function getTitle(): string
+    {
+        return '新增動態樣區';
+    }
+
     protected function handleRecordCreation(array $data): Model
     {
-        $slug = $data['page_slug'];
+        $tail = ltrim($data['page_slug'], '/');
+        $slug = str_starts_with($tail, 'sites/') ? $tail : 'sites/' . $tail;
         unset($data['page_slug']);
 
         return DB::connection('mysql_web')->transaction(function () use ($data, $slug): Site {
+            $sortOrder = ((int) Site::query()->max('sort_order')) + 1;
+
             $page = Page::query()->create([
                 'slug' => $slug,
                 'title_zh_tw' => $data['name_zh_tw'],
                 'title_en' => $data['name_en'],
                 'nav_group' => 'sites',
-                'nav_order' => ((int) Page::query()->where('nav_group', 'sites')->max('nav_order')) + 1,
+                'nav_order' => $sortOrder,
             ]);
 
-            return Site::query()->create($data + ['page_id' => $page->getKey()]);
+            return Site::query()->create($data + [
+                'page_id' => $page->getKey(),
+                'sort_order' => $sortOrder,
+            ]);
         });
     }
 

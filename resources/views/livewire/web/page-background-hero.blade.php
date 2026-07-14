@@ -26,14 +26,14 @@
 
                 @if ($locale === 'en')
                     {{-- 英文介面：只顯示英文 --}}
-                    {{ $page->title_en }}
+                    {{ $titleEn }}
                 @else
                     {{-- 中文介面：英文 + 中文都顯示 --}}
                     <div>
-                        {{ $page->title_en }}
+                        {{ $titleEn }}
                     </div>
                     <div class="{{ $fontSizeClass2 }} mt-1 md:tracking-normal">
-                        {{ $page->title_zh_tw }}
+                        {{ $titleZhTw }}
                     </div>
                 @endif
             </div>

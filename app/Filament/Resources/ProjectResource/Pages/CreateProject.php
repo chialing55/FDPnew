@@ -9,13 +9,8 @@ class CreateProject extends CreateRecord
 {
     protected static string $resource = ProjectResource::class;
 
-    protected function afterCreate(): void
+    protected function getRedirectUrl(): string
     {
-        $record = $this->record;
-        $data = $this->data;
-
-        // 只需要 sync 關聯表
-        $record->sites()->sync($data['sites'] ?? []);
-        $record->subjects()->sync($data['subjects'] ?? []);
+        return ProjectResource::getUrl('edit', ['record' => $this->record]);
     }
 }

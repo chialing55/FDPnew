@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources\ProjectResource\Pages;
 
+use App\Filament\Actions\ListPageSettingsAction;
 use App\Filament\Resources\ProjectResource;
 use Filament\Actions;
 use Filament\Resources\Pages\ListRecords;
@@ -14,6 +15,7 @@ class ListProjects extends ListRecords
     protected function getHeaderActions(): array
     {
         return [
+            ListPageSettingsAction::make('projects', '研究計畫列表頁'),
             Actions\CreateAction::make()->label('新增研究計畫'),
         ];
     }

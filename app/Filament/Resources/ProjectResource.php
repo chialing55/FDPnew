@@ -5,6 +5,7 @@ namespace App\Filament\Resources;
 use App\Filament\Resources\ProjectResource\Pages;
 use App\Filament\Forms\ContentBlockForm;
 use App\Filament\Forms\ContentRelationForm;
+use App\Filament\Forms\PageBasicFields;
 use App\Models\Web\Project;
 use Filament\Forms;
 use Filament\Forms\Components\Tabs;
@@ -25,22 +26,40 @@ class ProjectResource extends Resource
 
     public static function form(Form $form): Form
     {
+        if ($form->getOperation() === 'create') {
+            return $form->schema([
+                Forms\Components\Section::make('基本資料')->schema([
+                    Forms\Components\Grid::make(2)->schema([
+                        ...PageBasicFields::make(
+                            titleZhTwLabel: '計畫名稱（中）',
+                            titleEnLabel: '計畫名稱（英）',
+                        ),
+                    ]),
+                ]),
+            ]);
+        }
+
         return $form->schema([
             Tabs::make('研究計畫設定')->tabs([
                 Tabs\Tab::make('基本資料')->icon('heroicon-o-document-text')->schema([
                     Forms\Components\Grid::make(2)->schema([
-                        Forms\Components\TextInput::make('title_zh_tw')->label('計畫名稱（中）')->required()->maxLength(255),
-                        Forms\Components\TextInput::make('title_en')->label('計畫名稱（英）')->required()->maxLength(255),
-                        Forms\Components\TextInput::make('code')->label('計畫代碼')->maxLength(100),
-                        Forms\Components\Toggle::make('is_active')->label('顯示於前台')->default(true),
-                        Forms\Components\TextInput::make('pi_zh_tw')->label('主持人（中）')->maxLength(255),
-                        Forms\Components\TextInput::make('pi_en')->label('PI（英）')->maxLength(255),
-                        Forms\Components\DatePicker::make('start_date')->label('開始日期')->native(false),
-                        Forms\Components\DatePicker::make('end_date')->label('結束日期')->native(false),
-                        Forms\Components\TextInput::make('funding_agency_zh_tw')->label('補助單位（中）')->maxLength(255),
-                        Forms\Components\TextInput::make('funding_agency_en')->label('Funding agency（英）')->maxLength(255),
+                        ...PageBasicFields::make(
+                            titleZhTwLabel: '計畫名稱（中）',
+                            titleEnLabel: '計畫名稱（英）',
+                        ),
                     ]),
-                    Forms\Components\TextInput::make('website_url')->label('計畫網站 URL')->url()->maxLength(255),
+                    Forms\Components\Section::make('其他設定')->schema([
+                        Forms\Components\Grid::make(2)->schema([
+                            Forms\Components\TextInput::make('code')->label('計畫代碼')->maxLength(100),
+                            Forms\Components\TextInput::make('website_url')->label('計畫網站 URL')->url()->maxLength(255),
+                            Forms\Components\TextInput::make('pi_zh_tw')->label('主持人（中）')->maxLength(255),
+                            Forms\Components\TextInput::make('pi_en')->label('PI（英）')->maxLength(255),
+                            Forms\Components\DatePicker::make('start_date')->label('開始日期')->native(false),
+                            Forms\Components\DatePicker::make('end_date')->label('結束日期')->native(false),
+                            Forms\Components\TextInput::make('funding_agency_zh_tw')->label('補助單位（中）')->maxLength(255),
+                            Forms\Components\TextInput::make('funding_agency_en')->label('Funding agency（英）')->maxLength(255),
+                        ]),
+                    ]),
                 ]),
                 Tabs\Tab::make('關聯設定')->icon('heroicon-o-link')->schema([
                     ...ContentRelationForm::fields(siteLabel: '關聯樣區（可複選）'),

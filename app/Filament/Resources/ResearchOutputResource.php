@@ -5,6 +5,8 @@ namespace App\Filament\Resources;
 use App\Filament\Resources\ResearchOutputResource\Pages;
 use App\Filament\Forms\ContentBlockForm;
 use App\Filament\Forms\ContentRelationForm;
+use App\Filament\Forms\PageBasicFields;
+use App\Filament\Forms\HeroImageField;
 use App\Models\Web\ResearchOutput;
 use Filament\Forms;
 use Filament\Forms\Components\Tabs;
@@ -12,6 +14,7 @@ use Filament\Forms\Form;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
+use Illuminate\Support\HtmlString;
 
 class ResearchOutputResource extends Resource
 {
@@ -20,30 +23,44 @@ class ResearchOutputResource extends Resource
     protected static ?string $navigationIcon = 'heroicon-o-rectangle-group';
     protected static ?string $navigationGroup = '研究成果';
     protected static ?int $navigationSort = 1;
-    protected static ?string $navigationLabel = '成果列表';
+    protected static ?string $navigationLabel = '研究成果';
     protected static ?string $modelLabel = '成果';
-    protected static ?string $pluralModelLabel = '成果列表';
+    protected static ?string $pluralModelLabel = '研究成果';
 
     public static function form(Form $form): Form
     {
+        if ($form->getOperation() === 'create') {
+            return $form->schema([
+                Forms\Components\Section::make('基本資料')->schema([
+                    Forms\Components\Grid::make(2)->schema([
+                        ...PageBasicFields::make(
+                            urlField: Forms\Components\TextInput::make('slug')
+                                ->label('頁面網址')
+                                ->prefix(url('/results') . '/')
+                                ->required()
+                                ->maxLength(150)
+                                ->unique()
+                                ->helperText('只需填最後一段，例如 fushan-forest-composition。頁面公開後請勿隨意修改。'),
+                            titleEnRequired: false,
+                        ),
+                    ]),
+                ]),
+            ]);
+        }
+
         return $form->schema([
             Tabs::make('成果設定')->tabs([
                 Tabs\Tab::make('基本資料')
                     ->icon('heroicon-o-document-text')
                     ->schema([
                         Forms\Components\Grid::make(2)->schema([
-                            Forms\Components\TextInput::make('title_zh_tw')
-                                ->label('中文標題')->required()->maxLength(255),
-                            Forms\Components\TextInput::make('title_en')
-                                ->label('英文標題')->maxLength(255),
-                        ]),
-                        Forms\Components\Grid::make(2)->schema([
-                            Forms\Components\TextInput::make('slug')
-                                ->label('成果網址')->prefix(url('/results') . '/')
+                            ...PageBasicFields::make(
+                                urlField: Forms\Components\TextInput::make('slug')
+                                ->label('頁面網址')->prefix(url('/results') . '/')
                                 ->required()->maxLength(150)->unique(ignoreRecord: true)
                                 ->helperText('例如 fushan-forest-composition；不需輸入 results/。'),
-                            Forms\Components\Toggle::make('is_public')
-                                ->label('發布到前台')->default(true),
+                                titleEnRequired: false,
+                            ),
                         ]),
                     ]),
 
@@ -52,6 +69,29 @@ class ResearchOutputResource extends Resource
                     ->schema([
                         ...ContentRelationForm::fields(),
                     ])->columns(2),
+
+                Tabs\Tab::make('導覽與 Hero')
+                    ->icon('heroicon-o-photo')
+                    ->schema([
+                        Forms\Components\Section::make('導覽設定')
+                            ->description('單筆研究成果固定歸屬研究成果頁；頁面基本資料與共用 Hero 可由此進入設定。')
+                            ->schema([
+                                Forms\Components\Placeholder::make('results_navigation_settings')
+                                    ->label('研究成果頁')
+                                    ->content(fn (): HtmlString => new HtmlString(
+                                        '<a class="font-semibold text-primary-600 hover:underline" href="'
+                                        . e(PageResource::getUrl('edit', [
+                                            'record' => \App\Models\Web\Page::query()->where('slug', 'results')->firstOrFail(),
+                                        ]))
+                                        . '">編輯研究成果頁基本資料與 Hero</a>'
+                                    )),
+                            ]),
+                        Forms\Components\Section::make('選擇研究成果 Hero')
+                            ->description('選擇此研究成果專用的 Hero；未選擇時沿用研究成果頁 Hero。')
+                            ->schema([
+                                HeroImageField::make()->columnSpanFull(),
+                            ]),
+                    ]),
 
                 Tabs\Tab::make('頁面內容')
                     ->icon('heroicon-o-rectangle-stack')
@@ -78,7 +118,7 @@ class ResearchOutputResource extends Resource
                     ->label('樣區')->badge()->separator(', '),
                 Tables\Columns\TextColumn::make('subjects.name_zh_tw')
                     ->label('研究主題')->badge()->separator(', '),
-                Tables\Columns\IconColumn::make('is_public')->label('公開')->boolean(),
+                Tables\Columns\IconColumn::make('is_active')->label('公開')->boolean(),
             ])
             ->defaultSort('id', 'desc')
             ->actions([

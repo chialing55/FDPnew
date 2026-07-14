@@ -6,7 +6,13 @@
     </div>
     <div class='z-5 mx-auto gap-4 text-center md:px-8 md:pb-4'>
         <div class="web-content text-sm leading-relaxed text-gray-700 md:text-base">
-            {!! $indexIntro->body ?? '' !!}
+            @foreach ($indexIntro?->items ?? [] as $item)
+                @if ($item->type === 'text' && !empty($item->body))
+                    {!! $item->body !!}
+                @elseif ($item->type === 'component' && !empty($item->component))
+                    @livewire($item->component, $item->params ?? [], key('home-intro-item-' . $item->id))
+                @endif
+            @endforeach
         </div>
     </div>
     {{-- plots --}}
@@ -68,7 +74,26 @@
             @endforelse
         </div>
     </div>
-
+    <div class="relative left-1/2 right-1/2 mb-12 ml-[-50vw] mr-[-50vw] bg-gray-200 py-8 lg:mt-8" style="width: 100vw;">
+        <div class="mx-auto w-full max-w-7xl">
+            <ol class="grid gap-4 md:grid-cols-2">
+                <li>
+                    <a href="{{ url('/results') }}"
+                        class="group flex items-center justify-between rounded-lg bg-white px-6 py-5 text-lg font-semibold text-forest-dark no-underline shadow-sm transition hover:-translate-y-0.5 hover:border-forest hover:text-forest hover:no-underline hover:shadow-md">
+                        <span>{{ __('web.index_results_overview') }}</span>
+                        <span aria-hidden="true" class="transition group-hover:translate-x-1">→</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="{{ url('/projects') }}"
+                        class="group flex items-center justify-between rounded-lg bg-white px-6 py-5 text-lg font-semibold text-forest-dark no-underline shadow-sm transition hover:-translate-y-0.5 hover:border-forest hover:text-forest hover:no-underline hover:shadow-md">
+                        <span>{{ __('web.index_projects_overview') }}</span>
+                        <span aria-hidden="true" class="transition group-hover:translate-x-1">→</span>
+                    </a>
+                </li>
+            </ol>
+        </div>
+    </div>
 
 
 </div>

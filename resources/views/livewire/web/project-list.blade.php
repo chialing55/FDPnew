@@ -80,7 +80,7 @@
                             @foreach ($p->subjects->sortBy('nav_order') as $sub)
                                 <span style="{{ $this->tagStyle('subject', $sub->id) }}"
                                     class="rounded px-2 py-1 text-gray-700">
-                                    {{ $sub->name }}
+                                    {{ $sub->short_name ?: $sub->name }}
                                 </span>
                             @endforeach
                         @endif

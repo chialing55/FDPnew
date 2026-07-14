@@ -2,6 +2,7 @@
 namespace App\Filament\Pages;
 use App\Forms\Components\HtmlContentEditor;
 use App\Models\Web\ContentBlock;
+use App\Models\Web\ContentBlockItem;
 use App\Models\Web\Page as WebPage;
 use Filament\Forms\Components\Tabs;
 use Filament\Forms\Form;
@@ -17,6 +18,7 @@ class HomeIntroductionManager extends Page
     protected static ?string $slug = 'home-introduction';
     protected static string $view = 'filament.pages.home-introduction-manager';
     public ContentBlock $introduction;
+    public ContentBlockItem $introductionItem;
     public array $data = [];
     public function mount(): void
     {
@@ -28,11 +30,13 @@ class HomeIntroductionManager extends Page
                 'title_zh_tw' => '網站介紹',
                 'title_en' => 'Introduction',
             ]);
-        $this->form->fill($this->introduction->only(['body_zh_tw', 'body_en']));
+        $this->introductionItem = $this->introduction->items()->where('type', 'text')->first()
+            ?? $this->introduction->items()->create(['type' => 'text', 'sort_order' => 0, 'is_public' => true]);
+        $this->form->fill($this->introductionItem->only(['body_zh_tw', 'body_en']));
     }
     public function form(Form $form): Form
     {
-        return $form->model($this->introduction)->statePath('data')->schema([
+        return $form->model($this->introductionItem)->statePath('data')->schema([
             Tabs::make('網站介紹')->tabs([
                 Tabs\Tab::make('中文')->schema([HtmlContentEditor::make('body_zh_tw')->label('網站介紹（中）')]),
                 Tabs\Tab::make('English')->schema([HtmlContentEditor::make('body_en')->label('Website introduction (English)')]),
@@ -41,7 +45,7 @@ class HomeIntroductionManager extends Page
     }
     public function save(): void
     {
-        $this->introduction->update($this->form->getState());
+        $this->introductionItem->update($this->form->getState());
         Notification::make()->title('網站介紹已儲存')->success()->send();
     }
 }

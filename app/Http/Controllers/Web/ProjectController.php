@@ -14,9 +14,10 @@ class ProjectController extends Controller
         $project->load(['sites', 'subjects']);
 
         $heroPage = Page::where('slug', 'projects')->firstOrFail();
+        $breadcrumbParentLabel = $heroPage->title;
         $heroPage->title_zh_tw = $project->title_zh_tw;
         $heroPage->title_en = $project->title_en;
 
-        return view('pages.web.project', compact('project', 'heroPage'));
+        return view('pages.web.project', compact('project', 'heroPage', 'breadcrumbParentLabel'));
     }
 }

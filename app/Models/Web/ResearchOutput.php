@@ -12,7 +12,7 @@ class ResearchOutput extends Model
     protected $table = 'research_outputs';
     protected $connection = 'mysql_web';
     protected $casts = [
-        'is_public' => 'boolean',
+        'is_active' => 'boolean',
     ];
 
     protected $fillable = [
@@ -20,7 +20,7 @@ class ResearchOutput extends Model
         'title_zh_tw',
         'title_en',
         'hero_image',
-        'is_public',
+        'is_active',
     ];
 
     /** 依語系回傳標題 */

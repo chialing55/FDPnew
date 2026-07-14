@@ -19,8 +19,6 @@ class ContentBlock extends Model
         'owner_id',
         'title_zh_tw',
         'title_en',
-        'body_zh_tw',
-        'body_en',
         // 僅供 PageDefault 建立不寫入資料庫的系統固定區塊。
         'view',
         'params',
@@ -44,12 +42,9 @@ class ContentBlock extends Model
             : $this->title_zh_tw;
     }
 
-    /** 依語系回傳內容 */
-    public function getBodyAttribute(): ?string
+    public function items()
     {
-        return app()->getLocale() === 'en'
-            ? $this->body_en
-            : $this->body_zh_tw;
+        return $this->hasMany(ContentBlockItem::class)->orderBy('sort_order');
     }
 
     public function owner()

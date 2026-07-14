@@ -24,6 +24,7 @@ class Index extends Component
 
         // 2. 載入該頁的內容區塊
         $this->indexIntro = $page->contentBlocks()
+            ->with(['items' => fn ($query) => $query->where('is_public', true)->orderBy('sort_order')])
             ->where('is_public', true)
             ->orderBy('sort_order')
             ->first();

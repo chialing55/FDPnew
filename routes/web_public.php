@@ -12,6 +12,8 @@ Route::prefix('web')->group(function () {
     Route::get('/species/{spcode}', [WebIndexController::class, 'species'])->name('front.species.legacy');
 });
 
+Route::redirect('/plants', '/web/splist', 301);
+
 
 // === 前台公開頁面 ===
 

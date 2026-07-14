@@ -129,12 +129,12 @@ class ProjectList extends Component
                     ->where('pages.nav_group', '=', 'subjects');
             })
             ->orderBy('pages.nav_order')
-            ->select('subjects.id', 'subjects.name_zh_tw', 'subjects.name_en')
+            ->select('subjects.id', 'subjects.short_name_zh_tw', 'subjects.short_name_en', 'subjects.name_zh_tw', 'subjects.name_en')
             ->get()
             ->mapWithKeys(function ($r) use ($locale) {
                 $label = $locale === 'en'
-                    ? ($r->name_en ?: $r->name_zh_tw)
-                    : ($r->name_zh_tw ?: $r->name_en);
+                    ? ($r->short_name_en ?: $r->name_en ?: $r->short_name_zh_tw ?: $r->name_zh_tw)
+                    : ($r->short_name_zh_tw ?: $r->name_zh_tw ?: $r->short_name_en ?: $r->name_en);
 
                 return [(string) $r->id => $label];
             })
@@ -155,8 +155,14 @@ class ProjectList extends Component
 
     public function clearFilters(): void
     {
-        $this->site = null;
-        $this->subject = null;
+        if ($this->showSiteFilter) {
+            $this->site = null;
+        }
+
+        if ($this->showSubjectFilter) {
+            $this->subject = null;
+        }
+
         $this->resetPage();
     }
 
@@ -196,7 +202,7 @@ class ProjectList extends Component
             ->selectSub($siteSortSubquery, 'site_nav_order')
             ->selectSub($subjectSortSubquery, 'subject_nav_order')
             ->with([
-                'subjects:id,name_zh_tw,name_en,page_id',
+                'subjects:id,short_name_zh_tw,short_name_en,name_zh_tw,name_en,page_id',
                 'sites:id,name_zh_tw,name_en,page_id',
             ])
             ->when($subjectId, fn ($q) =>

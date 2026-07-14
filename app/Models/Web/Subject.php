@@ -18,10 +18,6 @@ class Subject extends Model
         'name_en',
         'short_name_zh_tw',
         'short_name_en',
-        'description_zh_tw',
-        'description_en',
-        'method_zh_tw',
-        'method_en',
         'is_active',
         'sort_order',
     ];
@@ -40,19 +36,6 @@ class Subject extends Model
             : $this->short_name_zh_tw;
     }
 
-    public function getDescriptionAttribute(): ?string
-    {
-        return app()->getLocale() === 'en'
-            ? $this->description_en
-            : $this->description_zh_tw;
-    }
-
-    public function getMethodAttribute(): ?string
-    {
-        return app()->getLocale() === 'en'
-            ? $this->method_en
-            : $this->method_zh_tw;
-    }
     /** 主題相關的內容區塊 */
     public function page()
     {

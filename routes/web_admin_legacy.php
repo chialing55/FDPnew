@@ -76,7 +76,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
 |--------------------------------------------------------------------------
 */
 
-Route::middleware(['auth'])->prefix('admin')->name('admin.')->group(function () {
+Route::middleware(['auth', 'approved'])->prefix('admin')->name('admin.')->group(function () {
 
     /*
     |--------------------------------------------------------------------------

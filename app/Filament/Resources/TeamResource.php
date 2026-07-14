@@ -4,11 +4,13 @@ namespace App\Filament\Resources;
 
 use App\Filament\Resources\TeamResource\Pages;
 use App\Models\Web\Team;
+use App\Filament\Forms\ImmediatePublicImage;
 use Filament\Forms;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
+use Illuminate\Support\HtmlString;
 
 class TeamResource extends Resource
 {
@@ -18,8 +20,8 @@ class TeamResource extends Resource
     protected static ?string $navigationGroup = '關於我們';
     protected static ?string $navigationLabel = '研究團隊';
     protected static ?int $navigationSort = 2;
-    protected static ?string $modelLabel = '參與團隊';
-    protected static ?string $pluralModelLabel = '參與團隊';
+    protected static ?string $modelLabel = '研究團隊';
+    protected static ?string $pluralModelLabel = '研究團隊';
 
     public static function form(Form $form): Form
     {
@@ -43,7 +45,7 @@ class TeamResource extends Resource
                                 ->native(false),
 
                             Forms\Components\Toggle::make('is_active')
-                                ->label('是否顯示於前台')
+                                ->label('顯示於前台')
                                 ->default(true),
 
                             Forms\Components\TextInput::make('website_url')
@@ -106,13 +108,40 @@ class TeamResource extends Resource
                 // ====== Logo ======
                 Forms\Components\Section::make('Logo')
                     ->schema([
-                        Forms\Components\FileUpload::make('logo_path')
-                            ->label('Logo 圖檔')
-                            ->image()
-                            ->directory('teams/logo')
-                            ->maxSize(2048)
-                            ->imageEditor()
-                            ->columnSpan(1),
+                        ImmediatePublicImage::field('logo_path', 'Logo 圖檔', directory: 'teams/logo', maxSize: 2048)
+                            ->live()
+                            ->afterStateHydrated(fn (Forms\Components\FileUpload $component): Forms\Components\FileUpload => $component->state([]))
+                            ->afterStateUpdated(function (Forms\Components\FileUpload $component, mixed $state, ?Team $record): void {
+                                $upload = ImmediatePublicImage::upload($state);
+
+                                if (! $upload || ! $record) {
+                                    return;
+                                }
+
+                                $path = ImmediatePublicImage::replace($upload, 'teams/logo', $record->logo_path);
+                                $record->update(['logo_path' => $path]);
+                                $component->state([]);
+                            })
+                            ->helperText('選擇檔案後會立即上傳；重新選擇會直接取代舊 Logo。'),
+                        Forms\Components\Placeholder::make('logo_preview')
+                            ->label('目前 Logo')
+                            ->content(fn (?Team $record): HtmlString => ImmediatePublicImage::preview($record?->logo_path, '尚未上傳 Logo', circular: true)),
+                        Forms\Components\Actions::make([
+                            Forms\Components\Actions\Action::make('deleteLogo')
+                                ->label('刪除 Logo')
+                                ->icon('heroicon-o-trash')
+                                ->color('danger')
+                                ->requiresConfirmation()
+                                ->action(function (Forms\Set $set, ?Team $record): void {
+                                    if (! $record) {
+                                        return;
+                                    }
+
+                                    ImmediatePublicImage::delete($record->logo_path);
+                                    $record->update(['logo_path' => null]);
+                                    $set('logo_path', []);
+                                }),
+                        ])->visible(fn (?Team $record): bool => filled($record?->logo_path)),
                     ]),
 
             ]);
@@ -141,7 +170,7 @@ class TeamResource extends Resource
                     ->searchable(),
 
                 Tables\Columns\IconColumn::make('is_active')
-                    ->label('顯示')
+                    ->label('公開')
                     ->boolean(),
 
                 Tables\Columns\TextColumn::make('updated_at')
