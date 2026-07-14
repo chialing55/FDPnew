@@ -39,7 +39,7 @@ return [
         'public' => [
             'driver' => 'local',
             'root' => storage_path('app/public'),
-            'url' => env('APP_URL').'/storage',
+            'url' => '/storage',
             'visibility' => 'public',
             'throw' => false,
         ],
@@ -47,7 +47,7 @@ return [
         'home_hero' => [
             'driver' => 'local',
             'root' => storage_path('app/public/hero'),
-            'url' => env('APP_URL').'/storage/hero',
+            'url' => '/storage/hero',
             'visibility' => 'public',
             'throw' => false,
         ],

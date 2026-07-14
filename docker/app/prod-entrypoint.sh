@@ -14,6 +14,9 @@ fi
 
 mkdir -p \
     storage/app/public \
+    storage/app/public/content-images \
+    storage/app/public/hero \
+    storage/app/public/plot-cards \
     storage/framework/cache \
     storage/framework/sessions \
     storage/framework/views \
@@ -21,6 +24,15 @@ mkdir -p \
     storage/logs \
     bootstrap/cache \
     public/FDPfiles/splist/photo
+
+if [ -d public/images/hero ]; then
+    cp -n public/images/hero/. storage/app/public/hero/
+fi
+
+for image in public/images/plots/*_thumb.jpg; do
+    [ -f "$image" ] || continue
+    cp -n "$image" storage/app/public/plot-cards/
+done
 
 chown -R www-data:www-data storage bootstrap/cache || true
 chown -R www-data:www-data public/FDPfiles/splist/photo || true

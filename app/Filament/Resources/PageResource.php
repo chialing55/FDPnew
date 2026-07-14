@@ -412,7 +412,8 @@ class PageResource extends Resource
         /** @var FilesystemAdapter $publicDisk */
         $publicDisk = Storage::disk('public');
 
-        $url = is_string($image) && filled($image) ? $publicDisk->url($image) : null;
+        $url = static::uploadedImageUrl($get('homepage_image'))
+            ?? (is_string($image) && filled($image) ? $publicDisk->url($image) : null);
 
         if (! $url) {
             return new HtmlString('<div style="padding:24px;border:1px dashed #cbd5e1;border-radius:8px;color:#64748b;text-align:center">尚未選擇圖片</div>');
