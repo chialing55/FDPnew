@@ -65,10 +65,8 @@ class ProjectList extends Component
     private function resolveSubjectId(?string $subject): ?int
     {
         if (!$subject) return null;
-        if (ctype_digit($subject)) {
-            return Subject::whereKey((int) $subject)->where('is_active', true)->value('id');
-        }
-        return Subject::where('slug', $subject)->where('is_active', true)->value('id');
+        if (ctype_digit($subject)) return (int) $subject;
+        return Subject::where('slug', $subject)->value('id');
     }
 
     private function resolveSiteId(?string $site): ?int
@@ -130,7 +128,6 @@ class ProjectList extends Component
                 $join->on('pages.id', '=', 'subjects.page_id')
                     ->where('pages.nav_group', '=', 'subjects');
             })
-            ->where('subjects.is_active', true)
             ->orderBy('pages.nav_order')
             ->select('subjects.id', 'subjects.short_name_zh_tw', 'subjects.short_name_en', 'subjects.name_zh_tw', 'subjects.name_en')
             ->get()
@@ -187,7 +184,6 @@ class ProjectList extends Component
                 $join->on('pages.id', '=', 'subjects.page_id')
                     ->where('pages.nav_group', '=', 'subjects');
             })
-            ->where('subjects.is_active', true)
             ->whereColumn('project_subject.project_id', 'projects.id')
             ->selectRaw('MIN(pages.nav_order)');
 
@@ -206,8 +202,7 @@ class ProjectList extends Component
             ->selectSub($siteSortSubquery, 'site_nav_order')
             ->selectSub($subjectSortSubquery, 'subject_nav_order')
             ->with([
-                'subjects' => fn ($query) => $query->where('subjects.is_active', true)
-                    ->select('subjects.id', 'short_name_zh_tw', 'short_name_en', 'name_zh_tw', 'name_en', 'page_id'),
+                'subjects:id,short_name_zh_tw,short_name_en,name_zh_tw,name_en,page_id',
                 'sites:id,name_zh_tw,name_en,page_id',
             ])
             ->when($subjectId, fn ($q) =>

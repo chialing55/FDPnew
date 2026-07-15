@@ -11,10 +11,7 @@ class ProjectController extends Controller
     public function show(Project $project)
     {
         abort_unless($project->is_active, 404);
-        $project->load([
-            'sites',
-            'subjects' => fn ($query) => $query->where('subjects.is_active', true),
-        ]);
+        $project->load(['sites', 'subjects']);
 
         $heroPage = Page::where('slug', 'projects')->firstOrFail();
         $breadcrumbParentLabel = $heroPage->title;
