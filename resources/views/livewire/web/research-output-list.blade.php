@@ -49,7 +49,7 @@
                     <span class="text-gray-900">
                         {{ $o->title }}
                     </span>
-                    <div class="flex flex-wrap gap-2 text-xs">
+                    <div class="flex flex-wrap justify-end gap-2 text-xs sm:ml-auto sm:pl-4">
                         @if ($showSiteTags)
                             @foreach ($o->sites as $s)
                                 <span style="{{ $this->tagStyle('site', $s->id) }}"

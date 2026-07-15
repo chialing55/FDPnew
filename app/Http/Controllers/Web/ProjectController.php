@@ -12,7 +12,7 @@ class ProjectController extends Controller
     {
         abort_unless($project->is_active, 404);
         $project->load([
-            'sites' => fn ($query) => $query->where('sites.is_active', true),
+            'sites',
             'subjects' => fn ($query) => $query->where('subjects.is_active', true),
         ]);
 
