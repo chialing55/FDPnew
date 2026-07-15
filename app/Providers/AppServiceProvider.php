@@ -39,10 +39,12 @@ class AppServiceProvider extends ServiceProvider
                 ->get();
 
             $sitePages = Page::where('nav_group', 'sites')
+                ->whereHas('site', fn ($query) => $query->where('is_active', true))
                 ->orderBy('nav_order')
                 ->get();
 
             $subjectPages = Page::where('nav_group', 'subjects')
+                ->whereHas('subject', fn ($query) => $query->where('is_active', true))
                 ->orderBy('nav_order')
                 ->get();
 

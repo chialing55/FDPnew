@@ -65,17 +65,23 @@ class ProjectList extends Component
     private function resolveSubjectId(?string $subject): ?int
     {
         if (!$subject) return null;
-        if (ctype_digit($subject)) return (int) $subject;
-        return Subject::where('slug', $subject)->value('id');
+        if (ctype_digit($subject)) {
+            return Subject::whereKey((int) $subject)->where('is_active', true)->value('id');
+        }
+        return Subject::where('slug', $subject)->where('is_active', true)->value('id');
     }
 
     private function resolveSiteId(?string $site): ?int
     {
         if (!$site) return null;
-        if (ctype_digit($site)) return (int) $site;
+        if (ctype_digit($site)) {
+            return Site::whereKey((int) $site)->where('is_active', true)->value('id');
+        }
 
         // 你之前用 name_en 找 fushan，我延用
-        return Site::whereRaw('LOWER(name_en) = ?', [strtolower($site)])->value('id');
+        return Site::whereRaw('LOWER(name_en) = ?', [strtolower($site)])
+            ->where('is_active', true)
+            ->value('id');
     }
 
     /**
@@ -106,6 +112,7 @@ class ProjectList extends Component
                 $join->on('pages.id', '=', 'sites.page_id')
                     ->where('pages.nav_group', '=', 'sites');
             })
+            ->where('sites.is_active', true)
             ->orderBy('pages.nav_order')
             ->select('sites.id', 'sites.name_zh_tw', 'sites.name_en')
             ->get()
@@ -128,6 +135,7 @@ class ProjectList extends Component
                 $join->on('pages.id', '=', 'subjects.page_id')
                     ->where('pages.nav_group', '=', 'subjects');
             })
+            ->where('subjects.is_active', true)
             ->orderBy('pages.nav_order')
             ->select('subjects.id', 'subjects.short_name_zh_tw', 'subjects.short_name_en', 'subjects.name_zh_tw', 'subjects.name_en')
             ->get()
@@ -168,8 +176,8 @@ class ProjectList extends Component
 
     public function render()
     {
-        $siteId = $this->site && ctype_digit($this->site) ? (int) $this->site : $this->resolveSiteId($this->site);
-        $subjectId = $this->subject && ctype_digit($this->subject) ? (int) $this->subject : $this->resolveSubjectId($this->subject);
+        $siteId = $this->resolveSiteId($this->site);
+        $subjectId = $this->resolveSubjectId($this->subject);
 
         /**
          * ✅ 依 sites / subjects 對應 pages.nav_order 來排序
@@ -184,6 +192,7 @@ class ProjectList extends Component
                 $join->on('pages.id', '=', 'subjects.page_id')
                     ->where('pages.nav_group', '=', 'subjects');
             })
+            ->where('subjects.is_active', true)
             ->whereColumn('project_subject.project_id', 'projects.id')
             ->selectRaw('MIN(pages.nav_order)');
 
@@ -193,6 +202,7 @@ class ProjectList extends Component
                 $join->on('pages.id', '=', 'sites.page_id')
                     ->where('pages.nav_group', '=', 'sites');
             })
+            ->where('sites.is_active', true)
             ->whereColumn('project_site.project_id', 'projects.id')
             ->selectRaw('MIN(pages.nav_order)');
 
@@ -202,8 +212,10 @@ class ProjectList extends Component
             ->selectSub($siteSortSubquery, 'site_nav_order')
             ->selectSub($subjectSortSubquery, 'subject_nav_order')
             ->with([
-                'subjects:id,short_name_zh_tw,short_name_en,name_zh_tw,name_en,page_id',
-                'sites:id,name_zh_tw,name_en,page_id',
+                'subjects' => fn ($query) => $query->where('subjects.is_active', true)
+                    ->select('subjects.id', 'short_name_zh_tw', 'short_name_en', 'name_zh_tw', 'name_en', 'page_id'),
+                'sites' => fn ($query) => $query->where('sites.is_active', true)
+                    ->select('sites.id', 'name_zh_tw', 'name_en', 'page_id'),
             ])
             ->when($subjectId, fn ($q) =>
                 $q->whereHas('subjects', fn ($qq) => $qq->where('subjects.id', $subjectId))

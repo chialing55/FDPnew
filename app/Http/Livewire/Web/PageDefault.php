@@ -171,8 +171,8 @@ class PageDefault extends Component
 
     private function researchOutputContent(ResearchOutput $output): Collection
     {
-        $site = $output->sites()->value('sites.id');
-        $subject = $output->subjects()->value('subjects.id');
+        $site = $output->sites()->where('sites.is_active', true)->value('sites.id');
+        $subject = $output->subjects()->where('subjects.is_active', true)->value('subjects.id');
 
         return collect([
             new ContentBlock([
@@ -250,6 +250,7 @@ class PageDefault extends Component
         $blocks = Subject::whereHas('page', function ($q) use ($slug) {
                 $q->where('slug', $slug);
             })
+            ->where('is_active', true)
             ->firstOrFail();
 
         if ($blocks) {

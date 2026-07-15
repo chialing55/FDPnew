@@ -274,19 +274,7 @@ class PageResource extends Resource
                     ]),
                     ImmediatePublicImage::field('homepage_image', '首頁樣區卡片圖片', directory: 'plot-cards')
                         ->live()
-                        ->afterStateHydrated(fn (Forms\Components\FileUpload $component): Forms\Components\FileUpload => $component->state([]))
-                        ->afterStateUpdated(function (Forms\Components\FileUpload $component, mixed $state, ?Site $record): void {
-                            $upload = ImmediatePublicImage::upload($state);
-
-                            if (! $upload || ! $record) {
-                                return;
-                            }
-
-                            $path = ImmediatePublicImage::replace($upload, 'plot-cards', $record->homepage_image);
-                            $record->update(['homepage_image' => $path]);
-                            $component->state([]);
-                        })
-                        ->helperText('選擇檔案後會立即上傳；重新選擇會直接取代舊照片。'),
+                        ->helperText('選擇檔案後請按「儲存變更」；重新選擇會取代舊照片。'),
                     Forms\Components\TextInput::make('homepage_image_position')
                         ->label('圖片垂直顯示位置')
                         ->numeric()->minValue(1)->maxValue(100)->default(50)
