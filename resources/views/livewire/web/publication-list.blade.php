@@ -1,4 +1,9 @@
 <div class="space-y-4">
+    <p class="text-sm text-gray-600">
+        {{ app()->getLocale() === 'en'
+            ? $publications->total() . ' publications'
+            : '共有 ' . $publications->total() . ' 篇文獻' }}
+    </p>
     @if ($showFilters)
         <x-web.filter-bar>
             <x-web.filter-select wire:model.live="year"
@@ -19,6 +24,10 @@
                     :label="__('web.select_subject')" :placeholder="__('web.select_all_subject')"
                     :options="$subjectOptions" />
             @endif
+            <button type="button" wire:click="clearFilters"
+                class="rounded-md border px-3 py-2 text-sm hover:bg-gray-50">
+                {{ __('web.select_clear') }}
+            </button>
         </x-web.filter-bar>
     @endif
     <ul class="divide-y divide-gray-200 bg-white">
@@ -70,5 +79,5 @@
             <li class="px-4 py-6 text-gray-600">目前尚無學術產出資料。</li>
         @endforelse
     </ul>
-    {{ $publications->links() }}
+    {{ $publications->links('components.web.compact-pagination') }}
 </div>

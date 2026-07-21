@@ -43,6 +43,22 @@ class PublicationList extends Component
         $this->resetPage();
     }
 
+    public function clearFilters(): void
+    {
+        $this->year = '';
+        $this->type = '';
+
+        if ($this->showSiteFilter) {
+            $this->site = null;
+        }
+
+        if ($this->showSubjectFilter) {
+            $this->subject = null;
+        }
+
+        $this->resetPage();
+    }
+
     public function render()
     {
         $query = Publication::active()
