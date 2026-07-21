@@ -10,6 +10,7 @@ class Site extends Model
     use HasFactory;
 
     protected $table = 'sites';
+
     protected $connection = 'mysql_web';
 
     protected $fillable = [
@@ -69,7 +70,8 @@ class Site extends Model
     public function siteTeams()
     {
         return $this->hasMany(SiteTeam::class);
-    }    
+    }
+
     public function teams()
     {
         return $this->belongsToMany(Team::class, 'site_team')
@@ -88,4 +90,5 @@ class Site extends Model
     {
         return $this->belongsToMany(Publication::class, 'publication_site');
     }
+
 }

@@ -42,9 +42,12 @@ class PageDefault extends Component
         $slugGrpoup=explode('/', $slug);
         
         if ($slugGrpoup[0] === 'sites' ) {
-            // 針對動態樣區頁面，加入預設的內容區塊
-            $site = $slugGrpoup[1];
-            $additionalBlocks = $this->siteContent($site);
+            // 樣區 slug 只在頁面入口解析一次；所有子元件一律接收 site ID。
+            $siteId = $page instanceof Page
+                ? $page->site()->value('id')
+                : null;
+            abort_unless($siteId, 404);
+            $additionalBlocks = $this->siteContent((int) $siteId);
             $blocks = $blocks->concat($additionalBlocks);
             // 
         }
@@ -196,7 +199,7 @@ class PageDefault extends Component
         ]);
     }
 
-    public function siteContent($site): Collection
+    public function siteContent(int $siteId): Collection
     {
         return collect([
             new ContentBlock([
@@ -207,7 +210,7 @@ class PageDefault extends Component
                 'body_en'     => '',
                 'view'        => 'web.site-teams-block', // 可選，指定 Blade 視圖
                 'params'      => [
-                    'currentSite' => $site,   // 傳給這個 block 的參數
+                    'currentSite' => (string) $siteId,
                 ],
             ]),
             new ContentBlock([
@@ -218,7 +221,7 @@ class PageDefault extends Component
                 'body_en'     => '',
                 'view'        => 'web.research-output-list', // 可選，指定 Blade 視圖
                 'params'      => [
-                    'site' => $site,   // 傳給這個 block 的參數
+                    'site' => (string) $siteId,
                     
                 ],
             ]),
@@ -230,7 +233,7 @@ class PageDefault extends Component
                 'body_en'     => '',
                 'view'        => 'web.project-list', // 可選，指定 Blade 視圖
                 'params'      => [
-                    'site' => $site,   // 傳給這個 block 的參數
+                    'site' => (string) $siteId,
                     
                 ],
             ]),
@@ -242,7 +245,7 @@ class PageDefault extends Component
                 'body_en'     => '',
                 'view'        => 'web.publication-list',
                 'params'      => [
-                    'site' => $site,
+                    'site' => (string) $siteId,
                     'showFilters' => false,
                 ],
             ]),

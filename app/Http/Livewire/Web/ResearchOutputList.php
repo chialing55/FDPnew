@@ -79,15 +79,6 @@ class ResearchOutputList extends Component
         return Subject::where('slug', $subject)->value('id');
     }
 
-    private function resolveSiteId(?string $site): ?int
-    {
-        if (!$site) return null;
-        if (ctype_digit($site)) return (int) $site;
-
-        // 你之前用 name_en 找 fushan，我保留這個
-        return Site::whereRaw('LOWER(name_en) = ?', [strtolower($site)])->value('id');
-    }
-
     /**
      * 標籤顏色（同一個 id 永遠同色）
      */
@@ -187,7 +178,7 @@ class ResearchOutputList extends Component
 
     public function render()
     {
-        $siteId = $this->resolveSiteId($this->site);
+        $siteId = $this->site !== null ? (int) $this->site : null;
         $subjectId = $this->resolveSubjectId($this->subject);
 
 

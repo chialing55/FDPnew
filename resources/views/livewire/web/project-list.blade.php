@@ -1,43 +1,23 @@
 <div class="space-y-4">
 
     @if ($showSiteFilter || $showSubjectFilter)
-        <div class="mb-4 flex flex-col gap-3 p-3 sm:flex-row sm:items-end">
+        <x-web.filter-bar>
 
             @if ($showSiteFilter)
-                <div class="w-full sm:w-64">
-                    <label class="mb-1 block text-xs text-gray-600">
-                        {{ __('web.select_site') }}
-                    </label>
-                    <select wire:model.live="site"
-                        class="h-10 w-full rounded-md border border-gray-300 px-3 py-2 text-sm">
-                        <option value="">{{ __('web.select_all_site') }}</option>
-                        @foreach ($siteOptions as $id => $label)
-                            <option value="{{ $id }}">{{ $label }}</option>
-                        @endforeach
-                    </select>
-                </div>
+                <x-web.filter-select wire:model.live="site" :label="__('web.select_site')"
+                    :placeholder="__('web.select_all_site')" :options="$siteOptions" />
             @endif
 
             @if ($showSubjectFilter)
-                <div class="w-full sm:w-64">
-                    <label class="mb-1 block text-xs text-gray-600">
-                        {{ __('web.select_subject') }}
-                    </label>
-                    <select wire:model.live="subject"
-                        class="h-10 w-full rounded-md border border-gray-300 px-3 py-2 text-sm">
-                        <option value="">{{ __('web.select_all_subject') }}</option>
-                        @foreach ($subjectOptions as $id => $label)
-                            <option value="{{ $id }}">{{ $label }}</option>
-                        @endforeach
-                    </select>
-                </div>
+                <x-web.filter-select wire:model.live="subject" :label="__('web.select_subject')"
+                    :placeholder="__('web.select_all_subject')" :options="$subjectOptions" />
             @endif
 
             <button type="button" wire:click="clearFilters"
                 class="rounded-md border px-3 py-2 text-sm hover:bg-gray-50">
                 {{ __('web.select_clear') }}
             </button>
-        </div>
+        </x-web.filter-bar>
     @endif
 
 

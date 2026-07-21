@@ -8,7 +8,7 @@ use App\Models\Web\SiteTeam;
 class SiteTeamsBlock extends Component
 {
     // 傳進來的條件（字串）
-    public ?string $currentSite = null;  // 例如 'fushan'
+    public ?string $currentSite = null;  // site ID
     public ?string $currentRole = null;  // 例如 'plot_manager'
 
     // 查出來的資料
@@ -21,7 +21,7 @@ class SiteTeamsBlock extends Component
     /**
      * 初始載入
      * 例如：
-     * @livewire('web.site-teams-block', ['currentSite' => 'fushan', 'currentRole' => 'plot_manager'])
+     * @livewire('web.site-teams-block', ['currentSite' => '1', 'currentRole' => 'plot_manager'])
      */
     public function mount(?string $currentSite = null, ?string $currentRole = null): void
     {
@@ -45,15 +45,15 @@ class SiteTeamsBlock extends Component
     /**
      * 共用查詢邏輯：可依 site、role（其中一個或兩個都有）過濾
      */
-    protected function loadTeams(?string $siteSlug, ?string $role): void
+    protected function loadTeams(?string $siteId, ?string $role): void
     {
         $query = SiteTeam::with(['team', 'site'])
             ->orderBy('sort_order', 'asc');
 
         // 先處理 site 過濾
-        if ($siteSlug) {
-            $this->site = Site::where('name_en', $siteSlug)->firstOrFail();
-            $this->currentSite = $siteSlug;
+        if ($siteId) {
+            $this->site = Site::findOrFail((int) $siteId);
+            $this->currentSite = (string) $this->site->id;
             $query->where('site_id', $this->site->id);
         } else {
             $this->site = null;
@@ -113,9 +113,9 @@ class SiteTeamsBlock extends Component
     public function role(string $role): void
     {
         // 切換角色時，保留目前樣區（優先用 currentSite，其次用已載入的 Site model）
-        $siteSlug = $this->currentSite ?? $this->site?->name_en;
+        $siteId = $this->currentSite ?? ($this->site ? (string) $this->site->id : null);
 
-        $this->loadTeams($siteSlug, $role);
+        $this->loadTeams($siteId, $role);
     }
 
     public function render()

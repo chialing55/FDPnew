@@ -48,19 +48,25 @@ class PublicationList extends Component
         $this->resetPage();
     }
 
+    public function tagStyle(string $type, int $id): string
+    {
+        $colors = [
+            'site' => ['#f1f5f9', '#eff6ff', '#eef2ff', '#ecfeff', '#f0fdfa', '#ecfdf5'],
+            'subject' => ['#fffbeb', '#fff7ed', '#fff1f2', '#fdf4ff', '#f5f3ff', '#f7fee7', '#ecfeff', '#ecfdf5', '#f0f9ff', '#fef2f2'],
+        ];
+        $list = $colors[$type] ?? ['#f3f4f6'];
+
+        return 'background-color: '.$list[$id % count($list)].';';
+    }
+
     public function render()
     {
         $query = Publication::active()
             ->with(['sites.page', 'subjects.page'])
             ->when($this->year !== '', fn ($query) => $query->where('year', $this->year))
-            ->when($this->site !== '', function ($query): void {
-                $query->whereHas('sites', function ($siteQuery): void {
-                    $siteQuery->where(function ($valueQuery): void {
-                        $valueQuery->where('sites.id', $this->site)
-                            ->orWhereHas('page', fn ($pageQuery) => $pageQuery->where('slug', $this->site));
-                    });
-                });
-            })
+            ->when($this->site !== '', fn ($query) => $query->whereHas(
+                'sites', fn ($siteQuery) => $siteQuery->where('sites.id', (int) $this->site)
+            ))
             ->when($this->subject !== '', fn ($query) => $query->whereHas(
                 'subjects', fn ($subjectQuery) => $subjectQuery->where('subjects.id', $this->subject)
             ));
