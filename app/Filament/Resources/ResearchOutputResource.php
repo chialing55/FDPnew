@@ -2,11 +2,11 @@
 
 namespace App\Filament\Resources;
 
-use App\Filament\Resources\ResearchOutputResource\Pages;
 use App\Filament\Forms\ContentBlockForm;
 use App\Filament\Forms\ContentRelationForm;
-use App\Filament\Forms\PageBasicFields;
 use App\Filament\Forms\HeroImageField;
+use App\Filament\Forms\PageBasicFields;
+use App\Filament\Resources\ResearchOutputResource\Pages;
 use App\Models\Web\ResearchOutput;
 use Filament\Forms;
 use Filament\Forms\Components\Tabs;
@@ -21,10 +21,15 @@ class ResearchOutputResource extends Resource
     protected static ?string $model = ResearchOutput::class;
 
     protected static ?string $navigationIcon = 'heroicon-o-rectangle-group';
+
     protected static ?string $navigationGroup = '研究成果';
+
     protected static ?int $navigationSort = 1;
+
     protected static ?string $navigationLabel = '研究成果';
+
     protected static ?string $modelLabel = '成果';
+
     protected static ?string $pluralModelLabel = '研究成果';
 
     public static function form(Form $form): Form
@@ -36,7 +41,7 @@ class ResearchOutputResource extends Resource
                         ...PageBasicFields::make(
                             urlField: Forms\Components\TextInput::make('slug')
                                 ->label('頁面網址')
-                                ->prefix(url('/results') . '/')
+                                ->prefix(url('/results').'/')
                                 ->required()
                                 ->maxLength(150)
                                 ->unique()
@@ -56,9 +61,9 @@ class ResearchOutputResource extends Resource
                         Forms\Components\Grid::make(2)->schema([
                             ...PageBasicFields::make(
                                 urlField: Forms\Components\TextInput::make('slug')
-                                ->label('頁面網址')->prefix(url('/results') . '/')
-                                ->required()->maxLength(150)->unique(ignoreRecord: true)
-                                ->helperText('例如 fushan-forest-composition；不需輸入 results/。'),
+                                    ->label('頁面網址')->prefix(url('/results').'/')
+                                    ->required()->maxLength(150)->unique(ignoreRecord: true)
+                                    ->helperText('例如 fushan-forest-composition；不需輸入 results/。'),
                                 titleEnRequired: false,
                             ),
                         ]),
@@ -80,10 +85,10 @@ class ResearchOutputResource extends Resource
                                     ->label('研究成果頁')
                                     ->content(fn (): HtmlString => new HtmlString(
                                         '<a class="font-semibold text-primary-600 hover:underline" href="'
-                                        . e(PageResource::getUrl('edit', [
+                                        .e(PageResource::getUrl('edit', [
                                             'record' => \App\Models\Web\Page::query()->where('slug', 'results')->firstOrFail(),
                                         ]))
-                                        . '">編輯研究成果頁基本資料與 Hero</a>'
+                                        .'">編輯研究成果頁基本資料與 Hero</a>'
                                     )),
                             ]),
                         Forms\Components\Section::make('選擇研究成果 Hero')
@@ -98,7 +103,7 @@ class ResearchOutputResource extends Resource
                     ->schema([
                         Forms\Components\Placeholder::make('content_notice')
                             ->label('頁面內容說明')
-                            ->content('成果頁面的內容全部由下方內容區塊組成；「研究計畫」與「文章發表」為前台固定區塊，不需在此重複建立。'),
+                            ->content('成果頁面的內容全部由下方內容區塊組成；「研究計畫」與「學術產出」為前台固定區塊，不需在此重複建立。'),
                         ContentBlockForm::make()->columnSpanFull(),
                     ]),
             ])->persistTabInQueryString()->columnSpanFull(),

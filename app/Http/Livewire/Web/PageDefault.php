@@ -4,14 +4,12 @@ namespace App\Http\Livewire\Web;
 
 use Livewire\Component;
 use App\Models\Web\Page;
-use App\Models\Web\Subject;
 use App\Models\Web\ContentBlock;
 use App\Models\Web\ContentBlockItem;
 use App\Models\Web\ResearchOutput;
 use App\Models\Web\Project;
-use Illuminate\Mail\Mailables\Content;
 use Illuminate\Support\Str;
-use Illuminate\Support\Collection;
+use App\Support\Web\RelatedContentBlockFactory;
 
 class PageDefault extends Component
 {
@@ -34,28 +32,36 @@ class PageDefault extends Component
             $blocks->prepend($this->projectInformationBlock($page));
         }
 
-        // 成果頁面的自訂內容之後，固定顯示研究計畫與文章發表。
+        // 成果頁面的自訂內容之後，固定顯示研究計畫與學術產出。
         if ($page instanceof ResearchOutput) {
-            $blocks = $blocks->concat($this->researchOutputContent($page));
+            $blocks = $blocks->concat(RelatedContentBlockFactory::forResearchOutput(
+                $page->sites()->value('sites.id'),
+                $page->subjects()->value('subjects.id'),
+            ));
         }
 
-        $slugGrpoup=explode('/', $slug);
+        $slugGroup = explode('/', $slug);
         
-        if ($slugGrpoup[0] === 'sites' ) {
+        if ($slugGroup[0] === 'sites') {
             // 樣區 slug 只在頁面入口解析一次；所有子元件一律接收 site ID。
             $siteId = $page instanceof Page
                 ? $page->site()->value('id')
                 : null;
             abort_unless($siteId, 404);
-            $additionalBlocks = $this->siteContent((int) $siteId);
-            $blocks = $blocks->concat($additionalBlocks);
+            $blocks->push($this->fixedViewBlock('參與團隊', 'Team Members', 'web.site-teams-block', [
+                'currentSite' => (string) $siteId,
+            ]));
+            $blocks = $blocks->concat(RelatedContentBlockFactory::forSite((int) $siteId));
             // 
         }
 
-        if ($slugGrpoup[0] === 'subjects' ) {
+        if ($slugGroup[0] === 'subjects') {
             // 研究主題的簡介與方法由 content_blocks 管理，動態成果區塊接在後方。
-            $additionalBlocks = $this->subjectContent($slug);
-            $blocks = $blocks->concat($additionalBlocks);
+            $subjectId = $page instanceof Page
+                ? $page->subject()->where('is_active', true)->value('id')
+                : null;
+            abort_unless($subjectId, 404);
+            $blocks = $blocks->concat(RelatedContentBlockFactory::forSubject((int) $subjectId));
         }
 
         if (($slug ?? null) === 'publications') {
@@ -171,141 +177,6 @@ class PageDefault extends Component
             . collect($rows)->map(fn (array $row): string => '<dt class="font-semibold text-gray-700">' . e($row[0]) . '</dt><dd class="min-w-0 break-words">' . $row[1] . '</dd>')->implode('')
             . '</dl>';
     }
-
-    private function researchOutputContent(ResearchOutput $output): Collection
-    {
-        $site = $output->sites()->value('sites.id');
-        $subject = $output->subjects()->value('subjects.id');
-
-        return collect([
-            new ContentBlock([
-                'title_zh_tw' => '研究計畫',
-                'title_en' => 'Research Projects',
-                'body_zh_tw' => '',
-                'body_en' => '',
-                'view' => 'web.project-list',
-                'params' => array_filter([
-                    'site' => $site ? (string) $site : null,
-                    'subject' => $subject ? (string) $subject : null,
-                ]),
-            ]),
-            new ContentBlock([
-                'title_zh_tw' => '文章發表',
-                'title_en' => 'Research Publications',
-                'body_zh_tw' => '',
-                'body_en' => '',
-                'view' => '',
-            ]),
-        ]);
-    }
-
-    public function siteContent(int $siteId): Collection
-    {
-        return collect([
-            new ContentBlock([
-                'id'          => null, // 或給個虛擬 id，如 'site-team'
-                'title_zh_tw' => '參與團隊',
-                'title_en'    => 'Team Members',
-                'body_zh_tw'  => '',
-                'body_en'     => '',
-                'view'        => 'web.site-teams-block', // 可選，指定 Blade 視圖
-                'params'      => [
-                    'currentSite' => (string) $siteId,
-                ],
-            ]),
-            new ContentBlock([
-                'id'          => null,
-                'title_zh_tw' => '基礎成果',
-                'title_en'    => 'Research Results',
-                'body_zh_tw'  => '',
-                'body_en'     => '',
-                'view'        => 'web.research-output-list', // 可選，指定 Blade 視圖
-                'params'      => [
-                    'site' => (string) $siteId,
-                    
-                ],
-            ]),
-            new ContentBlock([
-                'id'          => null,
-                'title_zh_tw' => '研究計畫',
-                'title_en'    => 'Research projects',
-                'body_zh_tw'  => '',
-                'body_en'     => '',
-                'view'        => 'web.project-list', // 可選，指定 Blade 視圖
-                'params'      => [
-                    'site' => (string) $siteId,
-                    
-                ],
-            ]),
-            new ContentBlock([
-                'id'          => null,
-                'title_zh_tw' => '文章發表',
-                'title_en'    => 'Research publications',
-                'body_zh_tw'  => '',
-                'body_en'     => '',
-                'view'        => 'web.publication-list',
-                'params'      => [
-                    'site' => (string) $siteId,
-                    'showFilters' => false,
-                ],
-            ]),
-        ]);
-    }
-
-    public function subjectContent($slug): Collection
-    {
-        $blocks = Subject::whereHas('page', function ($q) use ($slug) {
-                $q->where('slug', $slug);
-            })
-            ->where('is_active', true)
-            ->firstOrFail();
-
-        if ($blocks) {
-            return collect([
-                new ContentBlock([
-                    'id'          => null,
-                    'title_zh_tw' => '研究成果',
-                    'title_en'    => 'Research Results',
-                    'body_zh_tw'  => '',
-                    'body_en'     => '',
-                    'view'        => 'web.research-output-list', // 可選，指定 Blade 視圖
-                    'params'      => [
-                        'subject' => $blocks->id,   // 傳給這個 block 的參數
-                    ],
-                ]),
-                new ContentBlock([
-                    'id'          => null,
-                    'title_zh_tw' => '研究計畫',
-                    'title_en'    => 'Research Projects',
-                    'body_zh_tw'  => '',
-                    'body_en'     => '',
-                    'view'        => 'web.project-list',
-                    'params'      => [
-                        'subject' => $blocks->id,
-                    ],
-                ]),
-                new ContentBlock([
-                    'id'          => null,
-                    'title_zh_tw' => '文章發表',
-                    'title_en'    => 'Research Publications',
-                    'body_zh_tw'  => '',
-                    'body_en'     => '',
-                    'view'        => 'web.publication-list',
-                    'params'      => [
-                        'subject' => (string) $blocks->id,
-                        'showFilters' => false,
-                    ],
-                ]),
-            ]);
-        } else {
-            return collect([]);
-        }
-
-
-
-
-    }
-
 
     public function render()
     {

@@ -5,18 +5,31 @@
                 :label="app()->getLocale() === 'en' ? 'Year' : '年代'"
                 :placeholder="app()->getLocale() === 'en' ? 'All years' : '全部年代'"
                 :options="$years->mapWithKeys(fn ($value) => [(string) $value => $value])->all()" />
-            <x-web.filter-select wire:model.live="site"
-                :label="__('web.select_site')" :placeholder="__('web.select_all_site')"
-                :options="$sites->mapWithKeys(fn ($value) => [(string) $value->id => $value->name])->all()" />
-            <x-web.filter-select wire:model.live="subject"
-                :label="__('web.select_subject')" :placeholder="__('web.select_all_subject')"
-                :options="$subjects->mapWithKeys(fn ($value) => [(string) $value->id => $value->name])->all()" />
+            <x-web.filter-select wire:model.live="type"
+                :label="app()->getLocale() === 'en' ? 'Type' : '類型'"
+                :placeholder="app()->getLocale() === 'en' ? 'All types' : '全部類型'"
+                :options="$types->all()" />
+            @if ($showSiteFilter)
+                <x-web.filter-select wire:model.live="site"
+                    :label="__('web.select_site')" :placeholder="__('web.select_all_site')"
+                    :options="$siteOptions" />
+            @endif
+            @if ($showSubjectFilter)
+                <x-web.filter-select wire:model.live="subject"
+                    :label="__('web.select_subject')" :placeholder="__('web.select_all_subject')"
+                    :options="$subjectOptions" />
+            @endif
         </x-web.filter-bar>
     @endif
     <ul class="divide-y divide-gray-200 bg-white">
         @forelse ($publications as $publication)
             <li class="px-4 py-4">
                 <div class="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+                    <div class="shrink-0 sm:w-24">
+                        <span class="inline-block rounded bg-gray-100 px-2 py-1 text-xs text-gray-700">
+                            {{ $publication->type_label }}
+                        </span>
+                    </div>
                     <div class="min-w-0 flex-1">
                         <div class="font-medium text-gray-900">{!! $publication->citation_html ?: e($publication->title) !!}</div>
                         <div class="mt-2 flex flex-wrap gap-4 text-sm">
@@ -32,20 +45,24 @@
                         </div>
                     </div>
                     <div class="flex shrink-0 flex-wrap justify-end gap-2 text-xs sm:max-w-[35%] sm:pl-4">
-                        @foreach ($publication->sites as $publicationSite)
-                            <a href="{{ $publicationSite->page ? url('/' . $publicationSite->page->slug) : '#' }}"
-                                style="{{ $this->tagStyle('site', $publicationSite->id) }}"
-                                class="rounded px-2 py-1 text-gray-700 no-underline hover:opacity-80">
-                                {{ $publicationSite->name }}
-                            </a>
-                        @endforeach
-                        @foreach ($publication->subjects as $publicationSubject)
-                            <a href="{{ $publicationSubject->page ? url('/' . $publicationSubject->page->slug) : '#' }}"
-                                style="{{ $this->tagStyle('subject', $publicationSubject->id) }}"
-                                class="rounded px-2 py-1 text-gray-700 no-underline hover:opacity-80">
-                                {{ $publicationSubject->short_name ?: $publicationSubject->name }}
-                            </a>
-                        @endforeach
+                        @if ($showSiteTags)
+                            @foreach ($publication->sites as $publicationSite)
+                                <a href="{{ $publicationSite->page ? url('/' . $publicationSite->page->slug) : '#' }}"
+                                    style="{{ $this->tagStyle('site', $publicationSite->id) }}"
+                                    class="rounded px-2 py-1 text-gray-700 no-underline hover:opacity-80">
+                                    {{ $publicationSite->name }}
+                                </a>
+                            @endforeach
+                        @endif
+                        @if ($showSubjectTags)
+                            @foreach ($publication->subjects as $publicationSubject)
+                                <a href="{{ $publicationSubject->page ? url('/' . $publicationSubject->page->slug) : '#' }}"
+                                    style="{{ $this->tagStyle('subject', $publicationSubject->id) }}"
+                                    class="rounded px-2 py-1 text-gray-700 no-underline hover:opacity-80">
+                                    {{ $publicationSubject->short_name ?: $publicationSubject->name }}
+                                </a>
+                            @endforeach
+                        @endif
                     </div>
                 </div>
             </li>

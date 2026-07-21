@@ -31,6 +31,42 @@ class Publication extends Model
 
     ];
 
+    public static function typeLabels(?string $locale = null): array
+    {
+        $english = ($locale ?? app()->getLocale()) === 'en';
+
+        return $english
+            ? [
+                'book' => 'Book',
+                'thesis' => 'Thesis',
+                'dataset' => 'Dataset',
+                'journalArtical' => 'Journal article',
+                'journalArticle' => 'Journal article',
+                'journalartical' => 'Journal article',
+                'journalarticle' => 'Journal article',
+                'paper' => 'Paper',
+                'poster' => 'Poster',
+                'oral' => 'Oral presentation',
+            ]
+            : [
+                'book' => '書籍',
+                'thesis' => '學位論文',
+                'dataset' => '資料集',
+                'journalArtical' => '期刊論文',
+                'journalArticle' => '期刊論文',
+                'journalartical' => '期刊論文',
+                'journalarticle' => '期刊論文',
+                'paper' => '論文',
+                'poster' => '海報發表',
+                'oral' => '口頭發表',
+            ];
+    }
+
+    public function getTypeLabelAttribute(): string
+    {
+        return static::typeLabels()[$this->type] ?? $this->type ?? '';
+    }
+
     /** 依語系回傳引用文字 */
     public function getCitationAttribute(): ?string
     {

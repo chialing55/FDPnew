@@ -104,7 +104,11 @@ class PublicationResource extends Resource
     {
         return $table->columns([
             Tables\Columns\TextColumn::make('year')->label('年份')->sortable(),
-            Tables\Columns\TextColumn::make('type')->label('類型')->badge()->sortable(),
+            Tables\Columns\TextColumn::make('type')
+                ->label('類型')
+                ->formatStateUsing(fn (?string $state): string => Publication::typeLabels('zh-TW')[$state] ?? $state ?? '')
+                ->badge()
+                ->sortable(),
             Tables\Columns\TextColumn::make('abbreviated_authors')
                 ->label('作者')
                 ->searchable(query: fn ($query, string $search) => $query->where('authors', 'like', "%{$search}%"))
@@ -135,12 +139,7 @@ class PublicationResource extends Resource
         return Forms\Components\Select::make('type')
             ->label('Type')
             ->options(function (): array {
-                $labels = [
-                    'paper' => 'Paper',
-                    'poster' => 'Poster',
-                    'oral' => 'Oral',
-                    'thesis' => 'Thesis（碩博士論文）',
-                ];
+                $labels = Publication::typeLabels('zh-TW');
 
                 Publication::query()
                     ->whereNotNull('type')
