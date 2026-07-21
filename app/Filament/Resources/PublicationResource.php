@@ -2,24 +2,31 @@
 
 namespace App\Filament\Resources;
 
-use App\Filament\Resources\PublicationResource\Pages;
 use App\Filament\Forms\ContentRelationForm;
+use App\Filament\Resources\PublicationResource\Pages;
 use App\Models\Web\Publication;
 use Filament\Forms;
 use Filament\Forms\Components\Tabs;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
 use Filament\Tables;
+use Filament\Tables\Enums\ActionsPosition;
 use Filament\Tables\Table;
 
 class PublicationResource extends Resource
 {
     protected static ?string $model = Publication::class;
+
     protected static ?string $navigationGroup = '研究成果';
+
     protected static ?string $navigationLabel = '學術產出';
+
     protected static ?string $modelLabel = '學術產出';
+
     protected static ?string $pluralModelLabel = '學術產出';
+
     protected static ?string $navigationIcon = 'heroicon-o-academic-cap';
+
     protected static ?int $navigationSort = 3;
 
     public static function form(Form $form): Form
@@ -28,10 +35,11 @@ class PublicationResource extends Resource
             return $form->schema([
                 Forms\Components\Section::make('基本資料')->schema([
                     Forms\Components\Grid::make(2)->schema([
-                        Forms\Components\TextInput::make('authors')
+                        Forms\Components\Textarea::make('authors')
                             ->label('Authors')
                             ->required()
-                            ->maxLength(1000),
+                            ->rows(3)
+                            ->columnSpanFull(),
                         Forms\Components\TextInput::make('title')
                             ->label('Title')
                             ->required()
@@ -54,7 +62,10 @@ class PublicationResource extends Resource
                     ->icon('heroicon-o-document-text')
                     ->schema([
                         Forms\Components\Grid::make(12)->schema([
-                            Forms\Components\TextInput::make('authors')->label('Authors')->maxLength(1000)->columnSpan(4),
+                            Forms\Components\Textarea::make('authors')
+                                ->label('Authors')
+                                ->rows(4)
+                                ->columnSpanFull(),
                             Forms\Components\TextInput::make('year')->label('Year')->numeric()->columnSpan(2),
                             static::typeField()->columnSpan(2),
                             Forms\Components\TextInput::make('title')->label('Title')->maxLength(500)->columnSpan(4),
@@ -94,17 +105,24 @@ class PublicationResource extends Resource
         return $table->columns([
             Tables\Columns\TextColumn::make('year')->label('年份')->sortable(),
             Tables\Columns\TextColumn::make('type')->label('類型')->badge()->sortable(),
-            Tables\Columns\TextColumn::make('authors')->label('作者')->searchable()->wrap()->toggleable(),
-            Tables\Columns\TextColumn::make('title')->label('標題')->searchable()->wrap(),
-            Tables\Columns\TextColumn::make('journal')->label('期刊')->wrap(),
+            Tables\Columns\TextColumn::make('abbreviated_authors')
+                ->label('作者')
+                ->searchable(query: fn ($query, string $search) => $query->where('authors', 'like', "%{$search}%"))
+                ->wrap()
+                ->width('18rem'),
+            Tables\Columns\TextColumn::make('title')->label('標題')->searchable()->limit(70)->wrap()->width('22rem'),
+            Tables\Columns\TextColumn::make('journal')->label('期刊')->limit(35)->wrap()->toggleable(isToggledHiddenByDefault: true),
             Tables\Columns\TextColumn::make('sites.name_zh_tw')
                 ->label('樣區')->badge()->separator(', '),
             Tables\Columns\TextColumn::make('subjects.name_zh_tw')
                 ->label('研究主題')->badge()->separator(', '),
-            Tables\Columns\TextColumn::make('doi')->label('DOI')->searchable(),
+            Tables\Columns\TextColumn::make('doi')->label('DOI')->searchable()->limit(30)->toggleable(isToggledHiddenByDefault: true),
             Tables\Columns\IconColumn::make('is_open_access')->label('Open Access')->boolean(),
             Tables\Columns\IconColumn::make('is_active')->label('公開')->boolean(),
-        ])->defaultSort('year', 'desc')->actions([Tables\Actions\EditAction::make()]);
+        ])->defaultSort('year', 'desc')->actions(
+            [Tables\Actions\EditAction::make()],
+            ActionsPosition::BeforeColumns,
+        );
     }
 
     public static function getPages(): array

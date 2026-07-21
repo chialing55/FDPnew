@@ -10,6 +10,7 @@ class Publication extends Model
     use HasFactory;
 
     protected $table = 'publications';
+
     protected $connection = 'mysql_web';
 
     protected $fillable = [
@@ -38,25 +39,43 @@ class Publication extends Model
 
     public function getCitationHtmlAttribute(): ?string
     {
-        $authors = filled($this->authors) ? e(rtrim($this->authors, '.')) : null;
+        $authors = filled($this->authors) ? e(rtrim($this->abbreviated_authors, '.')) : null;
         $title = filled($this->title) ? e(rtrim($this->title, '.')) : null;
-        $year = filled($this->year) ? '<strong>' . e($this->year) . '</strong>' : null;
-        $source = filled($this->journal) ? '<em>' . e(rtrim($this->journal, '.')) . '</em>' : '';
+        $year = filled($this->year) ? '<strong>'.e($this->year).'</strong>' : null;
+        $source = filled($this->journal) ? '<em>'.e(rtrim($this->journal, '.')).'</em>' : '';
         if (filled($this->volume)) {
-            $source .= ($source !== '' ? ' ' : '') . e($this->volume);
+            $source .= ($source !== '' ? ' ' : '').e($this->volume);
         }
         if (filled($this->issue)) {
-            $source .= '(' . e($this->issue) . ')';
+            $source .= '('.e($this->issue).')';
         }
         if (filled($this->pages)) {
-            $source .= ($source !== '' ? ': ' : '') . e($this->pages);
+            $source .= ($source !== '' ? ': ' : '').e($this->pages);
         }
 
         $parts = SiteSetting::getValue('publication_citation_style', 'year_after_authors') === 'year_at_end'
-            ? array_filter([$authors, $title, $source ?: null, $year ? '(' . $year . ')' : null])
+            ? array_filter([$authors, $title, $source ?: null, $year ? '('.$year.')' : null])
             : array_filter([$authors, $year, $title, $source ?: null]);
 
-        return $parts === [] ? null : implode('. ', $parts) . '.';
+        return $parts === [] ? null : implode('. ', $parts).'.';
+    }
+
+    /** 保留首尾作者，避免作者群過長撐開列表與引用內容。 */
+    public function getAbbreviatedAuthorsAttribute(): ?string
+    {
+        if (! filled($this->authors)) {
+            return null;
+        }
+
+        $authors = preg_split('/\s*;\s*/u', trim($this->authors), -1, PREG_SPLIT_NO_EMPTY);
+
+        if (count($authors) <= 5) {
+            return implode('; ', $authors);
+        }
+
+        return implode('; ', array_slice($authors, 0, 3))
+            .'; ....; '
+            .implode('; ', array_slice($authors, -2));
     }
 
     /** scope：依年份倒序 */

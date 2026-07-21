@@ -238,9 +238,13 @@ class PageDefault extends Component
                 'id'          => null,
                 'title_zh_tw' => '文章發表',
                 'title_en'    => 'Research publications',
-                'body_zh_tw'  => 'Sample body content.',
-                'body_en'     => 'Sample body content.',
-                'view'        => '', // 可選，指定 Blade 視圖
+                'body_zh_tw'  => '',
+                'body_en'     => '',
+                'view'        => 'web.publication-list',
+                'params'      => [
+                    'site' => $site,
+                    'showFilters' => false,
+                ],
             ]),
         ]);
     }
@@ -275,6 +279,18 @@ class PageDefault extends Component
                     'view'        => 'web.project-list',
                     'params'      => [
                         'subject' => $blocks->id,
+                    ],
+                ]),
+                new ContentBlock([
+                    'id'          => null,
+                    'title_zh_tw' => '文章發表',
+                    'title_en'    => 'Research Publications',
+                    'body_zh_tw'  => '',
+                    'body_en'     => '',
+                    'view'        => 'web.publication-list',
+                    'params'      => [
+                        'subject' => (string) $blocks->id,
+                        'showFilters' => false,
                     ],
                 ]),
             ]);
