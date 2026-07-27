@@ -63,20 +63,26 @@
                         @include('livewire.partials.select-filter', ['model' => 'plot', 'options' => $plots])
                     </td>
                     <td>
-                        @include('livewire.partials.datalist-filter', [
-                            'model' => 'mtag',
-                            'options' => $mtagOptions,
-                            'listId' => 'fs-seedling-mtag-options',
-                            'width' => '70px',
-                        ])
+                        <input
+                            type="text"
+                            class="fs100"
+                            style="width: 70px;"
+                            wire:model="mtag"
+                            wire:change="search"
+                            wire:keydown.enter="search"
+                            placeholder="all"
+                        >
                     </td>
                     <td>
-                        @include('livewire.partials.datalist-filter', [
-                            'model' => 'tag',
-                            'options' => $tagOptions,
-                            'listId' => 'fs-seedling-tag-options',
-                            'width' => '70px',
-                        ])
+                        <input
+                            type="text"
+                            class="fs100"
+                            style="width: 70px;"
+                            wire:model="tag"
+                            wire:change="search"
+                            wire:keydown.enter="search"
+                            placeholder="all"
+                        >
                     </td>
                     <td>
                         @include('livewire.partials.datalist-filter', [

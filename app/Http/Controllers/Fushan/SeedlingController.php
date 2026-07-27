@@ -149,7 +149,10 @@ class SeedlingController extends Controller
             ' FROM seedling_records r' .
             ' JOIN seedling_stems st ON r.tag = st.tag' .
             ' JOIN seedling_individuals i ON st.mtag = i.mtag' .
-            " WHERE r.census LIKE ? AND (r.status LIKE 'A' OR r.status LIKE 'N')" .
+            ' WHERE r.deleted_at IS NULL' .
+            ' AND st.deleted_at IS NULL' .
+            ' AND i.deleted_at IS NULL' .
+            " AND r.census LIKE ? AND (r.status LIKE 'A' OR r.status LIKE 'N')" .
             ' ORDER BY i.trap, i.plot, st.tag';
     }
 

@@ -15,8 +15,6 @@ class SeedlingDataviewer extends Component
     public array $plots = [];
     public array $months = [];
     public array $speciesOptions = [];
-    public array $mtagOptions = [];
-    public array $tagOptions = [];
     public array $statusOptions = [];
     public array $recruitOptions = [];
     public array $sproutOptions = [];
@@ -54,7 +52,6 @@ class SeedlingDataviewer extends Component
     public function search(): void
     {
         $this->page = 1;
-        $this->refreshFilterOptions();
         $this->loadData();
     }
 
@@ -165,8 +162,6 @@ class SeedlingDataviewer extends Component
         $this->plots = $this->distinctOption('s.plot', 'plot');
         $this->months = $this->distinctMonthOptions();
         $this->speciesOptions = $this->distinctOption('s.csp', 'species');
-        $this->mtagOptions = $this->distinctOption('s.mtag', 'mtag');
-        $this->tagOptions = $this->distinctOption('s.tag', 'tag');
         $this->statusOptions = $this->distinctOption('s.status', 'status');
         $this->recruitOptions = $this->distinctOption('s.recruit', 'recruit');
         $this->sproutOptions = $this->distinctOption('s.sprout', 'sprout');
@@ -220,8 +215,8 @@ class SeedlingDataviewer extends Component
 
                 $query->where('s.year', $year)->where('s.month', (int) $month);
             })
-            ->when($except !== 'mtag' && $mtag !== '' && $mtag !== 'all', fn ($query) => $query->where('s.mtag', 'like', '%' . $mtag . '%'))
-            ->when($except !== 'tag' && $tag !== '' && $tag !== 'all', fn ($query) => $query->where('s.tag', 'like', '%' . $tag . '%'))
+            ->when($except !== 'mtag' && $mtag !== '' && $mtag !== 'all', fn ($query) => $query->where('s.mtag', 'like', $mtag . '%'))
+            ->when($except !== 'tag' && $tag !== '' && $tag !== 'all', fn ($query) => $query->where('s.tag', 'like', $tag . '%'))
             ->when($except !== 'species' && $species !== '' && $species !== 'all', fn ($query) => $query->where('s.csp', 'like', '%' . $species . '%'))
             ->when($except !== 'status' && $this->status !== 'all', fn ($query) => $query->where('s.status', $this->status))
             ->when($except !== 'recruit' && $this->recruit !== 'all', fn ($query) => $query->where('s.recruit', $this->recruit))

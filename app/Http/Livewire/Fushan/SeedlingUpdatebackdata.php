@@ -118,8 +118,8 @@ class SeedlingUpdatebackdata extends Component
         }
 
         $hasWork = FsSeedlingSlrecord1::query()->where('tag', $tag)->exists();
-        $hasMaster = DB::connection('mysql3')->table('seedling_records')->where('tag', $tag)->whereNull('deleted_at')->exists();
-        $hasStem = DB::connection('mysql3')->table('seedling_stems')->where('tag', $tag)->whereNull('deleted_at')->exists();
+        $hasMaster = DB::connection('mysql3')->table('seedling_records')->where('tag', $tag)->exists();
+        $hasStem = DB::connection('mysql3')->table('seedling_stems')->where('tag', $tag)->exists();
 
         if (!$hasWork && !$hasMaster && !$hasStem) {
             $this->go = 'no';
@@ -286,8 +286,6 @@ class SeedlingUpdatebackdata extends Component
                 ->table("seedling_stems as st")
                 ->leftJoin("seedling_individuals as i", "st.mtag", "=", "i.mtag")
                 ->where("st.tag", $tag)
-                ->whereNull("st.deleted_at")
-                ->whereNull("i.deleted_at")
                 ->select([
                     "i.id as individual_id",
                     "st.id as stem_id",
@@ -302,6 +300,8 @@ class SeedlingUpdatebackdata extends Component
                     "i.x",
                     "i.y",
                     "st.updated_id",
+                    "st.deleted_at as stem_deleted_at",
+                    "i.deleted_at as individual_deleted_at",
                 ])
                 ->orderByRaw($branchOrder)
                 ->orderBy("st.tag")
@@ -312,7 +312,6 @@ class SeedlingUpdatebackdata extends Component
             $masterRows = DB::connection("mysql3")
                 ->table("seedling_records as r")
                 ->where("r.tag", $tag)
-                ->whereNull("r.deleted_at")
                 ->select([
                     "r.id as record_id",
                     "r.census",
@@ -327,6 +326,7 @@ class SeedlingUpdatebackdata extends Component
                     "r.recruit",
                     "r.status",
                     "r.updated_id",
+                    "r.deleted_at as record_deleted_at",
                 ])
                 ->orderBy("r.census")
                 ->get()
@@ -345,7 +345,6 @@ class SeedlingUpdatebackdata extends Component
             ->merge(DB::connection("mysql3")
                 ->table("seedling_stems")
                 ->where("tag", $tag)
-                ->whereNull("deleted_at")
                 ->pluck("mtag"))
             ->map(fn ($mtag) => trim((string) $mtag))
             ->filter(fn ($mtag) => $mtag !== "")
@@ -361,7 +360,6 @@ class SeedlingUpdatebackdata extends Component
             ->merge(DB::connection("mysql3")
                 ->table("seedling_stems")
                 ->whereIn("mtag", $mtags->all())
-                ->whereNull("deleted_at")
                 ->pluck("tag"))
             ->map(fn ($relatedTag) => strtoupper(trim((string) $relatedTag)))
             ->filter(fn ($relatedTag) => $relatedTag !== "")
@@ -381,8 +379,6 @@ class SeedlingUpdatebackdata extends Component
             ->table("seedling_stems as st")
             ->leftJoin("seedling_individuals as i", "st.mtag", "=", "i.mtag")
             ->whereIn("st.mtag", $mtags->all())
-            ->whereNull("st.deleted_at")
-            ->whereNull("i.deleted_at")
             ->select([
                 "i.id as individual_id",
                 "st.id as stem_id",
@@ -397,6 +393,8 @@ class SeedlingUpdatebackdata extends Component
                 "i.x",
                 "i.y",
                 "st.updated_id",
+                "st.deleted_at as stem_deleted_at",
+                "i.deleted_at as individual_deleted_at",
             ])
             ->orderBy("st.mtag")
             ->orderByRaw($branchOrder)
@@ -408,7 +406,6 @@ class SeedlingUpdatebackdata extends Component
         $masterRows = DB::connection("mysql3")
             ->table("seedling_records as r")
             ->whereIn("r.tag", $relatedTags->all())
-            ->whereNull("r.deleted_at")
             ->select([
                 "r.id as record_id",
                 "r.census",
@@ -423,6 +420,7 @@ class SeedlingUpdatebackdata extends Component
                 "r.recruit",
                 "r.status",
                 "r.updated_id",
+                "r.deleted_at as record_deleted_at",
             ])
             ->orderBy("r.tag")
             ->orderBy("r.census")
@@ -449,6 +447,14 @@ class SeedlingUpdatebackdata extends Component
 
     private function normalizeIdentityRow(array $row): array
     {
+        $deletionNotes = [];
+        if (!empty($row["individual_deleted_at"])) {
+            $deletionNotes[] = "individual 已被軟刪除";
+        }
+        if (!empty($row["stem_deleted_at"])) {
+            $deletionNotes[] = "stem 已被軟刪除";
+        }
+
         $row["source"] = "identity";
         $row["work_id"] = "";
         $row["record_id"] = "";
@@ -457,6 +463,7 @@ class SeedlingUpdatebackdata extends Component
         $row["original_tag"] = $row["tag"] ?? "";
         $row["original_mtag"] = $row["mtag"] ?? "";
         $row["original_work_id"] = "";
+        $row["deletion_note"] = implode("；", $deletionNotes);
 
         return $row;
     }
@@ -472,6 +479,9 @@ class SeedlingUpdatebackdata extends Component
         $row["original_work_id"] = "";
         $row["individual_id"] = "";
         $row["stem_id"] = "";
+        $row["deletion_note"] = !empty($row["record_deleted_at"])
+            ? "record 已被軟刪除"
+            : "";
 
         return $row;
     }

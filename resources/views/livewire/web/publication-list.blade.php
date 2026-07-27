@@ -1,9 +1,4 @@
 <div class="space-y-4">
-    <p class="text-sm text-gray-600">
-        {{ app()->getLocale() === 'en'
-            ? $publications->total() . ' publications'
-            : '共有 ' . $publications->total() . ' 篇文獻' }}
-    </p>
     @if ($showFilters)
         <x-web.filter-bar>
             <x-web.filter-select wire:model.live="year"
@@ -30,6 +25,11 @@
             </button>
         </x-web.filter-bar>
     @endif
+    <p class="text-sm text-gray-600">
+        {{ app()->getLocale() === 'en'
+            ? $publications->total() . ' publications'
+            : '共有 ' . $publications->total() . ' 篇文獻' }}
+    </p>
     <ul class="divide-y divide-gray-200 bg-white">
         @forelse ($publications as $publication)
             <li class="px-4 py-4">

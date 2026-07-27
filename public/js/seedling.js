@@ -1509,6 +1509,7 @@ function seedlingUpdateTable(container, rows, csplist, fitToRows = false, tableS
             { data: "sprout", type: "dropdown", source: ["TRUE", "FALSE"], allowInvalid: false },
             { data: "x", type: "numeric", allowInvalid: false },
             { data: "y", type: "numeric", allowInvalid: false },
+            { data: "deletion_note", readOnly: true },
             { data: "source" },
             { data: "work_id" },
             { data: "record_id" },
@@ -1517,9 +1518,9 @@ function seedlingUpdateTable(container, rows, csplist, fitToRows = false, tableS
             { data: "original_tag" },
             { data: "original_mtag" },
         ];
-        colHeaders = ["trap", "plot", "tag", "mtag", "種類", "萌櫱", "X", "Y"];
-        colWidths = [55, 55, 120, 120, 140, 100, 50, 50];
-        hiddenColumns = { columns: [8, 9, 10, 11, 12, 13, 14] };
+        colHeaders = ["trap", "plot", "tag", "mtag", "種類", "萌櫱", "X", "Y", "備註"];
+        colWidths = [55, 55, 120, 120, 140, 100, 50, 50, 180];
+        hiddenColumns = { columns: [9, 10, 11, 12, 13, 14, 15] };
     } else if (tableShape === "records") {
         columns = [
             { data: "census", type: "numeric", allowInvalid: false },
@@ -1533,6 +1534,7 @@ function seedlingUpdateTable(container, rows, csplist, fitToRows = false, tableS
             { data: "recruit" },
             { data: "status", type: "dropdown", source: ["A", "G", "D", "N", ""], allowInvalid: false },
             { data: "note" },
+            { data: "deletion_note", readOnly: true },
             { data: "delete_action", renderer: "html", readOnly: true },
             { data: "source" },
             { data: "work_id" },
@@ -1542,9 +1544,9 @@ function seedlingUpdateTable(container, rows, csplist, fitToRows = false, tableS
             { data: "original_tag" },
             { data: "original_mtag" },
         ];
-        colHeaders = ["census", "year", "month", "date", "tag", "長度", "子葉", "真葉", "新舊", "狀態", "Note", ""];
-        colWidths = [60, 55, 55, 115, 120, 60, 55, 55, 55, 55, 260, 45];
-        hiddenColumns = { columns: [12, 13, 14, 15, 16, 17, 18] };
+        colHeaders = ["census", "year", "month", "date", "tag", "長度", "子葉", "真葉", "新舊", "狀態", "Note", "備註", ""];
+        colWidths = [60, 55, 55, 115, 120, 60, 55, 55, 55, 55, 260, 180, 45];
+        hiddenColumns = { columns: [13, 14, 15, 16, 17, 18, 19] };
     }
 
     if (tableShape === "work") {
