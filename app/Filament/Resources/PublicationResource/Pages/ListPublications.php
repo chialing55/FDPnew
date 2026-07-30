@@ -5,9 +5,13 @@ namespace App\Filament\Resources\PublicationResource\Pages;
 use App\Filament\Actions\ListPageSettingsAction;
 use App\Filament\Resources\PublicationResource;
 use App\Models\Web\SiteSetting;
+use App\Services\Web\PublicationCsvImporter;
 use Filament\Actions;
 use Filament\Forms;
+use Filament\Notifications\Notification;
 use Filament\Resources\Pages\ListRecords;
+use Livewire\Features\SupportFileUploads\TemporaryUploadedFile;
+use Throwable;
 
 class ListPublications extends ListRecords
 {
@@ -19,6 +23,51 @@ class ListPublications extends ListRecords
     {
         return [
             ListPageSettingsAction::make('publications', '學術產出頁'),
+            Actions\Action::make('importCsv')
+                ->label('匯入 CSV')
+                ->icon('heroicon-o-arrow-up-tray')
+                ->form([
+                    Forms\Components\FileUpload::make('csv')
+                        ->label('CSV 檔案')
+                        ->acceptedFileTypes(['text/csv', 'text/plain', 'application/csv'])
+                        ->maxSize(20480)
+                        ->storeFiles(false)
+                        ->required()
+                        ->helperText('依表頭名稱匯入；external_id 優先、DOI 次之，用來判斷新增或更新。'),
+                ])
+                ->modalDescription('支援欄位：external_id、authors、authors_zh_tw、title、title_zh_tw、journal、journal_zh_tw、year、type、volume、issue、pages、doi、url、pdf_path、is_open_access、is_active。')
+                ->action(function (array $data, PublicationCsvImporter $importer): void {
+                    $file = $data['csv'] ?? null;
+
+                    if (! $file instanceof TemporaryUploadedFile) {
+                        Notification::make()
+                            ->danger()
+                            ->title('匯入失敗')
+                            ->body('無法讀取上傳的 CSV 檔案。')
+                            ->send();
+
+                        return;
+                    }
+
+                    try {
+                        $result = $importer->import($file->getRealPath());
+
+                        Notification::make()
+                            ->success()
+                            ->title('CSV 匯入完成')
+                            ->body("新增 {$result['created']} 筆，更新 {$result['updated']} 筆。")
+                            ->send();
+                    } catch (Throwable $exception) {
+                        report($exception);
+
+                        Notification::make()
+                            ->danger()
+                            ->title('CSV 匯入失敗')
+                            ->body($exception->getMessage())
+                            ->persistent()
+                            ->send();
+                    }
+                }),
             Actions\Action::make('citationSettings')
                 ->label('引用格式設定')
                 ->icon('heroicon-o-cog-6-tooth')

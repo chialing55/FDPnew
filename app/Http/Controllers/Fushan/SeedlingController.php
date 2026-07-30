@@ -1600,6 +1600,9 @@ class SeedlingController extends Controller
             'project' => '小苗',
             'user' => $user->account ?? $user->name,
             'iansuiFontVersion' => file_exists(public_path('fonts/iansui.ttf')) ? filemtime(public_path('fonts/iansui.ttf')) : time(),
+            'chenYuluoyanFontVersion' => file_exists(public_path('fonts/ChenYuluoyan-Thin-Monospaced.ttf'))
+                ? filemtime(public_path('fonts/ChenYuluoyan-Thin-Monospaced.ttf'))
+                : time(),
         ]);
     }
 

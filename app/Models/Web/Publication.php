@@ -15,9 +15,12 @@ class Publication extends Model
 
     protected $fillable = [
         'authors',
+        'authors_zh_tw',
         'title',
+        'title_zh_tw',
         'year',
         'journal',
+        'journal_zh_tw',
         'volume',
         'issue',
         'pages',
@@ -67,6 +70,21 @@ class Publication extends Model
         return static::typeLabels()[$this->type] ?? $this->type ?? '';
     }
 
+    public function getDisplayAuthorsAttribute(): ?string
+    {
+        return $this->localizedValue('authors');
+    }
+
+    public function getDisplayTitleAttribute(): ?string
+    {
+        return $this->localizedValue('title');
+    }
+
+    public function getDisplayJournalAttribute(): ?string
+    {
+        return $this->localizedValue('journal');
+    }
+
     /** 依語系回傳引用文字 */
     public function getCitationAttribute(): ?string
     {
@@ -75,10 +93,10 @@ class Publication extends Model
 
     public function getCitationHtmlAttribute(): ?string
     {
-        $authors = filled($this->authors) ? e(rtrim($this->abbreviated_authors, '.')) : null;
-        $title = filled($this->title) ? e(rtrim($this->title, '.')) : null;
+        $authors = filled($this->display_authors) ? e(rtrim($this->abbreviated_authors, '.')) : null;
+        $title = filled($this->display_title) ? e(rtrim($this->display_title, '.')) : null;
         $year = filled($this->year) ? '<strong>'.e($this->year).'</strong>' : null;
-        $source = filled($this->journal) ? '<em>'.e(rtrim($this->journal, '.')).'</em>' : '';
+        $source = filled($this->display_journal) ? '<em>'.e(rtrim($this->display_journal, '.')).'</em>' : '';
         if (filled($this->volume)) {
             $source .= ($source !== '' ? ' ' : '').e($this->volume);
         }
@@ -99,11 +117,11 @@ class Publication extends Model
     /** 保留首尾作者，避免作者群過長撐開列表與引用內容。 */
     public function getAbbreviatedAuthorsAttribute(): ?string
     {
-        if (! filled($this->authors)) {
+        if (! filled($this->display_authors)) {
             return null;
         }
 
-        $authors = preg_split('/\s*;\s*/u', trim($this->authors), -1, PREG_SPLIT_NO_EMPTY);
+        $authors = preg_split('/\s*;\s*/u', trim($this->display_authors), -1, PREG_SPLIT_NO_EMPTY);
 
         if (count($authors) <= 5) {
             return implode('; ', $authors);
@@ -112,6 +130,15 @@ class Publication extends Model
         return implode('; ', array_slice($authors, 0, 3))
             .'; ....; '
             .implode('; ', array_slice($authors, -2));
+    }
+
+    private function localizedValue(string $field): ?string
+    {
+        if (app()->getLocale() !== 'en' && filled($this->getAttribute("{$field}_zh_tw"))) {
+            return $this->getAttribute("{$field}_zh_tw");
+        }
+
+        return $this->getAttribute($field);
     }
 
     /** scope：依年份倒序 */

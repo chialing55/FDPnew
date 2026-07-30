@@ -40,7 +40,7 @@
                         </span>
                     </div>
                     <div class="min-w-0 flex-1">
-                        <div class="font-medium text-gray-900">{!! $publication->citation_html ?: e($publication->title) !!}</div>
+                        <div class="font-medium text-gray-900">{!! $publication->citation_html ?: e($publication->display_title) !!}</div>
                         <div class="mt-2 flex flex-wrap gap-4 text-sm">
                             @if ($publication->doi)
                                 <a href="{{ 'https://doi.org/' . preg_replace('#^https?://(?:dx\.)?doi\.org/#i', '', $publication->doi) }}" target="_blank" rel="noopener" class="text-forest">DOI</a>

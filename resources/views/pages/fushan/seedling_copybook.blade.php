@@ -10,6 +10,7 @@
 
 @section('rightbox')
     <link rel="preload" href="/fonts/iansui.ttf?v={{ $iansuiFontVersion }}" as="font" crossorigin>
+    <link rel="preload" href="/fonts/ChenYuluoyan-Thin-Monospaced.ttf?v={{ $chenYuluoyanFontVersion }}" as="font" crossorigin>
     <style>
         :root {
             --copybook-print-width: 232.8mm;
@@ -23,6 +24,14 @@
             font-family: 'IansuiPractice';
             src: url('/fonts/iansui.ttf?v={{ $iansuiFontVersion }}') format('truetype');
             font-weight: 400;
+            font-style: normal;
+            font-display: swap;
+        }
+
+        @font-face {
+            font-family: 'ChenYuluoyanPractice';
+            src: url('/fonts/ChenYuluoyan-Thin-Monospaced.ttf?v={{ $chenYuluoyanFontVersion }}') format('truetype');
+            font-weight: 100;
             font-style: normal;
             font-display: swap;
         }
@@ -313,6 +322,13 @@
         <section class="copybook-panel">
             <h2>硬筆書法練習</h2>
             <div class="copybook-field">
+                <label for="copybook-font">字型</label>
+                <select id="copybook-font" class="copybook-input">
+                    <option value="iansui">芫荽</option>
+                    <option value="chen-yuluoyan">辰宇落雁體</option>
+                </select>
+            </div>
+            <div class="copybook-field">
                 <label for="copybook-text">文字</label>
                 <textarea id="copybook-text" class="copybook-textarea">風淡雲輕江山如畫天水一色柳暗花明</textarea>
             </div>
@@ -335,8 +351,13 @@
             const modelColumns = new Set([0, 6]);
             const traceColumns = new Set([1, 2, 7, 8]);
             const copybookTitle = '硬筆書法練習紙';
+            const fontFamilies = {
+                iansui: "'IansuiPractice', 'Iansui 0.93', '芫荽 0.93', 'Noto Serif TC', serif",
+                'chen-yuluoyan': "'ChenYuluoyanPractice', 'Noto Serif TC', serif",
+            };
             const inputs = {
                 text: document.getElementById('copybook-text'),
+                font: document.getElementById('copybook-font'),
             };
             const preview = document.getElementById('copybook-preview');
             const meta = document.getElementById('copybook-meta');
@@ -404,6 +425,10 @@
             }
 
             function render() {
+                document.querySelector('.copybook-workspace').style.setProperty(
+                    '--copybook-font-family',
+                    fontFamilies[inputs.font.value] || fontFamilies.iansui
+                );
                 const chars = normalizeText(inputs.text.value);
                 const pages = Math.max(1, Math.ceil(chars.length / charsPerPage));
                 preview.innerHTML = '';
@@ -423,8 +448,11 @@
 
             const printButton = document.getElementById("copybook-print");
             if (printButton) {
-                printButton.addEventListener("click", function() {
+                printButton.addEventListener("click", async function() {
                     applyPrintSize();
+                    if (document.fonts && document.fonts.ready) {
+                        await document.fonts.ready;
+                    }
                     const originalTitle = document.title;
                     document.title = copybookTitle;
                     document.body.classList.add("print-copybook");

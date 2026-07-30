@@ -53,6 +53,21 @@ class PublicationResource extends Resource
                             ->default(true),
                     ]),
                 ]),
+                Forms\Components\Section::make('中文資料（選填）')
+                    ->collapsed()
+                    ->schema([
+                        Forms\Components\Textarea::make('authors_zh_tw')
+                            ->label('中文作者')
+                            ->rows(3)
+                            ->columnSpanFull(),
+                        Forms\Components\TextInput::make('title_zh_tw')
+                            ->label('中文標題')
+                            ->maxLength(500),
+                        Forms\Components\TextInput::make('journal_zh_tw')
+                            ->label('中文期刊名稱')
+                            ->maxLength(255),
+                    ])
+                    ->columns(2),
             ]);
         }
 
@@ -91,6 +106,20 @@ class PublicationResource extends Resource
                         Forms\Components\Toggle::make('is_open_access')->label('Open Access'),
                         Forms\Components\Toggle::make('is_active')->label('顯示於前台')->default(true),
                     ]),
+                Tabs\Tab::make('中文資料（選填）')
+                    ->icon('heroicon-o-language')
+                    ->schema([
+                        Forms\Components\Textarea::make('authors_zh_tw')
+                            ->label('中文作者')
+                            ->rows(4)
+                            ->helperText('沒有中文資料時請留空，中文前台會自動顯示原始書目資料。'),
+                        Forms\Components\TextInput::make('title_zh_tw')
+                            ->label('中文標題')
+                            ->maxLength(500),
+                        Forms\Components\TextInput::make('journal_zh_tw')
+                            ->label('中文期刊名稱')
+                            ->maxLength(255),
+                    ]),
                 Tabs\Tab::make('關聯設定')
                     ->icon('heroicon-o-link')
                     ->schema([
@@ -111,10 +140,20 @@ class PublicationResource extends Resource
                 ->sortable(),
             Tables\Columns\TextColumn::make('abbreviated_authors')
                 ->label('作者')
-                ->searchable(query: fn ($query, string $search) => $query->where('authors', 'like', "%{$search}%"))
+                ->searchable(query: fn ($query, string $search) => $query->where(
+                    fn ($query) => $query
+                        ->where('authors', 'like', "%{$search}%")
+                        ->orWhere('authors_zh_tw', 'like', "%{$search}%")
+                ))
                 ->wrap()
                 ->width('18rem'),
             Tables\Columns\TextColumn::make('title')->label('標題')->searchable()->limit(70)->wrap()->width('22rem'),
+            Tables\Columns\TextColumn::make('title_zh_tw')
+                ->label('中文標題')
+                ->searchable()
+                ->limit(70)
+                ->wrap()
+                ->toggleable(isToggledHiddenByDefault: true),
             Tables\Columns\TextColumn::make('journal')->label('期刊')->limit(35)->wrap()->toggleable(isToggledHiddenByDefault: true),
             Tables\Columns\TextColumn::make('sites.name_zh_tw')
                 ->label('樣區')->badge()->separator(', '),
