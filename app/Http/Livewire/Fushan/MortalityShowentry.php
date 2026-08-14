@@ -31,6 +31,7 @@ class MortalityShowentry extends Component
     public $records = [];
     public $suggestedMapKey;
     public $firstPendingMapKey;
+    public $firstPendingMap;
     public $suggestedMapSort;
     public $firstPendingMapSort;
     public $entryCompleted = false;
@@ -586,6 +587,7 @@ class MortalityShowentry extends Component
         $this->firstPendingMapKey = $firstPendingRow
             ? $this->buildMapOptionKey((int) $firstPendingRow->map_sort, (string) $firstPendingRow->map)
             : null;
+        $this->firstPendingMap = $firstPendingRow ? trim((string) $firstPendingRow->map) : null;
         $this->firstPendingMapSort = $firstPendingRow ? (int) $firstPendingRow->map_sort : null;
         $mapOptionKeys = array_map(fn ($row) => (string) $row['key'], $this->mapOptions);
         $this->suggestedMapKey = $this->firstPendingMapKey ?? ($mapOptionKeys[0] ?? null);

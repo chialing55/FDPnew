@@ -51,8 +51,8 @@
             <div style='margin:10px 0'>
                 @if (!empty($completionHint))
                     <span style="font-weight:700; color:#374151;">{{ $completionHint }}</span>
-                @elseif ($suggestedMapKey !== null)
-                    <span style="color:#475569;">建議從目前第一個未完成的 map 開始。</span>
+                @elseif ($selectedMapKey === null && $firstPendingMapKey !== null)
+                    <span style="color:#475569;">建議從 map {{ $firstPendingMap }} 開始。</span>
                 @endif
             </div>
         @else
@@ -64,6 +64,15 @@
     </div>
 
     @if ($selectedMapSort !== null && $selectedMap !== null)
+        <div id="simplenote" class="text_box" style="margin-bottom:16px;">
+            <div style="font-weight:700; margin-bottom:8px;">輸入提醒</div>
+            <ul style="margin:0; padding-left:22px; line-height:1.8;">
+                <li>輸入前請先閱讀<a href="{{ route('admin.fushan.mortality.note') }}"><b>死亡率調查輸入注意事項</b></a>。</li>
+                <li>輸入資料後請按「儲存」，確認資料已確實保存。</li>
+                <li>若現場特殊狀況無法符合一般檢查規則，但確認需要照實記錄，請在備註中選擇 <b>特例 / exception</b>，並簡要說明原因。</li>
+            </ul>
+        </div>
+
         <div class='text_box'>
             <div style="display:flex; align-items:center; justify-content:space-between; gap:12px; flex-wrap:wrap;">
                 <div style="font-weight:700;">調查團隊</div>
