@@ -64,15 +64,12 @@
     </div>
 
     @if ($selectedMapSort !== null && $selectedMap !== null)
-        <div id="simplenote" class="text_box">
-            <div style="margin:10px;"><b>輸入提醒</b></div>
-            <div class="text_box2">
-                <ul>
-                    <li>輸入前請先閱讀<a href="{{ route('admin.fushan.mortality.note') }}"><b>死亡率調查輸入注意事項</b></a>。</li>
-                    <li><b>輸入資料後請按「儲存」，才能確實將資料儲存。</b></li>
-                    <li>若現場特殊狀況無法符合一般檢查規則，但確認需要照實記錄，請在備註中選擇 <b>特例 / exception</b>，並簡要說明原因。</li>
-                </ul>
-            </div>
+        <div id="simplenote" class="text_box2">
+            <ul>
+                <li>輸入前請先閱讀<a href="{{ route('admin.fushan.mortality.note') }}"><b>死亡率調查輸入注意事項</b></a>。</li>
+                <li><b>輸入資料後請按「儲存」，才能確實將資料儲存。</b></li>
+                <li>若現場特殊狀況無法符合一般檢查規則，但確認需要照實記錄，請在備註中選擇 <b>特例 / exception</b>，並簡要說明原因。</li>
+            </ul>
         </div>
 
         <div class='text_box'>
