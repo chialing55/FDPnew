@@ -112,6 +112,9 @@ Then open `http://127.0.0.1:8081` locally.
 
 ## 5. Backup before resize or rebuild
 
+For the automated Linode-to-Synology backup, retention, verification, and
+restore procedure, see [`docs/production-backup.md`](docs/production-backup.md).
+
 Before resizing Linode, replacing volumes, or re-importing data, back up MySQL:
 
 ```bash
