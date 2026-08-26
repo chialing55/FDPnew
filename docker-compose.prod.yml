@@ -53,8 +53,6 @@ services:
       - --max_allowed_packet=256M
     volumes:
       - ${MYSQL_DATA_PATH:-./data/mysql}:/var/lib/mysql
-      - ./docker/mysql/init:/docker-entrypoint-initdb.d:ro
-      - ${MYSQL_IMPORT_PATH:-./initdb}:/import:ro
     healthcheck:
       test: ["CMD-SHELL", "mysqladmin ping -h 127.0.0.1 -uroot -p\"$${MYSQL_ROOT_PASSWORD}\" --silent"]
       interval: 10s
