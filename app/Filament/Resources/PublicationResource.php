@@ -11,6 +11,7 @@ use Filament\Forms\Form;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Enums\ActionsPosition;
+use Filament\Tables\Enums\FiltersLayout;
 use Filament\Tables\Table;
 
 class PublicationResource extends Resource
@@ -31,67 +32,70 @@ class PublicationResource extends Resource
 
     public static function form(Form $form): Form
     {
-        if ($form->getOperation() === 'create') {
-            return $form->schema([
-                Forms\Components\Section::make('基本資料')->schema([
-                    Forms\Components\Grid::make(2)->schema([
-                        Forms\Components\Textarea::make('authors')
-                            ->label('Authors')
-                            ->required()
-                            ->rows(3)
-                            ->columnSpanFull(),
-                        Forms\Components\TextInput::make('title')
-                            ->label('Title')
-                            ->required()
-                            ->maxLength(500),
-                        Forms\Components\TextInput::make('year')
-                            ->label('Year')
-                            ->numeric(),
-                        static::typeField(),
-                        Forms\Components\Toggle::make('is_active')
-                            ->label('顯示於前台')
-                            ->default(true),
-                    ]),
-                ]),
-                Forms\Components\Section::make('中文資料（選填）')
-                    ->collapsed()
-                    ->schema([
-                        Forms\Components\Textarea::make('authors_zh_tw')
-                            ->label('中文作者')
-                            ->rows(3)
-                            ->columnSpanFull(),
-                        Forms\Components\TextInput::make('title_zh_tw')
-                            ->label('中文標題')
-                            ->maxLength(500),
-                        Forms\Components\TextInput::make('journal_zh_tw')
-                            ->label('中文期刊名稱')
-                            ->maxLength(255),
-                    ])
-                    ->columns(2),
-            ]);
-        }
-
         return $form->schema([
             Tabs::make('學術產出設定')->tabs([
                 Tabs\Tab::make('基本資料')
                     ->icon('heroicon-o-document-text')
                     ->schema([
                         Forms\Components\Grid::make(12)->schema([
+                            static::typeField()->columnSpan(4),
+                            static::languageField()->columnSpan(4),
+                            Forms\Components\TextInput::make('year')->label('Year')->numeric()->columnSpan(4),
                             Forms\Components\Textarea::make('authors')
                                 ->label('Authors')
+                                ->required()
                                 ->rows(4)
-                                ->columnSpanFull(),
-                            Forms\Components\TextInput::make('year')->label('Year')->numeric()->columnSpan(2),
-                            static::typeField()->columnSpan(2),
-                            Forms\Components\TextInput::make('title')->label('Title')->maxLength(500)->columnSpan(4),
-                            Forms\Components\TextInput::make('journal')->label('Journal')->maxLength(255)->columnSpan(4),
-                            Forms\Components\TextInput::make('volume')->label('Volume')->maxLength(50)->columnSpan(2),
-                            Forms\Components\TextInput::make('issue')->label('Issue')->maxLength(50)->columnSpan(2),
+                                ->columnSpan(fn (Forms\Get $get): int => static::showsChineseFields($get) ? 6 : 12),
+                            Forms\Components\Textarea::make('authors_zh_tw')
+                                ->label('中文作者')
+                                ->rows(4)
+                                ->columnSpan(6)
+                                ->visible(fn (Forms\Get $get): bool => static::showsChineseFields($get)),
+                            Forms\Components\Textarea::make('title')
+                                ->label('Title')
+                                ->required()
+                                ->rows(3)
+                                ->maxLength(500)
+                                ->columnSpan(fn (Forms\Get $get): int => static::showsChineseFields($get) ? 6 : 12),
+                            Forms\Components\Textarea::make('title_zh_tw')
+                                ->label('中文標題')
+                                ->rows(3)
+                                ->maxLength(500)
+                                ->columnSpan(6)
+                                ->visible(fn (Forms\Get $get): bool => static::showsChineseFields($get)),
+                            static::thesisTypeField()->columnSpan(4),
+                            static::pairedAutocompleteField('institution', 'Institution (English)', 'institution_zh_tw')
+                                ->columnSpan(4)
+                                ->visible(fn (Forms\Get $get): bool => $get('type') === 'thesis'),
+                            static::pairedAutocompleteField('institution_zh_tw', '學校名稱（中文）', 'institution')
+                                ->columnSpan(4)
+                                ->visible(fn (Forms\Get $get): bool => $get('type') === 'thesis'),
+                            static::pairedAutocompleteField('journal', 'Journal', 'journal_zh_tw')
+                                ->columnSpan(fn (Forms\Get $get): int => $get('language') === 'zh' ? 3 : 6)
+                                ->hidden(fn (Forms\Get $get): bool => $get('type') === 'thesis'),
+                            static::pairedAutocompleteField('journal_zh_tw', '中文期刊名稱', 'journal')
+                                ->columnSpan(3)
+                                ->visible(fn (Forms\Get $get): bool => $get('type') !== 'thesis' && $get('language') === 'zh'),
+                            Forms\Components\TextInput::make('volume')
+                                ->label('Volume')
+                                ->maxLength(50)
+                                ->columnSpan(1)
+                                ->hidden(fn (Forms\Get $get): bool => $get('type') === 'thesis'),
+                            Forms\Components\TextInput::make('issue')
+                                ->label('Issue')
+                                ->maxLength(50)
+                                ->columnSpan(1)
+                                ->hidden(fn (Forms\Get $get): bool => $get('type') === 'thesis'),
                             Forms\Components\TextInput::make('pages')
                                 ->label('Pages')->placeholder('例如：100–123')
                                 ->helperText('請輸入頁碼或頁碼範圍。')
-                                ->maxLength(100)->columnSpan(2),
-                            Forms\Components\TextInput::make('doi')->label('DOI')->maxLength(255)->columnSpan(2),
+                                ->maxLength(100)->columnSpan(2)
+                                ->hidden(fn (Forms\Get $get): bool => $get('type') === 'thesis'),
+                            Forms\Components\TextInput::make('doi')
+                                ->label('DOI')
+                                ->maxLength(255)
+                                ->columnSpan(2)
+                                ->hidden(fn (Forms\Get $get): bool => $get('type') === 'thesis'),
                         ]),
                         Forms\Components\Grid::make(2)->schema([
                             Forms\Components\TextInput::make('url')
@@ -105,20 +109,6 @@ class PublicationResource extends Resource
                         ]),
                         Forms\Components\Toggle::make('is_open_access')->label('Open Access'),
                         Forms\Components\Toggle::make('is_active')->label('顯示於前台')->default(true),
-                    ]),
-                Tabs\Tab::make('中文資料（選填）')
-                    ->icon('heroicon-o-language')
-                    ->schema([
-                        Forms\Components\Textarea::make('authors_zh_tw')
-                            ->label('中文作者')
-                            ->rows(4)
-                            ->helperText('沒有中文資料時請留空，中文前台會自動顯示原始書目資料。'),
-                        Forms\Components\TextInput::make('title_zh_tw')
-                            ->label('中文標題')
-                            ->maxLength(500),
-                        Forms\Components\TextInput::make('journal_zh_tw')
-                            ->label('中文期刊名稱')
-                            ->maxLength(255),
                     ]),
                 Tabs\Tab::make('關聯設定')
                     ->icon('heroicon-o-link')
@@ -160,10 +150,42 @@ class PublicationResource extends Resource
             Tables\Columns\TextColumn::make('subjects.name_zh_tw')
                 ->label('研究主題')->badge()->separator(', '),
             Tables\Columns\TextColumn::make('doi')->label('DOI')->searchable()->limit(30)->toggleable(isToggledHiddenByDefault: true),
-            Tables\Columns\IconColumn::make('is_open_access')->label('Open Access')->boolean(),
             Tables\Columns\IconColumn::make('is_active')->label('公開')->boolean(),
-        ])->defaultSort('year', 'desc')->actions(
-            [Tables\Actions\EditAction::make()],
+        ])
+            ->defaultSort('year', 'desc')
+            ->filters([
+                Tables\Filters\SelectFilter::make('type')
+                    ->label('文獻類型')
+                    ->options(fn (): array => static::publicationTypeOptions())
+                    ->multiple()
+                    ->searchable()
+                    ->preload(),
+                Tables\Filters\SelectFilter::make('site')
+                    ->label('樣區')
+                    ->relationship('sites', 'name_zh_tw')
+                    ->multiple()
+                    ->searchable()
+                    ->preload(),
+                Tables\Filters\SelectFilter::make('subject')
+                    ->label('研究主題')
+                    ->relationship('subjects', 'name_zh_tw')
+                    ->multiple()
+                    ->searchable()
+                    ->preload(),
+            ], layout: FiltersLayout::AboveContent)
+            ->filtersFormColumns([
+                'default' => 1,
+                'md' => 3,
+            ])
+            ->toggleColumnsTriggerAction(
+                fn (Tables\Actions\Action $action): Tables\Actions\Action => $action
+                    ->label('顯示／隱藏欄位')
+                    ->button()
+            )
+            ->actions(
+            [
+                Tables\Actions\EditAction::make()->label('編輯'),
+            ],
             ActionsPosition::BeforeColumns,
         );
     }
@@ -177,23 +199,10 @@ class PublicationResource extends Resource
     {
         return Forms\Components\Select::make('type')
             ->label('Type')
-            ->options(function (): array {
-                $labels = Publication::typeLabels('zh-TW');
-
-                Publication::query()
-                    ->whereNotNull('type')
-                    ->where('type', '!=', '')
-                    ->distinct()
-                    ->orderBy('type')
-                    ->pluck('type')
-                    ->each(function (string $type) use (&$labels): void {
-                        $labels[$type] ??= $type;
-                    });
-
-                return $labels;
-            })
+            ->options(fn (): array => static::publicationTypeOptions())
             ->default('paper')
             ->required()
+            ->live()
             ->searchable()
             ->preload()
             ->native(false)
@@ -205,5 +214,100 @@ class PublicationResource extends Resource
             ])
             ->createOptionUsing(fn (array $data): string => strtolower(trim($data['type'])))
             ->helperText('可選擇既有類型，或新增其他類型。');
+    }
+
+    protected static function publicationTypeOptions(): array
+    {
+        $labels = Publication::typeLabels('zh-TW');
+        $options = [
+            'journalArticle' => $labels['journalArticle'],
+            'thesis' => $labels['thesis'],
+            'book' => $labels['book'],
+            'dataset' => $labels['dataset'],
+            'paper' => $labels['paper'],
+            'poster' => $labels['poster'],
+            'oral' => $labels['oral'],
+        ];
+
+        Publication::query()
+            ->whereNotNull('type')
+            ->where('type', '!=', '')
+            ->distinct()
+            ->orderBy('type')
+            ->pluck('type')
+            ->each(function (string $type) use (&$options, $labels): void {
+                $label = $labels[$type] ?? $type;
+
+                if (! array_key_exists($type, $options) && ! in_array($label, $options, true)) {
+                    $options[$type] = $label;
+                }
+            });
+
+        return $options;
+    }
+
+    protected static function languageField(): Forms\Components\Select
+    {
+        return Forms\Components\Select::make('language')
+            ->label('Language')
+            ->options([
+                'en' => 'English',
+                'zh' => 'Chinese',
+            ])
+            ->default('en')
+            ->required()
+            ->live()
+            ->native(false);
+    }
+
+    protected static function thesisTypeField(): Forms\Components\Select
+    {
+        return Forms\Components\Select::make('thesis_type')
+            ->label('Thesis type')
+            ->options([
+                'master' => "Master's thesis",
+                'doctoral' => 'Doctoral dissertation',
+            ])
+            ->placeholder('請選擇')
+            ->native(false)
+            ->visible(fn (Forms\Get $get): bool => $get('type') === 'thesis');
+    }
+
+    protected static function pairedAutocompleteField(
+        string $field,
+        string $label,
+        string $pairedField,
+    ): Forms\Components\TextInput {
+        return Forms\Components\TextInput::make($field)
+            ->label($label)
+            ->maxLength(255)
+            ->datalist(fn (): array => Publication::query()
+                ->whereNotNull($field)
+                ->where($field, '!=', '')
+                ->distinct()
+                ->orderBy($field)
+                ->pluck($field)
+                ->all())
+            ->live(onBlur: true)
+            ->afterStateUpdated(function (?string $state, Forms\Set $set) use ($field, $pairedField): void {
+                if (blank($state)) {
+                    return;
+                }
+
+                $pairedValue = Publication::query()
+                    ->where($field, $state)
+                    ->whereNotNull($pairedField)
+                    ->where($pairedField, '!=', '')
+                    ->value($pairedField);
+
+                if (filled($pairedValue)) {
+                    $set($pairedField, $pairedValue);
+                }
+            });
+    }
+
+    protected static function showsChineseFields(Forms\Get $get): bool
+    {
+        return $get('type') === 'thesis' || $get('language') === 'zh';
     }
 }

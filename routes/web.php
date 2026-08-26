@@ -8,6 +8,17 @@ use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\UpdateController;
 use App\Http\Controllers\Web\WebIndexController;
 use App\Http\Controllers\ContentImageController;
+use App\Http\Controllers\ChangYangController;
+
+Route::prefix('changyang')->name('changyang.')->group(function () {
+    Route::get('/', [ChangYangController::class, 'show'])->name('home');
+    Route::get('/{page}.html', [ChangYangController::class, 'legacy'])
+        ->where('page', '[a-z0-9-]+')
+        ->name('legacy');
+    Route::get('/{page}', [ChangYangController::class, 'show'])
+        ->where('page', '[a-z0-9-]+')
+        ->name('page');
+});
 
 /*
 |--------------------------------------------------------------------------

@@ -1,0 +1,2183 @@
+{
+    "version": 1,
+    "source": "changyang.weebly.com archive",
+    "pages": [
+        {
+            "slug": "home",
+            "title": "Plant Ecology Lab at NSYSU",
+            "navigation_label": "Home",
+            "template": "home",
+            "hero_image_path": "changyang/heroes/home/291124344.jpg",
+            "hero_image_alt": "Plant Ecology Lab at NSYSU",
+            "hero_title": "Forest Dynamics in a Changing World",
+            "hero_subtitle": "氣候變遷下的森林動態",
+            "hero_settings": {
+                "height": "600px",
+                "position": "50% 50%",
+                "overlay_opacity": 0.08
+            },
+            "meta_description": null,
+            "show_in_navigation": true,
+            "navigation_order": 1,
+            "is_active": true,
+            "sections": [
+                {
+                    "heading": null,
+                    "subheading": null,
+                    "settings": null,
+                    "sort_order": 1,
+                    "is_active": true,
+                    "blocks": [
+                        {
+                            "type": "rich_text",
+                            "layout": "text_only",
+                            "heading": null,
+                            "content_html": "<div class=\"paragraph\" style=\"text-align:center;\">我們正在招募新血，若有興趣加入我們的團隊，請與張楊家豪聯繫<br>We're recruiting graduate students. <br>If you're interested in our research, please contact Chia-Hao Chang-Yang for more details.<br><strong><span style=\"color:rgb(42, 42, 42)\">changyang AT mail.nsysu.edu.tw</span></strong></div>",
+                            "settings": null,
+                            "sort_order": 1,
+                            "is_active": true,
+                            "images": []
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "slug": "news",
+            "title": "News",
+            "navigation_label": "News",
+            "template": "news",
+            "hero_image_path": "changyang/heroes/news/1593014940.jpg",
+            "hero_image_alt": "News",
+            "hero_title": "News is the first rough draft of history",
+            "hero_subtitle": null,
+            "hero_settings": {
+                "height": "300px",
+                "position": "undefined undefined",
+                "overlay_opacity": 0.3
+            },
+            "meta_description": null,
+            "show_in_navigation": true,
+            "navigation_order": 2,
+            "is_active": true,
+            "sections": []
+        },
+        {
+            "slug": "people",
+            "title": "People",
+            "navigation_label": "People",
+            "template": "people",
+            "hero_image_path": "changyang/heroes/people/1757525028.jpg",
+            "hero_image_alt": "People",
+            "hero_title": "We are the people loving trees",
+            "hero_subtitle": null,
+            "hero_settings": {
+                "height": "300px",
+                "position": "50.00% 47.04%",
+                "overlay_opacity": 0.3
+            },
+            "meta_description": null,
+            "show_in_navigation": true,
+            "navigation_order": 3,
+            "is_active": true,
+            "sections": [
+                {
+                    "heading": "Principle Investigator (PI)",
+                    "subheading": null,
+                    "settings": null,
+                    "sort_order": 1,
+                    "is_active": true,
+                    "blocks": [
+                        {
+                            "type": "person",
+                            "layout": "image_left",
+                            "heading": "Chia-Hao Chang-Yang (張楊家豪)",
+                            "media_content_html": "<p>Assistant Professor<br>Department of Biological Sciences<br>National Sun Yat-sen University<br>changyang@mail.nsysu.edu.tw<br>+886-7-5252000 ext 3610</p>",
+                            "content_html": "<p>I am a forest ecologist broadly interested in plant phenology, community ecology, and biodiversity patterns.  My research focuses on understanding plant-climate interactions, evaluating impacts of climate changes on forest dynamics, and disentangling the mechanisms that determine community assembly.  I explore these questions by linking data from different spatial and temporal scales.<br><br>我的研究專長為森林生態學，研究興趣主要在植物物候學、群落生態學與生物多樣性等領域，目前的研究主題包括了解氣候變遷對於森林動態可能帶來的衝擊、量化氣候變化對於森林植物開花、結果物候的影響、探究森林群落建構過程的主要機制，透過結合不同時間與空間尺度的資料來探索這些問題。<br><br>我喜歡在森林裡看樹、找樹、測量樹木，歡迎與我一同加入森林動態的研究。<br><br><a href=\"/storage/changyang/documents/chang-yang_cv_2024.pdf\" target=\"_blank\">CV</a><br><br><strong>We are recruiting graduate / undergraduate students. Feel free to contact me for more details.<br><br>我們正在招募新血 (碩博士生、大學部學生)！若有興趣加入我們的團隊，歡迎與我聯繫。</strong></p>",
+                            "settings": null,
+                            "sort_order": 1,
+                            "is_active": true,
+                            "images": [
+                                {
+                                    "image_path": "changyang/content/people/chia-hao-2016.jpg",
+                                    "alt_text": "圖片",
+                                    "caption": null,
+                                    "link_url": null,
+                                    "display_settings": {
+                                        "frame_width": "342px",
+                                        "object_fit": "cover",
+                                        "position_x": "50%",
+                                        "position_y": "50%"
+                                    },
+                                    "sort_order": 1
+                                }
+                            ]
+                        }
+                    ]
+                },
+                {
+                    "heading": "Research Assistants 研究助理",
+                    "subheading": null,
+                    "settings": null,
+                    "sort_order": 2,
+                    "is_active": true,
+                    "blocks": [
+                        {
+                            "type": "person",
+                            "layout": "image_left",
+                            "heading": "蔡佳秀",
+                            "media_content_html": null,
+                            "content_html": "<p>佳秀先前是研究室長駐福山的野外助理 (2021-25年)，目前則是負責協助執行林業與自然保育署的全國外來植物調查計畫，調查台南與高雄的外來植物分布現況，並藉由比對前一次2009-2012年的調查資料，了解各外來植物在台灣的動態變化。佳秀也曾協助嘉義大學南仁山樣區團隊進行每木調查、小苗調查與掉落物收集，野外經驗非常豐富。</p>",
+                            "settings": null,
+                            "sort_order": 1,
+                            "is_active": true,
+                            "images": [
+                                {
+                                    "image_path": "changyang/content/people/1738022702_orig.jpg",
+                                    "alt_text": "圖片",
+                                    "caption": null,
+                                    "link_url": null,
+                                    "display_settings": {
+                                        "frame_width": "342px",
+                                        "frame_height": "307px",
+                                        "object_fit": "cover",
+                                        "position_x": "50%",
+                                        "position_y": "50%"
+                                    },
+                                    "sort_order": 1
+                                }
+                            ]
+                        },
+                        {
+                            "type": "person",
+                            "layout": "image_left",
+                            "heading": "曾沛濂",
+                            "media_content_html": null,
+                            "content_html": "<p>沛濂是我們研究室的碩士畢業生，碩班的研究主題是藉由彙整台灣過往的植物開花、結果物候文獻與調查資料，並搭配植群樣區調查資料，估算台灣不同植物群落主要的開花時間，並探討台灣各植物群落的開花時間主要受什麼氣候因子所影響。目前沛濂負責執行我們團隊在壽山國家自然公園的研究計畫，調查壽山原生與外來植物的動態變化，並結合無人機空拍與衛星影像，探討壽山地國家自然公園在過往30年的植被變遷，評估氣候變遷所帶來的影響。<br><br><strong>[碩士論文]</strong> 臺灣植物開花物候： 生活型、譜系、環境因子的影響</p>",
+                            "settings": null,
+                            "sort_order": 2,
+                            "is_active": true,
+                            "images": [
+                                {
+                                    "image_path": "changyang/content/people/pxl-20240620-020711702_orig.jpg",
+                                    "alt_text": "圖片",
+                                    "caption": null,
+                                    "link_url": null,
+                                    "display_settings": {
+                                        "frame_width": "342px",
+                                        "object_fit": "cover",
+                                        "position_x": "50%",
+                                        "position_y": "50%"
+                                    },
+                                    "sort_order": 1
+                                }
+                            ]
+                        },
+                        {
+                            "type": "person",
+                            "layout": "image_left",
+                            "heading": "羅珮蓁",
+                            "media_content_html": null,
+                            "content_html": "<p>珮蓁是我們研究室的碩士畢業生，他的研究調查了福山亞熱帶森林65種樹木的樹型結構，透過量測各樹種的胸高直徑、樹高、樹長以及冠幅，分析樹型結構與其他植物功能性狀的相關性，以及對於樹木生長、存活的影響，藉此探討樹種於不同階段的生活史策略。珮蓁目前負責協助林業與自然保育署的全國外來植物調查計畫，調查台南與高雄的外來植物分布現況，並藉由比對前一次2009-2012年的調查資料，了解各外來植物在台灣的動態變化。<br><br><strong>[碩士論文] </strong>亞熱帶森林樹種異速生長與功能性狀、族群動態之關係</p>",
+                            "settings": null,
+                            "sort_order": 3,
+                            "is_active": true,
+                            "images": [
+                                {
+                                    "image_path": "changyang/content/people/2022_orig.jpg",
+                                    "alt_text": "圖片",
+                                    "caption": null,
+                                    "link_url": null,
+                                    "display_settings": {
+                                        "frame_width": "342px",
+                                        "object_fit": "cover",
+                                        "position_x": "50%",
+                                        "position_y": "50%"
+                                    },
+                                    "sort_order": 1
+                                }
+                            ]
+                        },
+                        {
+                            "type": "person",
+                            "layout": "image_left",
+                            "heading": "黃俊男",
+                            "media_content_html": null,
+                            "content_html": "<p>小俊目前是研究室常駐福山的助理，負責福山樣區種子雨與喬木小苗動態的野外調查、種子樣本的分類與整理、凋落物收集、野外小苗實驗等資料彙整與輸入，並協助其他野外調查的進行。</p>",
+                            "settings": null,
+                            "sort_order": 4,
+                            "is_active": true,
+                            "images": [
+                                {
+                                    "image_path": "changyang/content/people/2025_orig.jpg",
+                                    "alt_text": "圖片",
+                                    "caption": null,
+                                    "link_url": null,
+                                    "display_settings": {
+                                        "frame_width": "342px",
+                                        "object_fit": "cover",
+                                        "position_x": "50%",
+                                        "position_y": "50%"
+                                    },
+                                    "sort_order": 1
+                                }
+                            ]
+                        },
+                        {
+                            "type": "person",
+                            "layout": "image_left",
+                            "heading": "鄭俐俐 Lily Cheng Clavel",
+                            "media_content_html": null,
+                            "content_html": "<p>俐俐目前負責協助執行研究室在福山的小苗野外實驗計畫，探討同種密度制約效應與地被覆蓋對於森林樹種小苗更新的影響。俐俐的碩士研究是在法國University of Montpellier永續發展研究所(IRD)與AMAP Lab進行，透過植物解剖形態特徵探討木質藤本植物的攀附機制，曾在New Caledonia、French  Guiana與Pureto Rico做過野外調查。</p>",
+                            "settings": null,
+                            "sort_order": 5,
+                            "is_active": true,
+                            "images": [
+                                {
+                                    "image_path": "changyang/content/people/2026_orig.jpg",
+                                    "alt_text": "圖片",
+                                    "caption": null,
+                                    "link_url": null,
+                                    "display_settings": {
+                                        "frame_width": "342px",
+                                        "object_fit": "cover",
+                                        "position_x": "50%",
+                                        "position_y": "50%"
+                                    },
+                                    "sort_order": 1
+                                }
+                            ]
+                        },
+                        {
+                            "type": "person",
+                            "layout": "image_left",
+                            "heading": "劉士樵",
+                            "media_content_html": null,
+                            "content_html": "<p>士樵是我們研究室的碩士班畢業生，從大學部時就開始參與我們團隊在福山的野外調查，碩班的研究則調查了壽山主要樹種的功能性狀，結合森林樣區的複查資料，探討壽山樹種短期動態與環境因子的相關性，以及功能性狀和環境間的交互作用。士樵接下來將會協助我們進行研究室的各樣調查與資料分析！</p>",
+                            "settings": null,
+                            "sort_order": 6,
+                            "is_active": true,
+                            "images": [
+                                {
+                                    "image_path": "changyang/content/people/pxl-20220826-072726388_orig.jpg",
+                                    "alt_text": "圖片",
+                                    "caption": null,
+                                    "link_url": null,
+                                    "display_settings": {
+                                        "frame_width": "342px",
+                                        "object_fit": "cover",
+                                        "position_x": "50%",
+                                        "position_y": "50%"
+                                    },
+                                    "sort_order": 1
+                                }
+                            ]
+                        }
+                    ]
+                },
+                {
+                    "heading": "Graduate students 研究生",
+                    "subheading": null,
+                    "settings": null,
+                    "sort_order": 3,
+                    "is_active": true,
+                    "blocks": [
+                        {
+                            "type": "person",
+                            "layout": "image_left",
+                            "heading": "鄧永淥",
+                            "media_content_html": null,
+                            "content_html": "<p>碩士班研究生 (2021-2023)、博士班研究生 (2025-<br><br><strong>[碩士論文]</strong> 植物功能性狀和環境之交互作用對亞熱帶雨林樹木新增的影響<br><br>永淥從大學部就加入我們研究團隊，長期協助我們進行各項野外調查工作與資料分析。永淥大學部專題時分析了福山長葉木薑子在豐歉年間種子活性與傳播距離的年間變化，碩班的研究主題是探討福山森林樹木功能性狀與環境之交互作用對樹木新增的影響，博士班的研究主題同樣聚焦在trait-environment interaction如何影響森林動態，並進一步探討trait-environment interaction在樹木不同生活史階段是否有所不同、是否會受到年間氣候變化而改變。</p>",
+                            "settings": null,
+                            "sort_order": 1,
+                            "is_active": true,
+                            "images": [
+                                {
+                                    "image_path": "changyang/content/people/2020-07-27-11-14-48_orig.jpg",
+                                    "alt_text": "圖片",
+                                    "caption": null,
+                                    "link_url": null,
+                                    "display_settings": {
+                                        "frame_width": "342px",
+                                        "object_fit": "cover",
+                                        "position_x": "50%",
+                                        "position_y": "50%"
+                                    },
+                                    "sort_order": 1
+                                }
+                            ]
+                        },
+                        {
+                            "type": "person",
+                            "layout": "image_left",
+                            "heading": "林亮辰",
+                            "media_content_html": null,
+                            "content_html": "<p>近年來降雨分布愈來愈不均勻，台灣中南部乾季長度逐年增加，許多森林樹木都受到乾旱的影響，但不同的樹種反應並不一致。亮辰藉由量測葉片的溶質滲漏速率來量化樹木葉片的耐旱性，開拓研究室在生理生態這個面向的研究。</p>",
+                            "settings": null,
+                            "sort_order": 2,
+                            "is_active": true,
+                            "images": [
+                                {
+                                    "image_path": "changyang/content/people/1296657418_orig.jpg",
+                                    "alt_text": "圖片",
+                                    "caption": null,
+                                    "link_url": null,
+                                    "display_settings": {
+                                        "frame_width": "342px",
+                                        "object_fit": "cover",
+                                        "position_x": "50%",
+                                        "position_y": "50%"
+                                    },
+                                    "sort_order": 1
+                                }
+                            ]
+                        }
+                    ]
+                },
+                {
+                    "heading": "Undergraduate students 大學部專題生",
+                    "subheading": null,
+                    "settings": null,
+                    "sort_order": 4,
+                    "is_active": true,
+                    "blocks": [
+                        {
+                            "type": "rich_text",
+                            "layout": "text_only",
+                            "heading": null,
+                            "media_content_html": null,
+                            "content_html": "<p>大學部專題生招募中！如果有興趣加入我們，歡迎與老師或是研究室成員聯繫。<br>We are recruiting undergraduate students. Welcome to join the plant ecology group at NSYSU!</p>\n\n<div>\r\n<hr>\r\n</div>",
+                            "settings": null,
+                            "sort_order": 1,
+                            "is_active": true,
+                            "images": []
+                        }
+                    ]
+                },
+                {
+                    "heading": "Lab alumni",
+                    "subheading": null,
+                    "settings": null,
+                    "sort_order": 5,
+                    "is_active": true,
+                    "blocks": [
+                        {
+                            "type": "person",
+                            "layout": "image_left",
+                            "heading": "蔣寶慧 Po-Hui Chiang",
+                            "media_content_html": null,
+                            "content_html": "<p>寶慧是研究室研究室第一任大總管，2019-2025年這段期間協助福山森林動態樣區資料整理與分析、壽山植物生態調查、台灣原生與外來植物名錄彙整等研究工作，研究室主要的行政工作也都是由寶慧一手包辦，是團隊的重要戰力！</p>",
+                            "settings": null,
+                            "sort_order": 1,
+                            "is_active": true,
+                            "images": [
+                                {
+                                    "image_path": "changyang/content/people/ph-2023_orig.jpg",
+                                    "alt_text": "圖片",
+                                    "caption": null,
+                                    "link_url": null,
+                                    "display_settings": {
+                                        "frame_width": "342px",
+                                        "object_fit": "cover",
+                                        "position_x": "50%",
+                                        "position_y": "50%"
+                                    },
+                                    "sort_order": 1
+                                }
+                            ]
+                        },
+                        {
+                            "type": "person",
+                            "layout": "image_left",
+                            "heading": "江庭誼 (卡夫卡)",
+                            "media_content_html": null,
+                            "content_html": "<p>卡夫卡是研究室 2019-2021年駐福山的野外助理，主要負責福山森林動態樣區種子雨與喬木小苗動態的野外調查、樣本分類與整理、與資料整理，並協助相關野外調查的進行，卡夫卡先前也是福山樣區第4次每木調查團隊的成員，目前則在山林中繼續打滾，野外經驗非常豐富。</p>",
+                            "settings": null,
+                            "sort_order": 2,
+                            "is_active": true,
+                            "images": [
+                                {
+                                    "image_path": "changyang/content/people/kafka_orig.jpg",
+                                    "alt_text": "圖片",
+                                    "caption": null,
+                                    "link_url": null,
+                                    "display_settings": {
+                                        "frame_width": "342px",
+                                        "object_fit": "cover",
+                                        "position_x": "50%",
+                                        "position_y": "50%"
+                                    },
+                                    "sort_order": 1
+                                }
+                            ]
+                        },
+                        {
+                            "type": "person",
+                            "layout": "image_left",
+                            "heading": "覃文榆",
+                            "media_content_html": null,
+                            "content_html": "<p>大學部專題生 (2020-2022)<br><br>文榆的研究主題為台灣福山亞熱帶雨林脊椎動物的時空變化。透過分析在福山森林動態樣區林下自動相機所拍攝的照片，我們想要了解福山森林主要的脊椎動物組程，以及其隨時間與空間的變化趨勢，而這些變化又如何受到植被以及地形因子的影響。</p>",
+                            "settings": null,
+                            "sort_order": 3,
+                            "is_active": true,
+                            "images": [
+                                {
+                                    "image_path": "changyang/content/people/2020-07-10-08-36-23_orig.jpg",
+                                    "alt_text": "圖片",
+                                    "caption": null,
+                                    "link_url": null,
+                                    "display_settings": {
+                                        "frame_width": "342px",
+                                        "object_fit": "cover",
+                                        "position_x": "50%",
+                                        "position_y": "50%"
+                                    },
+                                    "sort_order": 1
+                                }
+                            ]
+                        },
+                        {
+                            "type": "person",
+                            "layout": "image_left",
+                            "heading": "許國強",
+                            "media_content_html": null,
+                            "content_html": "<p>大學部專題生 (2020-2022)<br><br>國強的研究主題為台灣福山亞熱帶雨林樹木萌櫱現象對於生長的影響。台灣低海拔森林因為經常受到颱風侵擾，造成許多樹木斷折而有基部萌櫱的現象，先前的分析也顯示，萌櫱有助於樹木分散風險、增加其存活的機率，然而萌櫱現象對於樹木生長的影響卻鮮少有人分析，因此，我們想要了解福山森林中主要樹種其萌櫱情形與生長之相關性，以及植株大小和生育地對於這個現象的共同影響。</p>",
+                            "settings": null,
+                            "sort_order": 4,
+                            "is_active": true,
+                            "images": [
+                                {
+                                    "image_path": "changyang/content/people/1934849738.jpg",
+                                    "alt_text": "圖片",
+                                    "caption": null,
+                                    "link_url": null,
+                                    "display_settings": {
+                                        "frame_width": "342px",
+                                        "object_fit": "cover",
+                                        "position_x": "50%",
+                                        "position_y": "50%"
+                                    },
+                                    "sort_order": 1
+                                }
+                            ]
+                        },
+                        {
+                            "type": "person",
+                            "layout": "image_left",
+                            "heading": "張凱勛",
+                            "media_content_html": null,
+                            "content_html": "<p>碩士班研究生 (2019-202X)<br><br>凱勛的研究主要聚焦於不同菌根菌類型的樹種其生長量如何受到生物因子和非生物因子的影響。許多研究指出，與不同菌根菌共生的樹木，其生長表現對於土壤、地形、鄰樹組成的反應並不相同，對於某些因子，外生菌根菌與叢枝菌根菌的樹種反應截然不同。因此，我們透過分析福山森林動態樣區的長期樹木生長資料，以及樣區的環境因子，來了解不同樹種之間的差別。</p>",
+                            "settings": null,
+                            "sort_order": 5,
+                            "is_active": true,
+                            "images": [
+                                {
+                                    "image_path": "changyang/content/people/2023_orig.jpg",
+                                    "alt_text": "圖片",
+                                    "caption": null,
+                                    "link_url": null,
+                                    "display_settings": {
+                                        "frame_width": "342px",
+                                        "object_fit": "cover",
+                                        "position_x": "50%",
+                                        "position_y": "50%"
+                                    },
+                                    "sort_order": 1
+                                }
+                            ]
+                        },
+                        {
+                            "type": "person",
+                            "layout": "image_left",
+                            "heading": "藍以恆",
+                            "media_content_html": null,
+                            "content_html": "<p>碩士班研究生 (2022-2024)<br><br>以恆的研究主題為台灣福山亞熱帶雨林中，環境因子對附生植物的空間分布的影響。過往關於附生植物的研究中，通常著重於<strong>微氣候</strong>與<strong>宿主特性</strong>對於附生植物的影響，附生植物本身的<strong>性狀</strong>差異則較少被討論。因此我們透過分析附生植物之功能性狀如何影響其對於環境因子的反應，以及附生植物與宿主間的交互作用，進而決定其在空間上的分布。<br><br><strong>[碩士論文]</strong> 亞熱帶雨林附生植物之多樣性與空間分布</p>",
+                            "settings": null,
+                            "sort_order": 6,
+                            "is_active": true,
+                            "images": [
+                                {
+                                    "image_path": "changyang/content/people/1449061754_orig.png",
+                                    "alt_text": "圖片",
+                                    "caption": null,
+                                    "link_url": null,
+                                    "display_settings": {
+                                        "frame_width": "342px",
+                                        "object_fit": "cover",
+                                        "position_x": "50%",
+                                        "position_y": "50%"
+                                    },
+                                    "sort_order": 1
+                                }
+                            ]
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "slug": "research",
+            "title": "Research",
+            "navigation_label": "Research",
+            "template": "default",
+            "hero_image_path": "changyang/heroes/research/1395436438.jpg",
+            "hero_image_alt": "Research",
+            "hero_title": "Trees, Trees, and Trees",
+            "hero_subtitle": null,
+            "hero_settings": {
+                "height": "300px",
+                "position": "50.00% 50.00%",
+                "overlay_opacity": 0.3
+            },
+            "meta_description": null,
+            "show_in_navigation": true,
+            "navigation_order": 4,
+            "is_active": true,
+            "sections": [
+                {
+                    "heading": "Effects of climatic variation on plant reproduction<br>氣候變化對於森林植物開花、結果物候的影響",
+                    "subheading": null,
+                    "settings": null,
+                    "sort_order": 1,
+                    "is_active": true,
+                    "blocks": [
+                        {
+                            "type": "image_text",
+                            "layout": "image_left",
+                            "heading": null,
+                            "media_content_html": null,
+                            "content_html": "<p>森林植物的開花、結果物候表現深受氣候環境所影響，掌握森林植物物候的長期動態變化除了能讓我們了解當前氣候對於森林植物的影響之外，更可以幫助我們預測未來氣候變遷對於森林生態系可能的衝擊。<br><br>我們自2002年九月開始便長期在台灣東北部福山的亞熱帶雨林長期監測森林植物的開花與結果物候，發現不同空間與時間尺度的氣候變化均對森林植物開花、結果表現有著顯著的影響。現在我們正在建立物候預測模式，未來則希望結合無人機等遙測技術與群落水平之物候資料，發展在地景尺度之物候監測技術。</p>",
+                            "settings": null,
+                            "sort_order": 1,
+                            "is_active": true,
+                            "images": [
+                                {
+                                    "image_path": "changyang/content/research/1215643109_orig.jpg",
+                                    "alt_text": "圖片",
+                                    "caption": null,
+                                    "link_url": null,
+                                    "display_settings": {
+                                        "frame_width": "342px",
+                                        "object_fit": "cover",
+                                        "position_x": "50%",
+                                        "position_y": "50%"
+                                    },
+                                    "sort_order": 1
+                                }
+                            ]
+                        }
+                    ]
+                },
+                {
+                    "heading": "Closing the life cycles of trees<br>建立森林樹木 \"完整\" 生活史模式",
+                    "subheading": null,
+                    "settings": null,
+                    "sort_order": 2,
+                    "is_active": true,
+                    "blocks": [
+                        {
+                            "type": "image_text",
+                            "layout": "image_right",
+                            "heading": null,
+                            "media_content_html": null,
+                            "content_html": "<p>樹木是生活史非常漫長的生物，許多樹木的壽命可以長達數百年、甚至數千年。在樹木整個生活史當中，族群變動最劇烈的階段則屬從種子到小苗此一階段，一棵樹一年可能會產生數千顆、甚至數萬顆種子，一生當中則可能會產生百萬、甚至千萬以上的種子，但平均而言，一棵樹木一生只要有一棵種子能順利長大、能開花結果，對於整個樹木族群來說便能維持族群數量的穩定。<br><br>樹木小苗的成長過程必須克服各種環境選汰壓力、同種種樹與不同種樹間的競爭、動物啃食的風險和各種疾病的感染等種種威脅，才能成功建立。有許多研究指出森林樹木的組成，可能早在小苗階段就已決定的，然而，在許多森林模式中，小苗這個階段經常被過度簡化或忽略，這可能會導致在估算森林周轉率 (turnover rate) 時的偏差，進而影響森林生態系相關模式的估算結果。因此，我們將嘗試連結不同時間與空間尺度調查之森林動態資料，建構包含樹木不同生活史階段的\"完整\"模式。</p>",
+                            "settings": null,
+                            "sort_order": 1,
+                            "is_active": true,
+                            "images": [
+                                {
+                                    "image_path": "changyang/content/research/2019-07-15-13-37-18_orig.jpg",
+                                    "alt_text": "圖片",
+                                    "caption": null,
+                                    "link_url": null,
+                                    "display_settings": {
+                                        "frame_width": "342px",
+                                        "object_fit": "cover",
+                                        "position_x": "50%",
+                                        "position_y": "50%"
+                                    },
+                                    "sort_order": 1
+                                }
+                            ]
+                        }
+                    ]
+                },
+                {
+                    "heading": "Drivers of local-scale forest demography<br>森林樹木生長、存活、新增之決定因子",
+                    "subheading": null,
+                    "settings": null,
+                    "sort_order": 3,
+                    "is_active": true,
+                    "blocks": [
+                        {
+                            "type": "image_text",
+                            "layout": "image_left",
+                            "heading": null,
+                            "media_content_html": null,
+                            "content_html": "<p>森林的結構與動態、不同樹種的空間分布，以及森林生態系的功能、多樣性格局，都是由森林中每一棵樹木的生長、存活、與新增的共同集合表現，而每一個特體的動態變化則又與樹木自身生理和其所處環境有關， 從細胞與組織的層次，進而到植物個體與族群，皆有不同機制共同決定我們所觀察到的動態變化。如何串聯不同時間與空間尺度的調查資料，是我們有興趣的研究議題。<br><br>我們自2002年六月便開始在宜蘭福山植物園鄰近的亞熱帶雨林，進行森林動態研究，也與美國Smithsonian Institute之ForestGEO合作，進行各種長期森林動態監測與環境因子測量，並參與諸多跨樣區比較，期望能深入了解決定森林動態的各種機制。</p>\n\n<p> </p>",
+                            "settings": null,
+                            "sort_order": 1,
+                            "is_active": true,
+                            "images": [
+                                {
+                                    "image_path": "changyang/content/research/dsc04347_orig.jpg",
+                                    "alt_text": "圖片",
+                                    "caption": null,
+                                    "link_url": null,
+                                    "display_settings": {
+                                        "frame_width": "342px",
+                                        "object_fit": "cover",
+                                        "position_x": "50%",
+                                        "position_y": "50%"
+                                    },
+                                    "sort_order": 1
+                                }
+                            ]
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "slug": "publications",
+            "title": "Publications",
+            "navigation_label": "Publications",
+            "template": "publications",
+            "hero_image_path": "changyang/heroes/publications/999085096.jpg",
+            "hero_image_alt": "Publications",
+            "hero_title": "Population, Community, and Ecosystem",
+            "hero_subtitle": null,
+            "hero_settings": {
+                "height": "300px",
+                "position": "50.00% 64.67%",
+                "overlay_opacity": 0.3
+            },
+            "meta_description": null,
+            "show_in_navigation": true,
+            "navigation_order": 5,
+            "is_active": true,
+            "sections": []
+        },
+        {
+            "slug": "courses",
+            "title": "Courses",
+            "navigation_label": "Courses",
+            "template": "default",
+            "hero_image_path": "changyang/heroes/courses/1727721497.jpg",
+            "hero_image_alt": "Courses",
+            "hero_title": "Standing on the Shoulders of Giants",
+            "hero_subtitle": null,
+            "hero_settings": {
+                "height": "299px",
+                "position": "50.00% 51.30%",
+                "overlay_opacity": 0.3
+            },
+            "meta_description": null,
+            "show_in_navigation": true,
+            "navigation_order": 6,
+            "is_active": true,
+            "sections": [
+                {
+                    "heading": "Biology 101 (普通生物學)",
+                    "subheading": null,
+                    "settings": null,
+                    "sort_order": 1,
+                    "is_active": true,
+                    "blocks": [
+                        {
+                            "type": "image_text",
+                            "layout": "image_left",
+                            "heading": null,
+                            "content_html": "<div><div class=\"wsite-multicol\"><div class=\"wsite-multicol-table-wrap\" style=\"margin:0 -15px;\">\n\t<table class=\"wsite-multicol-table\">\n\t\t<tbody class=\"wsite-multicol-tbody\">\n\t\t\t<tr class=\"wsite-multicol-tr\">\n\t\t\t\t<td class=\"wsite-multicol-col\" style=\"width:30.842105263158%; padding:0 15px;\">\n\t\t\t\t\t\n\t\t\t\t\t\t\n\n<span class=\"imgPusher\" style=\"float:right;height:0px\"></span><span style=\"display: table;width:312px;position:relative;float:right;max-width:100%;;clear:right;margin-top:0px;*margin-top:0px\"><a><img src=\"/storage/changyang/content/courses/dsc05177_orig.jpg\" style=\"margin-top: 0px; margin-bottom: 40px; margin-left: 0px; margin-right: 0px; border-width:0; max-width:100%\" alt=\"圖片\" class=\"galleryImageBorder wsite-image\"></a><span style=\"display: table-caption; caption-side: bottom; font-size: 90%; margin-top: -40px; margin-bottom: 40px; text-align: center;\" class=\"wsite-caption\"></span></span>\n<div class=\"paragraph\" style=\"display:block;\"><br><br></div>\n<hr style=\"width:100%;clear:both;visibility:hidden;\">\n\n\n\t\t\t\t\t\n\t\t\t\t</td>\t\t\t\t<td class=\"wsite-multicol-col\" style=\"width:69.157894736842%; padding:0 15px;\">\n\t\t\t\t\t\n\t\t\t\t\t\t\n\n<div class=\"paragraph\"> 中山生科的普通生物學有別於一般教科書由微觀到巨觀的安排，我們從演化與生態學開始切入，希望學生能先培養對於自身周遭的生物現象產生敏感度，再逐步進入微觀的世界，如細胞、遺傳、生理、生化等。本課程我主要負責生態學的部分，希望能讓學生了解生物與環境之間的交互關係，並進而對生態與保育產生興趣。</div>\n\n\n\t\t\t\t\t\n\t\t\t\t</td>\t\t\t</tr>\n\t\t</tbody>\n\t</table>\n</div></div></div>",
+                            "settings": null,
+                            "sort_order": 1,
+                            "is_active": true,
+                            "images": [
+                                {
+                                    "image_path": "changyang/content/courses/dsc05177_orig.jpg",
+                                    "alt_text": "圖片",
+                                    "caption": null,
+                                    "link_url": null,
+                                    "display_settings": null,
+                                    "sort_order": 1
+                                }
+                            ]
+                        }
+                    ]
+                },
+                {
+                    "heading": "Forest Ecology (森林生態學)",
+                    "subheading": null,
+                    "settings": null,
+                    "sort_order": 2,
+                    "is_active": true,
+                    "blocks": [
+                        {
+                            "type": "image_text",
+                            "layout": "image_left",
+                            "heading": null,
+                            "content_html": "<div><div class=\"wsite-multicol\"><div class=\"wsite-multicol-table-wrap\" style=\"margin:0 -15px;\">\n\t<table class=\"wsite-multicol-table\">\n\t\t<tbody class=\"wsite-multicol-tbody\">\n\t\t\t<tr class=\"wsite-multicol-tr\">\n\t\t\t\t<td class=\"wsite-multicol-col\" style=\"width:30.842105263158%; padding:0 15px;\">\n\t\t\t\t\t\n\t\t\t\t\t\t\n\n<span class=\"imgPusher\" style=\"float:right;height:0px\"></span><span style=\"display: table;width:auto;position:relative;float:right;max-width:100%;;clear:right;margin-top:0px;*margin-top:0px\"><a><img src=\"/storage/changyang/content/courses/fe_orig.jpg\" style=\"margin-top: 0px; margin-bottom: 40px; margin-left: 0px; margin-right: 0px; border-width:0; max-width:100%\" alt=\"圖片\" class=\"galleryImageBorder wsite-image\"></a><span style=\"display: table-caption; caption-side: bottom; font-size: 90%; margin-top: -40px; margin-bottom: 40px; text-align: center;\" class=\"wsite-caption\"></span></span>\n<div class=\"paragraph\" style=\"display:block;\"><br><br></div>\n<hr style=\"width:100%;clear:both;visibility:hidden;\">\n\n\n\t\t\t\t\t\n\t\t\t\t</td>\t\t\t\t<td class=\"wsite-multicol-col\" style=\"width:69.157894736842%; padding:0 15px;\">\n\t\t\t\t\t\n\t\t\t\t\t\t\n\n<div class=\"paragraph\">森林蘊藏許多重要自然資源，亦為陸域生態系最大的碳儲庫，對於全球氣候有著重要的影響。森林佔台灣土地面積約60%，對於台灣非常重要。台灣森林有著非常多樣的動、植物與微生物，這些森林的組成如何互動、又如何與其所在的環境產生交互關係，了解這些森林的不同面向與動態變化，將可以幫助我們認識台灣的生物多樣性與其維持機制。按此處以編輯.</div>\n\n\n\t\t\t\t\t\n\t\t\t\t</td>\t\t\t</tr>\n\t\t</tbody>\n\t</table>\n</div></div></div>",
+                            "settings": null,
+                            "sort_order": 1,
+                            "is_active": true,
+                            "images": [
+                                {
+                                    "image_path": "changyang/content/courses/fe_orig.jpg",
+                                    "alt_text": "圖片",
+                                    "caption": null,
+                                    "link_url": null,
+                                    "display_settings": null,
+                                    "sort_order": 1
+                                }
+                            ]
+                        }
+                    ]
+                },
+                {
+                    "heading": "Local Flora (本地植物學)",
+                    "subheading": null,
+                    "settings": null,
+                    "sort_order": 3,
+                    "is_active": true,
+                    "blocks": [
+                        {
+                            "type": "image_text",
+                            "layout": "image_left",
+                            "heading": null,
+                            "content_html": "<div><div class=\"wsite-multicol\"><div class=\"wsite-multicol-table-wrap\" style=\"margin:0 -15px;\">\n\t<table class=\"wsite-multicol-table\">\n\t\t<tbody class=\"wsite-multicol-tbody\">\n\t\t\t<tr class=\"wsite-multicol-tr\">\n\t\t\t\t<td class=\"wsite-multicol-col\" style=\"width:30.842105263158%; padding:0 15px;\">\n\t\t\t\t\t\n\t\t\t\t\t\t\n\n<div><div class=\"wsite-image wsite-image-border-none \" style=\"padding-top:0px;padding-bottom:50px;margin-left:0px;margin-right:0px;text-align:left\">\r\n<a>\r\n<img src=\"/storage/changyang/content/courses/2019-05-31-08-37-36_orig.jpg\" alt=\"圖片\" style=\"width:293;max-width:100%\">\r\n</a>\r\n<div style=\"display:block;font-size:90%\"></div>\r\n</div></div>\n\n\n\t\t\t\t\t\n\t\t\t\t</td>\t\t\t\t<td class=\"wsite-multicol-col\" style=\"width:69.157894736842%; padding:0 15px;\">\n\t\t\t\t\t\n\t\t\t\t\t\t\n\n<div class=\"paragraph\">臺灣多樣的地貌孕育出多樣性非常豐富的植被，臺灣原生物種有 4,000 多種，其中約有四分之一為臺灣特有種，儘管臺灣有著非常嚴重的土地過度開發問題，低海拔地區的原生林幾乎被砍伐殆盡，但我們依然可以在臺灣發現非常多樣的植物相。本課程的講授內容包含臺灣自然史，以及臺灣植物調查發現的歷史，接著從認識校園內常見的植物開始，搭配植物分類學的基本概念，對於臺灣常見的植物分類群，進行重點式分群整理，再擴及到柴山地區、以及低海拔到高山的植物，藉此讓學生認識植物多樣性，最後討論台灣植物的利用、保育的現況與挑戰。<br><br></div>\n\n\n\t\t\t\t\t\n\t\t\t\t</td>\t\t\t</tr>\n\t\t</tbody>\n\t</table>\n</div></div></div>",
+                            "settings": null,
+                            "sort_order": 1,
+                            "is_active": true,
+                            "images": [
+                                {
+                                    "image_path": "changyang/content/courses/2019-05-31-08-37-36_orig.jpg",
+                                    "alt_text": "圖片",
+                                    "caption": null,
+                                    "link_url": null,
+                                    "display_settings": null,
+                                    "sort_order": 1
+                                }
+                            ]
+                        }
+                    ]
+                },
+                {
+                    "heading": "Biostatistics (生物統計學)",
+                    "subheading": null,
+                    "settings": null,
+                    "sort_order": 4,
+                    "is_active": true,
+                    "blocks": [
+                        {
+                            "type": "image_text",
+                            "layout": "image_left",
+                            "heading": null,
+                            "content_html": "<div><div class=\"wsite-multicol\"><div class=\"wsite-multicol-table-wrap\" style=\"margin:0 -15px;\">\n\t<table class=\"wsite-multicol-table\">\n\t\t<tbody class=\"wsite-multicol-tbody\">\n\t\t\t<tr class=\"wsite-multicol-tr\">\n\t\t\t\t<td class=\"wsite-multicol-col\" style=\"width:30.842105263158%; padding:0 15px;\">\n\t\t\t\t\t\n\t\t\t\t\t\t\n\n<div><div class=\"wsite-image wsite-image-border-none \" style=\"padding-top:10px;padding-bottom:10px;margin-left:0px;margin-right:10px;text-align:left\">\r\n<a>\r\n<img src=\"/storage/changyang/content/courses/biostatistics_orig.png\" alt=\"圖片\" style=\"width:auto;max-width:100%\">\r\n</a>\r\n<div style=\"display:block;font-size:90%\"></div>\r\n</div></div>\n\n\n\t\t\t\t\t\n\t\t\t\t</td>\t\t\t\t<td class=\"wsite-multicol-col\" style=\"width:69.157894736842%; padding:0 15px;\">\n\t\t\t\t\t\n\t\t\t\t\t\t\n\n<div class=\"paragraph\"><span style=\"color:rgb(0, 0, 0)\">1.  什麼是生物統計學？</span><br><span style=\"color:rgb(0, 0, 0)\">2.  好的開始是成功的一半：科學方法與實驗設計</span><br><span style=\"color:rgb(0, 0, 0)\">3.  有圖表有數字就有真相？：敘述性統計、樣本與母群體</span><br><span style=\"color:rgb(0, 0, 0)\">4.  到底要不要普篩：抽樣與機率概念</span><br><span style=\"color:rgb(0, 0, 0)\">5.  疫苗到底有沒有效：統計假說檢定</span><br><span style=\"color:rgb(0, 0, 0)\">6.  為什麼別人寄給我的信老是跑到垃圾郵件去：變方分析</span><br><span style=\"color:rgb(0, 0, 0)\">7.  相關、因果傻傻分不清：相關分析與簡單線性廻歸</span><br><span style=\"color:rgb(0, 0, 0)\">8.  資料不是常態分佈怎麼辦：無母數分析</span><br><br>​<br></div>\n\n\n\t\t\t\t\t\n\t\t\t\t</td>\t\t\t</tr>\n\t\t</tbody>\n\t</table>\n</div></div></div>",
+                            "settings": null,
+                            "sort_order": 1,
+                            "is_active": true,
+                            "images": [
+                                {
+                                    "image_path": "changyang/content/courses/biostatistics_orig.png",
+                                    "alt_text": "圖片",
+                                    "caption": null,
+                                    "link_url": null,
+                                    "display_settings": null,
+                                    "sort_order": 1
+                                }
+                            ]
+                        }
+                    ]
+                },
+                {
+                    "heading": "R Basics for Ecologists (生態學者的R入門)",
+                    "subheading": null,
+                    "settings": null,
+                    "sort_order": 5,
+                    "is_active": true,
+                    "blocks": [
+                        {
+                            "type": "image_text",
+                            "layout": "image_left",
+                            "heading": null,
+                            "content_html": "<div><div class=\"wsite-multicol\"><div class=\"wsite-multicol-table-wrap\" style=\"margin:0 -15px;\">\n\t<table class=\"wsite-multicol-table\">\n\t\t<tbody class=\"wsite-multicol-tbody\">\n\t\t\t<tr class=\"wsite-multicol-tr\">\n\t\t\t\t<td class=\"wsite-multicol-col\" style=\"width:30.842105263158%; padding:0 15px;\">\n\t\t\t\t\t\n\t\t\t\t\t\t\n\n<div><div class=\"wsite-image wsite-image-border-none \" style=\"padding-top:0px;padding-bottom:40px;margin-left:0px;margin-right:0px;text-align:left\">\r\n<a>\r\n<img src=\"/storage/changyang/content/courses/re_orig.png\" alt=\"圖片\" style=\"width:auto;max-width:100%\">\r\n</a>\r\n<div style=\"display:block;font-size:90%\"></div>\r\n</div></div>\n\n\n\t\t\t\t\t\n\t\t\t\t</td>\t\t\t\t<td class=\"wsite-multicol-col\" style=\"width:69.157894736842%; padding:0 15px;\">\n\t\t\t\t\t\n\t\t\t\t\t\t\n\n<div class=\"paragraph\">R是目前最受到生態學者喜愛的統計語言，除了在生態學上的運用，資料科學、人工智慧等相關領域也大多都使用R來進行資料整理、統計分析、資料視覺化與科學繪圖，也有眾多套件可以擴充其功能，更重要的是R為免費的開源(open-source)軟體，目前許多研究在發表時都會附上資料分析時所撰寫的R程式。儘管R語言功能如此強大，但因為R是指令操作，剛開始學習時有較高的學習門檻，本課程主要的目的即在於讓學生跨過此一障礙，進入R語言的資料分析世界。</div>\n\n\n\t\t\t\t\t\n\t\t\t\t</td>\t\t\t</tr>\n\t\t</tbody>\n\t</table>\n</div></div></div>",
+                            "settings": null,
+                            "sort_order": 1,
+                            "is_active": true,
+                            "images": [
+                                {
+                                    "image_path": "changyang/content/courses/re_orig.png",
+                                    "alt_text": "圖片",
+                                    "caption": null,
+                                    "link_url": null,
+                                    "display_settings": null,
+                                    "sort_order": 1
+                                }
+                            ]
+                        }
+                    ]
+                },
+                {
+                    "heading": "Computer Intensive Statistics in Ecology with R (統計生態學與R)",
+                    "subheading": null,
+                    "settings": null,
+                    "sort_order": 6,
+                    "is_active": true,
+                    "blocks": [
+                        {
+                            "type": "image_text",
+                            "layout": "image_left",
+                            "heading": null,
+                            "content_html": "<div><div class=\"wsite-multicol\"><div class=\"wsite-multicol-table-wrap\" style=\"margin:0 -15px;\">\n\t<table class=\"wsite-multicol-table\">\n\t\t<tbody class=\"wsite-multicol-tbody\">\n\t\t\t<tr class=\"wsite-multicol-tr\">\n\t\t\t\t<td class=\"wsite-multicol-col\" style=\"width:30.842105263158%; padding:0 15px;\">\n\t\t\t\t\t\n\t\t\t\t\t\t\n\n<div><div class=\"wsite-image wsite-image-border-none \" style=\"padding-top:0px;padding-bottom:40px;margin-left:0px;margin-right:0px;text-align:left\">\r\n<a>\r\n<img src=\"/storage/changyang/content/courses/whittaker-biomes-tw_orig.png\" alt=\"圖片\" style=\"width:auto;max-width:100%\">\r\n</a>\r\n<div style=\"display:block;font-size:90%\"></div>\r\n</div></div>\n\n\n\t\t\t\t\t\n\t\t\t\t</td>\t\t\t\t<td class=\"wsite-multicol-col\" style=\"width:69.157894736842%; padding:0 15px;\">\n\t\t\t\t\t\n\t\t\t\t\t\t\n\n<div class=\"paragraph\">隨著電腦運算能力的強化以及統計分析程式的可及性提高，許多進階統計方法被廣泛運用於生態學的研究。本課程目的在於讓學生了解如何應用R語言來進行生態資料分析，透過實作來了解多個運用電腦大量運算之相關統計分析方法，如蒙地卡羅模擬(Monte Carlo simulation)、再取樣法(resampling methods)、最佳化演算法(optimization algorithms)等，並討論這些方法在生態研究上的應用。學生在這門課必須熟悉R語言的操作，利用R撰寫相關程式來分析資料，並上臺報告其程式與分析結果。</div>\n\n\n\t\t\t\t\t\n\t\t\t\t</td>\t\t\t</tr>\n\t\t</tbody>\n\t</table>\n</div></div></div>",
+                            "settings": null,
+                            "sort_order": 1,
+                            "is_active": true,
+                            "images": [
+                                {
+                                    "image_path": "changyang/content/courses/whittaker-biomes-tw_orig.png",
+                                    "alt_text": "圖片",
+                                    "caption": null,
+                                    "link_url": null,
+                                    "display_settings": null,
+                                    "sort_order": 1
+                                }
+                            ]
+                        }
+                    ]
+                },
+                {
+                    "heading": "Sustainable Development Issues in the Context Of Globalization(全球與在地永續發展議題探討)",
+                    "subheading": null,
+                    "settings": null,
+                    "sort_order": 7,
+                    "is_active": true,
+                    "blocks": [
+                        {
+                            "type": "image_text",
+                            "layout": "image_left",
+                            "heading": null,
+                            "content_html": "<div><div class=\"wsite-multicol\"><div class=\"wsite-multicol-table-wrap\" style=\"margin:0 -15px;\">\n\t<table class=\"wsite-multicol-table\">\n\t\t<tbody class=\"wsite-multicol-tbody\">\n\t\t\t<tr class=\"wsite-multicol-tr\">\n\t\t\t\t<td class=\"wsite-multicol-col\" style=\"width:30.842105263158%; padding:0 15px;\">\n\t\t\t\t\t\n\t\t\t\t\t\t\n\n<div><div class=\"wsite-image wsite-image-border-none \" style=\"padding-top:10px;padding-bottom:10px;margin-left:0;margin-right:0;text-align:center\">\r\n<a>\r\n<img src=\"/storage/changyang/content/courses/653446301_orig.jpg\" alt=\"圖片\" style=\"width:auto;max-width:100%\">\r\n</a>\r\n<div style=\"display:block;font-size:90%\"></div>\r\n</div></div>\n\n\n\t\t\t\t\t\n\t\t\t\t</td>\t\t\t\t<td class=\"wsite-multicol-col\" style=\"width:69.157894736842%; padding:0 15px;\">\n\t\t\t\t\t\n\t\t\t\t\t\t\n\n<div class=\"paragraph\"><span style=\"color:rgb(0, 0, 0)\">1992 年地球高峰會議後，「永續」這兩個字就逐漸成為大家熟悉的詞彙，但面對全球各式環境及社會經濟的問題與挑戰，該如何達成「永續」? 到甚麼程度的「永續」? 用什麼工具及方式邁向「永續」? 聯合國於2015年成⽴ 70週年之際，在世界各國領袖的簽署下，共同發佈了「翻轉我們的世界：2030年永續發展目標 (Sustainable Development Goals, SDGs)」，這17項目標同時兼顧經濟成⻑、社會進步與環境保護三⼤⾯向，顯⽰出任何⼈及任何產業都必須對這樣的永續發展有相當的認識與⾏動，無法置⾝事外。這門課程以「永續」為出發，藉由2030年永續發展目標 (Sustainable Development Goals, SDGs) 檢視與探討不同面向在地的議題，透過個案思考在地的挑戰與解方。</span></div>\n\n\n\t\t\t\t\t\n\t\t\t\t</td>\t\t\t</tr>\n\t\t</tbody>\n\t</table>\n</div></div></div>",
+                            "settings": null,
+                            "sort_order": 1,
+                            "is_active": true,
+                            "images": [
+                                {
+                                    "image_path": "changyang/content/courses/653446301_orig.jpg",
+                                    "alt_text": "圖片",
+                                    "caption": null,
+                                    "link_url": null,
+                                    "display_settings": null,
+                                    "sort_order": 1
+                                }
+                            ]
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "slug": "gallery",
+            "title": "Gallery",
+            "navigation_label": "Gallery",
+            "template": "gallery",
+            "hero_image_path": "changyang/heroes/gallery/1868015871.jpg",
+            "hero_image_alt": "Gallery",
+            "hero_title": "Forests around the World",
+            "hero_subtitle": null,
+            "hero_settings": {
+                "height": "400px",
+                "position": "50.00% 43.12%",
+                "overlay_opacity": 0.3
+            },
+            "meta_description": null,
+            "show_in_navigation": true,
+            "navigation_order": 7,
+            "is_active": true,
+            "sections": []
+        },
+        {
+            "slug": "resources",
+            "title": "Resources",
+            "navigation_label": "Resources",
+            "template": "default",
+            "hero_image_path": "changyang/heroes/resources/38020594.jpg",
+            "hero_image_alt": "Resources",
+            "hero_title": "All Rivers Run into the Sea",
+            "hero_subtitle": null,
+            "hero_settings": {
+                "height": "400px",
+                "position": "50% 50%",
+                "overlay_opacity": 0.3
+            },
+            "meta_description": null,
+            "show_in_navigation": true,
+            "navigation_order": 8,
+            "is_active": true,
+            "sections": [
+                {
+                    "heading": "Collaborating Institutions 合作單位",
+                    "subheading": null,
+                    "settings": null,
+                    "sort_order": 1,
+                    "is_active": true,
+                    "blocks": [
+                        {
+                            "type": "rich_text",
+                            "layout": "text_only",
+                            "heading": null,
+                            "media_content_html": null,
+                            "content_html": "<ul><li><a href=\"http://www.forest.gov.tw/\" target=\"_blank\">Taiwan Forest Bureau　行政院農業委員會林務局</a>　<br></li><li><a href=\"http://www.tfri.gov.tw/\" target=\"_blank\">Taiwan Forestry Research Institute　行政院農業委員會林業試驗所</a>　</li><li><a href=\"https://forestgeo.si.edu/\" target=\"_blank\">Forest Global Earth Observatory (ForestGEO)</a></li><li><a href=\"http://www.cfbiodiv.org/english/\" target=\"_blank\">Chinese Forest Biodiversity Monitoring Network (CForBio)　中國森林生物多樣性監測網絡</a>　</li></ul>",
+                            "settings": null,
+                            "sort_order": 1,
+                            "is_active": true,
+                            "images": []
+                        }
+                    ]
+                },
+                {
+                    "heading": "Databases and Software 線上資源",
+                    "subheading": null,
+                    "settings": null,
+                    "sort_order": 2,
+                    "is_active": true,
+                    "blocks": [
+                        {
+                            "type": "rich_text",
+                            "layout": "text_only",
+                            "heading": null,
+                            "media_content_html": null,
+                            "content_html": "<ul><li><a href=\"http://tai2.ntu.edu.tw/\" target=\"_blank\">Plants of Taiwan　台灣植物資訊整合查詢系統</a>　<br></li><li><a href=\"https://www.inaturalist.org\" target=\"_blank\">iNaturalist</a></li><li><a href=\"https://www.gbif.org/zh-tw/\" target=\"_blank\">GBIF</a></li><li><a href=\"http://www.mobot.org/MOBOT/research/APweb/\" target=\"_blank\">Angiosperm Phylogeny Website</a></li><li><a href=\"http://phylodiversity.net/phylocom/\" target=\"_blank\">Phylocom</a></li><li><a href=\"http://www.r-project.org/\" target=\"_blank\">R</a></li><li><a href=\"https://rstudio.com\" target=\"_blank\">RStudio</a></li></ul>",
+                            "settings": null,
+                            "sort_order": 1,
+                            "is_active": true,
+                            "images": []
+                        }
+                    ]
+                },
+                {
+                    "heading": "Fushan Forest Dynamics Plot 福山森林動態樣區",
+                    "subheading": null,
+                    "settings": null,
+                    "sort_order": 3,
+                    "is_active": true,
+                    "blocks": [
+                        {
+                            "type": "rich_text",
+                            "layout": "text_only",
+                            "heading": null,
+                            "media_content_html": null,
+                            "content_html": "<ul><li><a href=\"http://fdp.ndhu.edu.tw/fushanseed/specieslist.php\" target=\"_blank\">Seeds and seedlings in Fushan  福山植物種子小苗名錄</a>　<br></li><li><a href=\"http://fdp.ndhu.edu.tw/FDPdata\" target=\"_blank\">Data Management System for Taiwan Forest Dynamics Plots  台灣森林動態樣區資料管理系統</a><br></li></ul>",
+                            "settings": null,
+                            "sort_order": 1,
+                            "is_active": true,
+                            "images": []
+                        }
+                    ]
+                }
+            ]
+        }
+    ],
+    "news": [
+        {
+            "category_year": 2024,
+            "category_month": 11,
+            "content_html": "順利完成<strong>壽山國家自然公園外來種植物長期監測及移除計畫</strong>，期待後續能順利發表相關研究成果",
+            "sort_order": 1,
+            "is_active": true
+        },
+        {
+            "category_year": 2024,
+            "category_month": 10,
+            "content_html": "<strong style=\"color:rgb(42, 42, 42)\">​</strong><strong style=\"color:rgb(42, 42, 42)\">士樵</strong>在<a href=\"https://biology.nsysu.edu.tw/p/406-1182-346211,r2318.php?Lang=zh-tw\" target=\"_blank\">2024年 <strong style=\"color:rgb(42, 42, 42)\">森林資源永續發展研討會 </strong>分享研究成果，報告主題為：壽山熱帶森林樹木短期動態 <font color=\"#3b3e41\">-</font> 功能性狀與環境的交互作用</a>，並榮獲林學組學生海報發表<strong style=\"color:rgb(42, 42, 42)\">佳作</strong>，恭喜！ ",
+            "sort_order": 1,
+            "is_active": true
+        },
+        {
+            "category_year": 2024,
+            "category_month": 8,
+            "content_html": "團隊獲得 <strong>國科會 </strong>一般研究計畫多年期經費補助：<span style=\"color:rgb(51, 51, 51)\">同種負密度制約效應與地被覆蓋對於森林樹木更新影響之機制</span>",
+            "sort_order": 1,
+            "is_active": true
+        },
+        {
+            "category_year": 2024,
+            "category_month": 8,
+            "content_html": "福山樣區<strong> </strong>第8次<strong> </strong>樹木死亡率調查、第57次<strong> </strong>喬木小苗動態調查​​順利完成",
+            "sort_order": 2,
+            "is_active": true
+        },
+        {
+            "category_year": 2024,
+            "category_month": 8,
+            "content_html": "<span style=\"color:rgb(51, 51, 51)\">福山樣區 <strong>第5次每木調查 </strong>順利完成，感謝研究團隊所有夥伴的付出！</span>",
+            "sort_order": 3,
+            "is_active": true
+        },
+        {
+            "category_year": 2024,
+            "category_month": 8,
+            "content_html": "<span style=\"color:rgb(51, 51, 51)\">歡迎<strong>淳元</strong>加入我們研究團隊</span>",
+            "sort_order": 4,
+            "is_active": true
+        },
+        {
+            "category_year": 2024,
+            "category_month": 7,
+            "content_html": "<strong>家豪</strong>、<strong>永淥</strong>參加 <a href=\"https://forestgeo.si.edu/blog/2024-forestgeo-analytical-workshops-overcoming-obstacles\" target=\"_blank\">ForetGEO analytical workshop @ Kasetsart University, Thailand</a>",
+            "sort_order": 1,
+            "is_active": true
+        },
+        {
+            "category_year": 2024,
+            "category_month": 4,
+            "content_html": "<strong>三腳貓實驗室 </strong>podcast專訪：<a href=\"https://open.spotify.com/episode/13M5pDqIHOrqQiCkmY0mTW?si=7859825d1b7047df\" target=\"_blank\">用那片森林當作名片</a>，歡迎收聽",
+            "sort_order": 1,
+            "is_active": true
+        },
+        {
+            "category_year": 2024,
+            "category_month": 2,
+            "content_html": "​福山樣區 第56次 喬木小苗動態調查順利完成",
+            "sort_order": 1,
+            "is_active": true
+        },
+        {
+            "category_year": 2024,
+            "category_month": 2,
+            "content_html": "公視 <strong>我們的島 </strong>報導團隊在<a href=\"https://ourisland.pts.org.tw/content/10605\" target=\"_blank\">壽山進行的外來植物調查研究</a>",
+            "sort_order": 2,
+            "is_active": true
+        },
+        {
+            "category_year": 2024,
+            "category_month": 1,
+            "content_html": "<span style=\"color:rgb(51, 51, 51)\">​恭喜<strong>以恆</strong>順利通過碩士論文口試，主題為：</span><a href=\"https://hdl.handle.net/11296/qr2sug\" target=\"_blank\">亞熱帶雨林附生植物之多樣性與空間分布 (Diversity and Spatial Distribution of Epiphytes in a Subtropical Rainforest)</a>，感謝林試所徐嘉君博士與台灣大學柯柏如老師的寶貴意見",
+            "sort_order": 1,
+            "is_active": true
+        },
+        {
+            "category_year": 2024,
+            "category_month": 1,
+            "content_html": "壽山熱帶森林1.05公頃永久樣區 <strong>第2次每木調查 </strong>順利完成",
+            "sort_order": 2,
+            "is_active": true
+        },
+        {
+            "category_year": 2024,
+            "category_month": 1,
+            "content_html": "<strong>家豪</strong>、<strong>珮蓁</strong>在2024動物行為暨生態研討會分享研究成果",
+            "sort_order": 3,
+            "is_active": true
+        },
+        {
+            "category_year": 2023,
+            "category_month": 12,
+            "content_html": "恭賀<strong>以恆</strong>榮獲 <a href=\"https://biology.nsysu.edu.tw/p/406-1182-324220,r2318.php?Lang=zh-tw\" target=\"_blank\">2023年蔡奇助先生紀念獎學金</a>",
+            "sort_order": 1,
+            "is_active": true
+        },
+        {
+            "category_year": 2023,
+            "category_month": 12,
+            "content_html": "恭喜<strong>珮蓁</strong>榮獲 <a href=\"https://biology.nsysu.edu.tw/p/406-1182-324218,r2318.php?Lang=zh-tw\" target=\"_blank\">2023年周昌弘院士獎學金</a>",
+            "sort_order": 2,
+            "is_active": true
+        },
+        {
+            "category_year": 2023,
+            "category_month": 10,
+            "content_html": "<strong>以恆</strong>在<a href=\"https://biology.nsysu.edu.tw/p/406-1182-321128,r2318.php?Lang=zh-tw\" target=\"_blank\">2023年 <strong>森林資源永續發展研討會 </strong>分享研究成果</a>，報告主題為：福山亞熱帶雨林的附生植物多樣性與空間分布，並榮獲林學組學生海報發表<strong>第二名</strong>，恭喜！​",
+            "sort_order": 1,
+            "is_active": true
+        },
+        {
+            "category_year": 2023,
+            "category_month": 9,
+            "content_html": "歡迎<strong>宇寬</strong>、<strong>廷軒</strong>加入研究團隊，量測校園內水黃皮、楓香與茄冬之樹液流",
+            "sort_order": 1,
+            "is_active": true
+        },
+        {
+            "category_year": 2023,
+            "category_month": 8,
+            "content_html": "<span style=\"color:rgb(42, 42, 42)\">團隊獲得 </span><strong style=\"color:rgb(42, 42, 42)\">國科會 </strong><span style=\"color:rgb(42, 42, 42)\">新進人員研究計畫補助：</span>地被覆蓋與鄰樹效應對於森林樹木更新的影響",
+            "sort_order": 1,
+            "is_active": true
+        },
+        {
+            "category_year": 2023,
+            "category_month": 8,
+            "content_html": "福山森林動態樣區<strong> </strong>第7次<strong> </strong>樹木死亡率調查、第55次<strong> </strong>喬木小苗動態調查​​順利完成",
+            "sort_order": 2,
+            "is_active": true
+        },
+        {
+            "category_year": 2023,
+            "category_month": 7,
+            "content_html": "<strong>家豪</strong>參加ATBC 2023 Annual meeting @ Coimbatore, India，分享台灣森林小苗至小樹階段的長期動態",
+            "sort_order": 1,
+            "is_active": true
+        },
+        {
+            "category_year": 2023,
+            "category_month": 6,
+            "content_html": "福山森林動態樣區 <strong>第5次每木調查 </strong>正式展開，Fight!",
+            "sort_order": 1,
+            "is_active": true
+        },
+        {
+            "category_year": 2023,
+            "category_month": 6,
+            "content_html": "歡迎<strong>士樵</strong>加入中山大學植物生態研究室團隊",
+            "sort_order": 2,
+            "is_active": true
+        },
+        {
+            "category_year": 2023,
+            "category_month": 6,
+            "content_html": "<strong>台視 熱線追蹤 </strong>報導我們團隊在<a href=\"https://youtu.be/Jw9h1K-9mFY?si=kPPEjo8TewuLVq-u\" target=\"_blank\">福山亞熱帶雨林的長期生態監測</a>",
+            "sort_order": 3,
+            "is_active": true
+        },
+        {
+            "category_year": 2023,
+            "category_month": 6,
+            "content_html": "恭喜<strong>沛濂</strong>順利通過碩士論文口試，主題為：臺灣植物開花物候 - 生活型、譜系、環境因子的影響 (<a href=\"https://hdl.handle.net/11296/779b5g\" target=\"_blank\">Flowering Phenology in Taiwan: Effects of Life Forms, Phylogeny, and Environmental Factors)</a>，感謝屏東科技大學郭耀綸老師與林業試驗所林奐宇博士的寶貴意見",
+            "sort_order": 4,
+            "is_active": true
+        },
+        {
+            "category_year": 2023,
+            "category_month": 6,
+            "content_html": "恭喜<strong>永淥</strong>順利通過碩士論文口試，主題為：植物功能性狀和環境之交互作用對亞熱帶雨林樹木新增的影響 (<a href=\"https://hdl.handle.net/11296/t83ypp\" target=\"_blank\">Trait-environment Interactions on Tree Recruitment in a Subtropical Rain Forest)</a>，感謝東海大學林宜靜老師與中興大學趙國容老師的寶貴意見",
+            "sort_order": 5,
+            "is_active": true
+        },
+        {
+            "category_year": 2023,
+            "category_month": 6,
+            "content_html": "<strong>林務局 </strong>委託本團隊繼續執行福山森林動態樣區種子雨及喬木小苗長期監測計畫",
+            "sort_order": 6,
+            "is_active": true
+        },
+        {
+            "category_year": 2023,
+            "category_month": 3,
+            "content_html": "<strong>國家自然公園管理處 </strong>委託本團隊執行壽山國家自然公園外來種植物長期監測及移除",
+            "sort_order": 1,
+            "is_active": true
+        },
+        {
+            "category_year": 2023,
+            "category_month": 2,
+            "content_html": "<strong>​</strong>福山樣區 第54次 喬木小苗動態調查順利完成",
+            "sort_order": 1,
+            "is_active": true
+        },
+        {
+            "category_year": 2023,
+            "category_month": 2,
+            "content_html": "福山<strong>樹型結構</strong>調查、<strong>附生植物</strong>調查持續進行中",
+            "sort_order": 2,
+            "is_active": true
+        },
+        {
+            "category_year": 2023,
+            "category_month": 1,
+            "content_html": "<strong>永淥</strong>、<strong>沛濂</strong>在 <strong><a href=\"https://sites.google.com/view/2023cabe/\" target=\"_blank\">2023動物行為暨生態研討會</a> </strong>分享研究成果",
+            "sort_order": 1,
+            "is_active": true
+        },
+        {
+            "category_year": 2023,
+            "category_month": 1,
+            "content_html": "<a href=\"https://news.nsysu.edu.tw/p/406-1120-302764,r3979.php?Lang=zh-tw\" target=\"_blank\"><strong>教育廣播電台 </strong>生活報報節目訪問團團隊在<strong>壽山開花物候調查</strong>的研究成果，歡迎收聽！</a>",
+            "sort_order": 2,
+            "is_active": true
+        },
+        {
+            "category_year": 2022,
+            "category_month": 12,
+            "content_html": "恭喜<strong>沛濂</strong>、<strong style=\"color:rgb(42, 42, 42)\">永淥</strong>榮獲 中山大學碩士班研究生獎學金",
+            "sort_order": 1,
+            "is_active": true
+        },
+        {
+            "category_year": 2022,
+            "category_month": 12,
+            "content_html": "恭喜<strong>沛濂</strong>榮獲 2022年<a href=\"https://biology.nsysu.edu.tw/p/406-1182-301316,r2318.php?Lang=zh-tw\" target=\"_blank\">蔡奇助先生紀念獎學金</a>",
+            "sort_order": 2,
+            "is_active": true
+        },
+        {
+            "category_year": 2022,
+            "category_month": 11,
+            "content_html": "團隊與<strong>過山貓</strong>一起設計的『<strong>花現壽山</strong>』摺頁正式發行囉，數位版歡迎點擊<a href=\"https://ws.moi.gov.tw/001/Upload/443/relfile/13090/274158/f9d7cbf3-aa2b-42e0-84b2-45d0cedf3fbf.pdf\" target=\"_blank\">這裡</a>與<a href=\"https://ws.moi.gov.tw/001/Upload/443/relfile/13090/274158/6215a5af-922d-4992-a7fb-b3760f54ef50.pdf\" target=\"_blank\">這裡</a>下載",
+            "sort_order": 1,
+            "is_active": true
+        },
+        {
+            "category_year": 2022,
+            "category_month": 9,
+            "content_html": "福山森林動態樣區 <strong>種子雨監測 </strong>滿20年囉，正式邁入第21年，讓我們繼續努力！",
+            "sort_order": 1,
+            "is_active": true
+        },
+        {
+            "category_year": 2022,
+            "category_month": 9,
+            "content_html": "歡迎<strong>亮辰</strong>加入中山大學植物生態研究室，協助量測壽山熱帶森林植物葉片耐旱性",
+            "sort_order": 2,
+            "is_active": true
+        },
+        {
+            "category_year": 2022,
+            "category_month": 8,
+            "content_html": "台灣<a href=\"https://nsysu-plantecology.notion.site/Plant-Ecology-Workshop-NSYSU-a640d3deafeb497d8e4d415636d1c84e\" target=\"_blank\"><strong>植物生態工作小組</strong> (Plant Ecology Working Group) 年度聚會</a>於中山大學舉辦，總計有24人參加、9場 5-min 短講+海報宣讀、2場 20-min研究報告、1場 Git + GitHub workshop，與會成員包含東華大學、東海大學、台灣大學與中山大學植物生態領域的研究者",
+            "sort_order": 1,
+            "is_active": true
+        },
+        {
+            "category_year": 2022,
+            "category_month": 8,
+            "content_html": "歡迎<strong>珮蓁</strong>加入我們研究團隊，負責規劃福山樹型結構調查",
+            "sort_order": 2,
+            "is_active": true
+        },
+        {
+            "category_year": 2022,
+            "category_month": 8,
+            "content_html": "福山森林動態樣區<strong> </strong>第6次<strong> </strong>樹木死亡率調查、第53次<strong> </strong>喬木小苗動態調查​​順利完成",
+            "sort_order": 3,
+            "is_active": true
+        },
+        {
+            "category_year": 2022,
+            "category_month": 8,
+            "content_html": "團隊獲得 <strong>科技部 </strong>新進人員研究計畫補助：氣候與環境變化對於森林樹木更新動態之影響",
+            "sort_order": 4,
+            "is_active": true
+        },
+        {
+            "category_year": 2022,
+            "category_month": 7,
+            "content_html": "<strong>家豪</strong>線上參與 ATBC 2022 Annual meeting @ Cartagena, Colombia，分享<a href=\"https://youtu.be/6Lqzlbrbfd8?si=AcaiX_4cJbNLcf9e\" target=\"_blank\">氣候變化對於福山森林植物開花時間的影響機制</a>",
+            "sort_order": 1,
+            "is_active": true
+        },
+        {
+            "category_year": 2022,
+            "category_month": 2,
+            "content_html": "歡迎<strong>以恆</strong>加入研究團隊，協助進行福山亞熱帶雨林的附生植物調查",
+            "sort_order": 1,
+            "is_active": true
+        },
+        {
+            "category_year": 2021,
+            "category_month": 10,
+            "content_html": "<strong>凱勛</strong>於2021年 <strong>森林資源永續發展研討會</strong> 分享研究成果：環境因子對於台灣北部亞熱帶雨林樹木生長之影響",
+            "sort_order": 1,
+            "is_active": true
+        },
+        {
+            "category_year": 2021,
+            "category_month": 8,
+            "content_html": "歡迎<strong>佳秀</strong>加入我們團隊，擔任研究室駐福山野外助理",
+            "sort_order": 1,
+            "is_active": true
+        },
+        {
+            "category_year": 2021,
+            "category_month": 5,
+            "content_html": "恭喜研究室成員<strong>沛濂</strong>於2021年中山大學 <strong>神農獎 </strong>生物科學論文發表競賽，榮獲<a href=\"https://biology.nsysu.edu.tw/p/406-1182-262326,r2318.php?Lang=zh-tw\" target=\"_blank\">生態與分類組<strong>佳作</strong></a>",
+            "sort_order": 1,
+            "is_active": true
+        },
+        {
+            "category_year": 2021,
+            "category_month": 2,
+            "content_html": "<strong>國家自然公園管理處 </strong>委託本團隊進行壽山國家自然公園步道植物花期調查及解說素材設計",
+            "sort_order": 1,
+            "is_active": true
+        },
+        {
+            "category_year": 2021,
+            "category_month": 1,
+            "content_html": "<strong>凱勛</strong>於 2021動物行為暨生態研討會 分享研究成果",
+            "sort_order": 1,
+            "is_active": true
+        },
+        {
+            "category_year": 2020,
+            "category_month": 9,
+            "content_html": "歡迎<strong>沛濂</strong>、<strong>永淥</strong>、<strong>文榆</strong>、<strong>國強</strong>加入研究團隊",
+            "sort_order": 1,
+            "is_active": true
+        },
+        {
+            "category_year": 2020,
+            "category_month": 9,
+            "content_html": "福山森林動態樣區種子雨及喬木小苗長期監測計畫獲得新一輪 <strong>林務局 </strong>經費支持",
+            "sort_order": 2,
+            "is_active": true
+        },
+        {
+            "category_year": 2020,
+            "category_month": 8,
+            "content_html": "<span style=\"color:rgb(42, 42, 42)\">團隊獲得 </span><strong style=\"color:rgb(42, 42, 42)\">科技部 </strong><span style=\"color:rgb(42, 42, 42)\">新進人員研究計畫補助：</span>樹木生活史之關鍵階段 - 使用族群動態過程模式深度解析樹木幼苗至小樹之轉換動態",
+            "sort_order": 1,
+            "is_active": true
+        },
+        {
+            "category_year": 2019,
+            "category_month": 9,
+            "content_html": "歡迎<strong>凱勛</strong>、<strong>卡夫卡</strong>加入我們研究團隊",
+            "sort_order": 1,
+            "is_active": true
+        },
+        {
+            "category_year": 2019,
+            "category_month": 7,
+            "content_html": "<strong>家豪</strong>參加ATBC 2019 Annual Meeting @ Antananarivo, Madagascar，分享福山亞熱帶雨林小苗至小樹的長期動態",
+            "sort_order": 1,
+            "is_active": true
+        },
+        {
+            "category_year": 2019,
+            "category_month": 6,
+            "content_html": "福山森林動態樣區 <strong>第4次每木調查 </strong>順利結束，萬歲！",
+            "sort_order": 1,
+            "is_active": true
+        },
+        {
+            "category_year": 2019,
+            "category_month": 6,
+            "content_html": "<strong>家豪</strong>參加ForestGEO analytical workshop @ Nanyang Technological University, Singapore",
+            "sort_order": 2,
+            "is_active": true
+        },
+        {
+            "category_year": 2019,
+            "category_month": 1,
+            "content_html": "團隊獲得 <strong>科技部 </strong>新進人員研究計畫補助：<span>影響臺灣亞熱帶雨林植物開花時間之氣候訊號</span>",
+            "sort_order": 1,
+            "is_active": true
+        },
+        {
+            "category_year": 2019,
+            "category_month": 1,
+            "content_html": "歡迎<strong>寶慧</strong>加入中山大學植物生態研究室",
+            "sort_order": 2,
+            "is_active": true
+        },
+        {
+            "category_year": 2018,
+            "category_month": 11,
+            "content_html": "<strong>林務局 </strong>委託本團隊執行福山森林動態樣區種子雨及喬木小苗長期監測計畫 ",
+            "sort_order": 1,
+            "is_active": true
+        },
+        {
+            "category_year": 2018,
+            "category_month": 8,
+            "content_html": "中山大學植物生態研究室正式成立",
+            "sort_order": 1,
+            "is_active": true
+        }
+    ],
+    "galleries": [
+        {
+            "title": "Fushan",
+            "description": null,
+            "cover_image_path": "changyang/galleries/fushan/covers/2018-07-17-12-32-42.jpg",
+            "sort_order": 1,
+            "is_active": true,
+            "items": [
+                {
+                    "image_path": "changyang/galleries/fushan/images/2018-07-17-12-32-42_orig.jpg",
+                    "thumbnail_path": "changyang/galleries/fushan/thumbnails/2018-07-17-12-32-42.jpg",
+                    "title": null,
+                    "caption": null,
+                    "alt_text": null,
+                    "sort_order": 1,
+                    "is_active": true
+                },
+                {
+                    "image_path": "changyang/galleries/fushan/images/2018-07-29-14-54-18_orig.jpg",
+                    "thumbnail_path": "changyang/galleries/fushan/thumbnails/2018-07-29-14-54-18.jpg",
+                    "title": null,
+                    "caption": null,
+                    "alt_text": null,
+                    "sort_order": 2,
+                    "is_active": true
+                },
+                {
+                    "image_path": "changyang/galleries/fushan/images/2019-07-13-07-51-18_orig.jpg",
+                    "thumbnail_path": "changyang/galleries/fushan/thumbnails/2019-07-13-07-51-18.jpg",
+                    "title": null,
+                    "caption": null,
+                    "alt_text": null,
+                    "sort_order": 3,
+                    "is_active": true
+                },
+                {
+                    "image_path": "changyang/galleries/fushan/images/2019-07-15-08-30-44_orig.jpg",
+                    "thumbnail_path": "changyang/galleries/fushan/thumbnails/2019-07-15-08-30-44.jpg",
+                    "title": null,
+                    "caption": null,
+                    "alt_text": null,
+                    "sort_order": 4,
+                    "is_active": true
+                },
+                {
+                    "image_path": "changyang/galleries/fushan/images/burmannia-itoana_orig.jpg",
+                    "thumbnail_path": "changyang/galleries/fushan/thumbnails/burmannia-itoana.jpg",
+                    "title": null,
+                    "caption": null,
+                    "alt_text": null,
+                    "sort_order": 5,
+                    "is_active": true
+                },
+                {
+                    "image_path": "changyang/galleries/fushan/images/dryopteris-diffractum_orig.jpg",
+                    "thumbnail_path": "changyang/galleries/fushan/thumbnails/dryopteris-diffractum.jpg",
+                    "title": null,
+                    "caption": null,
+                    "alt_text": null,
+                    "sort_order": 6,
+                    "is_active": true
+                },
+                {
+                    "image_path": "changyang/galleries/fushan/images/dsc04334_orig.jpg",
+                    "thumbnail_path": "changyang/galleries/fushan/thumbnails/dsc04334.jpg",
+                    "title": null,
+                    "caption": null,
+                    "alt_text": null,
+                    "sort_order": 7,
+                    "is_active": true
+                },
+                {
+                    "image_path": "changyang/galleries/fushan/images/dsc04347_orig.jpg",
+                    "thumbnail_path": "changyang/galleries/fushan/thumbnails/dsc04347.jpg",
+                    "title": null,
+                    "caption": null,
+                    "alt_text": null,
+                    "sort_order": 8,
+                    "is_active": true
+                },
+                {
+                    "image_path": "changyang/galleries/fushan/images/dsc04415_orig.jpg",
+                    "thumbnail_path": "changyang/galleries/fushan/thumbnails/dsc04415.jpg",
+                    "title": null,
+                    "caption": null,
+                    "alt_text": null,
+                    "sort_order": 9,
+                    "is_active": true
+                },
+                {
+                    "image_path": "changyang/galleries/fushan/images/fushan-plot-2002_orig.jpg",
+                    "thumbnail_path": "changyang/galleries/fushan/thumbnails/fushan-plot-2002.jpg",
+                    "title": null,
+                    "caption": null,
+                    "alt_text": null,
+                    "sort_order": 10,
+                    "is_active": true
+                },
+                {
+                    "image_path": "changyang/galleries/fushan/images/fushan-plot-2017_orig.jpg",
+                    "thumbnail_path": "changyang/galleries/fushan/thumbnails/fushan-plot-2017.jpg",
+                    "title": null,
+                    "caption": null,
+                    "alt_text": null,
+                    "sort_order": 11,
+                    "is_active": true
+                },
+                {
+                    "image_path": "changyang/galleries/fushan/images/fushan-plot-2018_orig.jpg",
+                    "thumbnail_path": "changyang/galleries/fushan/thumbnails/fushan-plot-2018.jpg",
+                    "title": null,
+                    "caption": null,
+                    "alt_text": null,
+                    "sort_order": 12,
+                    "is_active": true
+                },
+                {
+                    "image_path": "changyang/galleries/fushan/images/fushan-plot-2019-1_orig.jpg",
+                    "thumbnail_path": "changyang/galleries/fushan/thumbnails/fushan-plot-2019-1.jpg",
+                    "title": null,
+                    "caption": null,
+                    "alt_text": null,
+                    "sort_order": 13,
+                    "is_active": true
+                },
+                {
+                    "image_path": "changyang/galleries/fushan/images/fushan-plot-2019-2_orig.jpg",
+                    "thumbnail_path": "changyang/galleries/fushan/thumbnails/fushan-plot-2019-2.jpg",
+                    "title": null,
+                    "caption": null,
+                    "alt_text": null,
+                    "sort_order": 14,
+                    "is_active": true
+                },
+                {
+                    "image_path": "changyang/galleries/fushan/images/helicia-formosana_orig.jpg",
+                    "thumbnail_path": "changyang/galleries/fushan/thumbnails/helicia-formosana.jpg",
+                    "title": null,
+                    "caption": null,
+                    "alt_text": null,
+                    "sort_order": 15,
+                    "is_active": true
+                },
+                {
+                    "image_path": "changyang/galleries/fushan/images/kurixalus-eiffingeri_orig.jpg",
+                    "thumbnail_path": "changyang/galleries/fushan/thumbnails/kurixalus-eiffingeri.jpg",
+                    "title": null,
+                    "caption": null,
+                    "alt_text": null,
+                    "sort_order": 16,
+                    "is_active": true
+                },
+                {
+                    "image_path": "changyang/galleries/fushan/images/rhacophorus-aurantiventris_orig.jpg",
+                    "thumbnail_path": "changyang/galleries/fushan/thumbnails/rhacophorus-aurantiventris.jpg",
+                    "title": null,
+                    "caption": null,
+                    "alt_text": null,
+                    "sort_order": 17,
+                    "is_active": true
+                },
+                {
+                    "image_path": "changyang/galleries/fushan/images/seed-trap-1_orig.jpg",
+                    "thumbnail_path": "changyang/galleries/fushan/thumbnails/seed-trap-1.jpg",
+                    "title": null,
+                    "caption": null,
+                    "alt_text": null,
+                    "sort_order": 18,
+                    "is_active": true
+                },
+                {
+                    "image_path": "changyang/galleries/fushan/images/seed-trap-2_orig.jpg",
+                    "thumbnail_path": "changyang/galleries/fushan/thumbnails/seed-trap-2.jpg",
+                    "title": null,
+                    "caption": null,
+                    "alt_text": null,
+                    "sort_order": 19,
+                    "is_active": true
+                }
+            ]
+        },
+        {
+            "title": "BCI",
+            "description": null,
+            "cover_image_path": "changyang/galleries/bci/covers/dsc08976.jpg",
+            "sort_order": 2,
+            "is_active": true,
+            "items": [
+                {
+                    "image_path": "changyang/galleries/bci/images/dsc08976_orig.jpg",
+                    "thumbnail_path": "changyang/galleries/bci/thumbnails/dsc08976.jpg",
+                    "title": null,
+                    "caption": null,
+                    "alt_text": null,
+                    "sort_order": 1,
+                    "is_active": true
+                },
+                {
+                    "image_path": "changyang/galleries/bci/images/dsc08994_orig.jpg",
+                    "thumbnail_path": "changyang/galleries/bci/thumbnails/dsc08994.jpg",
+                    "title": null,
+                    "caption": null,
+                    "alt_text": null,
+                    "sort_order": 2,
+                    "is_active": true
+                },
+                {
+                    "image_path": "changyang/galleries/bci/images/dsc08995_orig.jpg",
+                    "thumbnail_path": "changyang/galleries/bci/thumbnails/dsc08995.jpg",
+                    "title": null,
+                    "caption": null,
+                    "alt_text": null,
+                    "sort_order": 3,
+                    "is_active": true
+                },
+                {
+                    "image_path": "changyang/galleries/bci/images/dsc09013_orig.jpg",
+                    "thumbnail_path": "changyang/galleries/bci/thumbnails/dsc09013.jpg",
+                    "title": null,
+                    "caption": null,
+                    "alt_text": null,
+                    "sort_order": 4,
+                    "is_active": true
+                },
+                {
+                    "image_path": "changyang/galleries/bci/images/dsc09030_orig.jpg",
+                    "thumbnail_path": "changyang/galleries/bci/thumbnails/dsc09030.jpg",
+                    "title": null,
+                    "caption": null,
+                    "alt_text": null,
+                    "sort_order": 5,
+                    "is_active": true
+                },
+                {
+                    "image_path": "changyang/galleries/bci/images/dsc09033_orig.jpg",
+                    "thumbnail_path": "changyang/galleries/bci/thumbnails/dsc09033.jpg",
+                    "title": null,
+                    "caption": null,
+                    "alt_text": null,
+                    "sort_order": 6,
+                    "is_active": true
+                },
+                {
+                    "image_path": "changyang/galleries/bci/images/dsc09035_orig.jpg",
+                    "thumbnail_path": "changyang/galleries/bci/thumbnails/dsc09035.jpg",
+                    "title": null,
+                    "caption": null,
+                    "alt_text": null,
+                    "sort_order": 7,
+                    "is_active": true
+                },
+                {
+                    "image_path": "changyang/galleries/bci/images/dsc09037_orig.jpg",
+                    "thumbnail_path": "changyang/galleries/bci/thumbnails/dsc09037.jpg",
+                    "title": null,
+                    "caption": null,
+                    "alt_text": null,
+                    "sort_order": 8,
+                    "is_active": true
+                },
+                {
+                    "image_path": "changyang/galleries/bci/images/dsc09039_orig.jpg",
+                    "thumbnail_path": "changyang/galleries/bci/thumbnails/dsc09039.jpg",
+                    "title": null,
+                    "caption": null,
+                    "alt_text": null,
+                    "sort_order": 9,
+                    "is_active": true
+                },
+                {
+                    "image_path": "changyang/galleries/bci/images/dsc09045_orig.jpg",
+                    "thumbnail_path": "changyang/galleries/bci/thumbnails/dsc09045.jpg",
+                    "title": null,
+                    "caption": null,
+                    "alt_text": null,
+                    "sort_order": 10,
+                    "is_active": true
+                },
+                {
+                    "image_path": "changyang/galleries/bci/images/dsc09071_orig.jpg",
+                    "thumbnail_path": "changyang/galleries/bci/thumbnails/dsc09071.jpg",
+                    "title": null,
+                    "caption": null,
+                    "alt_text": null,
+                    "sort_order": 11,
+                    "is_active": true
+                },
+                {
+                    "image_path": "changyang/galleries/bci/images/dsc09099_orig.jpg",
+                    "thumbnail_path": "changyang/galleries/bci/thumbnails/dsc09099.jpg",
+                    "title": null,
+                    "caption": null,
+                    "alt_text": null,
+                    "sort_order": 12,
+                    "is_active": true
+                },
+                {
+                    "image_path": "changyang/galleries/bci/images/dsc09114_orig.jpg",
+                    "thumbnail_path": "changyang/galleries/bci/thumbnails/dsc09114.jpg",
+                    "title": null,
+                    "caption": null,
+                    "alt_text": null,
+                    "sort_order": 13,
+                    "is_active": true
+                },
+                {
+                    "image_path": "changyang/galleries/bci/images/dsc09117_orig.jpg",
+                    "thumbnail_path": "changyang/galleries/bci/thumbnails/dsc09117.jpg",
+                    "title": null,
+                    "caption": null,
+                    "alt_text": null,
+                    "sort_order": 14,
+                    "is_active": true
+                },
+                {
+                    "image_path": "changyang/galleries/bci/images/dsc09121_orig.jpg",
+                    "thumbnail_path": "changyang/galleries/bci/thumbnails/dsc09121.jpg",
+                    "title": null,
+                    "caption": null,
+                    "alt_text": null,
+                    "sort_order": 15,
+                    "is_active": true
+                },
+                {
+                    "image_path": "changyang/galleries/bci/images/dsc09136_orig.jpg",
+                    "thumbnail_path": "changyang/galleries/bci/thumbnails/dsc09136.jpg",
+                    "title": null,
+                    "caption": null,
+                    "alt_text": null,
+                    "sort_order": 16,
+                    "is_active": true
+                },
+                {
+                    "image_path": "changyang/galleries/bci/images/dsc09138_orig.jpg",
+                    "thumbnail_path": "changyang/galleries/bci/thumbnails/dsc09138.jpg",
+                    "title": null,
+                    "caption": null,
+                    "alt_text": null,
+                    "sort_order": 17,
+                    "is_active": true
+                },
+                {
+                    "image_path": "changyang/galleries/bci/images/dsc09141_orig.jpg",
+                    "thumbnail_path": "changyang/galleries/bci/thumbnails/dsc09141.jpg",
+                    "title": null,
+                    "caption": null,
+                    "alt_text": null,
+                    "sort_order": 18,
+                    "is_active": true
+                }
+            ]
+        }
+    ],
+    "media_manifest": [
+        {
+            "source": "changyang-assets/9/7/1/8/97185006/background-images/291124344.jpg",
+            "target": "changyang/heroes/home/291124344.jpg"
+        },
+        {
+            "source": "changyang-assets/9/7/1/8/97185006/background-images/1593014940.jpg",
+            "target": "changyang/heroes/news/1593014940.jpg"
+        },
+        {
+            "source": "changyang-assets/9/7/1/8/97185006/background-images/1757525028.jpg",
+            "target": "changyang/heroes/people/1757525028.jpg"
+        },
+        {
+            "source": "changyang-assets/9/7/1/8/97185006/chia-hao-2016.jpg",
+            "target": "changyang/content/people/chia-hao-2016.jpg"
+        },
+        {
+            "source": "changyang-assets/9/7/1/8/97185006/chang-yang_cv_2024.pdf",
+            "target": "changyang/documents/chang-yang_cv_2024.pdf"
+        },
+        {
+            "source": "changyang-assets/9/7/1/8/97185006/1738022702_orig.jpg",
+            "target": "changyang/content/people/1738022702_orig.jpg"
+        },
+        {
+            "source": "changyang-assets/9/7/1/8/97185006/pxl-20240620-020711702_orig.jpg",
+            "target": "changyang/content/people/pxl-20240620-020711702_orig.jpg"
+        },
+        {
+            "source": "changyang-assets/9/7/1/8/97185006/2022_orig.jpg",
+            "target": "changyang/content/people/2022_orig.jpg"
+        },
+        {
+            "source": "changyang-assets/9/7/1/8/97185006/2025_orig.jpg",
+            "target": "changyang/content/people/2025_orig.jpg"
+        },
+        {
+            "source": "changyang-assets/9/7/1/8/97185006/2026_orig.jpg",
+            "target": "changyang/content/people/2026_orig.jpg"
+        },
+        {
+            "source": "changyang-assets/9/7/1/8/97185006/pxl-20220826-072726388_orig.jpg",
+            "target": "changyang/content/people/pxl-20220826-072726388_orig.jpg"
+        },
+        {
+            "source": "changyang-assets/9/7/1/8/97185006/2020-07-27-11-14-48_orig.jpg",
+            "target": "changyang/content/people/2020-07-27-11-14-48_orig.jpg"
+        },
+        {
+            "source": "changyang-assets/9/7/1/8/97185006/1296657418_orig.jpg",
+            "target": "changyang/content/people/1296657418_orig.jpg"
+        },
+        {
+            "source": "changyang-assets/9/7/1/8/97185006/ph-2023_orig.jpg",
+            "target": "changyang/content/people/ph-2023_orig.jpg"
+        },
+        {
+            "source": "changyang-assets/9/7/1/8/97185006/kafka_orig.jpg",
+            "target": "changyang/content/people/kafka_orig.jpg"
+        },
+        {
+            "source": "changyang-assets/9/7/1/8/97185006/2020-07-10-08-36-23_orig.jpg",
+            "target": "changyang/content/people/2020-07-10-08-36-23_orig.jpg"
+        },
+        {
+            "source": "changyang-assets/9/7/1/8/97185006/1934849738.jpg",
+            "target": "changyang/content/people/1934849738.jpg"
+        },
+        {
+            "source": "changyang-assets/9/7/1/8/97185006/2023_orig.jpg",
+            "target": "changyang/content/people/2023_orig.jpg"
+        },
+        {
+            "source": "changyang-assets/9/7/1/8/97185006/1449061754_orig.png",
+            "target": "changyang/content/people/1449061754_orig.png"
+        },
+        {
+            "source": "changyang-assets/9/7/1/8/97185006/background-images/1395436438.jpg",
+            "target": "changyang/heroes/research/1395436438.jpg"
+        },
+        {
+            "source": "changyang-assets/9/7/1/8/97185006/1215643109_orig.jpg",
+            "target": "changyang/content/research/1215643109_orig.jpg"
+        },
+        {
+            "source": "changyang-assets/9/7/1/8/97185006/2019-07-15-13-37-18_orig.jpg",
+            "target": "changyang/content/research/2019-07-15-13-37-18_orig.jpg"
+        },
+        {
+            "source": "changyang-assets/9/7/1/8/97185006/dsc04347_orig.jpg",
+            "target": "changyang/content/research/dsc04347_orig.jpg"
+        },
+        {
+            "source": "changyang-assets/9/7/1/8/97185006/background-images/999085096.jpg",
+            "target": "changyang/heroes/publications/999085096.jpg"
+        },
+        {
+            "source": "changyang-assets/9/7/1/8/97185006/background-images/1727721497.jpg",
+            "target": "changyang/heroes/courses/1727721497.jpg"
+        },
+        {
+            "source": "changyang-assets/9/7/1/8/97185006/dsc05177_orig.jpg",
+            "target": "changyang/content/courses/dsc05177_orig.jpg"
+        },
+        {
+            "source": "changyang-assets/9/7/1/8/97185006/fe_orig.jpg",
+            "target": "changyang/content/courses/fe_orig.jpg"
+        },
+        {
+            "source": "changyang-assets/9/7/1/8/97185006/2019-05-31-08-37-36_orig.jpg",
+            "target": "changyang/content/courses/2019-05-31-08-37-36_orig.jpg"
+        },
+        {
+            "source": "changyang-assets/9/7/1/8/97185006/biostatistics_orig.png",
+            "target": "changyang/content/courses/biostatistics_orig.png"
+        },
+        {
+            "source": "changyang-assets/9/7/1/8/97185006/re_orig.png",
+            "target": "changyang/content/courses/re_orig.png"
+        },
+        {
+            "source": "changyang-assets/9/7/1/8/97185006/whittaker-biomes-tw_orig.png",
+            "target": "changyang/content/courses/whittaker-biomes-tw_orig.png"
+        },
+        {
+            "source": "changyang-assets/9/7/1/8/97185006/653446301_orig.jpg",
+            "target": "changyang/content/courses/653446301_orig.jpg"
+        },
+        {
+            "source": "changyang-assets/9/7/1/8/97185006/background-images/1868015871.jpg",
+            "target": "changyang/heroes/gallery/1868015871.jpg"
+        },
+        {
+            "source": "changyang-assets/9/7/1/8/97185006/background-images/38020594.jpg",
+            "target": "changyang/heroes/resources/38020594.jpg"
+        },
+        {
+            "source": "changyang-assets/9/7/1/8/97185006/2018-07-17-12-32-42.jpg",
+            "target": "changyang/galleries/fushan/covers/2018-07-17-12-32-42.jpg"
+        },
+        {
+            "source": "changyang-assets/9/7/1/8/97185006/2018-07-17-12-32-42_orig.jpg",
+            "target": "changyang/galleries/fushan/images/2018-07-17-12-32-42_orig.jpg"
+        },
+        {
+            "source": "changyang-assets/9/7/1/8/97185006/2018-07-17-12-32-42.jpg",
+            "target": "changyang/galleries/fushan/thumbnails/2018-07-17-12-32-42.jpg"
+        },
+        {
+            "source": "changyang-assets/9/7/1/8/97185006/2018-07-29-14-54-18_orig.jpg",
+            "target": "changyang/galleries/fushan/images/2018-07-29-14-54-18_orig.jpg"
+        },
+        {
+            "source": "changyang-assets/9/7/1/8/97185006/2018-07-29-14-54-18.jpg",
+            "target": "changyang/galleries/fushan/thumbnails/2018-07-29-14-54-18.jpg"
+        },
+        {
+            "source": "changyang-assets/9/7/1/8/97185006/2019-07-13-07-51-18_orig.jpg",
+            "target": "changyang/galleries/fushan/images/2019-07-13-07-51-18_orig.jpg"
+        },
+        {
+            "source": "changyang-assets/9/7/1/8/97185006/2019-07-13-07-51-18.jpg",
+            "target": "changyang/galleries/fushan/thumbnails/2019-07-13-07-51-18.jpg"
+        },
+        {
+            "source": "changyang-assets/9/7/1/8/97185006/2019-07-15-08-30-44_orig.jpg",
+            "target": "changyang/galleries/fushan/images/2019-07-15-08-30-44_orig.jpg"
+        },
+        {
+            "source": "changyang-assets/9/7/1/8/97185006/2019-07-15-08-30-44.jpg",
+            "target": "changyang/galleries/fushan/thumbnails/2019-07-15-08-30-44.jpg"
+        },
+        {
+            "source": "changyang-assets/9/7/1/8/97185006/burmannia-itoana_orig.jpg",
+            "target": "changyang/galleries/fushan/images/burmannia-itoana_orig.jpg"
+        },
+        {
+            "source": "changyang-assets/9/7/1/8/97185006/burmannia-itoana.jpg",
+            "target": "changyang/galleries/fushan/thumbnails/burmannia-itoana.jpg"
+        },
+        {
+            "source": "changyang-assets/9/7/1/8/97185006/dryopteris-diffractum_orig.jpg",
+            "target": "changyang/galleries/fushan/images/dryopteris-diffractum_orig.jpg"
+        },
+        {
+            "source": "changyang-assets/9/7/1/8/97185006/dryopteris-diffractum.jpg",
+            "target": "changyang/galleries/fushan/thumbnails/dryopteris-diffractum.jpg"
+        },
+        {
+            "source": "changyang-assets/9/7/1/8/97185006/dsc04334_orig.jpg",
+            "target": "changyang/galleries/fushan/images/dsc04334_orig.jpg"
+        },
+        {
+            "source": "changyang-assets/9/7/1/8/97185006/dsc04334.jpg",
+            "target": "changyang/galleries/fushan/thumbnails/dsc04334.jpg"
+        },
+        {
+            "source": "changyang-assets/9/7/1/8/97185006/dsc04347_orig.jpg",
+            "target": "changyang/galleries/fushan/images/dsc04347_orig.jpg"
+        },
+        {
+            "source": "changyang-assets/9/7/1/8/97185006/dsc04347.jpg",
+            "target": "changyang/galleries/fushan/thumbnails/dsc04347.jpg"
+        },
+        {
+            "source": "changyang-assets/9/7/1/8/97185006/dsc04415_orig.jpg",
+            "target": "changyang/galleries/fushan/images/dsc04415_orig.jpg"
+        },
+        {
+            "source": "changyang-assets/9/7/1/8/97185006/dsc04415.jpg",
+            "target": "changyang/galleries/fushan/thumbnails/dsc04415.jpg"
+        },
+        {
+            "source": "changyang-assets/9/7/1/8/97185006/fushan-plot-2002_orig.jpg",
+            "target": "changyang/galleries/fushan/images/fushan-plot-2002_orig.jpg"
+        },
+        {
+            "source": "changyang-assets/9/7/1/8/97185006/fushan-plot-2002.jpg",
+            "target": "changyang/galleries/fushan/thumbnails/fushan-plot-2002.jpg"
+        },
+        {
+            "source": "changyang-assets/9/7/1/8/97185006/fushan-plot-2017_orig.jpg",
+            "target": "changyang/galleries/fushan/images/fushan-plot-2017_orig.jpg"
+        },
+        {
+            "source": "changyang-assets/9/7/1/8/97185006/fushan-plot-2017.jpg",
+            "target": "changyang/galleries/fushan/thumbnails/fushan-plot-2017.jpg"
+        },
+        {
+            "source": "changyang-assets/9/7/1/8/97185006/fushan-plot-2018_orig.jpg",
+            "target": "changyang/galleries/fushan/images/fushan-plot-2018_orig.jpg"
+        },
+        {
+            "source": "changyang-assets/9/7/1/8/97185006/fushan-plot-2018.jpg",
+            "target": "changyang/galleries/fushan/thumbnails/fushan-plot-2018.jpg"
+        },
+        {
+            "source": "changyang-assets/9/7/1/8/97185006/fushan-plot-2019-1_orig.jpg",
+            "target": "changyang/galleries/fushan/images/fushan-plot-2019-1_orig.jpg"
+        },
+        {
+            "source": "changyang-assets/9/7/1/8/97185006/fushan-plot-2019-1.jpg",
+            "target": "changyang/galleries/fushan/thumbnails/fushan-plot-2019-1.jpg"
+        },
+        {
+            "source": "changyang-assets/9/7/1/8/97185006/fushan-plot-2019-2_orig.jpg",
+            "target": "changyang/galleries/fushan/images/fushan-plot-2019-2_orig.jpg"
+        },
+        {
+            "source": "changyang-assets/9/7/1/8/97185006/fushan-plot-2019-2.jpg",
+            "target": "changyang/galleries/fushan/thumbnails/fushan-plot-2019-2.jpg"
+        },
+        {
+            "source": "changyang-assets/9/7/1/8/97185006/helicia-formosana_orig.jpg",
+            "target": "changyang/galleries/fushan/images/helicia-formosana_orig.jpg"
+        },
+        {
+            "source": "changyang-assets/9/7/1/8/97185006/helicia-formosana.jpg",
+            "target": "changyang/galleries/fushan/thumbnails/helicia-formosana.jpg"
+        },
+        {
+            "source": "changyang-assets/9/7/1/8/97185006/kurixalus-eiffingeri_orig.jpg",
+            "target": "changyang/galleries/fushan/images/kurixalus-eiffingeri_orig.jpg"
+        },
+        {
+            "source": "changyang-assets/9/7/1/8/97185006/kurixalus-eiffingeri.jpg",
+            "target": "changyang/galleries/fushan/thumbnails/kurixalus-eiffingeri.jpg"
+        },
+        {
+            "source": "changyang-assets/9/7/1/8/97185006/rhacophorus-aurantiventris_orig.jpg",
+            "target": "changyang/galleries/fushan/images/rhacophorus-aurantiventris_orig.jpg"
+        },
+        {
+            "source": "changyang-assets/9/7/1/8/97185006/rhacophorus-aurantiventris.jpg",
+            "target": "changyang/galleries/fushan/thumbnails/rhacophorus-aurantiventris.jpg"
+        },
+        {
+            "source": "changyang-assets/9/7/1/8/97185006/seed-trap-1_orig.jpg",
+            "target": "changyang/galleries/fushan/images/seed-trap-1_orig.jpg"
+        },
+        {
+            "source": "changyang-assets/9/7/1/8/97185006/seed-trap-1.jpg",
+            "target": "changyang/galleries/fushan/thumbnails/seed-trap-1.jpg"
+        },
+        {
+            "source": "changyang-assets/9/7/1/8/97185006/seed-trap-2_orig.jpg",
+            "target": "changyang/galleries/fushan/images/seed-trap-2_orig.jpg"
+        },
+        {
+            "source": "changyang-assets/9/7/1/8/97185006/seed-trap-2.jpg",
+            "target": "changyang/galleries/fushan/thumbnails/seed-trap-2.jpg"
+        },
+        {
+            "source": "changyang-assets/9/7/1/8/97185006/dsc08976.jpg",
+            "target": "changyang/galleries/bci/covers/dsc08976.jpg"
+        },
+        {
+            "source": "changyang-assets/9/7/1/8/97185006/dsc08976_orig.jpg",
+            "target": "changyang/galleries/bci/images/dsc08976_orig.jpg"
+        },
+        {
+            "source": "changyang-assets/9/7/1/8/97185006/dsc08976.jpg",
+            "target": "changyang/galleries/bci/thumbnails/dsc08976.jpg"
+        },
+        {
+            "source": "changyang-assets/9/7/1/8/97185006/dsc08994_orig.jpg",
+            "target": "changyang/galleries/bci/images/dsc08994_orig.jpg"
+        },
+        {
+            "source": "changyang-assets/9/7/1/8/97185006/dsc08994.jpg",
+            "target": "changyang/galleries/bci/thumbnails/dsc08994.jpg"
+        },
+        {
+            "source": "changyang-assets/9/7/1/8/97185006/dsc08995_orig.jpg",
+            "target": "changyang/galleries/bci/images/dsc08995_orig.jpg"
+        },
+        {
+            "source": "changyang-assets/9/7/1/8/97185006/dsc08995.jpg",
+            "target": "changyang/galleries/bci/thumbnails/dsc08995.jpg"
+        },
+        {
+            "source": "changyang-assets/9/7/1/8/97185006/dsc09013_orig.jpg",
+            "target": "changyang/galleries/bci/images/dsc09013_orig.jpg"
+        },
+        {
+            "source": "changyang-assets/9/7/1/8/97185006/dsc09013.jpg",
+            "target": "changyang/galleries/bci/thumbnails/dsc09013.jpg"
+        },
+        {
+            "source": "changyang-assets/9/7/1/8/97185006/dsc09030_orig.jpg",
+            "target": "changyang/galleries/bci/images/dsc09030_orig.jpg"
+        },
+        {
+            "source": "changyang-assets/9/7/1/8/97185006/dsc09030.jpg",
+            "target": "changyang/galleries/bci/thumbnails/dsc09030.jpg"
+        },
+        {
+            "source": "changyang-assets/9/7/1/8/97185006/dsc09033_orig.jpg",
+            "target": "changyang/galleries/bci/images/dsc09033_orig.jpg"
+        },
+        {
+            "source": "changyang-assets/9/7/1/8/97185006/dsc09033.jpg",
+            "target": "changyang/galleries/bci/thumbnails/dsc09033.jpg"
+        },
+        {
+            "source": "changyang-assets/9/7/1/8/97185006/dsc09035_orig.jpg",
+            "target": "changyang/galleries/bci/images/dsc09035_orig.jpg"
+        },
+        {
+            "source": "changyang-assets/9/7/1/8/97185006/dsc09035.jpg",
+            "target": "changyang/galleries/bci/thumbnails/dsc09035.jpg"
+        },
+        {
+            "source": "changyang-assets/9/7/1/8/97185006/dsc09037_orig.jpg",
+            "target": "changyang/galleries/bci/images/dsc09037_orig.jpg"
+        },
+        {
+            "source": "changyang-assets/9/7/1/8/97185006/dsc09037.jpg",
+            "target": "changyang/galleries/bci/thumbnails/dsc09037.jpg"
+        },
+        {
+            "source": "changyang-assets/9/7/1/8/97185006/dsc09039_orig.jpg",
+            "target": "changyang/galleries/bci/images/dsc09039_orig.jpg"
+        },
+        {
+            "source": "changyang-assets/9/7/1/8/97185006/dsc09039.jpg",
+            "target": "changyang/galleries/bci/thumbnails/dsc09039.jpg"
+        },
+        {
+            "source": "changyang-assets/9/7/1/8/97185006/dsc09045_orig.jpg",
+            "target": "changyang/galleries/bci/images/dsc09045_orig.jpg"
+        },
+        {
+            "source": "changyang-assets/9/7/1/8/97185006/dsc09045.jpg",
+            "target": "changyang/galleries/bci/thumbnails/dsc09045.jpg"
+        },
+        {
+            "source": "changyang-assets/9/7/1/8/97185006/dsc09071_orig.jpg",
+            "target": "changyang/galleries/bci/images/dsc09071_orig.jpg"
+        },
+        {
+            "source": "changyang-assets/9/7/1/8/97185006/dsc09071.jpg",
+            "target": "changyang/galleries/bci/thumbnails/dsc09071.jpg"
+        },
+        {
+            "source": "changyang-assets/9/7/1/8/97185006/dsc09099_orig.jpg",
+            "target": "changyang/galleries/bci/images/dsc09099_orig.jpg"
+        },
+        {
+            "source": "changyang-assets/9/7/1/8/97185006/dsc09099.jpg",
+            "target": "changyang/galleries/bci/thumbnails/dsc09099.jpg"
+        },
+        {
+            "source": "changyang-assets/9/7/1/8/97185006/dsc09114_orig.jpg",
+            "target": "changyang/galleries/bci/images/dsc09114_orig.jpg"
+        },
+        {
+            "source": "changyang-assets/9/7/1/8/97185006/dsc09114.jpg",
+            "target": "changyang/galleries/bci/thumbnails/dsc09114.jpg"
+        },
+        {
+            "source": "changyang-assets/9/7/1/8/97185006/dsc09117_orig.jpg",
+            "target": "changyang/galleries/bci/images/dsc09117_orig.jpg"
+        },
+        {
+            "source": "changyang-assets/9/7/1/8/97185006/dsc09117.jpg",
+            "target": "changyang/galleries/bci/thumbnails/dsc09117.jpg"
+        },
+        {
+            "source": "changyang-assets/9/7/1/8/97185006/dsc09121_orig.jpg",
+            "target": "changyang/galleries/bci/images/dsc09121_orig.jpg"
+        },
+        {
+            "source": "changyang-assets/9/7/1/8/97185006/dsc09121.jpg",
+            "target": "changyang/galleries/bci/thumbnails/dsc09121.jpg"
+        },
+        {
+            "source": "changyang-assets/9/7/1/8/97185006/dsc09136_orig.jpg",
+            "target": "changyang/galleries/bci/images/dsc09136_orig.jpg"
+        },
+        {
+            "source": "changyang-assets/9/7/1/8/97185006/dsc09136.jpg",
+            "target": "changyang/galleries/bci/thumbnails/dsc09136.jpg"
+        },
+        {
+            "source": "changyang-assets/9/7/1/8/97185006/dsc09138_orig.jpg",
+            "target": "changyang/galleries/bci/images/dsc09138_orig.jpg"
+        },
+        {
+            "source": "changyang-assets/9/7/1/8/97185006/dsc09138.jpg",
+            "target": "changyang/galleries/bci/thumbnails/dsc09138.jpg"
+        },
+        {
+            "source": "changyang-assets/9/7/1/8/97185006/dsc09141_orig.jpg",
+            "target": "changyang/galleries/bci/images/dsc09141_orig.jpg"
+        },
+        {
+            "source": "changyang-assets/9/7/1/8/97185006/dsc09141.jpg",
+            "target": "changyang/galleries/bci/thumbnails/dsc09141.jpg"
+        }
+    ]
+}

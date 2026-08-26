@@ -63,7 +63,7 @@
                     <a href="{{ url('/publications') }}">{{ __('web.nav_publications') }}</a>
                 </div>
                 <div class="web-nav">
-                    <a href="{{ url('/web/splist') }}">{{ __('web.nav_plants') }}</a>
+                    <a href="{{ route('front.splist') }}">{{ __('web.nav_plants') }}</a>
                 </div>
                 {{-- 關於 / 研究緣起：dropdown --}}
                 <div>
@@ -104,7 +104,7 @@
             @endforeach
 
             <div><a href="{{ url('/publications') }}">{{ __('web.nav_publications') }}</a></div>
-            <div><a href="{{ url('/web/splist') }}">{{ __('web.nav_plants') }}</a></div>
+            <div><a href="{{ route('front.splist') }}">{{ __('web.nav_plants') }}</a></div>
             @foreach ($navAboutPages as $page)
                 <div><a href="{{ url($page->slug) }}">
                         {{ __('web.nav_' . $page->nav_group . '') }} - {{ $page->title }}

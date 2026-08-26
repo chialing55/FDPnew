@@ -99,7 +99,7 @@
                         <div class="space-y-4">
                             <div class="prose prose-sm max-w-none">
                                 <p>
-                                    <a href="{{ url('/web/splist') }}" target="_blank" rel="noopener">
+                                    <a href="{{ route('front.splist') }}" target="_blank" rel="noopener">
                                         前往福山樣區植物名錄
                                     </a>
                                 </p>

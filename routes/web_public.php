@@ -8,20 +8,18 @@ use App\Http\Controllers\Web\ProjectController;
 use App\Http\Controllers\Web\NewsController;
 
 Route::prefix('web')->group(function () {
-    Route::get('/splist', [WebIndexController::class, 'splist'])->name('front.splist.legacy');
+    Route::redirect('/splist', '/splist', 301)->name('front.splist.legacy');
     Route::get('/species/{spcode}', [WebIndexController::class, 'species'])->name('front.species.legacy');
 });
 
-Route::redirect('/plants', '/web/splist', 301);
+Route::get('/splist', [WebIndexController::class, 'splist'])->name('front.splist');
+Route::redirect('/plants', '/splist', 301);
 
 
 // === 前台公開頁面 ===
 
 
 // 你也可以另外做一個 index() 畫面，先用 splist 當首頁也可以
-
-// 物種列表
-// Route::get('/splist', [WebIndexController::class, 'splist'])->name('front.splist');
 
 // // 單一物種頁
 // Route::get('/species/{spcode}', [WebIndexController::class, 'species'])->name('front.species');

@@ -187,7 +187,7 @@ $('.listlink').on('click', function () {
   let type = $(this).attr('type');
   if (typeof type != 'undefined') {
     if (type == 'websplist') {
-      window.open('/web/splist', '_blank');
+      window.open('/splist', '_blank');
     } else {
       location.href = `${sectionBase}/${type}`;
     }

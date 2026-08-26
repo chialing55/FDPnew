@@ -29,6 +29,10 @@ class Publication extends Model
         'url',
         'external_id',
         'type',
+        'language',
+        'institution',
+        'institution_zh_tw',
+        'thesis_type',
         'is_open_access',
         'is_active',
 
@@ -85,6 +89,11 @@ class Publication extends Model
         return $this->localizedValue('journal');
     }
 
+    public function getDisplayInstitutionAttribute(): ?string
+    {
+        return $this->localizedValue('institution');
+    }
+
     /** 依語系回傳引用文字 */
     public function getCitationAttribute(): ?string
     {
@@ -95,8 +104,14 @@ class Publication extends Model
     {
         $authors = filled($this->display_authors) ? e(rtrim($this->abbreviated_authors, '.')) : null;
         $title = filled($this->display_title) ? e(rtrim($this->display_title, '.')) : null;
+        if ($title !== null && app()->getLocale() === 'en' && $this->isChineseLanguage()) {
+            $title .= ' (in Chinese)';
+        }
         $year = filled($this->year) ? '<strong>'.e($this->year).'</strong>' : null;
-        $source = filled($this->display_journal) ? '<em>'.e(rtrim($this->display_journal, '.')).'</em>' : '';
+        $source = $this->thesisSource();
+        if ($source === null) {
+            $source = filled($this->display_journal) ? '<em>'.e(rtrim($this->display_journal, '.')).'</em>' : '';
+        }
         if (filled($this->volume)) {
             $source .= ($source !== '' ? ' ' : '').e($this->volume);
         }
@@ -112,6 +127,46 @@ class Publication extends Model
             : array_filter([$authors, $year, $title, $source ?: null]);
 
         return $parts === [] ? null : implode('. ', $parts).'.';
+    }
+
+    private function thesisSource(): ?string
+    {
+        if ($this->type !== 'thesis') {
+            return null;
+        }
+
+        $thesisType = match (strtolower(trim((string) $this->thesis_type))) {
+            'master', "master's thesis", 'masters thesis', '碩士', '碩士論文' => 'master',
+            'doctoral', 'doctoral dissertation', 'phd', 'ph.d.', '博士', '博士論文' => 'doctoral',
+            default => null,
+        };
+
+        $label = app()->getLocale() === 'en'
+            ? match ($thesisType) {
+                'master' => "Master's thesis",
+                'doctoral' => 'Doctoral dissertation',
+                default => 'Thesis',
+            }
+            : match ($thesisType) {
+                'master' => '碩士論文',
+                'doctoral' => '博士論文',
+                default => '學位論文',
+            };
+
+        return filled($this->display_institution)
+            ? $label.', '.e(rtrim($this->display_institution, '.'))
+            : $label;
+    }
+
+    private function isChineseLanguage(): bool
+    {
+        return in_array(strtolower(trim((string) $this->language)), [
+            'zh',
+            'zh-tw',
+            'zh_tw',
+            'chinese',
+            '中文',
+        ], true);
     }
 
     /** 保留首尾作者，避免作者群過長撐開列表與引用內容。 */
