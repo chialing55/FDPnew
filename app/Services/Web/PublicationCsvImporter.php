@@ -36,7 +36,7 @@ class PublicationCsvImporter
     ];
 
     /** @return array{created: int, updated: int, skipped: int, skipped_rows: array<int, string>} */
-    public function import(string $path): array
+    public function import(string $path, ?int $siteId = null): array
     {
         $csv = Reader::createFromPath($path, 'r');
         $csv->setHeaderOffset(0);
@@ -53,7 +53,7 @@ class PublicationCsvImporter
         $nonBlankRows = 0;
         $skippedRows = [];
 
-        DB::connection('mysql_web')->transaction(function () use ($csv, $headers, &$created, &$updated, &$nonBlankRows, &$skippedRows): void {
+        DB::connection('mysql_web')->transaction(function () use ($csv, $headers, $siteId, &$created, &$updated, &$nonBlankRows, &$skippedRows): void {
             foreach ($csv->getRecords() as $offset => $record) {
                 $line = $offset + 1;
                 $rawRow = array_combine($headers, array_values($record));
@@ -72,6 +72,10 @@ class PublicationCsvImporter
                     $this->validateRow($row, $line, $isNew);
                     $publication->fill($row);
                     $publication->save();
+
+                    if ($siteId !== null) {
+                        $publication->sites()->syncWithoutDetaching([$siteId]);
+                    }
 
                     $isNew ? $created++ : $updated++;
                 } catch (RuntimeException $exception) {

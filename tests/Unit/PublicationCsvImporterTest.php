@@ -1,6 +1,7 @@
 <?php
 
 use App\Models\Web\Publication;
+use App\Models\Web\Site;
 use App\Services\Web\PublicationCsvImporter;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
@@ -44,6 +45,47 @@ beforeEach(function () {
         $table->boolean('is_active')->default(true);
         $table->timestamps();
     });
+
+    Schema::connection('mysql_web')->create('sites', function (Blueprint $table): void {
+        $table->id();
+        $table->string('name_zh_tw');
+        $table->timestamps();
+    });
+
+    Schema::connection('mysql_web')->create('publication_site', function (Blueprint $table): void {
+        $table->id();
+        $table->foreignId('publication_id')->constrained('publications')->cascadeOnDelete();
+        $table->foreignId('site_id')->constrained('sites')->cascadeOnDelete();
+        $table->timestamps();
+        $table->unique(['publication_id', 'site_id']);
+    });
+});
+
+it('links every successfully imported publication to the selected site without removing existing links', function () {
+    $existingSite = Site::create(['name_zh_tw' => '原有樣區']);
+    $selectedSite = Site::create(['name_zh_tw' => '本次匯入樣區']);
+    $publication = Publication::create([
+        'external_id' => 'PUB-1',
+        'authors' => 'Original author',
+        'title' => 'Original title',
+    ]);
+    $publication->sites()->attach($existingSite);
+
+    $file = tmpfile();
+    fputcsv($file, ['external_id', 'authors', 'title']);
+    fputcsv($file, ['PUB-1', 'Updated author', 'Updated title']);
+    fputcsv($file, ['PUB-2', 'New author', 'New title']);
+    $path = stream_get_meta_data($file)['uri'];
+
+    $result = app(PublicationCsvImporter::class)->import($path, $selectedSite->id);
+
+    expect($result)->toBe(['created' => 1, 'updated' => 1, 'skipped' => 0, 'skipped_rows' => []])
+        ->and(Publication::where('external_id', 'PUB-1')->first()->sites()->pluck('sites.id')->all())
+        ->toEqualCanonicalizing([$existingSite->id, $selectedSite->id])
+        ->and(Publication::where('external_id', 'PUB-2')->first()->sites()->pluck('sites.id')->all())
+        ->toBe([$selectedSite->id]);
+
+    fclose($file);
 });
 
 it('imports CSV columns and updates records by external id', function () {

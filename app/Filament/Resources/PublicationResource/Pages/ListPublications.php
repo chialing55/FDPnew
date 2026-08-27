@@ -4,6 +4,7 @@ namespace App\Filament\Resources\PublicationResource\Pages;
 
 use App\Filament\Actions\ListPageSettingsAction;
 use App\Filament\Resources\PublicationResource;
+use App\Models\Web\Site;
 use App\Models\Web\SiteSetting;
 use App\Services\Web\PublicationCsvImporter;
 use Filament\Actions;
@@ -27,6 +28,18 @@ class ListPublications extends ListRecords
                 ->label('匯入 CSV')
                 ->icon('heroicon-o-arrow-up-tray')
                 ->form([
+                    Forms\Components\Select::make('site_id')
+                        ->label('所屬樣區')
+                        ->options(fn (): array => Site::query()
+                            ->orderBy('sort_order')
+                            ->orderBy('name_zh_tw')
+                            ->pluck('name_zh_tw', 'id')
+                            ->all())
+                        ->searchable()
+                        ->preload()
+                        ->native(false)
+                        ->required()
+                        ->helperText('這次成功匯入的文獻都會連結到此樣區，不會移除文獻原有的樣區連結。'),
                     Forms\Components\FileUpload::make('csv')
                         ->label('CSV 檔案')
                         ->acceptedFileTypes(['text/csv', 'text/plain', 'application/csv'])
@@ -50,9 +63,14 @@ class ListPublications extends ListRecords
                     }
 
                     try {
-                        $result = $importer->import($file->getRealPath());
+                        $result = $importer->import($file->getRealPath(), (int) $data['site_id']);
 
+                        $siteName = Site::find($data['site_id'])?->name_zh_tw;
                         $body = "新增 {$result['created']} 筆，更新 {$result['updated']} 筆，略過 {$result['skipped']} 筆。";
+
+                        if (filled($siteName)) {
+                            $body .= "\n已連結樣區：{$siteName}。";
+                        }
 
                         if ($result['skipped_rows'] !== []) {
                             $body .= "\n\n".implode("\n", array_map(
