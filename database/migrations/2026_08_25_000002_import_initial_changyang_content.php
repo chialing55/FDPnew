@@ -47,6 +47,7 @@ return new class extends Migration
                         $blockId = $db->table('changyang_content_blocks')->insertGetId($block);
 
                         foreach ($images as $image) {
+                            $image['display_settings'] = $this->json($image['display_settings'] ?? null);
                             $image['content_block_id'] = $blockId;
                             $image['created_at'] = $now;
                             $image['updated_at'] = $now;
