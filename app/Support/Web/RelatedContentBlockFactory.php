@@ -31,7 +31,6 @@ class RelatedContentBlockFactory
         $filters = ['site' => (string) $siteId];
 
         return collect([
-            self::block('research_outputs', $filters),
             self::block('projects', $filters),
             self::block('publications', $filters),
         ]);
@@ -42,7 +41,6 @@ class RelatedContentBlockFactory
         $filters = ['subject' => (string) $subjectId];
 
         return collect([
-            self::block('research_outputs', $filters),
             self::block('projects', $filters),
             self::block('publications', $filters),
         ]);

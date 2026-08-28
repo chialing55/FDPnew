@@ -76,14 +76,7 @@
     </div>
     <div class="relative left-1/2 right-1/2 mb-12 ml-[-50vw] mr-[-50vw] bg-gray-200 py-8 lg:mt-8" style="width: 100vw;">
         <div class="mx-auto w-full max-w-7xl">
-            <ol class="grid gap-4 md:grid-cols-2">
-                <li>
-                    <a href="{{ url('/results') }}"
-                        class="group flex items-center justify-between rounded-lg bg-white px-6 py-5 text-lg font-semibold text-forest-dark no-underline shadow-sm transition hover:-translate-y-0.5 hover:border-forest hover:text-forest hover:no-underline hover:shadow-md">
-                        <span>{{ __('web.index_results_overview') }}</span>
-                        <span aria-hidden="true" class="transition group-hover:translate-x-1">→</span>
-                    </a>
-                </li>
+            <ol class="grid gap-4">
                 <li>
                     <a href="{{ url('/projects') }}"
                         class="group flex items-center justify-between rounded-lg bg-white px-6 py-5 text-lg font-semibold text-forest-dark no-underline shadow-sm transition hover:-translate-y-0.5 hover:border-forest hover:text-forest hover:no-underline hover:shadow-md">
