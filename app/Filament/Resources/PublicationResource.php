@@ -153,6 +153,7 @@ class PublicationResource extends Resource
             Tables\Columns\IconColumn::make('is_active')->label('公開')->boolean(),
         ])
             ->defaultSort('year', 'desc')
+            ->defaultKeySort()
             ->filters([
                 Tables\Filters\SelectFilter::make('type')
                     ->label('文獻類型')
