@@ -24,6 +24,8 @@
     <div class="headerlist iflex">
         <div class="list list1 listlink" type="doc">相關文件<hr></div>
         <div class="list list4 listlink" type="entry">資料輸入<hr></div>
+        <div class="list list2 listlink" type="dataviewer">資料檢視<hr></div>
+        <div class="list list5 listlink" type="download">資料下載<hr></div>
     </div>
 @endsection
 

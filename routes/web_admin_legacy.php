@@ -155,6 +155,14 @@ Route::middleware(['auth', 'approved'])->prefix('admin')->name('admin.')->group(
                 ->defaults('site', 'fushan')
                 ->name('entry');
 
+            Route::get('/dataviewer', [GeoTreeSurveyController::class, 'dataviewer'])
+                ->defaults('site', 'fushan')
+                ->name('dataviewer');
+
+            Route::get('/download', [GeoTreeSurveyController::class, 'download'])
+                ->defaults('site', 'fushan')
+                ->name('download');
+
             Route::get('/record-paper/{qx}', GeoTreeSurveyRecordPaperController::class)
                 ->whereNumber('qx')
                 ->name('record-paper');
