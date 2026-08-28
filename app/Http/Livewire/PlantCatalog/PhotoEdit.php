@@ -2,7 +2,7 @@
 
 namespace App\Http\Livewire\PlantCatalog;
 
-use App\Models\FsBaseSpinfo;
+use App\Models\PlantCatalog\SiteSpecies;
 use App\Models\Web\DisNote;
 use App\Models\Web\Photo;
 use Illuminate\Support\Facades\Auth;
@@ -38,7 +38,11 @@ class PhotoEdit extends Component
     public function mount(string $spcode): void
     {
         $this->spcode = $spcode;
-        $species = FsBaseSpinfo::query()->where('spcode', $spcode)->firstOrFail();
+        $species = SiteSpecies::query()
+            ->fushan()
+            ->withChecklistTaxonomy()
+            ->where('site_species.spcode', $spcode)
+            ->firstOrFail();
         $this->speciesinfo = $species->toArray();
         $this->loadOptions();
         $this->reloadDisNotes();

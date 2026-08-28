@@ -2,7 +2,7 @@
 
 namespace App\Http\Livewire\PlantCatalog;
 
-use App\Models\FsBaseSpinfo;
+use App\Models\PlantCatalog\SiteSpecies;
 use App\Models\Web\Photo;
 use Livewire\Component;
 
@@ -18,9 +18,11 @@ class Photos extends Component
             ->pluck('photo_count', 'spcode')
             ->toArray();
 
-        $this->splist = FsBaseSpinfo::query()
-            ->orderBy('apgfamily')
-            ->orderBy('now_simname')
+        $this->splist = SiteSpecies::query()
+            ->fushan()
+            ->withChecklistTaxonomy()
+            ->orderBy('checklist.family')
+            ->orderBy('checklist.canonical_name')
             ->get()
             ->map(function ($species) use ($photoCounts) {
                 $row = $species->toArray();

@@ -10,7 +10,7 @@ use Livewire\WithPagination;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Schema;
 
-use App\Models\FsBaseSpinfo;
+use App\Models\PlantCatalog\SiteSpecies;
 use App\Models\FsTreeCensuses;
 use App\Models\Web\Photo;
 use App\Models\Web\DisNote;
@@ -73,7 +73,12 @@ class Showspecies extends Component
 
         $this->desinfo = $des;
 
-        $this->speciesinfo = FsBaseSpinfo::where('spcode', $spcode)->first()->toArray();
+        $this->speciesinfo = SiteSpecies::query()
+            ->fushan()
+            ->withChecklistTaxonomy()
+            ->where('site_species.spcode', $spcode)
+            ->firstOrFail()
+            ->toArray();
         $this->spcode = $spcode;
         $this->researches = $this->speciesResearchFlags($spcode);
         [$this->latestTreeCensus, $this->latestTreeCensusYear] = $this->latestTreeCensusInfo();
@@ -157,12 +162,13 @@ class Showspecies extends Component
             'mortality' => 0,
         ];
 
-        if (!Schema::connection('mysql4')->hasTable('species_research_links')) {
+        if (!Schema::connection('plant_catalog')->hasTable('species_research_links')) {
             return $fallback;
         }
 
-        $linkedCodes = DB::connection('mysql4')
+        $linkedCodes = DB::connection('plant_catalog')
             ->table('species_research_links')
+            ->where('site', 'fushan')
             ->where('spcode', $spcode)
             ->pluck('research_code')
             ->all();

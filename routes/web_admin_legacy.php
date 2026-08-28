@@ -98,6 +98,10 @@ Route::middleware(['auth', 'approved'])->prefix('admin')->name('admin.')->group(
         Route::get('/download', [PlantCatalogController::class, 'download'])
             ->name('download');
 
+        Route::get('/maintenance', [PlantCatalogController::class, 'maintenance'])
+            ->middleware('admin')
+            ->name('maintenance');
+
         Route::get('/photos', [PlantCatalogController::class, 'photos'])
             ->name('photos');
 

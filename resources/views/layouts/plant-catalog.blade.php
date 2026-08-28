@@ -31,6 +31,7 @@
     <div class='headerlist iflex'>
         @if ($isAdmin)
             <div class='list list1 listlink admin-only-link' type='upload'>名錄上傳<hr></div>
+            <div class='list list4 listlink admin-only-link' type='maintenance'>名錄整理<hr></div>
         @endif
         <div class='list list2 listlink' type='download'>名錄下載<hr></div>
         <div class='list list3 listlink' type='photos'>照片編輯<hr></div>

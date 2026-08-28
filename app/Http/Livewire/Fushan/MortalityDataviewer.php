@@ -2,7 +2,7 @@
 
 namespace App\Http\Livewire\Fushan;
 
-use App\Models\FsBaseSpinfo;
+use App\Models\PlantCatalog\SiteSpecies;
 use Illuminate\Support\Facades\DB;
 use Livewire\Component;
 
@@ -444,7 +444,7 @@ class MortalityDataviewer extends Component
             return [];
         }
 
-        return FsBaseSpinfo::query()
+        return SiteSpecies::query()->fushan()
             ->whereIn('spcode', $spcodes)
             ->pluck('csp', 'spcode')
             ->all();
@@ -458,9 +458,11 @@ class MortalityDataviewer extends Component
             return [];
         }
 
-        return FsBaseSpinfo::query()
-            ->where('spcode', 'like', '%' . $species . '%')
-            ->orWhere('csp', 'like', '%' . $species . '%')
+        return SiteSpecies::query()->fushan()
+            ->where(function ($query) use ($species) {
+                $query->where('spcode', 'like', '%' . $species . '%')
+                    ->orWhere('csp', 'like', '%' . $species . '%');
+            })
             ->pluck('spcode')
             ->map(fn ($spcode) => trim((string) $spcode))
             ->filter(fn ($spcode) => $spcode !== '')

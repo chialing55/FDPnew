@@ -17,11 +17,13 @@ use App\Models\FsSeedlingSlcov1;
 use App\Models\FsSeedlingSlcov2;
 use App\Models\FsSeedlingSlroll1;
 use App\Models\FsSeedlingSlroll2;
+use App\Models\PlantCatalog\SiteSpecies;
 
 //將資料匯入小苗大表
 
 class SeedlingImport extends Component
 {
+    private ?array $spcodeByCsp = null;
     public $slmaxcensus;
     public $nowcensus;
     public $importnote;
@@ -321,6 +323,7 @@ class SeedlingImport extends Component
     {
         $now = date('Y-m-d H:i:s');
         $updatedId = $this->user ?: ($slrecord['updated_id'] ?? null);
+        $spcode = $this->spcodeForCsp($slrecord['csp'] ?? null);
 
         $individual = DB::connection('mysql3')
             ->table('seedling_individuals')
@@ -355,6 +358,7 @@ class SeedlingImport extends Component
                     'x' => $this->nullableValue($slrecord, 'x'),
                     'y' => $this->nullableValue($slrecord, 'y'),
                     'csp' => $slrecord['csp'] ?? null,
+                    'spcode' => $spcode,
                     'updated_id' => $updatedId,
                     'created_at' => $now,
                 ]);
@@ -404,6 +408,19 @@ class SeedlingImport extends Component
                     'updated_id' => $updatedId,
                 ]);
         }
+    }
+
+    private function spcodeForCsp($csp): string
+    {
+        if ($this->spcodeByCsp === null) {
+            $this->spcodeByCsp = SiteSpecies::query()->fushan()
+                ->whereNotNull('csp')->where('csp', '<>', '')
+                ->pluck('spcode', 'csp')->all();
+        }
+
+        $spcode = trim((string) ($this->spcodeByCsp[trim((string) $csp)] ?? ''));
+
+        return $spcode !== '' && ! str_starts_with(strtoupper($spcode), 'UNK') ? $spcode : 'UNKUNK';
     }
 
 

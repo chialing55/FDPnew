@@ -19,6 +19,7 @@ use App\Models\FsSeedlingSlrecord1;
 use App\Models\FsSeedlingSlrecord2;
 use App\Models\FsSeedlingSlroll1;
 use App\Models\FsSeedlingSlroll2;
+use App\Models\PlantCatalog\SiteSpecies;
 use Symfony\Component\HttpFoundation\StreamedResponse;
 use Symfony\Component\Process\Process;
 
@@ -699,10 +700,11 @@ class SeedlingController extends Controller
             return ['family_count' => 0, 'genus_count' => 0];
         }
 
-        $rows = DB::connection('mysql4')
-            ->table('spinfo')
+        $rows = SiteSpecies::query()
+            ->fushan()
+            ->withChecklistTaxonomy()
             ->whereIn('csp', $speciesNames)
-            ->select('apgfamily', 'genus')
+            ->select('checklist.family as apgfamily', 'checklist.genus')
             ->get();
 
         return [

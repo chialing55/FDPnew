@@ -4,7 +4,7 @@ namespace App\Http\Livewire\Fushan;
 
 use App\Jobs\SeedsAddButton;
 use App\Models\FsSeedsFulldata;
-use App\Models\FsSeedsSplist;
+use App\Services\PlantCatalog\FushanSeedSpeciesService;
 use Illuminate\Support\Facades\DB;
 use Livewire\Component;
 
@@ -54,10 +54,7 @@ class SeedsUnknownData extends Component
             ->pluck('csp')
             ->toArray();
 
-        $listedSpecies = FsSeedsSplist::query()
-            ->select('csp')
-            ->pluck('csp')
-            ->toArray();
+        $listedSpecies = (new FushanSeedSpeciesService)->cspList();
 
         return array_values(array_unique(array_merge([$this->unk], $usedSpecies, $listedSpecies)));
     }

@@ -12,8 +12,8 @@ use App\Http\Controllers\Controller;
 use App\Models\FsSeedsDateinfo;
 use App\Models\FsSeedsFulldata;
 use App\Models\FsSeedsRecord1;
-use App\Models\FsSeedsSplist;
 use App\Models\FsSeedsFixlog;
+use App\Services\PlantCatalog\FushanSeedSpeciesService;
 
 use App\Jobs\FsSeedsCheck;
 use App\Jobs\SeedsAddButton;
@@ -134,12 +134,7 @@ class SeedsSaveController extends Controller
     //產生名錄
     public function spinfo()
     {
-        $spinfolist = FsSeedsSplist::query()->get()->toArray();
-        foreach ($spinfolist as $spinfo1) {
-            $spinfo[$spinfo1['csp']] = $spinfo1;
-        }
-
-        return $spinfo;
+        return (new FushanSeedSpeciesService)->keyedByCsp();
     }
 
     //預設鑑定者

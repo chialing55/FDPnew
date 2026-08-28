@@ -13,7 +13,7 @@ use Livewire\WithPagination;
 use App\Models\FsSeedsDateinfo;
 use App\Models\FsSeedsFulldata;
 use App\Models\FsSeedsRecord1;
-use App\Models\FsSeedsSplist;
+use App\Services\PlantCatalog\FushanSeedSpeciesService;
 use App\Services\SeedsDateinfoSyncService;
 
 use App\Jobs\SeedsAddButton;
@@ -258,7 +258,9 @@ class SeedsShowentry extends Component
 
 
         $fsscsplist1 = FsSeedsFulldata::select('csp', DB::raw('count(trap) as count2'))->where('csp', 'not like', 'nothing')->groupBy('csp')->orderByDesc('count2')->get()->toArray();
-        $fsscsplist2 = FsSeedsSplist::select('csp')->get()->toArray();
+        $fsscsplist2 = collect((new FushanSeedSpeciesService)->cspList())
+            ->map(fn ($csp) => ['csp' => $csp])
+            ->all();
 
         for($i=0;$i<count($fsscsplist1);$i++){
 

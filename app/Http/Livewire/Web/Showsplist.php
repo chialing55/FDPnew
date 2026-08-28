@@ -5,7 +5,7 @@ namespace App\Http\Livewire\Web;
 use Livewire\Component;
 use Illuminate\Support\Facades\Schema;
 
-use App\Models\FsBaseSpinfo;
+use App\Models\PlantCatalog\SiteSpecies;
 use App\Http\Controllers\UpdateController;
 
 //網頁物種清單
@@ -32,13 +32,15 @@ class Showsplist extends Component
 
         $researchLinks = $this->speciesResearchLinks();
 
-        $this->splist = FsBaseSpinfo::query()
-            ->orderBy('apgfamily')
-            ->orderBy('now_simname')
+        $this->splist = SiteSpecies::query()
+            ->fushan()
+            ->withChecklistTaxonomy()
+            ->orderBy('checklist.family')
+            ->orderBy('checklist.canonical_name')
             ->get()
             ->map(function ($species) use ($researchLinks) {
                 $row = $species->toArray();
-                $row['researches'] = $researchLinks[$species->spcode] ?? $this->legacyResearchFlags($row);
+                $row['researches'] = $researchLinks[$species->spcode] ?? [];
                 return $row;
             })
             ->toArray();
@@ -46,11 +48,12 @@ class Showsplist extends Component
 
     private function speciesResearchLinks(): array
     {
-        if (!Schema::connection('mysql4')->hasTable('species_research_links')) {
+        if (!Schema::connection('plant_catalog')->hasTable('species_research_links')) {
             return [];
         }
 
-        return collect(\DB::connection('mysql4')->table('species_research_links')->select('spcode', 'research_code')->get())
+        return collect(\DB::connection('plant_catalog')->table('species_research_links')
+            ->where('site', 'fushan')->select('spcode', 'research_code')->get())
             ->groupBy('spcode')
             ->map(function ($links) {
                 return $links->pluck('research_code')
@@ -59,17 +62,6 @@ class Showsplist extends Component
             })
             ->all();
     }
-
-    private function legacyResearchFlags(array $species): array
-    {
-        return [
-            'tree' => (int) ($species['tree'] ?? 0),
-            'seed' => (int) ($species['seed'] ?? 0),
-            'seedling' => (int) ($species['seedling'] ?? 0),
-            'mortality' => 0,
-        ];
-    }
-
 
     public function render()
     {

@@ -3,7 +3,7 @@
 namespace App\Http\Controllers\Fushan;
 
 use App\Http\Controllers\Controller;
-use App\Models\FsBaseSpinfo;
+use App\Models\PlantCatalog\SiteSpecies;
 use App\Models\FsMortality\CensusRecord;
 use App\Models\FsMortality\CensusRecordComment;
 use App\Models\FsMortality\Census;
@@ -544,7 +544,7 @@ class MortalityController extends Controller
             return [];
         }
 
-        return FsBaseSpinfo::query()
+        return SiteSpecies::query()->fushan()
             ->whereIn('spcode', $spcodes)
             ->pluck('csp', 'spcode')
             ->all();

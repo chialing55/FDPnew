@@ -22,6 +22,11 @@ class PlantCatalogController extends Controller
         return view('pages.plant-catalog.photos', $this->viewData($request, '照片編輯'));
     }
 
+    public function maintenance(Request $request)
+    {
+        return view('pages.plant-catalog.maintenance', $this->viewData($request, '名錄整理'));
+    }
+
     public function editPhoto(Request $request, string $spcode)
     {
         return view('pages.plant-catalog.photo-edit', $this->viewData($request, '照片編輯') + [

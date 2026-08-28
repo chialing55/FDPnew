@@ -10,7 +10,6 @@ use Illuminate\Support\Facades\Schema;
 use App\Models\FsSeedsDateinfo;
 use App\Models\FsSeedsFulldata;
 use App\Models\FsSeedsRecord1;
-use App\Models\FsSeedsSplist;
 
 //增加每筆資料的刪除鈕
 

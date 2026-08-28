@@ -18,6 +18,7 @@ use App\Models\FsSeedlingSlrecord1;
 use App\Models\FsSeedlingSlrecord2;
 use App\Models\FsSeedlingSlroll1;
 use App\Models\FsSeedlingSlroll2;
+use App\Models\PlantCatalog\SiteSpecies;
 
 use App\Jobs\FsSeedlingDataCheck;
 use App\Jobs\FsSeedlingRecruitCheck;
@@ -30,6 +31,7 @@ use App\Support\ResolvesActorAccount;
 class SeedlingSaveController extends Controller
 {
     use ResolvesActorAccount;
+    private ?array $spcodeByCsp = null;
     private function noteTypeFromMessage(string $message, bool $hasError = false): string
     {
         if ($message === '') {
@@ -532,6 +534,10 @@ class SeedlingSaveController extends Controller
                 $individualId = $row["individual_id"] ?? null;
                 if ($individualId && !$isSprout) {
                     $individualUpdate = $this->onlySeedlingUpdateFields($row, ["mtag", "trap", "plot", "x", "y", "csp"]);
+                    if (Schema::connection('mysql3')->hasColumn('seedling_individuals', 'spcode')
+                        && array_key_exists('csp', $individualUpdate)) {
+                        $individualUpdate['spcode'] = $this->spcodeForCsp($individualUpdate['csp']);
+                    }
                     if ($mtag !== "") {
                         $individualUpdate["mtag"] = $mtag;
                     }
@@ -883,6 +889,19 @@ class SeedlingSaveController extends Controller
         }
 
         return "";
+    }
+
+    private function spcodeForCsp($csp): string
+    {
+        if ($this->spcodeByCsp === null) {
+            $this->spcodeByCsp = SiteSpecies::query()->fushan()
+                ->whereNotNull('csp')->where('csp', '<>', '')
+                ->pluck('spcode', 'csp')->all();
+        }
+
+        $spcode = trim((string) ($this->spcodeByCsp[trim((string) $csp)] ?? ''));
+
+        return $spcode !== '' && ! str_starts_with(strtoupper($spcode), 'UNK') ? $spcode : 'UNKUNK';
     }
 
     private function changedSeedlingUpdateFields(string $table, $id, array $values): array

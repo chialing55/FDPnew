@@ -3,6 +3,7 @@
 namespace App\Http\Livewire\PlantCatalog;
 
 use App\Models\PlantCatalog\TaiwanChecklist;
+use App\Models\PlantCatalog\SiteSpecies;
 use App\Support\SimpleDocx;
 use App\Support\SimpleXlsx;
 use Illuminate\Support\Collection;
@@ -313,11 +314,10 @@ class ChecklistDownload extends Component
         }
 
         $cspList = array_keys($marksByCsp);
-        $codeColumn = $this->spinfoCodeColumn();
-        $spinfoRows = DB::connection('mysql4')
-            ->table('spinfo')
+        $spinfoRows = SiteSpecies::query()
+            ->fushan()
             ->whereIn('csp', $cspList)
-            ->select('csp', $codeColumn . ' as checklist_spcode')
+            ->select('csp', 'code as checklist_spcode')
             ->get();
 
         $marksByCode = [];
@@ -367,15 +367,6 @@ class ChecklistDownload extends Component
                 return ['行號' => $index + 1] + $row;
             })
             ->all();
-    }
-
-    private function spinfoCodeColumn(): string
-    {
-        if (Schema::connection('mysql4')->hasColumn('spinfo', 'code')) {
-            return 'code';
-        }
-
-        return 'spcode';
     }
 
     public function render()

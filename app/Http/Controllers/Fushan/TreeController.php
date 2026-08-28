@@ -22,6 +22,8 @@ class TreeController extends Controller
 {
     use ResolvesActorAccount;
 
+    // 每木輸入的人員與物種名錄仍有舊表依賴；重整前請先讀 docs/tree-entry-refactor.md。
+
     public function tree(Request $request)
     {
 
