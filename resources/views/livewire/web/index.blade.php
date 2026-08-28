@@ -1,8 +1,8 @@
 <div class='px-0'>
     <div class='mb-4 mt-4 flex justify-center space-x-4 font-bold md:space-x-8 md:text-4xl'>
-        <div>{{ count($plots) }} {{ __('web.index_text_1') }}</div>
-        <div>100 {{ __('web.index_text_2') }}</div>
-        <div>1000000 {{ __('web.index_text_3') }}</div>
+        <div>{{ number_format($siteCount) }} {{ __('web.index_text_1') }}</div>
+        <div>{{ number_format($speciesCount) }} {{ __('web.index_text_2') }}</div>
+        <div>{{ number_format($treeCount) }} {{ __('web.index_text_3') }}</div>
     </div>
     <div class='z-5 mx-auto gap-4 text-center md:px-8 md:pb-4'>
         <div class="web-content text-sm leading-relaxed text-gray-700 md:text-base">

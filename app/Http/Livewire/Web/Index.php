@@ -8,6 +8,7 @@ use App\Models\Web\Site;
 use App\Models\Web\News;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Str;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 
 class Index extends Component
@@ -16,6 +17,9 @@ class Index extends Component
     public $indexIntro;
     public $plotsContent=[];
     public $latestNews;
+    public int $siteCount = 0;
+    public int $speciesCount = 0;
+    public int $treeCount = 0;
 
     public function mount(): void
     {
@@ -38,6 +42,24 @@ class Index extends Component
             ->whereHas('page', fn ($query) => $query->where('nav_group', 'sites'))
             ->get()
             ->sortBy(fn (Site $site): array => [$site->page?->nav_order ?? PHP_INT_MAX, $site->id]);
+
+        $this->siteCount = $sites->count();
+        $this->speciesCount = DB::connection('plant_catalog')
+            ->table('site_species')
+            ->whereNotNull('code')
+            ->where('code', '<>', '')
+            ->distinct()
+            ->count('code');
+        $this->treeCount = DB::connection('mysql1')
+            ->table('base')
+            ->where('deleted_at', '')
+            ->distinct()
+            ->count('tag')
+            + DB::connection('mysql5')
+                ->table('1ha_data_2024')
+                ->where('deleted_at', '')
+                ->distinct()
+                ->count('tag');
 
         $fallbackImages = collect(Storage::disk('public')->files('plot-cards'))
             ->filter(fn (string $file): bool => in_array(
