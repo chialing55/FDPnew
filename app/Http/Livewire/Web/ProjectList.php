@@ -14,9 +14,14 @@ class ProjectList extends Component
 
     public int $perPage = 50;
 
-    public function mount(): void
+    public function mount(bool $includeAllTags = false): void
     {
         $this->initializeSiteSubjectFilters();
+
+        if ($includeAllTags) {
+            $this->showSiteTags = true;
+            $this->showSubjectTags = true;
+        }
     }
 
     public function render()
@@ -29,7 +34,9 @@ class ProjectList extends Component
             ->select('projects.*')
             ->with([
                 'subjects:id,short_name_zh_tw,short_name_en,name_zh_tw,name_en,page_id',
+                'subjects.page',
                 'sites:id,name_zh_tw,name_en,page_id',
+                'sites.page',
             ])
             ->when($subjectId, fn ($q) => $q->whereHas('subjects', fn ($qq) => $qq->where('subjects.id', $subjectId))
             )

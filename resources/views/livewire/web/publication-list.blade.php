@@ -33,7 +33,7 @@
     <ul class="divide-y divide-gray-200 bg-white">
         @forelse ($publications as $publication)
             <li class="px-4 py-4">
-                <div class="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+                <div class="flex flex-col gap-3 sm:flex-row sm:items-start">
                     <div class="shrink-0 sm:w-24">
                         <span class="inline-block rounded bg-gray-100 px-2 py-1 text-xs text-gray-700">
                             {{ $publication->type_label }}
@@ -53,21 +53,25 @@
                             @endif
                         </div>
                     </div>
-                    <div class="flex shrink-0 flex-wrap justify-end gap-2 text-xs sm:max-w-[35%] sm:pl-4">
+                </div>
+                <div class="mt-3 flex w-full flex-col gap-2 text-xs sm:flex-row sm:items-start sm:justify-between">
+                    <div class="flex flex-wrap gap-2 sm:flex-1">
                         @if ($showSiteTags)
-                            @foreach ($publication->sites as $publicationSite)
+                            @foreach ($publication->sites->sortBy(fn ($site) => [$site->page?->nav_order ?? PHP_INT_MAX, $site->id]) as $publicationSite)
                                 <a href="{{ $publicationSite->page ? url('/' . $publicationSite->page->slug) : '#' }}"
                                     style="{{ $this->tagStyle('site', $publicationSite->id) }}"
-                                    class="rounded px-2 py-1 text-gray-700 no-underline hover:opacity-80">
+                                    class="whitespace-nowrap rounded px-2 py-1 text-gray-700 no-underline hover:opacity-80">
                                     {{ $publicationSite->name }}
                                 </a>
                             @endforeach
                         @endif
+                    </div>
+                    <div class="flex flex-wrap gap-2 sm:flex-1 sm:justify-end">
                         @if ($showSubjectTags)
-                            @foreach ($publication->subjects as $publicationSubject)
+                            @foreach ($publication->subjects->sortBy(fn ($subject) => [$subject->page?->nav_order ?? PHP_INT_MAX, $subject->id]) as $publicationSubject)
                                 <a href="{{ $publicationSubject->page ? url('/' . $publicationSubject->page->slug) : '#' }}"
                                     style="{{ $this->tagStyle('subject', $publicationSubject->id) }}"
-                                    class="rounded px-2 py-1 text-gray-700 no-underline hover:opacity-80">
+                                    class="whitespace-nowrap rounded px-2 py-1 text-gray-700 no-underline hover:opacity-80">
                                     {{ $publicationSubject->short_name ?: $publicationSubject->name }}
                                 </a>
                             @endforeach

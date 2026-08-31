@@ -14,16 +14,16 @@ return new class extends Migration
         $db->transaction(function () use ($db): void {
             $tree = $this->renameSubject(
                 'subjects/tree',
-                'subjects/tree',
-                '樹木動態',
-                'Tree Dynamics',
+                'subjects/long-term-tree-dynamics',
+                '樹木長期動態',
+                'Long-term Tree Dynamics',
                 1
             );
             $forestRegeneration = $this->renameSubject(
                 'subjects/seedling',
-                'subjects/forest-regeneration',
-                '森林更新',
-                'Forest Regeneration',
+                'subjects/long-term-seedling-dynamics',
+                '幼苗長期動態',
+                'Long-term Seedling Dynamics',
                 2
             );
             $plantDiversity = $this->renameSubject(

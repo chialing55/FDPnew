@@ -23,7 +23,7 @@
                 @endphp
 
                 <a href="{{ url($page->slug) }}"
-                    class="{{ $isActive ? 'font-bold text-forest' : '' }} block px-4 py-2 hover:bg-gray-100">
+                    class="{{ $isActive ? 'font-bold text-forest' : '' }} block whitespace-nowrap px-4 py-2 hover:bg-gray-100">
                     {{ $title }}
                 </a>
             @endforeach

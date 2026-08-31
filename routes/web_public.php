@@ -47,11 +47,13 @@ Route::get('about/news/{news}', [NewsController::class, 'show'])
     ->name('news.show');
 
 // Research subject URLs changed in 2026. Keep published links working.
-Route::redirect('subjects/seedling', '/subjects/forest-regeneration', 301);
+Route::redirect('subjects/seedling', '/subjects/long-term-seedling-dynamics', 301);
+Route::redirect('subjects/forest-regeneration', '/subjects/long-term-seedling-dynamics', 301);
+Route::redirect('subjects/tree', '/subjects/long-term-tree-dynamics', 301);
 Route::redirect('subjects/understory', '/subjects/plant-diversity-community', 301);
 Route::redirect('subjects/epiphytes', '/subjects/plant-diversity-community', 301);
 Route::redirect('subjects/seeds', '/subjects/plant-reproduction-phenology', 301);
-Route::redirect('subjects/mortality', '/subjects/tree', 301);
+Route::redirect('subjects/mortality', '/subjects/long-term-tree-dynamics', 301);
 Route::redirect('subjects/functionaltraits', '/subjects/functional-traits', 301);
 
 

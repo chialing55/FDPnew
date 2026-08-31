@@ -25,12 +25,22 @@ class PublicationList extends Component
         'subject' => ['except' => ''],
     ];
 
-    public function mount(?string $site = null, ?string $subject = null, bool $showFilters = true): void
+    public function mount(
+        ?string $site = null,
+        ?string $subject = null,
+        bool $showFilters = true,
+        bool $includeAllTags = false,
+    ): void
     {
         $this->site = $site;
         $this->subject = $subject;
         $this->showFilters = $showFilters;
         $this->initializeSiteSubjectFilters();
+
+        if ($includeAllTags) {
+            $this->showSiteTags = true;
+            $this->showSubjectTags = true;
+        }
     }
 
     public function updatedYear(): void

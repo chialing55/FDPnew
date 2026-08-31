@@ -41,8 +41,8 @@ class RelatedContentBlockFactory
         $filters = ['subject' => (string) $subjectId];
 
         return collect([
-            self::block('projects', $filters),
-            self::block('publications', $filters),
+            self::block('projects', $filters + ['includeAllTags' => true]),
+            self::block('publications', $filters + ['includeAllTags' => true]),
         ]);
     }
 
