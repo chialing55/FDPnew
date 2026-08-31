@@ -50,20 +50,22 @@
                     <div class="flex flex-wrap gap-2 sm:flex-1">
                         @if ($showSiteTags)
                             @foreach ($p->sites->sortBy(fn ($site) => [$site->page?->nav_order ?? PHP_INT_MAX, $site->id]) as $s)
-                                <span style="{{ $this->tagStyle('site', $s->id) }}"
-                                    class="whitespace-nowrap rounded px-2 py-1 text-gray-700">
+                                <a href="{{ $s->page ? url('/' . $s->page->slug) : '#' }}"
+                                    style="{{ $this->tagStyle('site', $s->id) }}"
+                                    class="{{ $this->tagClasses(true) }}">
                                     {{ $s->name}}
-                                </span>
+                                </a>
                             @endforeach
                         @endif
                     </div>
                     <div class="flex flex-wrap gap-2 sm:flex-1 sm:justify-end">
                         @if ($showSubjectTags)
                             @foreach ($p->subjects->sortBy(fn ($subject) => [$subject->page?->nav_order ?? PHP_INT_MAX, $subject->id]) as $sub)
-                                <span style="{{ $this->tagStyle('subject', $sub->id) }}"
-                                    class="whitespace-nowrap rounded px-2 py-1 text-gray-700">
+                                <a href="{{ $sub->page ? url('/' . $sub->page->slug) : '#' }}"
+                                    style="{{ $this->tagStyle('subject', $sub->id) }}"
+                                    class="{{ $this->tagClasses(true) }}">
                                     {{ $sub->short_name ?: $sub->name }}
-                                </span>
+                                </a>
                             @endforeach
                         @endif
                     </div>

@@ -69,6 +69,28 @@
 }
 
 @layer components {
+    .related-tag,
+    .web-content.prose a.related-tag {
+        display: inline-block;
+        white-space: nowrap;
+        border-radius: 0.25rem;
+        padding: 0.25rem 0.5rem;
+        font-size: 0.75rem;
+        line-height: 1rem;
+        font-weight: 400;
+        color: #374151 !important;
+        background-color: var(--related-tag-bg) !important;
+        text-decoration: none !important;
+    }
+
+    .related-tag:hover,
+    .web-content.prose a.related-tag:hover {
+        font-weight: 700 !important;
+        color: #374151 !important;
+        background-color: var(--related-tag-hover-bg) !important;
+        text-decoration: none !important;
+    }
+
     .web-nav a, .breadcrumb-separator a{
         @apply no-underline;
     }

@@ -31,8 +31,8 @@ class RelatedContentBlockFactory
         $filters = ['site' => (string) $siteId];
 
         return collect([
-            self::block('projects', $filters),
-            self::block('publications', $filters),
+            self::block('projects', $filters + ['includeAllTags' => true]),
+            self::block('publications', $filters + ['includeAllTags' => true]),
         ]);
     }
 

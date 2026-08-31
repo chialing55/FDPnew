@@ -4,6 +4,7 @@ namespace App\Http\Livewire\Web\Concerns;
 
 use App\Models\Web\Site;
 use App\Models\Web\Subject;
+use App\Support\Web\RelatedTagStyle;
 
 trait InteractsWithSiteSubjectFilters
 {
@@ -73,13 +74,12 @@ trait InteractsWithSiteSubjectFilters
 
     public function tagStyle(string $type, int $id): string
     {
-        $colors = [
-            'site' => ['#f1f5f9', '#eff6ff', '#eef2ff', '#ecfeff', '#f0fdfa', '#ecfdf5'],
-            'subject' => ['#fffbeb', '#fff7ed', '#fff1f2', '#fdf4ff', '#f5f3ff', '#f7fee7', '#ecfeff', '#ecfdf5', '#f0f9ff', '#fef2f2'],
-        ];
-        $list = $colors[$type] ?? ['#f3f4f6'];
+        return RelatedTagStyle::for($type, $id);
+    }
 
-        return 'background-color: '.$list[$id % count($list)].';';
+    public function tagClasses(bool $elevated = false): string
+    {
+        return RelatedTagStyle::classes($elevated);
     }
 
     private function normalizedFilterId(mixed $value): ?string

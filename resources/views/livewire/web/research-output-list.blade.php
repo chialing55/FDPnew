@@ -33,7 +33,7 @@
                         @if ($showSiteTags)
                             @foreach ($o->sites as $s)
                                 <span style="{{ $this->tagStyle('site', $s->id) }}"
-                                    class="rounded px-2 py-1 text-gray-700">
+                                    class="{{ $this->tagClasses() }}">
                                     {{ $s->name }}
                                 </span>
                             @endforeach
@@ -42,7 +42,7 @@
                         @if ($showSubjectTags)
                             @foreach ($o->subjects->sortBy('nav_order') as $sub)
                                 <span style="{{ $this->tagStyle('subject', $sub->id) }}"
-                                    class="rounded px-2 py-1 text-gray-700">
+                                    class="{{ $this->tagClasses() }}">
                                     {{ $sub->short_name ?: $sub->name }}
                                 </span>
                             @endforeach

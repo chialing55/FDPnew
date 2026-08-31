@@ -10,6 +10,7 @@ use App\Models\Web\ResearchOutput;
 use App\Models\Web\Project;
 use Illuminate\Support\Str;
 use App\Support\Web\RelatedContentBlockFactory;
+use App\Support\Web\RelatedTagStyle;
 
 class PageDefault extends Component
 {
@@ -121,6 +122,8 @@ class PageDefault extends Component
 
     private function projectInformationBlock(Project $project): ContentBlock
     {
+        $project->loadMissing(['sites.page', 'subjects.page']);
+
         $block = new ContentBlock([
             'title_zh_tw' => '計畫資訊',
             'title_en' => 'Project Information',
@@ -163,6 +166,30 @@ class PageDefault extends Component
             $rows[] = [$english ? 'Funding agency' : '補助單位', e($agency)];
         }
 
+        $sites = $project->sites
+            ->sortBy(fn ($site) => [$site->page?->nav_order ?? PHP_INT_MAX, $site->id])
+            ->map(fn ($site): string => $this->projectInformationTag(
+                $site->page?->slug,
+                $english ? ($site->name_en ?: $site->name_zh_tw) : ($site->name_zh_tw ?: $site->name_en),
+                RelatedTagStyle::for('site', $site->id),
+            ))->implode('');
+        if ($sites !== '') {
+            $rows[] = [$english ? 'Forest dynamics plots' : '動態樣區', '<div class="flex flex-wrap gap-2">'.$sites.'</div>'];
+        }
+
+        $subjects = $project->subjects
+            ->sortBy(fn ($subject) => [$subject->page?->nav_order ?? PHP_INT_MAX, $subject->id])
+            ->map(fn ($subject): string => $this->projectInformationTag(
+                $subject->page?->slug,
+                $english
+                    ? ($subject->short_name_en ?: $subject->name_en ?: $subject->name_zh_tw)
+                    : ($subject->short_name_zh_tw ?: $subject->name_zh_tw ?: $subject->name_en),
+                RelatedTagStyle::for('subject', $subject->id),
+            ))->implode('');
+        if ($subjects !== '') {
+            $rows[] = [$english ? 'Research subjects' : '研究主題', '<div class="flex flex-wrap gap-2">'.$subjects.'</div>'];
+        }
+
         if (filled($project->website_url)) {
             $label = $english ? 'Project website' : '計畫網站';
             $url = e($project->website_url);
@@ -176,6 +203,18 @@ class PageDefault extends Component
         return '<dl class="grid gap-x-6 gap-y-3 sm:grid-cols-[8rem_minmax(0,1fr)]">'
             . collect($rows)->map(fn (array $row): string => '<dt class="font-semibold text-gray-700">' . e($row[0]) . '</dt><dd class="min-w-0 break-words">' . $row[1] . '</dd>')->implode('')
             . '</dl>';
+    }
+
+    private function projectInformationTag(?string $slug, ?string $label, string $style): string
+    {
+        $content = e((string) $label);
+        $classes = RelatedTagStyle::classes();
+
+        if (filled($slug)) {
+            return '<a href="'.e(url('/'.$slug)).'" style="'.e($style).'" class="'.$classes.'">'.$content.'</a>';
+        }
+
+        return '<span style="'.e($style).'" class="'.$classes.'">'.$content.'</span>';
     }
 
     public function render()

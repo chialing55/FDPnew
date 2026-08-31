@@ -52,30 +52,30 @@
                                 <a href="{{ Storage::disk('public')->url($publication->pdf_path) }}" target="_blank" rel="noopener" class="text-forest">下載 PDF</a>
                             @endif
                         </div>
-                    </div>
-                </div>
-                <div class="mt-3 flex w-full flex-col gap-2 text-xs sm:flex-row sm:items-start sm:justify-between">
-                    <div class="flex flex-wrap gap-2 sm:flex-1">
-                        @if ($showSiteTags)
-                            @foreach ($publication->sites->sortBy(fn ($site) => [$site->page?->nav_order ?? PHP_INT_MAX, $site->id]) as $publicationSite)
-                                <a href="{{ $publicationSite->page ? url('/' . $publicationSite->page->slug) : '#' }}"
-                                    style="{{ $this->tagStyle('site', $publicationSite->id) }}"
-                                    class="whitespace-nowrap rounded px-2 py-1 text-gray-700 no-underline hover:opacity-80">
-                                    {{ $publicationSite->name }}
-                                </a>
-                            @endforeach
-                        @endif
-                    </div>
-                    <div class="flex flex-wrap gap-2 sm:flex-1 sm:justify-end">
-                        @if ($showSubjectTags)
-                            @foreach ($publication->subjects->sortBy(fn ($subject) => [$subject->page?->nav_order ?? PHP_INT_MAX, $subject->id]) as $publicationSubject)
-                                <a href="{{ $publicationSubject->page ? url('/' . $publicationSubject->page->slug) : '#' }}"
-                                    style="{{ $this->tagStyle('subject', $publicationSubject->id) }}"
-                                    class="whitespace-nowrap rounded px-2 py-1 text-gray-700 no-underline hover:opacity-80">
-                                    {{ $publicationSubject->short_name ?: $publicationSubject->name }}
-                                </a>
-                            @endforeach
-                        @endif
+                        <div class="mt-3 flex w-full flex-col gap-2 text-xs sm:flex-row sm:items-start sm:justify-between">
+                            <div class="flex flex-wrap gap-2 sm:flex-1">
+                                @if ($showSiteTags)
+                                    @foreach ($publication->sites->sortBy(fn ($site) => [$site->page?->nav_order ?? PHP_INT_MAX, $site->id]) as $publicationSite)
+                                        <a href="{{ $publicationSite->page ? url('/' . $publicationSite->page->slug) : '#' }}"
+                                            style="{{ $this->tagStyle('site', $publicationSite->id) }}"
+                                            class="{{ $this->tagClasses() }}">
+                                            {{ $publicationSite->name }}
+                                        </a>
+                                    @endforeach
+                                @endif
+                            </div>
+                            <div class="flex flex-wrap gap-2 sm:flex-1 sm:justify-end">
+                                @if ($showSubjectTags)
+                                    @foreach ($publication->subjects->sortBy(fn ($subject) => [$subject->page?->nav_order ?? PHP_INT_MAX, $subject->id]) as $publicationSubject)
+                                        <a href="{{ $publicationSubject->page ? url('/' . $publicationSubject->page->slug) : '#' }}"
+                                            style="{{ $this->tagStyle('subject', $publicationSubject->id) }}"
+                                            class="{{ $this->tagClasses() }}">
+                                            {{ $publicationSubject->short_name ?: $publicationSubject->name }}
+                                        </a>
+                                    @endforeach
+                                @endif
+                            </div>
+                        </div>
                     </div>
                 </div>
             </li>
