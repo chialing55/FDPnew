@@ -1,10 +1,25 @@
 <div class="space-y-4">
     @if ($showFilters)
         <x-web.filter-bar>
-            <x-web.filter-select wire:model.live="year"
-                :label="app()->getLocale() === 'en' ? 'Year' : '年代'"
-                :placeholder="app()->getLocale() === 'en' ? 'All years' : '全部年代'"
-                :options="$years->mapWithKeys(fn ($value) => [(string) $value => $value])->all()" />
+            <div class="shrink-0 text-sm font-medium text-gray-700">
+                <span class="mb-1 block">{{ app()->getLocale() === 'en' ? 'Year' : '年代' }}</span>
+                <div class="flex items-center gap-2">
+                    <select wire:key="publication-year-from-{{ $yearFrom }}" wire:model.live="yearFrom" aria-label="{{ app()->getLocale() === 'en' ? 'From year' : '起始年代' }}"
+                        class="h-10 w-24 rounded-md border border-gray-300 bg-white px-2 py-2 text-sm">
+                        <option value="">--</option>
+                        @foreach ($years as $yearOption)
+                            <option value="{{ $yearOption }}">{{ $yearOption }}</option>
+                        @endforeach
+                    </select>
+                    <span aria-hidden="true">&ndash;</span>
+                    <select wire:key="publication-year-to-{{ $yearTo }}" wire:model.live="yearTo" aria-label="{{ app()->getLocale() === 'en' ? 'To year' : '結束年代' }}"
+                        class="h-10 w-24 rounded-md border border-gray-300 bg-white px-2 py-2 text-sm">
+                        @foreach ($years as $yearOption)
+                            <option value="{{ $yearOption }}">{{ $yearOption }}</option>
+                        @endforeach
+                    </select>
+                </div>
+            </div>
             <x-web.filter-select wire:model.live="type"
                 :label="app()->getLocale() === 'en' ? 'Type' : '類型'"
                 :placeholder="app()->getLocale() === 'en' ? 'All types' : '全部類型'"
