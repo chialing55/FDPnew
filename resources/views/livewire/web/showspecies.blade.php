@@ -410,8 +410,8 @@
                             <x-web.species-result-panel title="每木調查成果">
                                 <x-slot:summary>
                                     <p>
-                                        共標定 {{ $countInd }} 棵樹 以及 {{ $countB }} 個分支。
-                                        最大樹的胸徑為 {{ $maxDBH }} cm。<br>
+                                        {{ $latestTreeCensusYear }} 年記錄到 {{ $countInd }} 棵樹，以及
+                                        {{ $countB }} 個分支。最大主幹的胸徑為 {{ $maxDBH }} cm。
                                     </p>
                                 </x-slot:summary>
                                 <div class='figouter'>
@@ -488,8 +488,8 @@
                             <x-web.species-result-panel title="每木調查成果">
                                 <x-slot:summary>
                                     <p>
-                                        共標定 {{ $countSsInd }} 棵樹以及 {{ $countSsB }} 個分支。
-                                        最大樹的胸徑為 {{ $maxSsDBH }} cm。
+                                        2024 年記錄到 {{ $countSsInd }} 棵樹，以及
+                                        {{ $countSsB }} 個分支。最大主幹的胸徑為 {{ $maxSsDBH }} cm。
                                     </p>
                                 </x-slot:summary>
                                 <div class="figouter">

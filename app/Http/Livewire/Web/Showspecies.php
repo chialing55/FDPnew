@@ -134,9 +134,9 @@ class Showspecies extends Component
         $latestTreeBase = $this->treeCensusQuery($this->latestTreeCensus)
             ->where('base.spcode', $detailSpcode);
 
-        $this->countInd = (clone $latestTreeBase)->where($latestTreeTable . '.branch', '0')->count();
-        $this->countB = (clone $latestTreeBase)->where($latestTreeTable . '.branch', '!=', '0')->count();
-        $this->maxDBH = (clone $latestTreeBase)->where($latestTreeTable . '.branch', '0')->max($latestTreeTable . '.dbh');
+        $this->countInd = (clone $latestTreeBase)->where($latestTreeTable.'.branch', '0')->count();
+        $this->countB = (clone $latestTreeBase)->where($latestTreeTable.'.branch', '!=', '0')->count();
+        $this->maxDBH = (clone $latestTreeBase)->where($latestTreeTable.'.branch', '0')->max($latestTreeTable.'.dbh');
         $this->countSeeds = FsSeedsFulldata::where('sp', $detailSpcode)->sum('seeds');
         $this->countFlower = FsSeedsFulldata::where('sp', $detailSpcode)->where('code', '6')->count();
         $this->countSeedlings = FsSeedlingData::where('csp', $this->speciesinfo['csp'])->whereColumn('tag', 'mtag')->sum('ind');
