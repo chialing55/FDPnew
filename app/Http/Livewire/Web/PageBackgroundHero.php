@@ -49,7 +49,7 @@ class PageBackgroundHero extends Component
         if ($breadcrumbParentLabel !== null) {
             $pageNavLabel = $breadcrumbParentLabel;
             $pageNavUrl = $breadcrumbParentUrl;
-        } elseif ($this->page instanceof Page && in_array($this->page->slug, ['results', 'projects', 'publications'], true)) {
+        } elseif ($this->page instanceof Page && in_array($this->page->slug, ['results', 'projects', 'publications', 'plants'], true)) {
             $pageNavLabel = null;
             $pageNavUrl = '';
         } elseif ($this->page->nav_group) {

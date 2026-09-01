@@ -58,9 +58,37 @@ let fig3;
 let fig4;
 let fig5;
 let fig6;
+let fig7;
+let fig8;
+let fig9;
+let fig10;
+
+const speciesDistributionPalette = [
+    // DBH classes form a continuous visual sequence from small to large.
+    // Saturation and opacity stay close to the stem-count chart palette.
+    { background: "rgba(232, 193, 91, 0.58)", border: "rgb(211, 165, 49)" },
+    { background: "rgba(190, 139, 74, 0.58)", border: "rgb(159, 105, 43)" },
+    { background: "rgba(79, 157, 105, 0.58)", border: "rgb(52, 126, 77)" },
+    { background: "rgba(38, 70, 105, 0.62)", border: "rgb(25, 49, 78)" },
+];
 
 function figtoggle(k) {
     $(`.fig${k}`).show().addClass("is-ready");
+}
+
+function restoreSpeciesChartReadyStates() {
+    if (!window.Chart) {
+        return;
+    }
+
+    for (let k = 1; k <= 10; k += 1) {
+        const canvas = document.getElementById(`myChartFig${k}`);
+        const frame = canvas?.closest(".species-chart-frame");
+
+        if (canvas && frame && Chart.getChart(canvas)) {
+            frame.classList.add("is-ready");
+        }
+    }
 }
 
 async function startSpeciesChartQueue() {
@@ -97,11 +125,14 @@ async function startSpeciesChartQueue() {
         try {
             if (typeof wire[method] === "function") {
                 await wire[method]();
+                restoreSpeciesChartReadyStates();
             }
         } catch (error) {
             console.error(`Failed to load chart method: ${method}`, error);
         }
     }
+
+    requestAnimationFrame(restoreSpeciesChartReadyStates);
 }
 
 document.addEventListener("livewire:initialized", () => {
@@ -121,6 +152,160 @@ document.addEventListener('livewire:init', () => {
     figtoggle(1);
   });
 });
+
+document.addEventListener('livewire:init', () => {
+  if (window.__boundFig7Event) return;
+  window.__boundFig7Event = true;
+
+  Livewire.on('fig7', ({ seedlingSeries }) => {
+    drawChart7(seedlingSeries);
+    figtoggle(7);
+  });
+});
+
+function drawChart7(seedlingSeries) {
+    const canvas = document.getElementById("myChartFig7");
+    if (!canvas) {
+        return;
+    }
+
+    const previousChart = Chart.getChart(canvas);
+    if (previousChart) {
+        previousChart.destroy();
+    }
+
+    fig7 = new Chart(canvas, {
+        type: "line",
+        data: {
+            datasets: [{
+                data: seedlingSeries,
+                pointStyle: false,
+                borderColor: "#a7c957",
+            }],
+        },
+        options: {
+            animation: false,
+            plugins: {
+                legend: { display: false },
+            },
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    title: {
+                        display: true,
+                        text: "小苗密度(小苗數/m²)",
+                    },
+                },
+            },
+        },
+    });
+}
+
+document.addEventListener('livewire:init', () => {
+  if (window.__boundShoushanSpeciesCharts) return;
+  window.__boundShoushanSpeciesCharts = true;
+
+  Livewire.on('fig8', ({ censusA, censusR, censusD }) => {
+    fig8 = drawSpeciesBarChart('myChartFig8', [
+      { label: 'Alive', data: censusA, backgroundColor: '#87CEEB' },
+      { label: 'Recruit', data: censusR, backgroundColor: '#ff9eb5' },
+      { label: 'Dead', data: censusD, backgroundColor: '#ffc98f' },
+    ]);
+    figtoggle(8);
+  });
+
+  Livewire.on('fig9', ({ groupedCounts }) => {
+    fig9 = drawSpeciesBarChart('myChartFig9', [{
+      data: groupedCounts,
+      backgroundColor: '#87CEEB',
+    }], false);
+    figtoggle(9);
+  });
+
+  Livewire.on('fig10', ({ points }) => {
+    const canvas = document.getElementById('myChartFig10');
+    if (!canvas) return;
+    Chart.getChart(canvas)?.destroy();
+
+    const dbhGroups = [
+      { label: '<5', min: 0, max: 5, radius: 2 },
+      { label: '5-10', min: 5, max: 10, radius: 3 },
+      { label: '10-20', min: 10, max: 20, radius: 4 },
+      { label: '>20', min: 20, max: Infinity, radius: 5 },
+    ];
+
+    const datasets = dbhGroups.map((group, index) => ({
+      label: group.label,
+      data: points.filter((point) => point.dbh >= group.min && point.dbh < group.max),
+      backgroundColor: speciesDistributionPalette[index].background,
+      borderColor: speciesDistributionPalette[index].border,
+      pointStyle: 'circle',
+      pointRadius: group.radius,
+    }));
+
+    fig10 = new Chart(canvas, {
+      type: 'scatter',
+      data: { datasets },
+      options: {
+        animation: false,
+        maintainAspectRatio: true,
+        // Canvas 稍微預留圖例與軸標題空間後，實際繪圖區接近 150:70，
+        // 讓 X、Y 軸每 10 m 的網格尺寸一致且刻度軸保持貼齊。
+        aspectRatio: 1.9,
+        plugins: {
+          legend: {
+            display: true,
+            align: 'end',
+            labels: {
+              usePointStyle: true,
+              usePointRadius: true,
+            },
+          },
+          tooltip: {
+            callbacks: {
+              label: (context) => {
+                const point = context.raw;
+                return `${point.tag} | DBH: ${point.dbh} cm | (${point.x}, ${point.y})`;
+              },
+            },
+          },
+        },
+        scales: {
+          x: {
+            min: 0,
+            max: 150,
+            ticks: { stepSize: 10 },
+            title: { display: true, text: 'X (m)' },
+          },
+          y: {
+            min: 0,
+            max: 70,
+            ticks: { stepSize: 10 },
+            title: { display: true, text: 'Y (m)' },
+          },
+        },
+      },
+    });
+    figtoggle(10);
+  });
+});
+
+function drawSpeciesBarChart(canvasId, datasets, showLegend = true) {
+    const canvas = document.getElementById(canvasId);
+    if (!canvas) return null;
+    Chart.getChart(canvas)?.destroy();
+
+    return new Chart(canvas, {
+        type: 'bar',
+        data: { datasets },
+        options: {
+            animation: false,
+            plugins: {
+                legend: { display: showLegend, align: 'end' },
+            },
+        },
+    });
+}
 
 
 //各次調查植株數量圖
@@ -235,7 +420,7 @@ function drawChart3(group) {
 
     var pointRadiusIncrement = 1; // 遞增的圓點大小
 
-    Object.keys(group).forEach(function (groupName) {
+    Object.keys(group).forEach(function (groupName, groupIndex) {
         if (group[groupName].length !== 0) {
             group1[groupName] = group[groupName].map(function (item) {
                 return {
@@ -259,6 +444,8 @@ function drawChart3(group) {
             data.push({
                 label: groupName, // 使用 groupName 作為標籤
                 data: group1[groupName],
+                backgroundColor: speciesDistributionPalette[groupIndex % speciesDistributionPalette.length].background,
+                borderColor: speciesDistributionPalette[groupIndex % speciesDistributionPalette.length].border,
                 pointStyle: "circle",
                 pointRadius: pointRadiusIncrement, // 設置 pointRadius
             });

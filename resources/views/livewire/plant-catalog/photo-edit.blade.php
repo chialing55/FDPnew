@@ -401,9 +401,9 @@
             <form wire:submit.prevent="savePhoto('{{ $photoKey }}')" class="plant-photo-editor"
                 wire:key="plant-photo-editor-{{ $photoKey }}">
                 <div class="plant-photo-editor-image">
-                    <a href="{{ asset("FDPfiles/splist/photo/{$spcode}/{$photo['filename']}") }}" target="_blank"
+                    <a href="{{ asset("FDPfiles/splist/photo/{$photo['spcode']}/{$photo['filename']}") }}" target="_blank"
                         rel="noopener">
-                        <img src="{{ asset("FDPfiles/splist/photo/{$spcode}/s_{$photo['filename']}") }}"
+                        <img src="{{ asset("FDPfiles/splist/photo/{$photo['spcode']}/s_{$photo['filename']}") }}"
                             alt="{{ $photo['filename'] }}">
                     </a>
                     <span>{{ $photo['filename'] }}</span>
@@ -456,6 +456,14 @@
                         <select wire:model.defer="editingPhotos.{{ $photoKey }}.is_public">
                             <option value="1">公開</option>
                             <option value="0">不公開</option>
+                        </select>
+                    </label>
+
+                    <label>
+                        代表照片
+                        <select wire:model.defer="editingPhotos.{{ $photoKey }}.is_featured">
+                            <option value="0">一般照片</option>
+                            <option value="1">首選代表照</option>
                         </select>
                     </label>
 

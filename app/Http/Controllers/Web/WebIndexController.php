@@ -9,6 +9,7 @@ use Illuminate\Support\Facades\App;
 use App\Http\Controllers\Controller;
 // use App\Models\FsBaseLogin;
 use App\Http\Controllers\UpdateController;
+use App\Models\Web\Page;
 
 //依據網址導向各個頁面
 
@@ -60,9 +61,15 @@ class WebIndexController extends Controller
         $user = $request->user()?->name;
 
 
-        return view('pages/web/splist', [
-            'user' => $user
-        ]);
+        $heroPage = Page::query()->where('slug', 'plants')->first()
+            ?? new Page([
+                'slug' => 'plants',
+                'title_zh_tw' => '監測植物',
+                'title_en' => 'Plant Monitoring',
+                'nav_group' => 'plants',
+            ]);
+
+        return view('pages/web/splist', compact('user', 'heroPage'));
     }
 
 }

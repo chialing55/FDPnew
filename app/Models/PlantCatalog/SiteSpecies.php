@@ -41,6 +41,7 @@ class SiteSpecies extends PlantCatalogModel
                 'site_species.*',
                 'checklist.canonical_name as now_simname',
                 'checklist.canonical_name as spcode_simname',
+                'checklist.chname as checklist_chname',
                 'checklist.full_name',
                 'checklist.genus',
                 'checklist.family as apgfamily',

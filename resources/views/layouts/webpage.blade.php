@@ -6,7 +6,7 @@
 
 @section('js')
 
-    <script src="{{ asset('/js/web.js') }}"></script>
+    <script src="{{ asset('/js/web.js') }}?v={{ filemtime(public_path('js/web.js')) }}"></script>
 
     @yield('pagejs')
 

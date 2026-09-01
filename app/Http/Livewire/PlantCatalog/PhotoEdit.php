@@ -6,6 +6,7 @@ use App\Models\PlantCatalog\SiteSpecies;
 use App\Models\Web\DisNote;
 use App\Models\Web\Photo;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Schema;
 use Livewire\Component;
@@ -16,6 +17,7 @@ class PhotoEdit extends Component
     use WithFileUploads;
 
     public string $spcode = '';
+    public string $catalogCode = '';
     public array $speciesinfo = [];
     public array $editingPhotos = [];
     public array $editingDisNotes = [];
@@ -44,6 +46,7 @@ class PhotoEdit extends Component
             ->where('site_species.spcode', $spcode)
             ->firstOrFail();
         $this->speciesinfo = $species->toArray();
+        $this->catalogCode = (string) $species->code;
         $this->loadOptions();
         $this->reloadDisNotes();
         $this->reloadPhotos();
@@ -135,25 +138,36 @@ class PhotoEdit extends Component
             "editingPhotos.{$photoKey}.status" => ['nullable', 'string', 'max:100'],
             "editingPhotos.{$photoKey}.photo_date" => ['nullable', 'date_format:Y-m-d'],
             "editingPhotos.{$photoKey}.is_public" => ['required', 'in:0,1'],
+            "editingPhotos.{$photoKey}.is_featured" => ['required', 'in:0,1'],
             "editingPhotos.{$photoKey}.photoby" => ['nullable', 'string', 'max:100'],
             "editingPhotos.{$photoKey}.des" => ['nullable', 'string', 'max:1000'],
         ]);
 
         $photo = $this->editingPhotos[$photoKey];
 
-        $this->photoQuery($photoKey)
-            ->update($this->filterPhotoColumns([
+        DB::connection('mysql_web')->transaction(function () use ($photoKey, $photo): void {
+            if ((int) ($photo['is_featured'] ?? 0) === 1) {
+                Photo::query()
+                    ->where('code', $this->catalogCode)
+                    ->update(['is_featured' => 0]);
+            }
+
+            $this->photoQuery($photoKey)->update($this->filterPhotoColumns([
+                'code' => $this->catalogCode,
+                'site' => $photo['site'] ?? 'fushan',
                 'type' => $photo['type'] ?? '',
                 'type2' => $photo['type2'] ?? '',
                 'fresh' => $photo['fresh'] ?? '',
                 'status' => $photo['status'] ?? '',
                 'photo_date' => ($photo['photo_date'] ?? '') !== '' ? $photo['photo_date'] : null,
                 'is_public' => (int) ($photo['is_public'] ?? 1),
+                'is_featured' => (int) ($photo['is_featured'] ?? 0),
                 'photoby' => $photo['photoby'] ?? '',
                 'des' => $photo['des'] ?? '',
                 'updated_id' => $this->userName(),
                 'updated_at' => now(),
             ]));
+        });
 
         $this->reloadPhotos();
         $this->photoMessages[$photoKey] = '照片資料已儲存。';
@@ -204,6 +218,8 @@ class PhotoEdit extends Component
 
             Photo::query()->create($this->filterPhotoColumns([
                 'spcode' => $this->spcode,
+                'code' => $this->catalogCode,
+                'site' => 'fushan',
                 'filename' => $filename,
                 'type' => '',
                 'type2' => '',
@@ -211,6 +227,7 @@ class PhotoEdit extends Component
                 'status' => '',
                 'photo_date' => null,
                 'is_public' => 1,
+                'is_featured' => 0,
                 'photoby' => '',
                 'des' => '',
                 'uploaded_id' => $this->userName(),
@@ -244,7 +261,16 @@ class PhotoEdit extends Component
     private function reloadPhotos(): void
     {
         $this->editingPhotos = Photo::query()
-            ->where('spcode', $this->spcode)
+            ->where(function ($query): void {
+                $query->where('code', $this->catalogCode)
+                    ->orWhere(function ($legacy): void {
+                        $legacy->where('spcode', $this->spcode)
+                            ->where(function ($missingCode): void {
+                                $missingCode->whereNull('code')->orWhere('code', '');
+                            });
+                    });
+            })
+            ->orderByDesc('is_featured')
             ->orderBy('type2')
             ->orderBy('filename')
             ->get()
@@ -258,6 +284,7 @@ class PhotoEdit extends Component
                         'key' => $key,
                         'id' => $photo->id ?? null,
                         'spcode' => $photo->spcode,
+                        'site' => $photo->site ?? '',
                         'filename' => $photo->filename,
                         'type' => $photo->type ?? '',
                         'type2' => $photo->type2 ?? '',
@@ -265,6 +292,7 @@ class PhotoEdit extends Component
                         'status' => $photo->status ?? '',
                         'photo_date' => $this->normalizeDate((string) ($photo->photo_date ?? '')),
                         'is_public' => (string) (int) ($photo->is_public ?? 1),
+                        'is_featured' => (string) (int) ($photo->is_featured ?? 0),
                         'photoby' => $photo->photoby ?? '',
                         'des' => $photo->des ?? '',
                     ],
@@ -354,7 +382,15 @@ class PhotoEdit extends Component
     {
         $photo = $this->editingPhotos[$photoKey] ?? null;
 
-        $query = Photo::query()->where('spcode', $this->spcode);
+        $query = Photo::query()->where(function ($query): void {
+            $query->where('code', $this->catalogCode)
+                ->orWhere(function ($legacy): void {
+                    $legacy->where('spcode', $this->spcode)
+                        ->where(function ($missingCode): void {
+                            $missingCode->whereNull('code')->orWhere('code', '');
+                        });
+                });
+        });
 
         if ($photo && !empty($photo['id'])) {
             return $query->where('id', $photo['id']);

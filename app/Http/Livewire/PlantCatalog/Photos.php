@@ -13,9 +13,10 @@ class Photos extends Component
     public function mount(): void
     {
         $photoCounts = Photo::query()
-            ->selectRaw('spcode, count(*) as photo_count')
-            ->groupBy('spcode')
-            ->pluck('photo_count', 'spcode')
+            ->selectRaw('code, count(*) as photo_count')
+            ->whereNotNull('code')
+            ->groupBy('code')
+            ->pluck('photo_count', 'code')
             ->toArray();
 
         $this->splist = SiteSpecies::query()
@@ -26,7 +27,7 @@ class Photos extends Component
             ->get()
             ->map(function ($species) use ($photoCounts) {
                 $row = $species->toArray();
-                $row['photo_count'] = (int) ($photoCounts[$species->spcode] ?? 0);
+                $row['photo_count'] = (int) ($photoCounts[$species->code] ?? 0);
 
                 return $row;
             })

@@ -7,13 +7,15 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\App;
 use Livewire\Component;
 use Livewire\WithPagination;
-use Illuminate\Support\Facades\File;
+use Livewire\Attributes\Renderless;
 use Illuminate\Support\Facades\Schema;
 
 use App\Models\PlantCatalog\SiteSpecies;
 use App\Models\FsTreeCensuses;
 use App\Models\Web\Photo;
 use App\Models\Web\DisNote;
+use App\Models\Web\Page;
+use App\Support\Web\RelatedTagStyle;
 
 use App\Models\FsSeedlingData;
 
@@ -24,6 +26,7 @@ class Showspecies extends Component
 {
     public $user;
     public $spcode;
+    public $catalogCode;
     public $photoinfo;
     public $desinfo;
     public $speciesinfo;
@@ -33,10 +36,18 @@ class Showspecies extends Component
     public $countSeeds;
     public $countFlower;
     public $countSeedlings;
+    public $countNjsSeedlings = 0;
+    public $countSsInd = 0;
+    public $countSsB = 0;
+    public $maxSsDBH;
     public $leafphoto = 'no';
+    public $featuredPhoto;
     public $treeinfo;
     public $groupConditions;
     public $researches = [];
+    public $researchSites = [];
+    public $researchesBySite = [];
+    public $relatedTagIds = [];
     public $latestTreeCensus = 5;
     public $latestTreeCensusYear = '2024';
 
@@ -44,16 +55,55 @@ class Showspecies extends Component
     {
         $this->treeinfo = '';
 
-        $photoQuery = Photo::where('spcode', $spcode);
+        // The public URL uses taiwan_checklist.code.  Legacy Fushan detail
+        // tables, photos and charts still use that site's local spcode.
+        $catalogSpecies = SiteSpecies::query()
+            ->withChecklistTaxonomy()
+            ->where(function ($query) use ($spcode): void {
+                $query->where('site_species.code', $spcode)
+                    ->orWhere('site_species.spcode', $spcode);
+            })
+            ->orderByRaw("site_species.site = 'fushan' DESC")
+            ->firstOrFail();
+        $fushanSpecies = SiteSpecies::query()
+            ->fushan()
+            ->withChecklistTaxonomy()
+            ->where('site_species.code', $catalogSpecies->code)
+            ->first();
+        $detailSpecies = $fushanSpecies ?? $catalogSpecies;
+        $detailSpcode = $fushanSpecies?->spcode ?? $catalogSpecies->spcode;
+        $this->speciesinfo = $detailSpecies->toArray();
+        $this->spcode = $detailSpcode;
+        $this->catalogCode = $catalogSpecies->code;
+
+        // Photos are linked to the shared TAI2/checklist code. The legacy
+        // site spcode is retained on each row only for its physical path.
+        $photoQuery = Photo::where(function ($query) use ($detailSpcode): void {
+            $query->where('code', $this->catalogCode)
+                // Keep unmatched legacy rows visible until they are curated.
+                ->orWhere(function ($legacy) use ($detailSpcode): void {
+                    $legacy->where('spcode', $detailSpcode)
+                        ->where(function ($missingCode): void {
+                            $missingCode->whereNull('code')->orWhere('code', '');
+                        });
+                });
+        });
 
         if (! auth()->check() && Schema::connection('mysql_web')->hasColumn('photo', 'is_public')) {
             $photoQuery->where('is_public', true);
         }
 
-        $this->photoinfo = $photoQuery->orderBy('type2')->get()->toArray();
+        $this->photoinfo = $photoQuery->orderByDesc('is_featured')->orderBy('type2')->get()->toArray();
+        $this->featuredPhoto = collect($this->photoinfo)
+            ->first(fn (array $photo): bool => (int) ($photo['is_featured'] ?? 0) === 1);
+        $this->leafphoto = $this->featuredPhoto ? 'yes' : 'no';
+        $this->photoinfo = collect($this->photoinfo)
+            ->reject(fn (array $photo): bool => (int) ($photo['is_featured'] ?? 0) === 1)
+            ->values()
+            ->all();
         // dd($photoinfo);
         $desinfo = auth()->check()
-            ? DisNote::where('spcode', $spcode)->orderBy('type2')->get()->toArray()
+            ? DisNote::where('spcode', $detailSpcode)->orderBy('type2')->get()->toArray()
             : [];
 
         $des = [];
@@ -73,34 +123,28 @@ class Showspecies extends Component
 
         $this->desinfo = $des;
 
-        $this->speciesinfo = SiteSpecies::query()
-            ->fushan()
-            ->withChecklistTaxonomy()
-            ->where('site_species.spcode', $spcode)
-            ->firstOrFail()
-            ->toArray();
-        $this->spcode = $spcode;
-        $this->researches = $this->speciesResearchFlags($spcode);
+        [$this->researches, $this->researchSites, $this->researchesBySite] = $this->speciesResearchLabels(
+            $catalogSpecies->code,
+            $detailSpcode
+        );
+        $this->relatedTagIds = $this->loadRelatedTagIds();
         [$this->latestTreeCensus, $this->latestTreeCensusYear] = $this->latestTreeCensusInfo();
 
         $latestTreeTable = $this->treeCensusTable($this->latestTreeCensus);
         $latestTreeBase = $this->treeCensusQuery($this->latestTreeCensus)
-            ->where('base.spcode', $spcode);
+            ->where('base.spcode', $detailSpcode);
 
         $this->countInd = (clone $latestTreeBase)->where($latestTreeTable . '.branch', '0')->count();
         $this->countB = (clone $latestTreeBase)->where($latestTreeTable . '.branch', '!=', '0')->count();
         $this->maxDBH = (clone $latestTreeBase)->where($latestTreeTable . '.branch', '0')->max($latestTreeTable . '.dbh');
-        $this->countSeeds = FsSeedsFulldata::where('sp', $spcode)->sum('seeds');
-        $this->countFlower = FsSeedsFulldata::where('sp', $spcode)->where('code', '6')->count();
+        $this->countSeeds = FsSeedsFulldata::where('sp', $detailSpcode)->sum('seeds');
+        $this->countFlower = FsSeedsFulldata::where('sp', $detailSpcode)->where('code', '6')->count();
         $this->countSeedlings = FsSeedlingData::where('csp', $this->speciesinfo['csp'])->whereColumn('tag', 'mtag')->sum('ind');
+        $this->countNjsSeedlings = $this->nanjenshanSeedlingCount();
+        $this->loadShoushanTreeSummary();
 
         // dd($this->treeinfo);
         // $this->showdata($spcode);
-        $leafphotoPath = 'FDPfiles/splist/leafphoto/' . $this->speciesinfo['csp'] . '.jpg';
-
-        if (file_exists(public_path($leafphotoPath))) {
-            $this->leafphoto = 'yes';
-        }
     }
 
     private function treeCensusYears(): array
@@ -153,7 +197,7 @@ class Showspecies extends Component
             ->join('base', 'base.tag', '=', $table . '.tag');
     }
 
-    private function speciesResearchFlags(string $spcode): array
+    private function speciesResearchLabels(string $catalogCode, string $fallbackSpcode): array
     {
         $fallback = [
             'tree' => (int) ($this->speciesinfo['tree'] ?? 0),
@@ -163,24 +207,125 @@ class Showspecies extends Component
         ];
 
         if (!Schema::connection('plant_catalog')->hasTable('species_research_links')) {
-            return $fallback;
+            return [$fallback, ['fushan'], ['fushan' => $fallback]];
         }
 
-        $linkedCodes = DB::connection('plant_catalog')
-            ->table('species_research_links')
-            ->where('site', 'fushan')
-            ->where('spcode', $spcode)
-            ->pluck('research_code')
-            ->all();
+        $links = DB::connection('plant_catalog')
+            ->table('site_species as species')
+            ->join('species_research_links as research', function ($join): void {
+                $join->on('research.site', '=', 'species.site')
+                    ->on('research.spcode', '=', 'species.spcode');
+            })
+            ->where('species.code', $catalogCode)
+            ->whereIn('species.site', ['fushan', 'nanjenshan', 'shoushan'])
+            ->distinct()
+            ->get(['species.site', 'research.research_code']);
 
-        if ($linkedCodes === []) {
-            return $fallback;
+        if ($links->isEmpty()) {
+            $sites = $fallbackSpcode !== '' ? ['fushan'] : [];
+
+            return [$fallback, $sites, $sites !== [] ? ['fushan' => $fallback] : []];
         }
 
-        return collect($linkedCodes)
+        $researches = $links->pluck('research_code')
             ->mapWithKeys(fn ($researchCode) => [$researchCode => 1])
             ->union($fallback)
             ->all();
+
+        $siteOrder = array_flip(['fushan', 'nanjenshan', 'shoushan']);
+        $sites = $links->pluck('site')->unique()
+            ->sortBy(fn (string $site): int => $siteOrder[$site] ?? 99)
+            ->values()->all();
+
+        $researchesBySite = $links->groupBy('site')
+            ->map(fn ($siteLinks): array => $siteLinks->pluck('research_code')
+                ->mapWithKeys(fn ($researchCode): array => [$researchCode => 1])
+                ->all())
+            ->all();
+
+        return [$researches, $sites, $researchesBySite];
+    }
+
+    private function loadRelatedTagIds(): array
+    {
+        return Page::query()
+            ->with(['site:id,page_id', 'subject:id,page_id'])
+            ->whereIn('slug', [
+                'sites/fushan',
+                'sites/nanjenshan',
+                'sites/shoushan',
+                'subjects/long-term-tree-dynamics',
+                'subjects/long-term-seedling-dynamics',
+                'subjects/plant-reproduction-phenology',
+            ])
+            ->get()
+            ->mapWithKeys(fn (Page $page): array => [
+                $page->slug => $page->site?->id ?? $page->subject?->id,
+            ])
+            ->filter()
+            ->all();
+    }
+
+    private function nanjenshanSeedlingCount(): int
+    {
+        $nanjenshanSpcode = DB::connection('plant_catalog')
+            ->table('site_species')
+            ->where('site', 'nanjenshan')
+            ->where('code', $this->catalogCode)
+            ->value('spcode');
+
+        if (!$nanjenshanSpcode) {
+            return 0;
+        }
+
+        return DB::connection('njs_seedling')
+            ->table('seedling_individuals')
+            ->where('spcode', $nanjenshanSpcode)
+            ->distinct('tag')
+            ->count('tag');
+    }
+
+    private function shoushanSpcode(): ?string
+    {
+        return DB::connection('plant_catalog')
+            ->table('site_species')
+            ->where('site', 'shoushan')
+            ->where('code', $this->catalogCode)
+            ->value('spcode');
+    }
+
+    private function shoushanTreeQuery(string $table)
+    {
+        return DB::connection('mysql5')
+            ->table($table.' as census')
+            ->join('1ha_base_2024 as base', 'base.tag', '=', 'census.tag')
+            ->where('base.spcode', $this->shoushanSpcode())
+            ->where('base.deleted_at', '');
+    }
+
+    private function loadShoushanTreeSummary(): void
+    {
+        if (!$this->shoushanSpcode()) {
+            return;
+        }
+
+        $latest = $this->shoushanTreeQuery('1ha_data_2024')
+            ->where('census.deleted_at', '')
+            ->whereIn('census.status', ['', '-9']);
+
+        $this->countSsInd = (clone $latest)->where('census.branch', 0)->count();
+        $this->countSsB = (clone $latest)->where('census.branch', '!=', 0)->count();
+        $this->maxSsDBH = (clone $latest)->where('census.branch', 0)->max('census.dbh');
+    }
+
+    public function tagStyle(string $type, string $slug, int $fallbackId): string
+    {
+        return RelatedTagStyle::for($type, (int) ($this->relatedTagIds[$slug] ?? $fallbackId));
+    }
+
+    public function tagClasses(): string
+    {
+        return RelatedTagStyle::classes();
     }
 
     public $censusA;
@@ -207,6 +352,7 @@ class Showspecies extends Component
     }
 
     // 各次調查植株數量圖
+    #[Renderless]
     public function fig1data()
     {
         $spcode = $this->spcode;
@@ -304,6 +450,7 @@ class Showspecies extends Component
         $this->groupConditions = $groupConditions;
     }
     // 最新一次調查徑級結構
+    #[Renderless]
     public function fig2data()
     {
 
@@ -340,6 +487,7 @@ class Showspecies extends Component
         );
     }
     // 最新一次調查植株位置分布
+    #[Renderless]
     public function fig3data()
     {
 
@@ -402,6 +550,7 @@ class Showspecies extends Component
 
     //開花量時間變化
     //census261 / 2007.09.01 / key=60 開始為 106個網子，之前是87
+    #[Renderless]
     public function fig4data()
     {
         if (empty($this->timeSeries)) {
@@ -445,6 +594,7 @@ class Showspecies extends Component
         );
     }
     //結果量時間變化
+    #[Renderless]
     public function fig5data()
     {
         if (empty($this->timeSeries)) {
@@ -503,6 +653,7 @@ class Showspecies extends Component
     }
     //小苗數量時間變化
     //census30 / 2010-11 / key=29 開始為 106個網子，之前是87
+    #[Renderless]
     public function fig6data()
     {
 
@@ -549,6 +700,108 @@ class Showspecies extends Component
             'fig6',
             seedlingSeries: $seedlingSeries
         );
+    }
+
+    #[Renderless]
+    public function fig7data(): void
+    {
+        $nanjenshanSpcode = DB::connection('plant_catalog')
+            ->table('site_species')
+            ->where('site', 'nanjenshan')
+            ->where('code', $this->catalogCode)
+            ->value('spcode');
+
+        if (!$nanjenshanSpcode) {
+            $this->dispatch('fig7', seedlingSeries: []);
+
+            return;
+        }
+
+        $quadratArea = DB::connection('njs_seedling')->table('quadrats')->count();
+
+        $seedlingSeries = DB::connection('njs_seedling')
+            ->table('seedling_records as records')
+            ->join('seedling_individuals as individuals', 'individuals.tag', '=', 'records.tag')
+            ->join('censuses', 'censuses.census', '=', 'records.census')
+            ->where('individuals.spcode', $nanjenshanSpcode)
+            ->whereIn('records.status', ['A', 'R'])
+            ->groupBy('censuses.census', 'censuses.ym')
+            ->orderBy('censuses.census')
+            ->selectRaw('censuses.ym, COUNT(DISTINCT records.tag) as total')
+            ->get()
+            ->mapWithKeys(fn ($row): array => [
+                str_replace('/', '-', $row->ym) => $quadratArea > 0
+                    ? round((int) $row->total / $quadratArea, 4)
+                    : 0,
+            ])
+            ->all();
+
+        $this->dispatch('fig7', seedlingSeries: $seedlingSeries);
+    }
+
+    #[Renderless]
+    public function fig8data(): void
+    {
+        $count2015 = $this->shoushanTreeQuery('1ha_data_2015')
+            ->where('census.deleted_at', '')
+            ->where('census.branch', 0)
+            ->where('census.status', '')
+            ->count();
+        $latest = $this->shoushanTreeQuery('1ha_data_2024')
+            ->where('census.deleted_at', '')
+            ->where('census.branch', 0);
+
+        $this->dispatch('fig8',
+            censusA: ['2015' => $count2015, '2024' => (clone $latest)->where('census.status', '')->count()],
+            censusR: ['2015' => 0, '2024' => (clone $latest)->where('census.status', '-9')->count()],
+            censusD: ['2015' => 0, '2024' => (clone $latest)->where('census.status', '0')->count()],
+        );
+    }
+
+    #[Renderless]
+    public function fig9data(): void
+    {
+        $rows = $this->shoushanTreeQuery('1ha_data_2024')
+            ->where('census.deleted_at', '')
+            ->where('census.branch', 0)
+            ->whereIn('census.status', ['', '-9'])
+            ->where('census.dbh', '>', 0)
+            ->selectRaw("CASE
+                WHEN census.dbh < 5 THEN '<5'
+                WHEN census.dbh < 10 THEN '5-10'
+                WHEN census.dbh < 20 THEN '10-20'
+                ELSE '>20'
+            END AS dbh_class, COUNT(*) AS total")
+            ->groupBy('dbh_class')
+            ->get()
+            ->pluck('total', 'dbh_class');
+
+        $groupedCounts = collect(['<5', '5-10', '10-20', '>20'])
+            ->mapWithKeys(fn (string $class): array => [$class => (int) ($rows[$class] ?? 0)])
+            ->all();
+
+        $this->dispatch('fig9', groupedCounts: $groupedCounts);
+    }
+
+    #[Renderless]
+    public function fig10data(): void
+    {
+        $points = $this->shoushanTreeQuery('1ha_data_2024')
+            ->where('census.deleted_at', '')
+            ->where('census.branch', 0)
+            ->whereIn('census.status', ['', '-9'])
+            ->where('census.dbh', '>', 0)
+            ->orderBy('base.tag')
+            ->get(['base.tag', 'base.plotx', 'base.ploty', 'census.dbh'])
+            ->map(fn ($row): array => [
+                'x' => (float) $row->plotx,
+                'y' => (float) $row->ploty,
+                'tag' => trim((string) $row->tag),
+                'dbh' => (float) $row->dbh,
+            ])
+            ->all();
+
+        $this->dispatch('fig10', points: $points);
     }
 
     public function getTimeSeries()
