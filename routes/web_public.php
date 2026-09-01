@@ -9,10 +9,11 @@ use App\Http\Controllers\Web\NewsController;
 
 Route::prefix('web')->group(function () {
     Route::redirect('/splist', '/splist', 301)->name('front.splist.legacy');
-    Route::get('/species/{spcode}', [WebIndexController::class, 'species'])->name('front.species.legacy');
+    Route::get('/species/{spcode}', [WebIndexController::class, 'legacySpecies'])->name('front.species.legacy');
 });
 
 Route::get('/splist', [WebIndexController::class, 'splist'])->name('front.splist');
+Route::get('/species/{spcode}', [WebIndexController::class, 'species'])->name('front.species');
 Route::redirect('/plants', '/splist', 301);
 
 

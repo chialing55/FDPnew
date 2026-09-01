@@ -131,7 +131,7 @@
             <tbody wire:key="species-results-{{ $filterVersion }}" class="divide-y divide-gray-200 bg-white">
                 @forelse ($speciesList as $species)
                     <tr class="cursor-pointer hover:bg-gray-50"
-                        onclick="window.location.href='{{ route('front.species.legacy', ['spcode' => $species['code']]) }}'">
+                        onclick="window.location.href='{{ route('front.species', ['spcode' => $species['code']]) }}'">
                         <td class="px-3 py-3">{{ $species['family'] }}@if (!empty($species['chfamily']))
                                 <span class="ml-1 text-gray-500">{{ $species['chfamily'] }}</span>
                             @endif

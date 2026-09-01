@@ -300,7 +300,7 @@
                     {{ $speciesinfo['chapgfamily'] ?? '' }}</span>
             </p>
         </div>
-        <a class="plant-photo-front-link" href="{{ url("/web/species/{$spcode}") }}" target="_blank" rel="noopener">
+        <a class="plant-photo-front-link" href="{{ route('front.species', ['spcode' => $catalogCode]) }}" target="_blank" rel="noopener">
             前台頁面
         </a>
     </div>

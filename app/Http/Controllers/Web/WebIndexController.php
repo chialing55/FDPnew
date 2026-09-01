@@ -9,6 +9,7 @@ use Illuminate\Support\Facades\App;
 use App\Http\Controllers\Controller;
 // use App\Models\FsBaseLogin;
 use App\Http\Controllers\UpdateController;
+use App\Models\PlantCatalog\SiteSpecies;
 use App\Models\Web\Page;
 
 //依據網址導向各個頁面
@@ -45,6 +46,11 @@ class WebIndexController extends Controller
 
     public function species(Request $request, $spcode)
     {
+        $catalogCode = $this->catalogCodeFor($spcode);
+
+        if ($catalogCode !== null && $catalogCode !== $spcode) {
+            return redirect()->route('front.species', ['spcode' => $catalogCode], 301);
+        }
 
         $user = $request->user()?->name;
 
@@ -52,6 +58,27 @@ class WebIndexController extends Controller
             'spcode' => $spcode,
             'user' => $user
         ]);
+    }
+
+    public function legacySpecies($spcode)
+    {
+        return redirect()->route('front.species', [
+            'spcode' => $this->catalogCodeFor($spcode) ?? $spcode,
+        ], 301);
+    }
+
+    private function catalogCodeFor(string $spcode): ?string
+    {
+        if (SiteSpecies::query()->where('code', $spcode)->exists()) {
+            return $spcode;
+        }
+
+        return SiteSpecies::query()
+            ->where('spcode', $spcode)
+            ->whereNotNull('code')
+            ->where('code', '<>', '')
+            ->orderByRaw("site = 'fushan' DESC")
+            ->value('code');
     }
 
 
