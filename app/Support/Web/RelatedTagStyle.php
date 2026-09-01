@@ -8,14 +8,18 @@ class RelatedTagStyle
     {
         $colors = [
             'site' => [
-                ['#f1f5f9', '#dbe4ee'], ['#eff6ff', '#dbeafe'], ['#eef2ff', '#dfe4ff'],
-                ['#ecfeff', '#cffafe'], ['#f0fdfa', '#ccfbf1'], ['#ecfdf5', '#d1fae5'],
+                // Sites use cool colors: slate-blue, blue, indigo, cyan,
+                // teal and mint.
+                ['#dce9f8', '#b9d3ef'], ['#cde7ff', '#8fc9f5'], ['#d8d8ff', '#aaaaf0'],
+                ['#c8f0f5', '#83dce7'], ['#c8eee6', '#83d2c2'], ['#d3efdc', '#98d4aa'],
             ],
             'subject' => [
-                ['#fffbeb', '#fef3c7'], ['#fff7ed', '#ffedd5'], ['#fff1f2', '#ffe4e6'],
-                ['#fdf4ff', '#fae8ff'], ['#f5f3ff', '#ede9fe'], ['#f7fee7', '#ecfccb'],
-                ['#ecfeff', '#cffafe'], ['#ecfdf5', '#d1fae5'], ['#f0f9ff', '#e0f2fe'],
-                ['#fef2f2', '#fee2e2'],
+                // Research subjects use warm colors only. The sequence keeps
+                // neighboring palette entries visually distinct.
+                ['#fff3a3', '#ffe066'], ['#ffe0a3', '#ffc766'], ['#ffd0a8', '#ffad70'],
+                ['#ffc2a8', '#ff916f'], ['#f7c0aa', '#e98f70'], ['#ffc1c7', '#f28b98'],
+                ['#f7bfd9', '#e887b6'], ['#eec5df', '#d995c2'], ['#e8c3b2', '#cc9278'],
+                ['#f3d2a2', '#dda85f'],
             ],
         ];
         $list = $colors[$type] ?? [['#f3f4f6', '#e5e7eb']];
