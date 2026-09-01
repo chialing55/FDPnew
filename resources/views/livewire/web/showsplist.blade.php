@@ -99,28 +99,31 @@
         <table class="min-w-full divide-y divide-gray-200 text-left text-sm">
             <thead class="bg-gray-50 text-gray-700">
                 <tr>
-                    <th scope="col" class="px-3 py-3 font-semibold"><button wire:click="sort('family')"
-                            class="border-0 bg-transparent p-0 font-semibold text-inherit hover:text-forest">科
-                            {{ $this->sortIndicator('family') }}</button></th>
-                    <th scope="col" class="px-3 py-3 font-semibold"><button wire:click="sort('canonical_name')"
-                            class="border-0 bg-transparent p-0 font-semibold text-inherit hover:text-forest">學名
-                            {{ $this->sortIndicator('canonical_name') }}</button></th>
-                    <th scope="col" class="px-3 py-3 font-semibold"><button wire:click="sort('chname')"
-                            class="border-0 bg-transparent p-0 font-semibold text-inherit hover:text-forest">中文名
-                            {{ $this->sortIndicator('chname') }}</button></th>
+                    <th scope="col" class="px-3 py-3 font-semibold"><span role="button" tabindex="0"
+                            wire:click="sort('family')" wire:keydown.enter="sort('family')"
+                            class="cursor-pointer select-none hover:text-forest">科
+                            {{ $this->sortIndicator('family') }}</span></th>
+                    <th scope="col" class="px-3 py-3 font-semibold"><span role="button" tabindex="0"
+                            wire:click="sort('canonical_name')" wire:keydown.enter="sort('canonical_name')"
+                            class="cursor-pointer select-none hover:text-forest">學名
+                            {{ $this->sortIndicator('canonical_name') }}</span></th>
+                    <th scope="col" class="px-3 py-3 font-semibold"><span role="button" tabindex="0"
+                            wire:click="sort('chname')" wire:keydown.enter="sort('chname')"
+                            class="cursor-pointer select-none hover:text-forest">中文名
+                            {{ $this->sortIndicator('chname') }}</span></th>
                     @if ($displayMode === 'site')
                         @foreach (['fushan' => '福山', 'nanjenshan' => '南仁山', 'shoushan' => '壽山'] as $site => $label)
-                            <th scope="col" class="px-3 py-3 text-center font-semibold"><button
-                                    wire:click="sort('{{ $site }}')"
-                                    class="border-0 bg-transparent p-0 font-semibold text-inherit hover:text-forest">{{ $label }}
-                                    {{ $this->sortIndicator($site) }}</button></th>
+                            <th scope="col" class="px-3 py-3 text-center font-semibold"><span role="button" tabindex="0"
+                                    wire:click="sort('{{ $site }}')" wire:keydown.enter="sort('{{ $site }}')"
+                                    class="cursor-pointer select-none hover:text-forest">{{ $label }}
+                                    {{ $this->sortIndicator($site) }}</span></th>
                         @endforeach
                     @else
                         @foreach (['tree' => '樹木', 'seedling' => '幼苗', 'seed' => '物候'] as $research => $label)
-                            <th scope="col" class="px-3 py-3 text-center font-semibold"><button
-                                    wire:click="sort('{{ $research }}')"
-                                    class="border-0 bg-transparent p-0 font-semibold text-inherit hover:text-forest">{{ $label }}
-                                    {{ $this->sortIndicator($research) }}</button></th>
+                            <th scope="col" class="px-3 py-3 text-center font-semibold"><span role="button" tabindex="0"
+                                    wire:click="sort('{{ $research }}')" wire:keydown.enter="sort('{{ $research }}')"
+                                    class="cursor-pointer select-none hover:text-forest">{{ $label }}
+                                    {{ $this->sortIndicator($research) }}</span></th>
                         @endforeach
                     @endif
                 </tr>
