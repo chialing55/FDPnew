@@ -66,11 +66,17 @@ let fig10;
 const speciesDistributionPalette = [
     // DBH classes form a continuous visual sequence from small to large.
     // Saturation and opacity stay close to the stem-count chart palette.
-    { background: "rgba(232, 193, 91, 0.58)", border: "rgb(211, 165, 49)" },
-    { background: "rgba(190, 139, 74, 0.58)", border: "rgb(159, 105, 43)" },
-    { background: "rgba(79, 157, 105, 0.58)", border: "rgb(52, 126, 77)" },
-    { background: "rgba(38, 70, 105, 0.62)", border: "rgb(25, 49, 78)" },
+    { background: "#F0D84F", border: "#BCA72B" },
+    { background: "#B6C84A", border: "#869A2D" },
+    { background: "#79B85C", border: "#518D3C" },
+    { background: "#3FA67B", border: "#287E59" },
+    { background: "#3186A3", border: "#24637C" },
+    { background: "#405A96", border: "#2E406E" },
 ];
+
+function speciesDistributionColor(index) {
+    return speciesDistributionPalette[index % speciesDistributionPalette.length];
+}
 
 function figtoggle(k) {
     $(`.fig${k}`).show().addClass("is-ready");
@@ -234,14 +240,18 @@ document.addEventListener('livewire:init', () => {
       { label: '>20', min: 20, max: Infinity, radius: 5 },
     ];
 
-    const datasets = dbhGroups.map((group, index) => ({
-      label: group.label,
-      data: points.filter((point) => point.dbh >= group.min && point.dbh < group.max),
-      backgroundColor: speciesDistributionPalette[index].background,
-      borderColor: speciesDistributionPalette[index].border,
-      pointStyle: 'circle',
-      pointRadius: group.radius,
-    }));
+    const datasets = dbhGroups.map((group, index) => {
+      const color = speciesDistributionColor(index);
+
+      return {
+        label: group.label,
+        data: points.filter((point) => point.dbh >= group.min && point.dbh < group.max),
+        backgroundColor: color.background,
+        borderColor: color.border,
+        pointStyle: 'circle',
+        pointRadius: group.radius,
+      };
+    }).filter((dataset) => dataset.data.length > 0);
 
     fig10 = new Chart(canvas, {
       type: 'scatter',
@@ -420,7 +430,9 @@ function drawChart3(group) {
 
     var pointRadiusIncrement = 1; // 遞增的圓點大小
 
-    Object.keys(group).forEach(function (groupName, groupIndex) {
+    const groupNames = Object.keys(group);
+
+    groupNames.forEach(function (groupName, groupIndex) {
         if (group[groupName].length !== 0) {
             group1[groupName] = group[groupName].map(function (item) {
                 return {
@@ -441,11 +453,12 @@ function drawChart3(group) {
                 return [item.dbh];
             });
             // 將數據集添加到數據集陣列中
+            const color = speciesDistributionColor(groupIndex);
             data.push({
                 label: groupName, // 使用 groupName 作為標籤
                 data: group1[groupName],
-                backgroundColor: speciesDistributionPalette[groupIndex % speciesDistributionPalette.length].background,
-                borderColor: speciesDistributionPalette[groupIndex % speciesDistributionPalette.length].border,
+                backgroundColor: color.background,
+                borderColor: color.border,
                 pointStyle: "circle",
                 pointRadius: pointRadiusIncrement, // 設置 pointRadius
             });
