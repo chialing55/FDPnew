@@ -261,7 +261,7 @@ document.addEventListener('livewire:init', () => {
     ];
 
     const datasets = dbhGroups.map((group, index) => {
-      const color = speciesDistributionColor(index);
+      const color = speciesDistributionColor(dbhGroups.length - 1 - index);
 
       return {
         label: group.label,
@@ -517,7 +517,8 @@ function drawChart3(group) {
                 return [item.dbh];
             });
             // 將數據集添加到數據集陣列中
-            const color = speciesDistributionColor(groupIndex);
+            const reverseIndex = groupNames.length - 1 - groupIndex;
+            const color = speciesDistributionColor(reverseIndex);
             data.push({
                 label: groupName, // 使用 groupName 作為標籤
                 data: group1[groupName],
