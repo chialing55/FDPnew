@@ -193,6 +193,115 @@ select {
   font-weight: 800;
 }
 
+/* Responsive shell for the data-management pages. Wide data grids retain their
+   own horizontal scrolling, while the page chrome fits phones and tablets. */
+@media (max-width: 1139px) {
+  body, html,
+  .main {
+    min-width: 0;
+  }
+
+  body {
+    overflow-x: hidden;
+  }
+
+  #header_text {
+    box-sizing: border-box;
+    padding-inline: 16px;
+  }
+
+  .header_bottom {
+    flex-wrap: wrap;
+    gap: 4px 12px;
+  }
+
+  .header_bottom > div,
+  .header_bottom > div[style] {
+    margin-left: 0 !important;
+  }
+
+  .headerlist,
+  [class*="listinner"] {
+    max-width: 100vw;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .content,
+  .right {
+    min-width: 0;
+    max-width: 100%;
+  }
+
+  .right > div {
+    max-width: 100%;
+  }
+
+  input:not([type="checkbox"]):not([type="radio"]),
+  select,
+  textarea,
+  button {
+    min-height: 40px;
+    box-sizing: border-box;
+  }
+
+  input:not([type="checkbox"]):not([type="radio"]),
+  select,
+  textarea {
+    max-width: 100%;
+    font-size: 16px;
+  }
+
+  .datasavebutton {
+    width: 100%;
+    max-width: 800px;
+  }
+
+  .icon {
+    display: none;
+  }
+}
+
+@media (max-width: 767px) {
+  #header_text {
+    font-size: clamp(18px, 5vw, 26px);
+  }
+
+  .header_bottom {
+    display: block !important;
+  }
+
+  .header_bottom > div {
+    padding: 8px 12px !important;
+  }
+
+  .headerlist {
+    display: flex;
+    flex-wrap: nowrap;
+    padding-bottom: 4px;
+  }
+
+  .headerlist .list {
+    flex: 0 0 auto;
+  }
+
+  .user {
+    width: 100%;
+    justify-content: space-between;
+    padding-top: 4px !important;
+  }
+
+  footer #header_text {
+    align-items: flex-start !important;
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  footer #header_text > .flex {
+    flex-wrap: wrap;
+  }
+}
+
 .app-feedback-note {
   display: block;
   width: fit-content;

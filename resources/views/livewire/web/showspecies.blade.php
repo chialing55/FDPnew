@@ -33,6 +33,13 @@
 
 <div class="space-y-4" data-species-chart-root data-chart-methods='@json($chartMethods)'>
     <style>
+        [data-species-chart-root],
+        [data-species-chart-root] *,
+        [data-species-chart-root] *::before,
+        [data-species-chart-root] *::after {
+            box-sizing: border-box;
+        }
+
         .species-research-flags {
             display: flex;
             flex-direction: column;
@@ -154,11 +161,16 @@
             display: block;
             position: relative;
             width: 100%;
+            max-width: 100%;
             min-height: 320px;
             margin: 10px 0;
+            overflow: hidden;
         }
 
         .species-chart-frame canvas {
+            display: block;
+            width: 100% !important;
+            max-width: 100% !important;
             opacity: 0;
             transition: opacity 0.18s ease;
         }
@@ -211,6 +223,7 @@
         .species-result-content {
             width: 100%;
             min-height: 12rem;
+            border: 1px solid #e5e7eb;
             border-radius: 0 0.5rem 0.5rem 0.5rem;
             background: #fff;
             padding: 1rem;
@@ -249,6 +262,93 @@
             .species-chart-sections {
                 grid-template-columns: 1fr;
             }
+
+            .species-chart-frame {
+                width: 100%;
+                max-width: 560px;
+                margin-inline: auto;
+            }
+
+            .species-chart-map-frame {
+                max-width: 560px;
+            }
+
+            .spheader h2 {
+                display: flex;
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 0.35rem;
+            }
+
+            .spheader h2 > span {
+                margin-left: 0 !important;
+            }
+
+            .species-scientific-name {
+                white-space: nowrap;
+            }
+
+            .species-research-flags {
+                align-items: flex-start;
+            }
+
+            .species-research-flag-row {
+                grid-template-columns: auto auto;
+                justify-content: start;
+            }
+
+            .species-research-subjects {
+                justify-content: flex-start;
+            }
+        }
+
+        @media (max-width: 767px) {
+            .spheader h2 {
+                display: flex;
+                flex-direction: column;
+                gap: 0.35rem;
+            }
+
+            .spheader h2 span,
+            .spheader p span,
+            .spheader p sapn {
+                margin-left: 0 !important;
+            }
+
+            .species-research-flags {
+                align-items: flex-start;
+                padding-inline: 0;
+            }
+
+            .species-research-subjects {
+                justify-content: flex-start;
+            }
+
+            .species-result-content {
+                padding: 0.75rem;
+            }
+
+            .species-chart-panel,
+            .species-description-box,
+            .species-photo-box {
+                padding-inline: 1rem;
+            }
+
+            .species-chart-frame {
+                width: 100%;
+                max-width: 340px;
+                min-height: 0;
+                margin: 0.75rem auto 1rem;
+            }
+
+            .species-chart-map-frame {
+                max-width: 100%;
+                min-height: 360px;
+            }
+
+            .species-chart-item {
+                margin-block: 1rem 1.5rem;
+            }
         }
     </style>
     <div>
@@ -260,8 +360,8 @@
     </div>
     <div class='spheader'>
         <div>
-            <h2>{!! \App\Support\PlantCatalog\ScientificNameFormatter::format($speciesinfo['now_simname']) !!}
-                <span style='margin-left: 30px'>{{ ($speciesinfo['checklist_chname'] ?? null) ?: $speciesinfo['csp'] }}</span>
+            <h2><span class="species-scientific-name">{!! \App\Support\PlantCatalog\ScientificNameFormatter::format($speciesinfo['now_simname']) !!}</span>
+                <span class="species-chinese-name" style='margin-left: 30px'>{{ ($speciesinfo['checklist_chname'] ?? null) ?: $speciesinfo['csp'] }}</span>
             </h2>
             <p>
                 @if ($speciesinfo['now_simname'] != $speciesinfo['spcode_simname'])
@@ -310,7 +410,7 @@
             @if ($leafphoto == 'yes' && $featuredPhoto)
                 <p class='text_box' style='padding: 0px;'><a
                         href='{{ asset("/FDPfiles/splist/photo/{$featuredPhoto['spcode']}/{$featuredPhoto['filename']}") }}'
-                        data-fancybox="gallery" data-caption="葉片照片">
+                        data-fancybox="gallery" data-caption="{{ __('web.reference_photos') }}">
                         <img src="{{ asset("/FDPfiles/splist/photo/{$featuredPhoto['spcode']}/s_{$featuredPhoto['filename']}") }}"
                             width="230"></a>
                 </p>
@@ -324,8 +424,8 @@
 
                 {{-- 標題 --}}
                 <div class="whitespace-normal font-semibold leading-relaxed text-gray-800">
-                    辨識要點<span style='margin-left:30px; font-size: 80%;'
-                        class='font-normal text-gray-700'>*種子雨收集與小苗調查用</span>
+                    {{ __('web.identification_notes') }}<span style='margin-left:30px; font-size: 80%;'
+                        class='font-normal text-gray-700'>{{ __('web.identification_note_use') }}</span>
                 </div>
             </div>
             <div class='species-description-notes mt-4 text-sm text-gray-700'>
@@ -353,7 +453,7 @@
 
                 {{-- 標題 --}}
                 <div class="whitespace-normal font-semibold leading-relaxed text-gray-800">
-                    參考照片
+                    {{ __('web.reference_photos') }}
                 </div>
             </div>
             <div class="species-photo-grid">
@@ -362,7 +462,7 @@
                         <div class='photo'>
                             <a href='{{ asset("/FDPfiles/splist/photo/{$photoinfo[$i]['spcode']}/{$photoinfo[$i]['filename']}") }}'
                                 data-fancybox="gallery"
-                                data-caption="類型: {{ $photoinfo[$i]['type'] }} / {{ $photoinfo[$i]['fresh'] }} / {{ $photoinfo[$i]['status'] }}<br>photo by: {{ $photoinfo[$i]['photoby'] }}@if ($photoinfo[$i]['des'] != '')
+                                data-caption="{{ __('web.photo_type') }}: {{ $photoinfo[$i]['type'] }} / {{ $photoinfo[$i]['fresh'] }} / {{ $photoinfo[$i]['status'] }}<br>photo by: {{ $photoinfo[$i]['photoby'] }}@if ($photoinfo[$i]['des'] != '')
 <br>{{ $photoinfo[$i]['des'] }}
 @endif">
                                 <img src="{{ asset("/FDPfiles/splist/photo/{$photoinfo[$i]['spcode']}/s_{$photoinfo[$i]['filename']}") }}"
@@ -371,7 +471,7 @@
 
                         </div>
                         <div class='photodes species-photo-description'>
-                            類型: {{ $photoinfo[$i]['type'] }} / {{ $photoinfo[$i]['fresh'] }} /
+                            {{ __('web.photo_type') }}: {{ $photoinfo[$i]['type'] }} / {{ $photoinfo[$i]['fresh'] }} /
                             {{ $photoinfo[$i]['status'] }}<br>
                             photo by: {{ $photoinfo[$i]['photoby'] }}
                             @if ($photoinfo[$i]['des'] != '')
@@ -407,50 +507,47 @@
 
                     <div class="species-chart-sections pb-4">
                         @if ($countInd > 0)
-                            <x-web.species-result-panel title="每木調查成果">
+                            <x-web.species-result-panel :title="__('web.tree_results')">
                                 <x-slot:summary>
-                                    <p>
-                                        {{ $latestTreeCensusYear }} 年記錄到 {{ $countInd }} 棵樹，以及
-                                        {{ $countB }} 個分支。最大主幹的胸徑為 {{ $maxDBH }} cm。
-                                    </p>
+                                    <p>{{ __('web.tree_summary', ['year' => $latestTreeCensusYear, 'trees' => $countInd, 'branches' => $countB, 'dbh' => $maxDBH]) }}</p>
                                 </x-slot:summary>
                                 <div class='figouter'>
-                                    <x-web.species-chart title="各次調查植株數量圖" chart="fig1"
+                                    <x-web.species-chart :title="__('web.chart_plant_counts')" chart="fig1"
                                         canvas-id="myChartFig1" />
-                                    <x-web.species-chart :title="$latestTreeCensusYear.'年調查徑級結構'" chart="fig2"
+                                    <x-web.species-chart :title="__('web.chart_dbh', ['year' => $latestTreeCensusYear])" chart="fig2"
                                         canvas-id="myChartFig2" />
-                                    <x-web.species-chart :title="$latestTreeCensusYear.'年調查植株位置分布'" chart="fig3"
+                                    <x-web.species-chart :title="__('web.chart_distribution', ['year' => $latestTreeCensusYear])" chart="fig3"
                                         canvas-id="myChartFig3" :map="true" />
                                 </div>
                             </x-web.species-result-panel>
                         @endif
                         @if ($countSeeds > 0 || $countFlower > 0 || $countSeedlings > 0)
-                            <x-web.species-result-panel title="物候">
+                            <x-web.species-result-panel :title="__('web.phenology')">
                                 <x-slot:summary>
                                     <p>
-                                        共收集到
+                                        {{ __('web.phenology_collected') }}
                                         @if ($countFlower > 0)
-                                            {{ $countFlower }} 筆落花。
+                                            {{ __('web.fallen_flowers', ['count' => $countFlower]) }}
                                         @endif
                                         @if ($countSeeds > 0)
-                                            {{ $countSeeds }} 顆種子。
+                                            {{ __('web.seeds_collected', ['count' => $countSeeds]) }}
                                         @endif
                                     </p>
                                 </x-slot:summary>
 
                                 <div class='figouter'>
                                     @if ($countFlower > 0)
-                                        <x-web.species-chart title="開花量時間變化" chart="fig4"
+                                        <x-web.species-chart :title="__('web.chart_flowering')" chart="fig4"
                                             canvas-id="myChartFig4" />
                                     @endif
                                     @if ($countSeeds > 0)
-                                        <x-web.species-chart title="結果量時間變化" chart="fig5"
+                                        <x-web.species-chart :title="__('web.chart_fruiting')" chart="fig5"
                                             canvas-id="myChartFig5" />
                                     @endif
                                     @if ($countSeedlings > 0)
-                                        <x-web.species-chart title="小苗數量時間變化" chart="fig6"
-                                            canvas-id="myChartFig6" group-title="小苗長期動態"
-                                            :description="'共記錄到 '.$countSeedlings.' 棵小苗。'" />
+                                        <x-web.species-chart :title="__('web.chart_seedlings')" chart="fig6"
+                                            canvas-id="myChartFig6" :group-title="__('web.seedling_dynamics')"
+                                            :description="__('web.seedling_summary', ['count' => $countSeedlings])" />
                                     @endif
                                 </div>
                             </x-web.species-result-panel>
@@ -464,11 +561,11 @@
                     class="species-result-content">
                     @if (($researchesBySite['nanjenshan']['seedling'] ?? 0) != 0)
                         <div class="species-chart-sections pb-4">
-                            <x-web.species-result-panel title="小苗長期動態">
+                            <x-web.species-result-panel :title="__('web.seedling_dynamics')">
                                 <x-slot:summary>
-                                    <p>共記錄到 {{ $countNjsSeedlings }} 棵小苗。</p>
+                                    <p>{{ __('web.seedling_summary', ['count' => $countNjsSeedlings]) }}</p>
                                 </x-slot:summary>
-                                <x-web.species-chart title="小苗數量時間變化" chart="fig7"
+                                <x-web.species-chart :title="__('web.chart_seedlings')" chart="fig7"
                                     canvas-id="myChartFig7" />
                             </x-web.species-result-panel>
                         </div>
@@ -485,19 +582,16 @@
                     class="species-result-content">
                     @if (($researchesBySite['shoushan']['tree'] ?? 0) != 0)
                         <div class="species-chart-sections pb-4">
-                            <x-web.species-result-panel title="每木調查成果">
+                            <x-web.species-result-panel :title="__('web.tree_results')">
                                 <x-slot:summary>
-                                    <p>
-                                        2024 年記錄到 {{ $countSsInd }} 棵樹，以及
-                                        {{ $countSsB }} 個分支。最大主幹的胸徑為 {{ $maxSsDBH }} cm。
-                                    </p>
+                                    <p>{{ __('web.tree_summary', ['year' => 2024, 'trees' => $countSsInd, 'branches' => $countSsB, 'dbh' => $maxSsDBH]) }}</p>
                                 </x-slot:summary>
                                 <div class="figouter">
-                                    <x-web.species-chart title="各次調查植株數量圖" chart="fig8"
+                                    <x-web.species-chart :title="__('web.chart_plant_counts')" chart="fig8"
                                         canvas-id="myChartFig8" />
-                                    <x-web.species-chart title="2024年調查徑級結構" chart="fig9"
+                                    <x-web.species-chart :title="__('web.chart_dbh', ['year' => 2024])" chart="fig9"
                                         canvas-id="myChartFig9" />
-                                    <x-web.species-chart title="2024年調查植株位置分布" chart="fig10"
+                                    <x-web.species-chart :title="__('web.chart_distribution', ['year' => 2024])" chart="fig10"
                                         canvas-id="myChartFig10" :map="true" />
                                 </div>
                             </x-web.species-result-panel>

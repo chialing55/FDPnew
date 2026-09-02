@@ -23,6 +23,29 @@ select {
   height: 25px
 }
 
+/* Touch-friendly controls without changing the compact desktop forms. */
+@media (max-width: 1023px) {
+  input:not([type="checkbox"]):not([type="radio"]),
+  select,
+  textarea,
+  button {
+    min-height: 40px;
+  }
+
+  input:not([type="checkbox"]):not([type="radio"]),
+  select,
+  textarea {
+    max-width: 100%;
+    box-sizing: border-box;
+    font-size: 16px;
+  }
+
+  .datasavebutton {
+    width: 100%;
+    max-width: 800px;
+  }
+}
+
 .fs100{
 	font-size: 100%;
 }

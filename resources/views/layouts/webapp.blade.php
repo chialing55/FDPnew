@@ -38,13 +38,13 @@
         </div>
     </main>
     <footer>
-        <div class='flex justify-between bg-forest-dark p-2 text-sm text-white'>
+        <div class='flex flex-col gap-2 bg-forest-dark px-4 py-3 text-xs leading-relaxed text-white sm:flex-row sm:items-end sm:justify-between sm:text-sm'>
             <p>
                 國立東華大學 NDHU / 國立中山大學 NSYSU / 國立台灣大學 NTU<br>
                 林務局 TFB / 林業試驗所 TFRI / ForestGEO
             </p>
             @if (session('latest_update'))
-                <p style='margin-left: 100px;'>更新日期：{{ session('latest_update') }}</p>
+                <p class="shrink-0">更新日期：{{ session('latest_update') }}</p>
             @endif
         </div>
     </footer>

@@ -25,7 +25,7 @@
 .page{
 	margin: auto;
 	margin-top:20px;
-	max-width: 75%;
+	width: min(100% - 2rem, 960px);
 }
 
 
@@ -95,6 +95,51 @@
 
 .text_box_note_out {
 	display:inline-flex;
+}
+
+/* Shared responsive defaults for public pages. */
+img,
+video,
+iframe {
+	max-width: 100%;
+}
+
+.page table {
+	max-width: 100%;
+}
+
+@media (max-width: 767px) {
+	.page {
+		width: min(100% - 1.5rem, 960px);
+		margin-top: 12px;
+	}
+
+	.spheader,
+	.text_box_note_out,
+	.text_box_enter {
+		display: flex;
+		flex-direction: column;
+		align-items: stretch;
+		gap: 10px;
+	}
+
+	.text_box,
+	.text_box_note {
+		min-width: 0;
+		width: 100%;
+		box-sizing: border-box;
+		padding: 16px;
+	}
+
+	.photocombo {
+		margin-inline: 0;
+	}
+
+	.page table {
+		display: block;
+		overflow-x: auto;
+		-webkit-overflow-scrolling: touch;
+	}
 }
 
 

@@ -311,11 +311,20 @@ class Showspecies extends Component
 
         $latest = $this->shoushanTreeQuery('1ha_data_2024')
             ->where('census.deleted_at', '')
-            ->whereIn('census.status', ['', '-9']);
+            ->where('census.date', '!=', '0000-00-00');
 
-        $this->countSsInd = (clone $latest)->where('census.branch', 0)->count();
-        $this->countSsB = (clone $latest)->where('census.branch', '!=', 0)->count();
-        $this->maxSsDBH = (clone $latest)->where('census.branch', 0)->max('census.dbh');
+        $this->countSsInd = (clone $latest)
+            ->where('census.branch', 0)
+            ->whereIn('census.status', ['', '-9', '-2', '-3'])
+            ->count();
+        $this->countSsB = (clone $latest)
+            ->where('census.branch', '!=', 0)
+            ->whereIn('census.status', ['', '-9'])
+            ->count();
+        $this->maxSsDBH = (clone $latest)
+            ->where('census.branch', 0)
+            ->whereIn('census.status', ['', '-9', '-2', '-3'])
+            ->max('census.dbh') ?? 0;
     }
 
     public function tagStyle(string $type, string $slug, int $fallbackId): string
@@ -381,7 +390,12 @@ class Showspecies extends Component
 
             $counts = $censusQuery
                 ->selectRaw("
-                    SUM(CASE WHEN {$table}.status != '0' AND {$table}.status != '-9' AND {$table}.date != '0000-00-00' THEN 1 ELSE 0 END) as alive_count,
+                    SUM(CASE
+                        WHEN {$table}.status != '0'
+                            AND {$table}.status != '-9'
+                            AND {$table}.date != '0000-00-00'
+                        THEN 1 ELSE 0
+                    END) as alive_count,
                     SUM(CASE WHEN {$table}.status = '-9' THEN 1 ELSE 0 END) as recruit_count,
                     SUM(CASE WHEN {$table}.status = '0' AND {$table}.date != '0000-00-00' THEN 1 ELSE 0 END) as dead_count
                 ")
@@ -745,16 +759,28 @@ class Showspecies extends Component
         $count2015 = $this->shoushanTreeQuery('1ha_data_2015')
             ->where('census.deleted_at', '')
             ->where('census.branch', 0)
-            ->where('census.status', '')
+            ->whereIn('census.status', ['', '-2', '-3'])
             ->count();
         $latest = $this->shoushanTreeQuery('1ha_data_2024')
             ->where('census.deleted_at', '')
             ->where('census.branch', 0);
 
         $this->dispatch('fig8',
-            censusA: ['2015' => $count2015, '2024' => (clone $latest)->where('census.status', '')->count()],
-            censusR: ['2015' => 0, '2024' => (clone $latest)->where('census.status', '-9')->count()],
-            censusD: ['2015' => 0, '2024' => (clone $latest)->where('census.status', '0')->count()],
+            censusA: [
+                '2015' => $count2015,
+                '2024' => (clone $latest)
+                    ->whereIn('census.status', ['', '-2', '-3'])
+                    ->where('census.date', '!=', '0000-00-00')
+                    ->count(),
+            ],
+            censusR: ['2015' => 0, '2024' => (clone $latest)
+                ->where('census.status', '-9')
+                ->where('census.date', '!=', '0000-00-00')
+                ->count()],
+            censusD: ['2015' => 0, '2024' => (clone $latest)
+                ->where('census.status', '0')
+                ->where('census.date', '!=', '0000-00-00')
+                ->count()],
         );
     }
 
@@ -764,7 +790,8 @@ class Showspecies extends Component
         $rows = $this->shoushanTreeQuery('1ha_data_2024')
             ->where('census.deleted_at', '')
             ->where('census.branch', 0)
-            ->whereIn('census.status', ['', '-9'])
+            ->whereIn('census.status', ['', '-9', '-2', '-3'])
+            ->where('census.date', '!=', '0000-00-00')
             ->where('census.dbh', '>', 0)
             ->selectRaw("CASE
                 WHEN census.dbh < 5 THEN '<5'
@@ -789,8 +816,8 @@ class Showspecies extends Component
         $points = $this->shoushanTreeQuery('1ha_data_2024')
             ->where('census.deleted_at', '')
             ->where('census.branch', 0)
-            ->whereIn('census.status', ['', '-9'])
-            ->where('census.dbh', '>', 0)
+            ->whereIn('census.status', ['', '-9', '-2', '-3'])
+            ->where('census.date', '!=', '0000-00-00')
             ->orderBy('base.tag')
             ->get(['base.tag', 'base.plotx', 'base.ploty', 'census.dbh'])
             ->map(fn ($row): array => [

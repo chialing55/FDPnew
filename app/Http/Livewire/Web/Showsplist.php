@@ -6,6 +6,7 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Str;
 use Livewire\Component;
+use App\Support\Web\RelatedTagStyle;
 
 //網頁物種清單
 class Showsplist extends Component
@@ -95,6 +96,16 @@ class Showsplist extends Component
         }
 
         return $this->sortDirection === 'asc' ? '↑' : '↓';
+    }
+
+    public function tagClasses(): string
+    {
+        return RelatedTagStyle::classes();
+    }
+
+    public function tagStyle(string $type, int $index): string
+    {
+        return RelatedTagStyle::for($type, $index);
     }
 
     /** @param array<string, mixed> $species */

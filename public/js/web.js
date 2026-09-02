@@ -78,6 +78,26 @@ function speciesDistributionColor(index) {
     return speciesDistributionPalette[index % speciesDistributionPalette.length];
 }
 
+const speciesChartAreaBorder = {
+    id: 'speciesChartAreaBorder',
+    afterDraw(chart) {
+        const { ctx, chartArea } = chart;
+        if (!chartArea) return;
+
+        const { left, top, right, bottom } = chartArea;
+        ctx.save();
+        ctx.strokeStyle = '#d1d5db';
+        ctx.lineWidth = 1;
+        ctx.strokeRect(
+            left + 0.5,
+            top + 0.5,
+            Math.max(0, right - left - 1),
+            Math.max(0, bottom - top - 1),
+        );
+        ctx.restore();
+    },
+};
+
 function figtoggle(k) {
     $(`.fig${k}`).show().addClass("is-ready");
 }
@@ -253,9 +273,34 @@ document.addEventListener('livewire:init', () => {
       };
     }).filter((dataset) => dataset.data.length > 0);
 
+    const shoushanMap = new Image();
+    shoushanMap.src = '/images/web/Shoushan_map.jpg';
+
+    const shoushanMapPlugin = {
+      id: 'shoushanMapBackground',
+      beforeDraw(chart) {
+        if (!shoushanMap.complete) {
+          shoushanMap.onload = () => chart.draw();
+          return;
+        }
+
+        const { ctx, chartArea } = chart;
+        if (!chartArea) return;
+
+        const { left, top, width, height } = chartArea;
+        ctx.save();
+        ctx.beginPath();
+        ctx.rect(left, top, width, height);
+        ctx.clip();
+        ctx.drawImage(shoushanMap, left, top, width, height);
+        ctx.restore();
+      },
+    };
+
     fig10 = new Chart(canvas, {
       type: 'scatter',
       data: { datasets },
+      plugins: [shoushanMapPlugin],
       options: {
         animation: false,
         maintainAspectRatio: true,
@@ -285,13 +330,11 @@ document.addEventListener('livewire:init', () => {
             min: 0,
             max: 150,
             ticks: { stepSize: 10 },
-            title: { display: true, text: 'X (m)' },
           },
           y: {
             min: 0,
             max: 70,
             ticks: { stepSize: 10 },
-            title: { display: true, text: 'Y (m)' },
           },
         },
       },
@@ -308,10 +351,17 @@ function drawSpeciesBarChart(canvasId, datasets, showLegend = true) {
     return new Chart(canvas, {
         type: 'bar',
         data: { datasets },
+        plugins: [speciesChartAreaBorder],
         options: {
             animation: false,
             plugins: {
                 legend: { display: showLegend, align: 'end' },
+            },
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    ticks: { precision: 0 },
+                },
             },
         },
     });
@@ -328,6 +378,7 @@ function drawChart1(censusA, censusR, censusD) {
 
     const config = {
         type: "bar",
+        plugins: [speciesChartAreaBorder],
         data: {
             // labels: ['1', '2', '3', '4'],
             datasets: [
@@ -350,6 +401,12 @@ function drawChart1(censusA, censusR, censusD) {
             plugins: {
                 legend: {
                     align: "end",
+                },
+            },
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    ticks: { precision: 0 },
                 },
             },
         },
@@ -381,6 +438,7 @@ function drawChart2(groupedCounts) {
     }
     const config = {
         type: "bar",
+        plugins: [speciesChartAreaBorder],
         data: {
             // labels: ['1', '2', '3', '4'],
             datasets: [
@@ -395,6 +453,12 @@ function drawChart2(groupedCounts) {
             plugins: {
                 legend: {
                     display: false, // 禁用图例
+                },
+            },
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    ticks: { precision: 0 },
                 },
             },
             barThickness: 50, //barwidth
@@ -500,7 +564,10 @@ function drawChart3(group) {
             maintainAspectRatio: true,
             scales: {
                 x: {
-                    // display: false, // 禁用 x 轴
+                    // 福山 500 × 500 m 樣區；座標除以 20 後固定為 0–25。
+                    // 固定完整範圍，避免依單一物種分布自動縮放而裁切底圖。
+                    min: 0,
+                    max: 25,
                     border: {
                         // 框線繪製
                         display: true,
@@ -512,11 +579,10 @@ function drawChart3(group) {
                         width: 1,
                         z: 1,
                     },
-                    // min: 0,
-                    // max: 500,
                 },
                 y: {
-                    // display: false, // 禁用 x 轴
+                    min: 0,
+                    max: 25,
                     border: {
                         // 框線繪製
                         display: true,
@@ -528,8 +594,6 @@ function drawChart3(group) {
                         width: 1,
                         z: 1,
                     },
-                    // min: 0,
-                    // max: 200,
                 },
             },
             plugins: {

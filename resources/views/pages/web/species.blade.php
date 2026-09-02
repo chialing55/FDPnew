@@ -1,13 +1,19 @@
 @extends('layouts/webpage')
 
-@section('title', '樣區植物名錄-' . __('web.title'))
+@section('title', __('web.species_title') . ' - ' . __('web.title'))
 
 @section('css')
     @parent
     <style>
         .page {
-            width: 100%;
-            max-width: 100%;
+            width: min(100% - 2rem, 1280px);
+            max-width: 1280px;
+        }
+
+        @media (max-width: 767px) {
+            .page {
+                width: min(100% - 1.5rem, 1280px);
+            }
         }
     </style>
 @endsection

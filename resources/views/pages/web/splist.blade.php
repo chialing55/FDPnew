@@ -1,5 +1,5 @@
 @extends('layouts/webpage')
-@section('title', '監測植物')
+@section('title', __('web.plants_title') . ' - ' . __('web.title'))
 @section('pagejs')
     <script>
         // var element = document.getElementById("#list1");

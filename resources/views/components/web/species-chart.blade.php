@@ -25,7 +25,7 @@
         'species-chart-frame',
         'species-chart-map-frame' => $map,
     ]) wire:ignore>
-        <div class="species-chart-placeholder">圖表載入中...</div>
+        <div class="species-chart-placeholder">{{ __('web.chart_loading') }}</div>
         <canvas id="{{ $canvasId }}"></canvas>
     </div>
 </div>

@@ -10,7 +10,8 @@
     @php
         $locale = app()->getLocale(); // 'zh-TW' 或 'en'
     @endphp
-    <div class='relative flex items-center justify-between' x-data="{ open: false }">
+    <div class='relative mx-auto flex max-w-7xl items-center justify-between' x-data="{ open: false }"
+        @keydown.escape.window="open = false">
         {{-- <a href='/web/index'> --}}
         <div class="flex items-center justify-between p-2 text-black md:p-0">
             @if ($locale === 'zh-TW')
@@ -25,7 +26,7 @@
             {{-- 漢堡按鈕：只在手機顯示 --}}
         </div>
         <div>
-            <button @click="open = !open"
+            <button @click="open = !open" :aria-expanded="open.toString()" aria-controls="mobile-web-navigation"
                 class="m-2 rounded-lg border bg-white p-2 shadow-sm focus:outline-none lg:hidden"
                 aria-label="Toggle navigation">
                 <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24"
@@ -85,8 +86,8 @@
         </nav>
 
         {{-- 手機版：收合式導覽列 --}}
-        <nav x-show="open" x-transition x-cloak
-            class="web-nav absolute right-2 top-full mt-2 space-y-2 rounded-lg border bg-gray-100 px-4 py-3 text-right text-sm text-gray-800 shadow-lg lg:hidden">
+        <nav id="mobile-web-navigation" x-show="open" x-transition x-cloak @click.outside="open = false"
+            class="web-nav absolute inset-x-2 top-full mt-2 max-h-[calc(100vh-5rem)] space-y-1 overflow-y-auto rounded-lg border bg-white p-2 text-left text-sm text-gray-800 shadow-lg lg:hidden sm:left-auto sm:w-96">
             {{-- 首頁 --}}
 
             <div><a href="/">{{ __('web.nav_home') }}</a></div>
