@@ -10,7 +10,7 @@
     @php
         $locale = app()->getLocale(); // 'zh-TW' 或 'en'
     @endphp
-    <div class='relative mx-auto flex max-w-7xl items-center justify-between' x-data="{ open: false }"
+    <div class="relative flex w-full items-center justify-between" x-data="{ open: false }"
         @keydown.escape.window="open = false">
         {{-- <a href='/web/index'> --}}
         <div class="flex items-center justify-between p-2 text-black md:p-0">
