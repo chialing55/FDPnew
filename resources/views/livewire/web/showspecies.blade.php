@@ -49,17 +49,22 @@
         }
 
         .species-research-flag-row {
-            display: grid;
-            grid-template-columns: auto minmax(0, 1fr);
-            gap: 8px;
-            align-items: start;
-        }
-
-        .species-research-subjects {
             display: flex;
             flex-wrap: wrap;
             gap: 6px;
+            align-items: center;
             justify-content: flex-end;
+        }
+
+        .species-research-subjects {
+            display: contents;
+        }
+
+        .spheader h2 {
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 0.35rem;
         }
 
         .species-description-box {
@@ -293,7 +298,6 @@
             }
 
             .species-research-flag-row {
-                grid-template-columns: auto auto;
                 justify-content: start;
             }
 
@@ -360,8 +364,8 @@
     </div>
     <div class='spheader'>
         <div>
-            <h2><span class="species-scientific-name">{!! \App\Support\PlantCatalog\ScientificNameFormatter::format($speciesinfo['now_simname']) !!}</span>
-                <span class="species-chinese-name" style='margin-left: 30px'>{{ ($speciesinfo['checklist_chname'] ?? null) ?: $speciesinfo['csp'] }}</span>
+            <h2><span class="species-chinese-name">{{ ($speciesinfo['checklist_chname'] ?? null) ?: $speciesinfo['csp'] }}</span>
+                <span class="species-scientific-name">{!! \App\Support\PlantCatalog\ScientificNameFormatter::format($speciesinfo['now_simname']) !!}</span>
             </h2>
             <p>
                 @if ($speciesinfo['now_simname'] != $speciesinfo['spcode_simname'])
