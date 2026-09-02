@@ -139,7 +139,12 @@ class Showspecies extends Component
         $this->maxDBH = (clone $latestTreeBase)->where($latestTreeTable.'.branch', '0')->max($latestTreeTable.'.dbh');
         $this->countSeeds = FsSeedsFulldata::where('sp', $detailSpcode)->sum('seeds');
         $this->countFlower = FsSeedsFulldata::where('sp', $detailSpcode)->where('code', '6')->count();
-        $this->countSeedlings = FsSeedlingData::where('csp', $this->speciesinfo['csp'])->whereColumn('tag', 'mtag')->sum('ind');
+        $this->countSeedlings = FsSeedlingData::where('csp', $this->speciesinfo['csp'])
+            ->where('sprout', 'FALSE')
+            ->whereNotNull('mtag')
+            ->where('mtag', '!=', '')
+            ->distinct()
+            ->count('mtag');
         $this->countNjsSeedlings = $this->nanjenshanSeedlingCount();
         $this->loadShoushanTreeSummary();
 
@@ -279,10 +284,13 @@ class Showspecies extends Component
         }
 
         return DB::connection('njs_seedling')
-            ->table('seedling_individuals')
-            ->where('spcode', $nanjenshanSpcode)
-            ->distinct('tag')
-            ->count('tag');
+            ->table('seedling_individuals as individuals')
+            ->join('seedling_records as records', 'records.tag', '=', 'individuals.tag')
+            ->where('individuals.spcode', $nanjenshanSpcode)
+            ->whereNotNull('individuals.tag')
+            ->where('individuals.tag', '!=', '')
+            ->distinct()
+            ->count('individuals.tag');
     }
 
     private function shoushanSpcode(): ?string
@@ -676,7 +684,7 @@ class Showspecies extends Component
 
         $seedlingSeries1 = FsSeedlingData::select(DB::raw('SUM(ind) as sum'), 'year', 'month')
             ->where('csp', $this->speciesinfo['csp'])
-            ->whereColumn('tag', 'mtag')
+            ->where('sprout', 'FALSE')
             ->where('status', 'A')
             ->groupBy('year', 'month')
             ->get()
@@ -689,7 +697,7 @@ class Showspecies extends Component
             ->toArray();
         $seedlingDateSeries = FsSeedlingData::select(DB::raw("CONCAT(year, '-', month) as ym"))
             ->where('csp', $this->speciesinfo['csp'])
-            ->whereColumn('tag', 'mtag')
+            ->where('sprout', 'FALSE')
             ->where('status', 'A')
             ->groupBy('year', 'month')
             ->pluck('ym')
