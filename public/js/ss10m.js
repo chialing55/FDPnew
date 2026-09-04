@@ -163,7 +163,7 @@ function ssenvitable(envi, site){
 
   var hiddenColumns =[];
 
-  return createHandsontable(container, columns, envi, saveButtonName, `${urlbase}/saveenvi`, tabletype, colWidths, hiddenColumns, colHeaders, 1 );
+  return createHandsontable(container, columns, envi, saveButtonName, `${urlbase}/envi`, tabletype, colWidths, hiddenColumns, colHeaders, 1 );
 
 }
 
@@ -208,7 +208,7 @@ function ssdatatable(data, thispage, pps, site){
       columns: [16],
     };
 
-  return createHandsontable(container, columns, data2, saveButtonName, `${urlbase}/savedata`, tabletype, colWidths, hiddenColumns, colHeaders, thispage );
+  return createHandsontable(container, columns, data2, saveButtonName, `${urlbase}/data`, tabletype, colWidths, hiddenColumns, colHeaders, thispage );
 }
 
   const tagValidator = (value, callback) => {
@@ -252,7 +252,7 @@ $(`button[name=recruitsave${site}]`).off();
   var colHeaders=["Date","plot","5x","5y", "tag", "b", "csp", "code","dbh","ill","leave","pom","note","漏資料"];
 
   var hiddenColumns =[];
-  return createHandsontable(container, columns, emptytable, saveButtonName, `${urlbase}/saverecruit`, tabletype, colWidths, hiddenColumns, colHeaders, thispage );
+  return createHandsontable(container, columns, emptytable, saveButtonName, `${urlbase}/recruit`, tabletype, colWidths, hiddenColumns, colHeaders, thispage );
 
 }
 
@@ -291,7 +291,7 @@ function alternotetable(alterdata, stemid, entry, thispage){
   var hiddenColumns ={
       columns: [9],
     };
-  return createHandsontable(container, columns, alterdata, saveButtonName, `${urlbase}/savealternote`, tableType, colWidths, hiddenColumns, colHeaders, thispage );  
+  return createHandsontable(container, columns, alterdata, saveButtonName, `${urlbase}/alternote`, tableType, colWidths, hiddenColumns, colHeaders, thispage );
 
 }
 
@@ -327,7 +327,7 @@ function ssaddcovtable(covs, site, emptytable2, covcsplist){
   var hiddenColumns ={
       columns: [9],
     };
-  return createHandsontable(container, columns, emptytable2, saveButtonName, `${urlbase}/10msaveaddcov`, tableType, colWidths, hiddenColumns, colHeaders, thispage );  
+  return createHandsontable(container, columns, emptytable2, saveButtonName, `${urlbase}/10m/cov/add`, tableType, colWidths, hiddenColumns, colHeaders, thispage );
 
 }
 
@@ -362,7 +362,7 @@ $(`button[name=covsave${site}]`).off();
   var hiddenColumns ={
       columns: [10],
     };
-  return createHandsontable(container, columns, covs, saveButtonName, `${urlbase}/10msavecov`, tableType, colWidths, hiddenColumns, colHeaders, thispage );  
+  return createHandsontable(container, columns, covs, saveButtonName, `${urlbase}/10m/cov`, tableType, colWidths, hiddenColumns, colHeaders, thispage );
 
 }
 
@@ -374,9 +374,9 @@ $(`button[name=covsave${site}]`).off();
     {
       $('.covsavenote').html('');
 
-      var saveUrl=`${urlbase}/10mdeletecov/${id}/${entry}`;
-      var ajaxData={};
-      var ajaxType='get';
+      var saveUrl=`${urlbase}/10m/cov/${id}/${entry}`;
+      var ajaxData={_method: 'DELETE'};
+      var ajaxType='post';
 
       function handleSuccess(res) {
             if (res.covsavenote !=''){
@@ -545,7 +545,7 @@ function deleteCensusData(stemid, from){
     {
       $('.altersavenote').html('');
 
-      var saveUrl=`${urlbase}/deletecensusdata`;
+      var saveUrl=`${urlbase}/census/delete`;
       var ajaxData={
             stemid: stemid,
             from: from,

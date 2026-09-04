@@ -2,12 +2,17 @@
 
 $('.listlink').on('click', function(){
 	let type=$(this).attr('type');
+	let target=$(this).data('url');
+	if (target){
+		location.href=target;
+		return;
+	}
 	if (typeof type!='undefined'){
-	location.href=(`/admin/shoushan/plot/${type}`);
+	location.href=(`/admin/shoushan/tree/${type.replace('_', '/')}`);
 	}
 
 })
-let urlbase='/ssPlot';
+let urlbase='/admin/shoushan/tree';
 
 
 // 使用
@@ -22,7 +27,7 @@ handleHoverEvents('.list6', '.list6inner');
 // console.log(qx, qy);
     // var tempwindow1=window.open('_blank');
     if (plot!=''){
-      let url=`${urlbase}/10m-record-pdf/${plot}`;
+      let url=`${urlbase}/pdf/10m/record/${plot}`;
       window.open(url);
     }
   });
@@ -33,7 +38,7 @@ handleHoverEvents('.list6', '.list6inner');
 // console.log(qx, qy);
     // var tempwindow1=window.open('_blank');
     if (qx!='' && qy!=''){
-      let url=`${urlbase}/1ha-record-pdf/${qx}/${qy}`;
+      let url=`${urlbase}/pdf/1ha/record/${qx}/${qy}`;
       window.open(url);
     }
   });
@@ -104,7 +109,7 @@ function ssdatatableupdate(data, thispage, pps){
 }
 
 function deleteid(stemid, entry, thispage){  //刪除新增樹資料
-  var saveUrl=`${urlbase}/deletedata/${stemid}/${entry}/${plotType}/${thispage}`;
+  var saveUrl=`${urlbase}/data/${stemid}/${entry}/${plotType}/${thispage}`;
   handleDeleteid(stemid,  saveUrl)
 }
 
@@ -117,7 +122,7 @@ function alternote(stemid, entry, thispage, event) {
 
 
 function deletealternote(stemid, plotType, thispage){
-  var saveUrl=`${urlbase}/deletealter/${stemid}/${entry}/${plotType}/${thispage}`;
+  var saveUrl=`${urlbase}/alter/${stemid}/${entry}/${plotType}/${thispage}`;
   handleDeleteAlternote(stemid, plotType, saveUrl)
 }
 

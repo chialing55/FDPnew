@@ -18,7 +18,19 @@ class GeoTreeSurveyController extends Controller
 
     public function entry(Request $request): View
     {
-        return $this->page($request, 'pages.fushan.geo_tree_survey_entry');
+        return $this->page($request, 'pages.fushan.geo_tree_survey_entry', [
+            'entry' => (string) ($request->route('entry') ?? '1'),
+        ]);
+    }
+
+    public function note(Request $request): View
+    {
+        return $this->page($request, 'pages.fushan.geo_tree_survey_note');
+    }
+
+    public function compare(Request $request): View
+    {
+        return $this->page($request, 'pages.fushan.geo_tree_survey_compare');
     }
 
     public function dataviewer(Request $request): View

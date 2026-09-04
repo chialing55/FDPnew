@@ -159,6 +159,22 @@ Route::middleware(['auth', 'approved'])->prefix('admin')->name('admin.')->group(
                 ->defaults('site', 'fushan')
                 ->name('entry');
 
+            Route::get('/note', [GeoTreeSurveyController::class, 'note'])
+                ->defaults('site', 'fushan')
+                ->name('note');
+
+            Route::get('/entry1', [GeoTreeSurveyController::class, 'entry'])
+                ->defaults('site', 'fushan')->defaults('entry', '1')
+                ->name('entry.1');
+
+            Route::get('/entry2', [GeoTreeSurveyController::class, 'entry'])
+                ->defaults('site', 'fushan')->defaults('entry', '2')
+                ->name('entry.2');
+
+            Route::get('/compare', [GeoTreeSurveyController::class, 'compare'])
+                ->defaults('site', 'fushan')
+                ->name('compare');
+
             Route::get('/dataviewer', [GeoTreeSurveyController::class, 'dataviewer'])
                 ->defaults('site', 'fushan')
                 ->name('dataviewer');

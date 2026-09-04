@@ -1,6 +1,6 @@
 @extends('layouts/ssplot') 
 @section('pagejs')
-<script src="{{asset('/js/ss1ha.js')}}"></script>
+<script src="{{ asset('/js/ss1ha.js') }}?v={{ filemtime(public_path('js/ss1ha.js')) }}"></script>
 
 <script>
 

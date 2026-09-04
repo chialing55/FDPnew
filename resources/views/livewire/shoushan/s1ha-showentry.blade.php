@@ -4,7 +4,7 @@
 </div>
     <h2> 2023 年 壽山 1.05 ha 永久樣區 第 {{$entry}} 次資料輸入</h2>
     <div style='margin-top:10px'>
-         <p>請先詳閱 <a href="{{--{{asset('/shoushan/plot/10m_note')}}--}}"><b>資料輸入注意事項</b></a></p>  
+         <p>請先詳閱 <a href="{{ route('admin.shoushan.tree.1ha.note') }}"><b>資料輸入注意事項</b></a></p>
         <p> 輸入者 {{$user}}，輸入日期 {{date("Y-m-d")}}</p>
     </div>
 

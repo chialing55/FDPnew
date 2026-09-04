@@ -107,7 +107,7 @@ function ssenvitable(envi, qx, qy ,sqx, sqy){
 
   var hiddenColumns =[];
 
-  return createHandsontable(container, columns, envi, saveButtonName, `${urlbase}/saveenvi`, tableType, colWidths, hiddenColumns, colHeaders, 1 );
+  return createHandsontable(container, columns, envi, saveButtonName, `${urlbase}/envi`, tableType, colWidths, hiddenColumns, colHeaders, 1 );
 
 
 }
@@ -154,7 +154,7 @@ function ssdatatable(data, thispage, pps){
       columns: [17],
     };
 
-  return createHandsontable(container, columns, data2, saveButtonName, `${urlbase}/savedata`, tableType, colWidths, hiddenColumns, colHeaders, thispage );
+  return createHandsontable(container, columns, data2, saveButtonName, `${urlbase}/data`, tableType, colWidths, hiddenColumns, colHeaders, thispage );
 
 
  
@@ -194,7 +194,7 @@ function ssrecruittable(data, emptytable, csplist){
   var colHeaders=["Date","10x","10y","5x","5y", "tag", "b", "csp", "code","dbh","ill","leave","pom","note","漏資料"];
 
   var hiddenColumns =[];
-  return createHandsontable(container, columns, emptytable, saveButtonName, `${urlbase}/saverecruit`, tableType, colWidths, hiddenColumns, colHeaders, thispage );
+  return createHandsontable(container, columns, emptytable, saveButtonName, `${urlbase}/recruit`, tableType, colWidths, hiddenColumns, colHeaders, thispage );
 
 }
 
@@ -233,7 +233,7 @@ function alternotetable(alterdata, stemid, entry, thispage){
   var hiddenColumns ={
       columns: [10],
     };
-  return createHandsontable(container, columns, alterdata, saveButtonName, `${urlbase}/savealternote`, tableType, colWidths, hiddenColumns, colHeaders, thispage );
+  return createHandsontable(container, columns, alterdata, saveButtonName, `${urlbase}/alternote`, tableType, colWidths, hiddenColumns, colHeaders, thispage );
 
 }
 
@@ -368,7 +368,7 @@ function deleteCensusData(stemid, from){
     {
       $('.altersavenote').html('');
 
-      var saveUrl=`${urlbase}/deletecensusdata`;
+      var saveUrl=`${urlbase}/census/delete`;
       var ajaxData={
             stemid: stemid,
             from: from,

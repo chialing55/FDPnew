@@ -26,7 +26,7 @@
 <script src="{{asset('/js/grid.locale-en.js')}}"></script> --}}
     {{-- <script src="{{asset('/js/jquery.caret-1.5.2.min.js')}}"></script> --}}
     <script src="{{ asset('/js/create-handsontable.js') }}"></script>
-    <script src="{{ asset('/js/ssplot.js') }}"></script>
+    <script src="{{ asset('/js/ssplot.js') }}?v={{ filemtime(public_path('js/ssplot.js')) }}"></script>
     <script src="{{ asset('/js/tree-map.js') }}"></script>
 
     @yield('pagejs')
@@ -42,7 +42,7 @@
 
 @section('headerList')
     <div class='headerlist iflex'>
-        <div class='list list1 listlink' type='doc'>相關文件
+        <div class='list list1 listlink' type='doc' data-url="{{ route('admin.shoushan.tree.doc') }}">相關文件
             <hr>
         </div>
         <div class='list list6 '>森林觀測樣區
@@ -59,42 +59,42 @@
 @section('headerListinner')
 
     <div class='listinner list4inner'>
-        <li class='innerlist list41' type='1ha_note'>資料輸入注意事項
+        <li class='innerlist list41 listlink' type='1ha_note' data-url="{{ route('admin.shoushan.tree.1ha.note') }}">資料輸入注意事項
             <hr>
         </li>
-        <li class='innerlist list42 listlink' type='1ha_entry1'>第一次輸入
+        <li class='innerlist list42 listlink' type='1ha_entry1' data-url="{{ route('admin.shoushan.tree.1ha.entry.1') }}">第一次輸入
             <hr>
         </li>
-        <li class='innerlist list43 listlink' type='1ha_entry2'>第二次輸入
+        <li class='innerlist list43 listlink' type='1ha_entry2' data-url="{{ route('admin.shoushan.tree.1ha.entry.2') }}">第二次輸入
             <hr>
         </li>
-        <li class='innerlist list44 listlink' type='1ha_compare'>資料檢查/比對
+        <li class='innerlist list44 listlink' type='1ha_compare' data-url="{{ route('admin.shoushan.tree.1ha.compare') }}">資料檢查/比對
             <hr>
         </li>
-        <li class='innerlist list46 listlink' type='1ha_update'>資料修改
+        <li class='innerlist list46 listlink' type='1ha_update' data-url="{{ route('admin.shoushan.tree.1ha.update') }}">資料修改
             <hr>
         </li>
-        <li class='innerlist list45 listlink' type='1ha_dataviewer'>資料檢視
+        <li class='innerlist list45 listlink' type='1ha_dataviewer' data-url="{{ route('admin.shoushan.tree.1ha.dataviewer') }}">資料檢視
             <hr>
         </li>
-        <li class='innerlist list47 listlink' type='1ha_map'>植株位置輸入
+        <li class='innerlist list47 listlink' type='1ha_map' data-url="{{ route('admin.shoushan.tree.1ha.map') }}">植株位置輸入
             <hr>
         </li>
 
     </div>
 
     <div class='listinner list6inner'>
-        <li class='innerlist list61 ' type='10m_note'>資料輸入注意事項
+        <li class='innerlist list61 listlink' type='10m_note' data-url="{{ route('admin.shoushan.tree.10m.note') }}">資料輸入注意事項
             <hr>
         </li>
         {{--           <li class='innerlist list62 listlink' type='10m_entry1' >第一次輸入<hr></li>
           <li class='innerlist list63 listlink' type='10m_entry2' >第二次輸入<hr></li> --}}
         {{-- <li class='innerlist list64 listlink' type='10m_compare'>資料檢查/比對<hr></li> --}}
         {{-- <li class='innerlist list66 listlink' type='10m_update'>資料修改<hr></li> --}}
-        <li class='innerlist list65 listlink' type='10m_dataviewer'>資料檢視
+        <li class='innerlist list65 listlink' type='10m_dataviewer' data-url="{{ route('admin.shoushan.tree.10m.dataviewer') }}">資料檢視
             <hr>
         </li>
-        <li class='innerlist list67 listlink' type='10m_map'>植株位置輸入
+        <li class='innerlist list67 listlink' type='10m_map' data-url="{{ route('admin.shoushan.tree.10m.map') }}">植株位置輸入
             <hr>
         </li>
 

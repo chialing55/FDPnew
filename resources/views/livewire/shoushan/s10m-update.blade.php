@@ -50,7 +50,7 @@ if($type==2){$addclass2='thistype'; $addclass1='';}
     <div id='simplenote' class='text_box' style='max-width: 900px;'>
     <ul>
         <li>主幹才能修改位置資訊及物種名稱。</li>
-        <li>若為更改號碼，請至<a href='{{asset('/shoushan/plot/10m_dataviewer')}}'>資料檢視</a>檢查是否重號或是否有主幹。(有時是分支要更正為獨立個體，但特殊修改沒有寫 b=0)</li>
+        <li>若為更改號碼，請至<a href="{{ route('admin.shoushan.tree.10m.dataviewer') }}">資料檢視</a>檢查是否重號或是否有主幹。(有時是分支要更正為獨立個體，但特殊修改沒有寫 b=0)</li>
         <li>若為換號，會因另一號碼尚未更新而出現重號的錯誤。可先給予另一位使用之編號，然後更新互相換號的另一個號碼後，再重新更新為正確的。如：200600.2與200600.3更換分支號，先將200600.2更新為200600.99，然後將200600.3更新為200600.2後，再將原本的200600.2更新為200600.3。</li>
         <li>如為分支改為新個體，換號且換物種，請先更新為主幹後再改物種名稱。</li>
 
@@ -129,4 +129,3 @@ if($type==2){$addclass2='thistype'; $addclass1='';}
     @endif
     @endif
 </div>
-
