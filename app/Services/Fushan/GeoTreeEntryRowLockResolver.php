@@ -10,7 +10,8 @@ final class GeoTreeEntryRowLockResolver
     public function resolve(array $records): array
     {
         $rules = config('tree-entry.surveys.fushan_geo_trees.rowLocks', []);
-        $stemids = collect($records)->pluck('stemid')->filter()->map(fn ($value) => (string) $value)->unique()->values();
+        // Stem IDs are identifiers: branches .1 and .10 must remain distinct.
+        $stemids = collect($records)->pluck('stemid')->filter()->map(fn ($value) => (string) $value)->uniqueStrict()->values();
         $previousByStemid = Census5Part::query()
             ->whereIn('stemid', $stemids)
             ->get(['stemid', 'dbh', 'pom'])
