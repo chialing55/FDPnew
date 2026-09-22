@@ -41,8 +41,9 @@ class Index extends Component
             ->with('page')
             ->where('is_active', true)
             ->whereHas('page', fn ($query) => $query->where('nav_group', 'sites'))
-            ->get()
-            ->sortBy(fn (Site $site): array => [$site->page?->nav_order ?? PHP_INT_MAX, $site->id]);
+            ->orderBy('sort_order')
+            ->orderBy('id')
+            ->get();
 
         $this->siteCount = $sites->count();
         $this->speciesCount = DB::connection('plant_catalog')

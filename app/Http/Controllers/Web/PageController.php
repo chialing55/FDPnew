@@ -9,6 +9,10 @@ class PageController extends Controller
 {
     public function show($slug)
     {
+        if ($slug === 'results') {
+            abort_unless(config('research_outputs.public_enabled'), 404);
+        }
+
         $page = Page::with(['site', 'subject'])->where('slug', $slug)->firstOrFail();
 
         if ($page->nav_group === 'sites') {

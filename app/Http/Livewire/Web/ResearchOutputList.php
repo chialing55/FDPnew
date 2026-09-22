@@ -17,6 +17,8 @@ class ResearchOutputList extends Component
 
     public function mount(): void
     {
+        abort_unless(config('research_outputs.public_enabled'), 404);
+
         $this->initializeSiteSubjectFilters();
     }
 

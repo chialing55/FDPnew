@@ -11,7 +11,12 @@ class ListResearchOutputs extends ListRecords
 {
     protected static string $resource = ResearchOutputResource::class;
 
-    protected ?string $subheading = '先從列表選擇一筆成果；點擊整列或「編輯內容」即可進入編輯頁面。';
+    protected ?string $subheading = '目前前台暫停顯示研究成果；既有成果仍保留，可從列表選擇並編輯。';
+
+    public function getTitle(): string
+    {
+        return '研究成果（暫停顯示）';
+    }
 
     protected function getHeaderActions(): array
     {

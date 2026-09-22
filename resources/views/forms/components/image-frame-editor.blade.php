@@ -4,6 +4,8 @@
     $image = is_array($image) ? array_values($image)[0] ?? null : $image;
     $preview = $getPreviewData();
     $previewLayout = data_get($preview, 'layout', 'image_left');
+    $sitePreviewPrefix = str_contains($statePath, '.') ? \Illuminate\Support\Str::beforeLast($statePath, '.') : '';
+    $siteContentStatePath = $sitePreviewPrefix !== '' ? $sitePreviewPrefix . '.description_zh_tw' : null;
     $showsTextPreview = $showsTextPreview();
     $imageUrl = match (true) {
         $image instanceof \Livewire\Features\SupportFileUploads\TemporaryUploadedFile => $image->temporaryUrl(),
@@ -16,10 +18,13 @@
     <div class="changyang-frame-editor"
         x-data="{
             state: @entangle($statePath),
+            siteContent: @js(data_get($preview, 'content', '')),
             dragging: false,
             viewportWidth: document.documentElement.clientWidth,
             previewScale: 1,
             previewHeight: 0,
+            sitePreviewScale: 1,
+            sitePreviewHeight: null,
             resizeObserver: null,
             resizePreview() {
                 if (! this.$refs.heroViewport || ! this.$refs.frame) return;
@@ -27,13 +32,28 @@
                 this.previewScale = Math.min(1, this.$refs.heroViewport.clientWidth / this.viewportWidth);
                 this.previewHeight = this.$refs.frame.offsetHeight * this.previewScale;
             },
+            resizeSitePreview() {
+                if (! this.$refs.siteViewport || ! this.$refs.siteFrame) return;
+                if (! this.$refs.siteViewport.clientWidth) return;
+                this.sitePreviewScale = Math.min(1, this.$refs.siteViewport.clientWidth / 1224);
+                this.sitePreviewHeight = this.$refs.siteFrame.offsetHeight * this.sitePreviewScale;
+            },
             init() {
                 this.$nextTick(() => {
-                    if (! this.$refs.heroViewport) return;
-                    this.resizeObserver = new ResizeObserver(() => this.resizePreview());
-                    this.resizeObserver.observe(this.$refs.heroViewport);
-                    this.resizeObserver.observe(this.$refs.frame);
+                    this.resizeObserver = new ResizeObserver(() => {
+                        this.resizePreview();
+                        this.resizeSitePreview();
+                    });
+                    if (this.$refs.heroViewport && this.$refs.frame) {
+                        this.resizeObserver.observe(this.$refs.heroViewport);
+                        this.resizeObserver.observe(this.$refs.frame);
+                    }
+                    if (this.$refs.siteViewport && this.$refs.siteFrame) {
+                        this.resizeObserver.observe(this.$refs.siteViewport);
+                        this.resizeObserver.observe(this.$refs.siteFrame);
+                    }
                     this.resizePreview();
+                    this.resizeSitePreview();
                 });
             },
             destroy() { this.resizeObserver?.disconnect(); },
@@ -47,8 +67,9 @@
                 this.state.position_y = Math.min(100, Math.max(0, ((event.clientY - rect.top) / rect.height) * 100));
             },
         }"
-        x-init="normalize()"
-        @resize.window="resizePreview()"
+        x-init="normalize(); $nextTick(() => resizeSitePreview())"
+        @resize.window="resizePreview(); resizeSitePreview()"
+        @cms-content-change.window="if (@js($siteContentStatePath) && $event.detail.statePath === @js($siteContentStatePath)) siteContent = $event.detail.value"
     >
         @if (data_get($preview, 'mode') === 'block')
             @include('forms.components.changyang-block-preview')
@@ -83,20 +104,29 @@
                 <label>上下位置 <input type="range" min="0" max="100" step="1" x-model.number="state.position_y"><output x-text="`${Math.round(state.position_y)}%`"></output></label>
                 <label>圖片放大 <input type="range" min="1" max="{{ \App\Support\ChangYang\ImageFrame::MAX_SCALE }}" step="0.05" x-model.number="state.scale"><output x-text="`${Math.round(state.scale * 100)}%`"></output></label>
             </div>
-            <article class="changyang-frame-editor__site-card">
-                <div class="changyang-frame-editor__site-image" x-ref="frame"
-                    @pointerdown.prevent="dragging = true; move($event)"
-                    @pointermove="move($event)"
-                    @pointerup.window="dragging = false"
-                    @pointercancel.window="dragging = false">
-                    <img src="{{ $imageUrl }}" alt=""
-                        :style="`object-position: ${state.position_x}% ${state.position_y}%; transform: scale(${state.scale}); transform-origin: ${state.position_x}% ${state.position_y}%`">
-                </div>
-                <div class="changyang-frame-editor__site-text">
-                    <h1>{{ data_get($preview, 'heading') ?: '樣區名稱' }}</h1>
-                    @if (filled(data_get($preview, 'content')))<div class="web-content">{!! data_get($preview, 'content') !!}</div>@else <p>樣區簡介會顯示在這裡。</p>@endif
-                </div>
-            </article>
+            <div class="changyang-frame-editor__site-viewport" x-ref="siteViewport" :style="sitePreviewHeight ? `height: ${sitePreviewHeight}px` : ''">
+                <article @class(['changyang-frame-editor__site-card', 'changyang-frame-editor__site-card--image-right' => data_get($preview, 'image_right')])
+                    x-ref="siteFrame"
+                    :style="{ transform: `scale(${sitePreviewScale})`, transformOrigin: 'top left' }">
+                    <div class="changyang-frame-editor__site-image"
+                        x-ref="frame"
+                        @pointerdown.prevent="dragging = true; move($event)"
+                        @pointermove="move($event)"
+                        @pointerup.window="dragging = false"
+                        @pointercancel.window="dragging = false">
+                        <img src="{{ $imageUrl }}" alt=""
+                            class="absolute inset-0 h-full w-full rounded-lg object-cover"
+                            :style="`object-position: ${state.position_x}% ${state.position_y}%; transform: scale(${state.scale}); transform-origin: ${state.position_x}% ${state.position_y}%`">
+                    </div>
+                    <div class="changyang-frame-editor__site-text">
+                        <h1 class="mt-0 text-2xl capitalize md:text-5xl" style="text-align: {{ data_get($preview, 'image_right') ? 'left' : 'right' }}; text-shadow: 1px 1px 4px rgba(51, 77, 43, 0.7); line-height:2rem;">
+                            {{ data_get($preview, 'heading') ?: '樣區名稱' }}
+                        </h1>
+                        <div class="web-content text-sm text-gray-600" x-show="siteContent" x-html="siteContent"></div>
+                        <p class="text-sm text-gray-600" x-show="! siteContent">樣區簡介會顯示在這裡。</p>
+                    </div>
+                </article>
+            </div>
         @elseif ($imageUrl)
             <p class="changyang-frame-editor__help">在圖片內拖曳選擇取樣位置；使用滑桿放大。圖片寬度固定，調整高度可配合文字長度。</p>
             <div @class(['changyang-frame-editor__preview', 'changyang-frame-editor__preview--image-right' => $showsTextPreview && $previewLayout === 'image_right', 'changyang-frame-editor__preview--image-only' => ! $showsTextPreview])>
@@ -129,9 +159,8 @@
             <p class="changyang-frame-editor__empty">請先上傳或選擇圖片，才能調整取樣位置。</p>
         @endif
     </div>
-</x-dynamic-component>
 
-<style>
+    <style>
     .changyang-frame-editor { padding: 1rem; border: 1px solid #e3ded9; border-radius: .75rem; background: #faf8f6; }
     .changyang-frame-editor__help, .changyang-frame-editor__empty { margin: 0 0 .8rem; color: #625b54; font-size: .875rem; line-height: 1.5; }
     .changyang-frame-editor__preview { position: relative; display: grid; grid-template-columns: minmax(220px, 31%) minmax(0, 1fr); gap: 2.25rem; align-items: start; margin-top: 4.2rem; }
@@ -159,12 +188,17 @@
     .changyang-frame-editor__site-controls { display:grid; grid-template-columns:repeat(3, minmax(0, 1fr)); gap:.75rem 1.5rem; margin-bottom:1rem; }
     .changyang-frame-editor__site-controls label { display:grid; grid-template-columns:5rem 1fr 3.5rem; align-items:center; gap:.65rem; font-size:.875rem; }
     .changyang-frame-editor__site-controls output { color:#625b54; font-variant-numeric:tabular-nums; text-align:right; }
-    .changyang-frame-editor__site-card { display:flex; min-height:19rem; overflow:hidden; border:1px solid #e5e7eb; border-radius:.5rem; background:#fff; }
-    .changyang-frame-editor__site-image { position:relative; flex:0 0 60%; min-height:19rem; overflow:hidden; cursor:grab; touch-action:none; }
+    .changyang-frame-editor__site-viewport { min-height:12rem; overflow:hidden; }
+    /* Public homepage: 70rem container minus 2rem margins, with an 18px root font.
+       Explicit scoped styles are required: Filament does not load public Tailwind utilities. */
+    .changyang-frame-editor__site-card { display:flex; width:1224px; box-sizing:border-box; margin:0; padding:9px; border:1px solid #e5e7eb; border-radius:9px; background:white; font-weight:400; }
+    .changyang-frame-editor__site-card--image-right { flex-direction:row-reverse; }
+    .changyang-frame-editor__site-image { position:relative; flex:0 0 60%; min-height:216px; align-self:stretch; overflow:hidden; border-radius:9px; cursor:grab; touch-action:none; }
+    .changyang-frame-editor__site-image img { position:absolute; inset:0; display:block; width:100%; height:100%; max-width:none; object-fit:cover; pointer-events:none; user-select:none; }
+    .changyang-frame-editor__site-text { box-sizing:border-box; width:40%; min-width:0; padding:18px; text-align:left; }
+    .changyang-frame-editor__site-text > h1 { margin:0 0 18px; font-size:54px; font-weight:700; line-height:36px; color:#2f5249; text-align:right; }
+    .changyang-frame-editor__site-text > .web-content { font-size:18px; line-height:1.8; color:#374151; }
     .changyang-frame-editor__site-image:active { cursor:grabbing; }
-    .changyang-frame-editor__site-image img { position:absolute; inset:0; display:block; width:100%; height:100%; object-fit:cover; user-select:none; pointer-events:none; }
-    .changyang-frame-editor__site-text { flex:1; min-width:0; padding:1.25rem; color:#4b5563; font-size:.875rem; line-height:1.55; text-align:left; }
-    .changyang-frame-editor__site-text h1 { margin:0 0 1rem; color:#111827; font-size:clamp(1.5rem, 3vw, 2.5rem); line-height:1.1; text-shadow:1px 1px 4px rgba(51,77,43,.35); }
-    .changyang-frame-editor__site-text p { margin:0; color:#8b8179; }
-    @media (max-width: 640px) { .changyang-frame-editor__preview, .changyang-frame-editor__preview--image-right { display: block; } .changyang-frame-editor__frame { margin-bottom: 1rem; } .changyang-frame-editor__controls { width: 100%; } .changyang-frame-editor__hero-controls, .changyang-frame-editor__site-controls { grid-template-columns:1fr; } .changyang-frame-editor__site-card { display:block; } .changyang-frame-editor__site-image { min-height:14rem; } }
-</style>
+    @media (max-width: 640px) { .changyang-frame-editor__preview, .changyang-frame-editor__preview--image-right { display: block; } .changyang-frame-editor__frame { margin-bottom: 1rem; } .changyang-frame-editor__controls { width: 100%; } .changyang-frame-editor__hero-controls, .changyang-frame-editor__site-controls { grid-template-columns:1fr; } }
+    </style>
+</x-dynamic-component>

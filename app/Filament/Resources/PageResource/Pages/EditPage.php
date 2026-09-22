@@ -4,6 +4,8 @@ namespace App\Filament\Resources\PageResource\Pages;
 
 use App\Filament\Resources\PageResource;
 use App\Filament\Actions\ViewPublicPageAction;
+use App\Filament\Actions\SyncZoteroPublicationsAction;
+use App\Filament\Actions\PublicationPageActions;
 use App\Filament\Resources\SiteResource;
 use App\Filament\Resources\SubjectResource;
 use Filament\Actions;
@@ -23,7 +25,7 @@ class EditPage extends EditRecord
     {
         $name = $this->record->site?->name_zh_tw ?: $this->record->title_zh_tw;
 
-        if (in_array($this->record->slug, ['results', 'projects', 'about/news', 'about/team'], true)) {
+        if (in_array($this->record->slug, ['results', 'projects', 'publications', 'about/news', 'about/team'], true)) {
             return '編輯' . $name . '頁';
         }
 
@@ -57,6 +59,12 @@ class EditPage extends EditRecord
     protected function getHeaderActions(): array
     {
         return [
+            SyncZoteroPublicationsAction::make()
+                ->visible(fn (): bool => $this->record->slug === 'publications'),
+            PublicationPageActions::importCsv()
+                ->visible(fn (): bool => $this->record->slug === 'publications'),
+            PublicationPageActions::citationSettings()
+                ->visible(fn (): bool => $this->record->slug === 'publications'),
             ViewPublicPageAction::make(fn () => url('/' . ltrim($this->record->slug, '/'))),
             Actions\DeleteAction::make()
                 ->visible(fn (): bool => PageResource::canDelete($this->record)),

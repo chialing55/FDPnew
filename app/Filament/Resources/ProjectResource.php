@@ -3,6 +3,7 @@
 namespace App\Filament\Resources;
 
 use App\Filament\Resources\ProjectResource\Pages;
+use App\Filament\Support\CmsListPageNavigation;
 use App\Filament\Forms\ContentBlockForm;
 use App\Filament\Forms\ContentRelationForm;
 use App\Filament\Forms\PageBasicFields;
@@ -19,10 +20,15 @@ class ProjectResource extends Resource
     protected static ?string $model = Project::class;
     protected static ?string $navigationIcon = 'heroicon-o-clipboard-document-list';
     protected static ?string $navigationGroup = '研究成果';
-    protected static ?int $navigationSort = 2;
+    protected static ?int $navigationSort = 1;
     protected static ?string $navigationLabel = '研究計畫';
     protected static ?string $modelLabel = '研究計畫';
     protected static ?string $pluralModelLabel = '研究計畫';
+
+    public static function getNavigationItems(): array
+    {
+        return [CmsListPageNavigation::make('projects', '研究計畫', 'heroicon-o-clipboard-document-list', 1)];
+    }
 
     public static function form(Form $form): Form
     {

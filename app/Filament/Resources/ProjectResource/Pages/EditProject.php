@@ -3,6 +3,8 @@
 namespace App\Filament\Resources\ProjectResource\Pages;
 
 use App\Filament\Resources\ProjectResource;
+use App\Filament\Support\CmsListPageNavigation;
+use Filament\Actions;
 use Filament\Resources\Pages\EditRecord;
 
 class EditProject extends EditRecord
@@ -17,6 +19,17 @@ class EditProject extends EditRecord
     public function getBreadcrumb(): string
     {
         return $this->record->title_zh_tw;
+    }
+
+    public function getBreadcrumbs(): array
+    {
+        return [CmsListPageNavigation::tabUrl('projects') => '研究計畫', $this->getBreadcrumb()];
+    }
+
+    protected function getHeaderActions(): array
+    {
+        return [Actions\Action::make('back')->label('回研究計畫列表')->icon('heroicon-o-arrow-left')
+            ->url(CmsListPageNavigation::tabUrl('projects'))];
     }
 
     protected function afterSave(): void

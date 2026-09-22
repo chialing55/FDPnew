@@ -5,6 +5,7 @@ namespace App\Filament\Resources;
 use App\Filament\Resources\PageResource\Pages;
 use App\Filament\Forms\ContentBlockForm;
 use App\Filament\Forms\ImmediatePublicImage;
+use App\Filament\Support\CmsMissingRelationFilter;
 use App\Forms\Components\HtmlContentEditor;
 use App\Forms\Components\ImageFrameEditor;
 use App\Models\Web\Page;
@@ -25,9 +26,9 @@ use Livewire\Features\SupportFileUploads\TemporaryUploadedFile;
 
 class PageResource extends Resource
 {
-    private const FIXED_LIST_PAGE_SLUGS = ['results', 'projects', 'about/news', 'about/team'];
+    private const FIXED_LIST_PAGE_SLUGS = ['results', 'projects', 'publications', 'about/news', 'about/team'];
 
-    private const PROTECTED_PAGE_SLUGS = ['index', 'results', 'projects', 'about/news', 'about/team'];
+    private const PROTECTED_PAGE_SLUGS = ['index', 'results', 'projects', 'publications', 'about/news', 'about/team'];
 
     private const IMAGE_EXTENSIONS = ['jpg', 'jpeg', 'png', 'webp', 'gif'];
 
@@ -185,6 +186,22 @@ class PageResource extends Resource
                                             ->columnSpanFull(),
                                     ]),
                             ]),
+                        Tabs\Tab::make('研究計畫列表')
+                            ->id('projects')
+                            ->icon('heroicon-o-clipboard-document-list')
+                            ->visible(fn (?Page $record): bool => $record?->slug === 'projects')
+                            ->schema([
+                                Forms\Components\View::make('filament.forms.cms-content-list-tab')
+                                    ->viewData(fn (): array => static::contentListData('projects')),
+                            ]),
+                        Tabs\Tab::make('學術產出列表')
+                            ->id('publications')
+                            ->icon('heroicon-o-academic-cap')
+                            ->visible(fn (?Page $record): bool => $record?->slug === 'publications')
+                            ->schema([
+                                Forms\Components\View::make('filament.forms.cms-content-list-tab')
+                                    ->viewData(fn (): array => static::contentListData('publications')),
+                            ]),
                         Tabs\Tab::make('頁面內容')
                             ->icon('heroicon-o-rectangle-stack')
                             ->visible(fn (?Page $record): bool => ! in_array($record?->slug, self::FIXED_LIST_PAGE_SLUGS, true))
@@ -198,6 +215,28 @@ class PageResource extends Resource
                         static::siteTeamsTab(),
                     ])->persistTabInQueryString()->columnSpanFull(),
             ]);
+    }
+
+    protected static function contentListData(string $type): array
+    {
+        $isPublication = $type === 'publications';
+        $model = $isPublication ? \App\Models\Web\Publication::class : \App\Models\Web\Project::class;
+        $onlyMissing = request()->query('relation_filter') === 'missing';
+        $query = $onlyMissing ? CmsMissingRelationFilter::query($type) : $model::query();
+
+        $query->withCount(['sites', 'subjects']);
+
+        if ($isPublication) {
+            $query->orderByDesc('year');
+        }
+
+        return [
+            'type' => $type,
+            'onlyMissing' => $onlyMissing,
+            'missingCount' => CmsMissingRelationFilter::query($type)->count(),
+            'items' => $query->orderByDesc('id')
+                ->paginate(25, pageName: $isPublication ? 'publication_page' : 'project_page'),
+        ];
     }
 
     protected static function slugField(): Forms\Components\TextInput
@@ -272,8 +311,8 @@ class PageResource extends Resource
                         Forms\Components\TextInput::make('name_en')->label('樣區名稱（英）')->required(),
                     ]),
                     Forms\Components\Tabs::make('樣區簡介')->tabs([
-                        Tabs\Tab::make('中文')->schema([HtmlContentEditor::make('description_zh_tw')->label('樣區簡介（中）')]),
-                        Tabs\Tab::make('English')->schema([HtmlContentEditor::make('description_en')->label('Site introduction (English)')]),
+                        Tabs\Tab::make('中文')->schema([HtmlContentEditor::make('description_zh_tw')->label('樣區簡介（中）')->withoutExamples()->withoutPreview()->compact()]),
+                        Tabs\Tab::make('English')->schema([HtmlContentEditor::make('description_en')->label('Site introduction (English)')->withoutExamples()->withoutPreview()->compact()]),
                     ]),
                     ImmediatePublicImage::field('homepage_image', '首頁樣區卡片圖片', directory: 'plot-cards')
                         ->live()
@@ -281,10 +320,17 @@ class PageResource extends Resource
                     ImageFrameEditor::make('homepage_image_settings')
                         ->label('首頁樣區卡片圖片與文字預覽')
                         ->imagePath(fn (Forms\Get $get): mixed => $get('homepage_image'))
-                        ->previewData(fn (Forms\Get $get): array => [
+                        ->previewData(fn (Forms\Get $get, ?Site $record): array => [
                             'mode' => 'site_card',
                             'heading' => $get('name_zh_tw'),
                             'content' => $get('description_zh_tw'),
+                            'image_right' => $record && (($position = Site::query()
+                                ->where('is_active', true)
+                                ->whereHas('page', fn ($query) => $query->where('nav_group', 'sites'))
+                                ->orderBy('sort_order')
+                                ->orderBy('id')
+                                ->pluck('id')
+                                ->search($record->getKey())) !== false) && $position % 2 === 1,
                         ])
                         ->columnSpanFull(),
                     Forms\Components\Actions::make([

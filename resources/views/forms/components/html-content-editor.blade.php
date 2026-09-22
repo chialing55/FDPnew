@@ -1,9 +1,5 @@
 @php($statePath = $getStatePath())
 @php($initialState = $getState() ?? '')
-@once
-    <link rel="stylesheet" href="{{ asset('vendor/jodit/jodit.min.css') }}">
-    <script src="{{ asset('vendor/jodit/jodit.min.js') }}"></script>
-@endonce
 <x-dynamic-component :component="$getFieldWrapperView()" :field="$field">
     <div
         x-data="{
@@ -26,8 +22,8 @@
                 const start = () => {
                     if (! window.Jodit || this.editor) return;
                     this.editor = window.Jodit.make(this.$refs.editor, {
-                        height: 420,
-                        minHeight: 300,
+                        height: {{ $getEditorHeight() }},
+                        minHeight: {{ $getEditorMinHeight() }},
                         toolbarAdaptive: false,
                         toolbarSticky: true,
                         spellcheck: true,
@@ -65,6 +61,10 @@
                     this.editor.events.on('change', value => {
                         this.state = value;
                         this.$wire.set(@js($statePath), value || '', false);
+                        // Other form previews can subscribe without forcing a full Livewire re-render.
+                        window.dispatchEvent(new CustomEvent('cms-content-change', {
+                            detail: { statePath: @js($statePath), value: value || '' },
+                        }));
                     });
                     this.$watch('state', value => {
                         if (this.editor && value !== this.editor.value) this.editor.value = value || '';
@@ -113,8 +113,10 @@
         <div class="mb-3 flex justify-end">
             <button type="button" class="cms-preview-button" @click.stop="openPreview()">預覽</button>
         </div>
+        @endif
         <div wire:ignore><textarea x-ref="editor"></textarea></div>
 
+        @if ($showsPreview())
         <template x-teleport="body">
             <div x-show="previewOpen" x-cloak class="cms-preview-overlay" @keydown.escape.window="previewOpen = false">
                 <div class="cms-preview-dialog">

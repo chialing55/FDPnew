@@ -24,9 +24,9 @@ class ResearchOutputResource extends Resource
 
     protected static ?string $navigationGroup = '研究成果';
 
-    protected static ?int $navigationSort = 1;
+    protected static ?int $navigationSort = 3;
 
-    protected static ?string $navigationLabel = '研究成果';
+    protected static ?string $navigationLabel = '研究成果（暫停顯示）';
 
     protected static ?string $modelLabel = '成果';
 

@@ -9,7 +9,7 @@ class ResearchOutputController extends Controller
 {
     public function show(string $slug)
     {
-
+        abort_unless(config('research_outputs.public_enabled'), 404);
 
         $output = ResearchOutput::where('slug', $slug)
             ->where('is_active', 1)

@@ -1,0 +1,116 @@
+<?php
+
+namespace App\Filament\Actions;
+
+use App\Models\Web\Site;
+use App\Models\Web\SiteSetting;
+use App\Services\Web\PublicationCsvImporter;
+use Filament\Actions\Action;
+use Filament\Forms;
+use Filament\Notifications\Notification;
+use Livewire\Features\SupportFileUploads\TemporaryUploadedFile;
+use Throwable;
+
+class PublicationPageActions
+{
+    public static function importCsv(): Action
+    {
+        return Action::make('importCsv')
+            ->label('匯入 CSV')
+            ->icon('heroicon-o-arrow-up-tray')
+            ->form([
+                Forms\Components\Select::make('site_id')
+                    ->label('所屬樣區')
+                    ->options(fn (): array => Site::query()
+                        ->orderBy('sort_order')
+                        ->orderBy('name_zh_tw')
+                        ->pluck('name_zh_tw', 'id')
+                        ->all())
+                    ->searchable()
+                    ->preload()
+                    ->native(false)
+                    ->required()
+                    ->helperText('這次成功匯入的文獻都會連結到此樣區，不會移除文獻原有的樣區連結。'),
+                Forms\Components\FileUpload::make('csv')
+                    ->label('CSV 檔案')
+                    ->acceptedFileTypes(['text/csv', 'text/plain', 'application/csv'])
+                    ->maxSize(20480)
+                    ->storeFiles(false)
+                    ->required()
+                    ->helperText('依表頭名稱挑選需要的欄位匯入，多餘欄位會自動忽略；依 zotero_id、DOI、標題與年份，或期刊／學位論文複合欄位判斷新增或更新。'),
+            ])
+            ->modalDescription('新資料必須包含 authors 與 title。支援欄位：zotero_id、authors、authors_zh_tw、title、title_zh_tw、journal、journal_zh_tw、year、type、language、institution、institution_zh_tw、thesis_type、volume、issue、pages、doi、url、pdf_path、is_open_access、is_active；其他欄位會忽略。')
+            ->action(function (array $data, PublicationCsvImporter $importer): void {
+                $file = $data['csv'] ?? null;
+
+                if (! $file instanceof TemporaryUploadedFile) {
+                    Notification::make()->danger()->title('匯入失敗')
+                        ->body('無法讀取上傳的 CSV 檔案。')->send();
+
+                    return;
+                }
+
+                try {
+                    $result = $importer->import($file->getRealPath(), (int) $data['site_id']);
+
+                    $siteName = Site::find($data['site_id'])?->name_zh_tw;
+                    $body = "新增 {$result['created']} 筆，更新 {$result['updated']} 筆，略過 {$result['skipped']} 筆。";
+
+                    if (filled($siteName)) {
+                        $body .= "\n已連結樣區：{$siteName}。";
+                    }
+
+                    if ($result['skipped_rows'] !== []) {
+                        $body .= "\n\n".implode("\n", array_map(
+                            fn (string $message): string => "- {$message}",
+                            $result['skipped_rows'],
+                        ));
+                    }
+
+                    $notification = Notification::make()
+                        ->title($result['skipped'] > 0 ? 'CSV 匯入完成，部分資料已略過' : 'CSV 匯入完成')
+                        ->body($body);
+
+                    if ($result['skipped'] > 0) {
+                        $notification->warning()->persistent();
+                    } else {
+                        $notification->success();
+                    }
+
+                    $notification->send();
+                } catch (Throwable $exception) {
+                    report($exception);
+
+                    Notification::make()->danger()->title('CSV 匯入失敗')
+                        ->body($exception->getMessage())->persistent()->send();
+                }
+            });
+    }
+
+    public static function citationSettings(): Action
+    {
+        return Action::make('citationSettings')
+            ->label('引用格式設定')
+            ->icon('heroicon-o-cog-6-tooth')
+            ->fillForm(fn (): array => [
+                'citation_style' => SiteSetting::getValue('publication_citation_style', 'year_after_authors'),
+            ])
+            ->form([
+                Forms\Components\Radio::make('citation_style')
+                    ->label('引用排列方式')
+                    ->options([
+                        'year_after_authors' => '格式一：作者、年份、標題、期刊、卷（期）、頁碼',
+                        'year_at_end' => '格式二：作者、標題、期刊、卷（期）、頁碼、年份',
+                    ])
+                    ->descriptions([
+                        'year_after_authors' => 'Authors. 2015. Title. Journal 19: 2512–2522。',
+                        'year_at_end' => 'Authors. Title. Journal 19: 2512–2522 (2015)。',
+                    ])
+                    ->required(),
+            ])
+            ->action(function (array $data): void {
+                SiteSetting::setValue('publication_citation_style', $data['citation_style']);
+            })
+            ->successNotificationTitle('引用格式已更新，前台已套用新設定');
+    }
+}

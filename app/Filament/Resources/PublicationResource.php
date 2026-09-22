@@ -4,6 +4,7 @@ namespace App\Filament\Resources;
 
 use App\Filament\Forms\ContentRelationForm;
 use App\Filament\Resources\PublicationResource\Pages;
+use App\Filament\Support\CmsListPageNavigation;
 use App\Models\Web\Publication;
 use Filament\Forms;
 use Filament\Forms\Components\Tabs;
@@ -28,7 +29,12 @@ class PublicationResource extends Resource
 
     protected static ?string $navigationIcon = 'heroicon-o-academic-cap';
 
-    protected static ?int $navigationSort = 3;
+    protected static ?int $navigationSort = 2;
+
+    public static function getNavigationItems(): array
+    {
+        return [CmsListPageNavigation::make('publications', '學術產出', 'heroicon-o-academic-cap', 2)];
+    }
 
     /**
      * A specialised publication resource may reuse this form without exposing
