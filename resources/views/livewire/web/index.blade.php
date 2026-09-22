@@ -37,7 +37,7 @@
                         <div class='relative min-h-48 self-stretch overflow-hidden rounded-lg lg:w-[60%]'>
                             <img src='{{ $plotsContent[$plot]['image'] }}' alt='{{ $plot }}'
                                 class='absolute inset-0 h-full w-full rounded-lg object-cover'
-                                style='object-position: center {{ $plotsContent[$plot]['image_position'] }}%;'>
+                                style='object-position: {{ $plotsContent[$plot]['image_settings']['position_x'] }}% {{ $plotsContent[$plot]['image_settings']['position_y'] }}%; transform: scale({{ $plotsContent[$plot]['image_settings']['scale'] }}); transform-origin: {{ $plotsContent[$plot]['image_settings']['position_x'] }}% {{ $plotsContent[$plot]['image_settings']['position_y'] }}%;'>
                         </div>
                     @endif
                     <div class='p-4 text-left {{ $plotsContent[$plot]['image'] ? 'lg:w-[40%]' : 'lg:w-full' }} lg:max-w-lg'>

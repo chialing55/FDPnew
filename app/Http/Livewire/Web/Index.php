@@ -10,6 +10,7 @@ use Illuminate\Support\Arr;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
+use App\Support\ChangYang\ImageFrame;
 
 class Index extends Component
 {
@@ -83,6 +84,9 @@ class Index extends Component
                         ? Storage::disk('public')->url(Arr::random($fallbackImages))
                         : null),
                 'image_position' => max(1, min(100, (int) ($site->homepage_image_position ?? 50))),
+                'image_settings' => ImageFrame::normalize($site->homepage_image_settings ?? [
+                    'position_y' => $site->homepage_image_position ?? 50,
+                ]),
             ];
         }
 

@@ -23,6 +23,8 @@ class Site extends Model
         'description_en',
         'homepage_image',
         'homepage_image_position',
+        'homepage_image_settings',
+        'homepage_image_settings',
         'is_active',
         'latitude',
         'longitude',
@@ -37,6 +39,8 @@ class Site extends Model
         'plot_area_ha' => 'decimal:2',
         'established_year' => 'integer',
         'sort_order' => 'integer',
+        'homepage_image_settings' => 'array',
+        'homepage_image_settings' => 'array',
     ];
 
     /** 依語系回傳名稱 */

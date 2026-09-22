@@ -76,6 +76,27 @@
                     </div>
                 </section>
             </div>
+        @elseif (data_get($preview, 'mode') === 'site_card' && $imageUrl)
+            <p class="changyang-frame-editor__help">此預覽使用首頁動態樣區卡片的圖文比例。可在圖片上拖曳，或用滑桿調整左右、上下焦點與放大倍率；儲存後套用到前台。</p>
+            <div class="changyang-frame-editor__site-controls">
+                <label>左右位置 <input type="range" min="0" max="100" step="1" x-model.number="state.position_x"><output x-text="`${Math.round(state.position_x)}%`"></output></label>
+                <label>上下位置 <input type="range" min="0" max="100" step="1" x-model.number="state.position_y"><output x-text="`${Math.round(state.position_y)}%`"></output></label>
+                <label>圖片放大 <input type="range" min="1" max="{{ \App\Support\ChangYang\ImageFrame::MAX_SCALE }}" step="0.05" x-model.number="state.scale"><output x-text="`${Math.round(state.scale * 100)}%`"></output></label>
+            </div>
+            <article class="changyang-frame-editor__site-card">
+                <div class="changyang-frame-editor__site-image" x-ref="frame"
+                    @pointerdown.prevent="dragging = true; move($event)"
+                    @pointermove="move($event)"
+                    @pointerup.window="dragging = false"
+                    @pointercancel.window="dragging = false">
+                    <img src="{{ $imageUrl }}" alt=""
+                        :style="`object-position: ${state.position_x}% ${state.position_y}%; transform: scale(${state.scale}); transform-origin: ${state.position_x}% ${state.position_y}%`">
+                </div>
+                <div class="changyang-frame-editor__site-text">
+                    <h1>{{ data_get($preview, 'heading') ?: '樣區名稱' }}</h1>
+                    @if (filled(data_get($preview, 'content')))<div class="web-content">{!! data_get($preview, 'content') !!}</div>@else <p>樣區簡介會顯示在這裡。</p>@endif
+                </div>
+            </article>
         @elseif ($imageUrl)
             <p class="changyang-frame-editor__help">在圖片內拖曳選擇取樣位置；使用滑桿放大。圖片寬度固定，調整高度可配合文字長度。</p>
             <div @class(['changyang-frame-editor__preview', 'changyang-frame-editor__preview--image-right' => $showsTextPreview && $previewLayout === 'image_right', 'changyang-frame-editor__preview--image-only' => ! $showsTextPreview])>
@@ -135,5 +156,15 @@
     .changyang-frame-editor__hero-preview { padding:0; overflow:hidden; cursor:grab; touch-action:none; }
     .changyang-frame-editor__hero-preview:active { cursor:grabbing; }
     .changyang-frame-editor__hero-preview .page-hero { margin:0; }
-    @media (max-width: 640px) { .changyang-frame-editor__preview, .changyang-frame-editor__preview--image-right { display: block; } .changyang-frame-editor__frame { margin-bottom: 1rem; } .changyang-frame-editor__controls { width: 100%; } .changyang-frame-editor__hero-controls { grid-template-columns:1fr; } }
+    .changyang-frame-editor__site-controls { display:grid; grid-template-columns:repeat(3, minmax(0, 1fr)); gap:.75rem 1.5rem; margin-bottom:1rem; }
+    .changyang-frame-editor__site-controls label { display:grid; grid-template-columns:5rem 1fr 3.5rem; align-items:center; gap:.65rem; font-size:.875rem; }
+    .changyang-frame-editor__site-controls output { color:#625b54; font-variant-numeric:tabular-nums; text-align:right; }
+    .changyang-frame-editor__site-card { display:flex; min-height:19rem; overflow:hidden; border:1px solid #e5e7eb; border-radius:.5rem; background:#fff; }
+    .changyang-frame-editor__site-image { position:relative; flex:0 0 60%; min-height:19rem; overflow:hidden; cursor:grab; touch-action:none; }
+    .changyang-frame-editor__site-image:active { cursor:grabbing; }
+    .changyang-frame-editor__site-image img { position:absolute; inset:0; display:block; width:100%; height:100%; object-fit:cover; user-select:none; pointer-events:none; }
+    .changyang-frame-editor__site-text { flex:1; min-width:0; padding:1.25rem; color:#4b5563; font-size:.875rem; line-height:1.55; text-align:left; }
+    .changyang-frame-editor__site-text h1 { margin:0 0 1rem; color:#111827; font-size:clamp(1.5rem, 3vw, 2.5rem); line-height:1.1; text-shadow:1px 1px 4px rgba(51,77,43,.35); }
+    .changyang-frame-editor__site-text p { margin:0; color:#8b8179; }
+    @media (max-width: 640px) { .changyang-frame-editor__preview, .changyang-frame-editor__preview--image-right { display: block; } .changyang-frame-editor__frame { margin-bottom: 1rem; } .changyang-frame-editor__controls { width: 100%; } .changyang-frame-editor__hero-controls, .changyang-frame-editor__site-controls { grid-template-columns:1fr; } .changyang-frame-editor__site-card { display:block; } .changyang-frame-editor__site-image { min-height:14rem; } }
 </style>

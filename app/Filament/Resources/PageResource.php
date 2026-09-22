@@ -6,6 +6,7 @@ use App\Filament\Resources\PageResource\Pages;
 use App\Filament\Forms\ContentBlockForm;
 use App\Filament\Forms\ImmediatePublicImage;
 use App\Forms\Components\HtmlContentEditor;
+use App\Forms\Components\ImageFrameEditor;
 use App\Models\Web\Page;
 use App\Models\Web\Site;
 use App\Models\Web\Team;
@@ -267,7 +268,7 @@ class PageResource extends Resource
             ->schema([
                 Forms\Components\Section::make()->relationship('site')->schema([
                     Forms\Components\Grid::make(2)->schema([
-                        Forms\Components\TextInput::make('name_zh_tw')->label('樣區名稱（中）')->required(),
+                        Forms\Components\TextInput::make('name_zh_tw')->label('樣區名稱（中）')->required()->live(onBlur: true),
                         Forms\Components\TextInput::make('name_en')->label('樣區名稱（英）')->required(),
                     ]),
                     Forms\Components\Tabs::make('樣區簡介')->tabs([
@@ -277,15 +278,15 @@ class PageResource extends Resource
                     ImmediatePublicImage::field('homepage_image', '首頁樣區卡片圖片', directory: 'plot-cards')
                         ->live()
                         ->helperText('選擇檔案後請按「儲存變更」；重新選擇會取代舊照片。'),
-                    Forms\Components\TextInput::make('homepage_image_position')
-                        ->label('圖片垂直顯示位置')
-                        ->numeric()->minValue(1)->maxValue(100)->default(50)
-                        ->live(debounce: 300)
-                        ->suffix('%')
-                        ->helperText('1 接近頂端、50 置中、100 接近底端；只調整前台顯示焦點，不會修改原圖。'),
-                    Forms\Components\Placeholder::make('homepage_card_preview')
-                        ->label('首頁卡片圖片預覽')
-                        ->content(fn (Forms\Get $get, ?Site $record): HtmlString => static::homepageCardPreview($get, $record)),
+                    ImageFrameEditor::make('homepage_image_settings')
+                        ->label('首頁樣區卡片圖片與文字預覽')
+                        ->imagePath(fn (Forms\Get $get): mixed => $get('homepage_image'))
+                        ->previewData(fn (Forms\Get $get): array => [
+                            'mode' => 'site_card',
+                            'heading' => $get('name_zh_tw'),
+                            'content' => $get('description_zh_tw'),
+                        ])
+                        ->columnSpanFull(),
                     Forms\Components\Actions::make([
                         Forms\Components\Actions\Action::make('deleteHomepageImage')
                             ->label('刪除照片')
@@ -392,48 +393,6 @@ class PageResource extends Resource
         }
 
         return $options;
-    }
-
-    protected static function homepageCardPreview(Forms\Get $get, ?Site $record): HtmlString
-    {
-        $image = $record?->homepage_image;
-
-        /** @var FilesystemAdapter $publicDisk */
-        $publicDisk = Storage::disk('public');
-
-        $url = static::uploadedImageUrl($get('homepage_image'))
-            ?? (is_string($image) && filled($image) ? $publicDisk->url($image) : null);
-
-        if (! $url) {
-            return new HtmlString('<div style="padding:24px;border:1px dashed #cbd5e1;border-radius:8px;color:#64748b;text-align:center">尚未選擇圖片</div>');
-        }
-
-        $position = max(1, min(100, (int) ($get('homepage_image_position') ?? 50)));
-
-        return new HtmlString(
-            '<div style="display:flex;width:100%;min-height:192px;overflow:hidden;border:1px solid #e5e7eb;border-radius:8px;background:#fff">'
-            . '<div style="position:relative;width:60%;min-height:192px;overflow:hidden;border-radius:8px">'
-            . '<img src="' . e($url) . '" alt="" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:center ' . $position . '%">'
-            . '</div>'
-            . '<div style="display:flex;width:40%;align-items:center;justify-content:center;padding:16px;color:#94a3b8">文字區域（40%）</div>'
-            . '</div>'
-        );
-    }
-
-    protected static function uploadedImageUrl(mixed $image): ?string
-    {
-        if (is_array($image)) {
-            $image = array_values($image)[0] ?? null;
-        }
-
-        /** @var FilesystemAdapter $publicDisk */
-        $publicDisk = Storage::disk('public');
-
-        return match (true) {
-            $image instanceof TemporaryUploadedFile => $image->temporaryUrl(),
-            is_string($image) && filled($image) => $publicDisk->url($image),
-            default => null,
-        };
     }
 
     protected static function isImage(string $file): bool
