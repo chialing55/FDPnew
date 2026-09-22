@@ -53,4 +53,4 @@ RUN composer install --no-interaction --prefer-dist --no-scripts
 COPY . .
 
 # 預設啟動指令（含 sleep 讓 db 準備好）
-CMD ["sh", "-c", "sleep 5 && bash init.sh & exec php-fpm"]
+CMD ["sh", "-c", "sleep 5 && bash init.sh && exec php-fpm"]

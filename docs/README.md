@@ -12,6 +12,10 @@
 
 - [正式站備份與還原](production/backup.md)
 
+## 後台介面
+
+- [編輯列表樣式](admin/list-style.md)
+
 ## 研究成果輸出
 
 - [圖表樣式](research-output/chart-style.md)
@@ -23,6 +27,7 @@
 
 ## 每木
 
+- [福山每木調查資料輸入與驗證指南（管理員閱讀版）](tree-entry/administrator-guide.md)
 - [輸入介面重整待辦](tree/entry-refactor.md)
 - [公版每木輸入介面](tree-entry/shared-interface.md)
 - [每木輸入驗證規格](tree-entry/validation-profiles.md)

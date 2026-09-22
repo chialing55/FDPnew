@@ -53,8 +53,8 @@ chmod -R 775 public/FDPfiles/splist/photo || true
 # 4. 清除 Laravel 快取
 # 資料庫 migration 不在容器啟動時自動執行，避免 rebuild/recreate
 # 意外修改既有環境的資料表；需要時由維運人員明確執行。
-php artisan config:clear
-php artisan cache:clear
-php artisan view:clear
+su -s /bin/sh www-data -c 'php artisan config:clear'
+su -s /bin/sh www-data -c 'php artisan cache:clear'
+su -s /bin/sh www-data -c 'php artisan view:clear'
 
 echo "✅ Laravel 專案初始化完成！"

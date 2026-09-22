@@ -19,6 +19,37 @@ services:
     expose:
       - "9000"
 
+  scheduler:
+    image: fdp-app:prod
+    restart: unless-stopped
+    user: www-data
+    env_file:
+      - .env.production
+    entrypoint: ["php", "artisan", "schedule:work"]
+    depends_on:
+      app:
+        condition: service_started
+      db:
+        condition: service_healthy
+    volumes:
+      - fdp_storage:/app/storage
+
+  queue:
+    image: fdp-app:prod
+    restart: unless-stopped
+    user: www-data
+    env_file:
+      - .env.production
+    working_dir: /app
+    entrypoint: ["php", "artisan", "queue:work", "database", "--sleep=3", "--tries=1", "--timeout=300"]
+    depends_on:
+      app:
+        condition: service_started
+      db:
+        condition: service_healthy
+    volumes:
+      - fdp_storage:/app/storage
+
   nginx:
     image: nginx:1.27-alpine
     container_name: fdp_nginx_prod

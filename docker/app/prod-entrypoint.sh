@@ -39,10 +39,10 @@ if [ ! -f .env ] && [ -f .env.production ]; then
     cp .env.production .env
 fi
 
-php artisan storage:link --force || true
-php artisan package:discover --ansi || true
-php artisan config:cache
-php artisan route:cache
-php artisan view:cache
+su -s /bin/sh www-data -c 'php artisan storage:link --force' || true
+su -s /bin/sh www-data -c 'php artisan package:discover --ansi' || true
+su -s /bin/sh www-data -c 'php artisan config:cache'
+su -s /bin/sh www-data -c 'php artisan route:cache'
+su -s /bin/sh www-data -c 'php artisan view:cache'
 
 exec "$@"
