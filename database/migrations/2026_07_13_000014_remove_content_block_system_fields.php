@@ -12,13 +12,22 @@ return new class extends Migration
     public function up(): void
     {
         $db = DB::connection($this->connection);
+        $schema = Schema::connection($this->connection);
 
         // view 功能已改由 PageDefault 固定加入，不再由管理者維護。
-        $db->table('content_blocks')->whereNotNull('view')->where('view', '!=', '')->delete();
+        if ($schema->hasColumn('content_blocks', 'view')) {
+            $db->table('content_blocks')->whereNotNull('view')->where('view', '!=', '')->delete();
+        }
 
-        Schema::connection($this->connection)->table('content_blocks', function (Blueprint $table): void {
-            $table->dropColumn(['block_type', 'view', 'params']);
-        });
+        $columns = collect(['block_type', 'view', 'params'])
+            ->filter(fn (string $column): bool => $schema->hasColumn('content_blocks', $column))
+            ->all();
+
+        if ($columns !== []) {
+            $schema->table('content_blocks', function (Blueprint $table) use ($columns): void {
+                $table->dropColumn($columns);
+            });
+        }
     }
 
     public function down(): void

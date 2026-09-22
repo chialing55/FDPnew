@@ -2,6 +2,7 @@
 
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
 {
@@ -28,6 +29,11 @@ return new class extends Migration
 
         $db->table('pages')->where('slug', 'publications')->update(['nav_order' => 3]);
         $db->table('pages')->where('slug', 'plants')->update(['nav_order' => 4]);
+
+        if (! Schema::connection($this->connection)->hasColumn('projects', 'summary_zh_tw')
+            || ! Schema::connection($this->connection)->hasColumn('content_blocks', 'body_zh_tw')) {
+            return;
+        }
 
         $projects = $db->table('projects')->where(function ($query): void {
             $query->where(function ($q): void { $q->whereNotNull('summary_zh_tw')->where('summary_zh_tw', '!=', ''); })

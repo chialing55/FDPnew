@@ -10,21 +10,27 @@ return new class extends Migration
 
     public function up(): void
     {
-        Schema::connection($this->connection)->create('publication_site', function (Blueprint $table): void {
-            $table->id();
-            $table->foreignId('publication_id')->constrained('publications')->cascadeOnDelete();
-            $table->foreignId('site_id')->constrained('sites')->cascadeOnDelete();
-            $table->timestamps();
-            $table->unique(['publication_id', 'site_id']);
-        });
+        $schema = Schema::connection($this->connection);
 
-        Schema::connection($this->connection)->create('publication_subject', function (Blueprint $table): void {
-            $table->id();
-            $table->foreignId('publication_id')->constrained('publications')->cascadeOnDelete();
-            $table->foreignId('subject_id')->constrained('subjects')->cascadeOnDelete();
-            $table->timestamps();
-            $table->unique(['publication_id', 'subject_id']);
-        });
+        if (! $schema->hasTable('publication_site')) {
+            $schema->create('publication_site', function (Blueprint $table): void {
+                $table->id();
+                $table->foreignId('publication_id')->constrained('publications')->cascadeOnDelete();
+                $table->foreignId('site_id')->constrained('sites')->cascadeOnDelete();
+                $table->timestamps();
+                $table->unique(['publication_id', 'site_id']);
+            });
+        }
+
+        if (! $schema->hasTable('publication_subject')) {
+            $schema->create('publication_subject', function (Blueprint $table): void {
+                $table->id();
+                $table->foreignId('publication_id')->constrained('publications')->cascadeOnDelete();
+                $table->foreignId('subject_id')->constrained('subjects')->cascadeOnDelete();
+                $table->timestamps();
+                $table->unique(['publication_id', 'subject_id']);
+            });
+        }
     }
 
     public function down(): void

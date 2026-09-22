@@ -10,8 +10,17 @@ return new class extends Migration
 
     public function up(): void
     {
-        Schema::connection($this->connection)->table('news', function (Blueprint $table): void {
-            $table->dropColumn(['summary_zh_tw', 'summary_en']);
+        $schema = Schema::connection($this->connection);
+        $columns = collect(['summary_zh_tw', 'summary_en'])
+            ->filter(fn (string $column): bool => $schema->hasColumn('news', $column))
+            ->all();
+
+        if ($columns === []) {
+            return;
+        }
+
+        $schema->table('news', function (Blueprint $table) use ($columns): void {
+            $table->dropColumn($columns);
         });
     }
 

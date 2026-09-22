@@ -10,10 +10,18 @@ return new class extends Migration
 
     public function up(): void
     {
-        Schema::connection($this->connection)->table('publications', function (Blueprint $table): void {
-            $table->string('authors_zh_tw', 1000)->nullable()->after('year');
-            $table->string('authors_en', 1000)->nullable()->after('authors_zh_tw');
-            $table->dropColumn(['citation_zh_tw', 'citation_en']);
+        $schema = Schema::connection($this->connection);
+        $schema->table('publications', function (Blueprint $table) use ($schema): void {
+            if (! $schema->hasColumn('publications', 'authors_zh_tw')) {
+                $table->string('authors_zh_tw', 1000)->nullable()->after('year');
+            }
+            if (! $schema->hasColumn('publications', 'authors_en')) {
+                $table->string('authors_en', 1000)->nullable()->after('authors_zh_tw');
+            }
+            $legacy = array_values(array_filter(['citation_zh_tw', 'citation_en'], fn (string $column): bool => $schema->hasColumn('publications', $column)));
+            if ($legacy !== []) {
+                $table->dropColumn($legacy);
+            }
         });
     }
 

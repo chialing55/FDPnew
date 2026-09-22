@@ -9,7 +9,13 @@ return new class extends Migration
 {
     public function up(): void
     {
-        Schema::connection('mysql_web')->table('sites', function (Blueprint $table): void {
+        $schema = Schema::connection('mysql_web');
+
+        if ($schema->hasColumn('sites', 'sort_order')) {
+            return;
+        }
+
+        $schema->table('sites', function (Blueprint $table): void {
             $table->unsignedInteger('sort_order')->default(0)->after('is_active');
         });
 

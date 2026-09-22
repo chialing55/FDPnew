@@ -14,28 +14,34 @@ return new class extends Migration
         $schema = Schema::connection($this->connection);
         $db = DB::connection($this->connection);
 
-        $schema->create('site_settings', function (Blueprint $table): void {
-            $table->id();
-            $table->string('key')->unique();
-            $table->text('value')->nullable();
-            $table->timestamps();
-        });
+        if (! $schema->hasTable('site_settings')) {
+            $schema->create('site_settings', function (Blueprint $table): void {
+                $table->id();
+                $table->string('key')->unique();
+                $table->text('value')->nullable();
+                $table->timestamps();
+            });
+        }
 
         $citationStyle = $db->table('publications')->whereNotNull('citation_style')->value('citation_style');
         if (! in_array($citationStyle, ['year_after_authors', 'year_at_end'], true)) {
             $citationStyle = 'year_after_authors';
         }
 
-        $db->table('site_settings')->insert([
-            'key' => 'publication_citation_style',
-            'value' => $citationStyle,
-            'created_at' => now(),
-            'updated_at' => now(),
-        ]);
+        if (! $db->table('site_settings')->where('key', 'publication_citation_style')->exists()) {
+            $db->table('site_settings')->insert([
+                'key' => 'publication_citation_style',
+                'value' => $citationStyle,
+                'created_at' => now(),
+                'updated_at' => now(),
+            ]);
+        }
 
-        $schema->table('publications', function (Blueprint $table): void {
-            $table->dropColumn('citation_style');
-        });
+        if ($schema->hasColumn('publications', 'citation_style')) {
+            $schema->table('publications', function (Blueprint $table): void {
+                $table->dropColumn('citation_style');
+            });
+        }
     }
 
     public function down(): void

@@ -11,7 +11,13 @@ return new class extends Migration
 
     public function up(): void
     {
-        Schema::connection($this->connection)->create('content_block_items', function (Blueprint $table): void {
+        $schema = Schema::connection($this->connection);
+
+        if ($schema->hasTable('content_block_items')) {
+            return;
+        }
+
+        $schema->create('content_block_items', function (Blueprint $table): void {
             $table->id();
             $table->foreignId('content_block_id')->constrained('content_blocks')->cascadeOnDelete();
             $table->string('type', 30)->default('text');
@@ -47,7 +53,7 @@ return new class extends Migration
                 ]);
             });
 
-        Schema::connection($this->connection)->table('content_blocks', function (Blueprint $table): void {
+        $schema->table('content_blocks', function (Blueprint $table): void {
             $table->dropColumn(['body_zh_tw', 'body_en']);
         });
     }
