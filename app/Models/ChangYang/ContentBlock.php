@@ -10,17 +10,19 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 class ContentBlock extends Model
 {
     protected $connection = 'mysql_web';
+
     protected $table = 'changyang_content_blocks';
+
     protected $guarded = [];
 
     protected function casts(): array
     {
-        return ['settings' => 'array', 'sort_order' => 'integer', 'is_active' => 'boolean'];
+        return ['sort_order' => 'integer', 'is_active' => 'boolean'];
     }
 
-    public function section(): BelongsTo
+    public function page(): BelongsTo
     {
-        return $this->belongsTo(PageSection::class, 'section_id');
+        return $this->belongsTo(Page::class);
     }
 
     public function images(): HasMany

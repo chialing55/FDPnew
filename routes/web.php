@@ -10,6 +10,10 @@ use App\Http\Controllers\Web\WebIndexController;
 use App\Http\Controllers\ContentImageController;
 use App\Http\Controllers\ChangYangController;
 
+// This panel shares the application's authentication. Keep old bookmarks from
+// showing Filament's panel-specific sign-in page.
+Route::redirect('/changyang-admin/login', '/login');
+
 Route::prefix('changyang')->name('changyang.')->group(function () {
     Route::get('/', [ChangYangController::class, 'show'])->name('home');
     Route::get('/{page}.html', [ChangYangController::class, 'legacy'])

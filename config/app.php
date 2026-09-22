@@ -197,6 +197,7 @@ return [
         // App\Providers\BroadcastServiceProvider::class,
         App\Providers\EventServiceProvider::class,
         App\Providers\Filament\CmsPanelProvider::class,
+        App\Providers\Filament\ChangYangPanelProvider::class,
         App\Providers\RouteServiceProvider::class,
 
         //pdf

@@ -10,17 +10,24 @@ use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
 use Illuminate\Support\Facades\Hash;
+use Spatie\Permission\Models\Permission;
 
 class UserResource extends Resource
 {
     protected static ?string $model = User::class;
+
     protected static bool $shouldRegisterNavigation = false;
 
     protected static ?string $navigationIcon = 'heroicon-o-user-group';
+
     protected static ?string $navigationLabel = '使用者';
+
     protected static ?string $navigationGroup = '系統管理';
+
     protected static ?int $navigationSort = 1;
+
     protected static ?string $pluralModelLabel = '使用者';
+
     protected static ?string $modelLabel = '使用者';
 
     public static function form(Form $form): Form
@@ -56,6 +63,11 @@ class UserResource extends Resource
                     ->label('後台權限')
                     ->helperText('允許此使用者進入網頁後端管理平台'),
 
+                Forms\Components\Toggle::make('can_manage_changyang_site')
+                    ->label('張楊家豪個人網站管理')
+                    ->helperText('允許此使用者進入獨立的張楊家豪個人網站後台。')
+                    ->dehydrated(),
+
                 // 角色選擇（多選）
                 Forms\Components\Select::make('roles')
                     ->label('角色')
@@ -89,6 +101,11 @@ class UserResource extends Resource
                     ->label('後台權限')
                     ->boolean(),
 
+                Tables\Columns\IconColumn::make('can_manage_changyang_site')
+                    ->label('老師網站管理')
+                    ->state(fn (User $record): bool => $record->canManageChangyangSite())
+                    ->boolean(),
+
                 Tables\Columns\TextColumn::make('created_at')
                     ->label('建立時間')
                     ->dateTime()
@@ -114,5 +131,14 @@ class UserResource extends Resource
         ];
     }
 
-    
+    public static function syncChangyangPermission(User $user, bool $granted): void
+    {
+        $permission = Permission::findOrCreate('manage-changyang-site', 'web');
+
+        if ($granted) {
+            $user->givePermissionTo($permission);
+        } else {
+            $user->revokePermissionTo($permission);
+        }
+    }
 }

@@ -9,7 +9,9 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 class Page extends Model
 {
     protected $connection = 'mysql_web';
+
     protected $table = 'changyang_pages';
+
     protected $guarded = [];
 
     protected function casts(): array
@@ -17,9 +19,9 @@ class Page extends Model
         return ['hero_settings' => 'array', 'show_in_navigation' => 'boolean', 'navigation_order' => 'integer', 'is_active' => 'boolean'];
     }
 
-    public function sections(): HasMany
+    public function blocks(): HasMany
     {
-        return $this->hasMany(PageSection::class)->orderBy('sort_order');
+        return $this->hasMany(ContentBlock::class)->orderBy('sort_order');
     }
 
     public function scopeActive(Builder $query): Builder

@@ -6,17 +6,12 @@
     };
 @endphp
 <div class="page-content">
-    @forelse ($sections as $section)
-        <section class="content-section" @if(data_get($section->settings, 'background_color')) style="background-color: {{ data_get($section->settings, 'background_color') }}" @endif>
-            @if ($section->heading)
-                <h2 class="content-section__title">{!! $formatSectionHeading($section->heading) !!}</h2>
+    @forelse ($blocks as $block)
+        <section class="content-section">
+            @if ($block->heading)
+                <h2 class="content-section__title">{!! $formatSectionHeading($block->heading) !!}</h2>
             @endif
-            @if ($section->subheading)
-                <p class="content-section__subtitle">{{ $section->subheading }}</p>
-            @endif
-
             <div class="content-section__blocks">
-                @foreach ($section->blocks as $block)
                     @php
                         $contentContainsImages = str_contains(strtolower($block->content_html ?? ''), '<img');
                         $hasStructuredMedia = in_array($block->layout, ['image_left', 'image_right'], true) && ! $contentContainsImages && $block->images->isNotEmpty();
@@ -28,49 +23,50 @@
                             <div class="content-block__media">
                                 @foreach ($block->images as $image)
                                     @php
-                                        $imageSettings = $image->display_settings ?? [];
-                                        $frameHeight = data_get($imageSettings, 'frame_height');
-                                        $frameHeight = is_string($frameHeight) && preg_match('/^\d+(?:\.\d+)?(?:px|rem|vh)$/', $frameHeight) ? $frameHeight : null;
-                                        $objectFit = data_get($imageSettings, 'object_fit');
-                                        $objectFit = in_array($objectFit, ['cover', 'contain', 'fill', 'scale-down'], true) ? $objectFit : 'cover';
-                                        $positionX = data_get($imageSettings, 'position_x');
-                                        $positionX = is_string($positionX) && preg_match('/^\d+(?:\.\d+)?%$/', $positionX) ? $positionX : '50%';
-                                        $positionY = data_get($imageSettings, 'position_y');
-                                        $positionY = is_string($positionY) && preg_match('/^\d+(?:\.\d+)?%$/', $positionY) ? $positionY : '50%';
+                                        $imageSettings = \App\Support\ChangYang\ImageFrame::normalize($image->display_settings);
+                                        $frameHeight = $imageSettings['frame_height'].'px';
+                                        $objectFit = $imageSettings['object_fit'];
+                                        $positionX = $imageSettings['position_x'].'%';
+                                        $positionY = $imageSettings['position_y'].'%';
+                                        $scale = $imageSettings['scale'];
                                     @endphp
-                                    <figure @class(['has-crop' => $frameHeight]) @if($frameHeight) style="height: {{ $frameHeight }}" @endif>
+                                    <figure @if ($interactivePreview ?? false)
+                                        x-ref="frame" :class="{ 'has-crop': !!state.frame_height || state.scale > 1 }" :style="state.frame_height ? 'height: ' + state.frame_height + 'px' : ''"
+                                        @pointerdown.prevent="dragging = true; move($event)" @pointermove="move($event)"
+                                        @pointerup.window="dragging = false" @pointercancel.window="dragging = false"
+                                        @endif
+                                        @class(['has-crop' => $frameHeight || $scale > 1]) @if($frameHeight) style="height: {{ $frameHeight }}" @endif>
                                         @if ($image->link_url)<a href="{{ $image->link_url }}">@endif
-                                        <img src="{{ \Illuminate\Support\Facades\Storage::disk('public')->url($image->image_path) }}" alt="{{ $image->alt_text ?: '' }}" style="object-fit: {{ $objectFit }}; object-position: {{ $positionX }} {{ $positionY }}">
+                                        <img @if ($interactivePreview ?? false) :style="`object-fit: cover; object-position: ${state.position_x ?? 50}% ${state.position_y ?? 50}%; transform: scale(${state.scale || 1}); transform-origin: ${state.position_x ?? 50}% ${state.position_y ?? 50}%`" @endif src="{{ $image->preview_url ?? \Illuminate\Support\Facades\Storage::disk('public')->url($image->image_path) }}" alt="{{ $image->alt_text ?: '' }}" style="object-fit: {{ $objectFit }}; object-position: {{ $positionX }} {{ $positionY }}; transform: scale({{ $scale }}); transform-origin: {{ $positionX }} {{ $positionY }}">
                                         @if ($image->link_url)</a>@endif
-                                        @if ($image->caption)<figcaption>{{ $image->caption }}</figcaption>@endif
+
                                     </figure>
+                                    @if ($image->photographer)<p style="margin-top: .5rem; font-size: .875rem; color: #625b54">攝影：{{ $image->photographer }}</p>@endif
                                 @endforeach
                                 @if ($block->media_content_html)
                                     <div class="content-block__media-content">{!! $block->media_content_html !!}</div>
                                 @endif
                             </div>
                             <div class="content-block__body">
-                                @if ($block->heading)<h3>{{ $block->heading }}</h3>@endif
                                 @if ($block->content_html)<div class="rich-text">{!! $block->content_html !!}</div>@endif
                             </div>
                         @else
-                            @if ($block->heading)<h3>{{ $block->heading }}</h3>@endif
                             @if (! $contentContainsImages && $block->images->isNotEmpty())
                                 <div class="content-block__images">
                                     @foreach ($block->images as $image)
                                         <figure>
                                             @if ($image->link_url)<a href="{{ $image->link_url }}">@endif
-                                            <img src="{{ \Illuminate\Support\Facades\Storage::disk('public')->url($image->image_path) }}" alt="{{ $image->alt_text ?: '' }}">
+                                            <img @if ($interactivePreview ?? false) :style="`object-fit: cover; object-position: ${state.position_x ?? 50}% ${state.position_y ?? 50}%; transform: scale(${state.scale || 1}); transform-origin: ${state.position_x ?? 50}% ${state.position_y ?? 50}%`" @endif src="{{ $image->preview_url ?? \Illuminate\Support\Facades\Storage::disk('public')->url($image->image_path) }}" alt="{{ $image->alt_text ?: '' }}">
                                             @if ($image->link_url)</a>@endif
-                                            @if ($image->caption)<figcaption>{{ $image->caption }}</figcaption>@endif
+
                                         </figure>
+                                    @if ($image->photographer)<p style="margin-top: .5rem; font-size: .875rem; color: #625b54">攝影：{{ $image->photographer }}</p>@endif
                                     @endforeach
                                 </div>
                             @endif
                             @if ($block->content_html)<div class="rich-text">{!! $block->content_html !!}</div>@endif
                         @endif
                     </article>
-                @endforeach
             </div>
         </section>
     @empty

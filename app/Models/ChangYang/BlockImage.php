@@ -8,7 +8,9 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 class BlockImage extends Model
 {
     protected $connection = 'mysql_web';
+
     protected $table = 'changyang_block_images';
+
     protected $guarded = [];
 
     protected function casts(): array

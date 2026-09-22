@@ -145,6 +145,17 @@
                     ];
                 }
 
+                if (auth()->user()?->canManageChangyangSite()) {
+                    $fixedItems[] = [
+                        'key' => 'changyang-admin',
+                        'label' => '張楊家豪個人網站管理',
+                        'url' => url('/changyang-admin'),
+                        'img' => asset('/images/research/DSCN6021.JPG'),
+                        'style' => 'box3',
+                        'new_tab' => true,
+                    ];
+                }
+
                 // 之後若要新增研究工作卡片，請優先改這裡：
                 // 1. 在 $workUi 新增該 key 的圖片、卡片底色、顯示名稱
                 // 2. 在 $workDisplayOrder 補上同一個 key，畫面就會照這裡的順序顯示

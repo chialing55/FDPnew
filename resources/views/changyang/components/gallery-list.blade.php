@@ -2,7 +2,10 @@
     @if ($galleries->isNotEmpty())
         <div class="gallery-album-index" data-gallery-index>
             @foreach ($galleries as $gallery)
-                @php $cover = $gallery->cover_image_path ?: $gallery->items->first()?->thumbnail_path ?: $gallery->items->first()?->image_path; @endphp
+                @php
+                    $coverItem = $gallery->items->firstWhere('is_cover', true) ?? $gallery->items->first();
+                    $cover = $coverItem?->thumbnail_path ?: $coverItem?->image_path;
+                @endphp
                 <button class="gallery-album-card" type="button" data-open-album="gallery-album-{{ $gallery->id }}">
                     @if ($cover)
                         <span class="gallery-album-card__cover"><img src="{{ \Illuminate\Support\Facades\Storage::disk('public')->url($cover) }}" alt="{{ $gallery->title }}" loading="lazy"></span>
@@ -25,8 +28,8 @@
             <div class="gallery-grid">
                 @foreach ($gallery->items as $item)
                     <figure class="gallery-item">
-                        <a href="{{ \Illuminate\Support\Facades\Storage::disk('public')->url($item->image_path) }}" data-gallery-image data-alt="{{ $item->alt_text }}" data-caption="{{ $item->caption }}">
-                            <img src="{{ \Illuminate\Support\Facades\Storage::disk('public')->url($item->thumbnail_path ?: $item->image_path) }}" alt="{{ $item->alt_text ?: '' }}" loading="lazy">
+                        <a href="{{ \Illuminate\Support\Facades\Storage::disk('public')->url($item->image_path) }}" data-gallery-image data-alt="{{ $item->title ?? '' }}" data-caption="{{ $item->caption }}">
+                            <img src="{{ \Illuminate\Support\Facades\Storage::disk('public')->url($item->thumbnail_path ?: $item->image_path) }}" alt="{{ $item->title ?? '' }}" loading="lazy">
                         </a>
                         @if ($item->title || $item->caption)
                             <figcaption>{{ $item->title ?: $item->caption }}</figcaption>

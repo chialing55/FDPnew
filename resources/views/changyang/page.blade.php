@@ -30,12 +30,16 @@
     <main id="main-content" class="site-main">
         @include('changyang.components.hero', ['page' => $currentPage])
 
-        @if ($currentPage->template === 'news')
+        @if ($currentPage->template === 'publications')
+            @include('changyang.components.publications-list', ['groups' => $publications])
+        @elseif ($currentPage->template === 'news')
             @include('changyang.components.news-list', ['groups' => $newsGroups])
         @elseif ($currentPage->template === 'gallery')
             @include('changyang.components.gallery-list', ['galleries' => $galleries])
+        @elseif ($currentPage->template === 'people')
+            @include('changyang.components.people-list', ['categories' => $personCategories])
         @else
-            @include('changyang.components.page-sections', ['sections' => $currentPage->sections])
+            @include('changyang.components.page-blocks', ['blocks' => $currentPage->blocks])
         @endif
     </main>
 

@@ -5,6 +5,8 @@ namespace App\Http\Controllers;
 use App\Models\ChangYang\Gallery;
 use App\Models\ChangYang\NewsItem;
 use App\Models\ChangYang\Page;
+use App\Models\ChangYang\PersonCategory;
+use App\Models\Web\Publication;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\View\View;
 
@@ -15,9 +17,8 @@ class ChangYangController extends Controller
         $currentPage = Page::active()
             ->where('slug', $page)
             ->with([
-                'sections' => fn ($query) => $query->active()->orderBy('sort_order'),
-                'sections.blocks' => fn ($query) => $query->active()->orderBy('sort_order'),
-                'sections.blocks.images' => fn ($query) => $query->orderBy('sort_order'),
+                'blocks' => fn ($query) => $query->active()->orderBy('sort_order'),
+                'blocks.images' => fn ($query) => $query->orderBy('sort_order'),
             ])
             ->firstOrFail();
 
@@ -28,10 +29,7 @@ class ChangYangController extends Controller
 
         $newsGroups = collect();
         if ($currentPage->template === 'news') {
-            $newsGroups = NewsItem::active()
-                ->orderByDesc('category_year')
-                ->orderByDesc('category_month')
-                ->orderBy('sort_order')
+            $newsGroups = NewsItem::active()->latestFirst()
                 ->get()
                 ->groupBy(fn (NewsItem $item): string => sprintf('%04d-%02d', $item->category_year, $item->category_month));
         }
@@ -44,7 +42,19 @@ class ChangYangController extends Controller
                 ->get();
         }
 
-        return view('changyang.page', compact('currentPage', 'navigation', 'newsGroups', 'galleries'));
+        $publications = $currentPage->template === 'publications'
+            ? Publication::active()->where('is_changyang', true)->latestFirst()->orderBy('title')->get()->groupBy('year')
+            : collect();
+
+        $personCategories = $currentPage->template === 'people'
+            ? PersonCategory::query()
+                ->where('is_active', true)
+                ->with(['roles' => fn ($query) => $query->where('is_current', true)->whereHas('person', fn ($personQuery) => $personQuery->where('is_active', true))->with('person')->orderBy('sort_order')])
+                ->orderBy('sort_order')
+                ->get()
+            : collect();
+
+        return view('changyang.page', compact('currentPage', 'navigation', 'newsGroups', 'galleries', 'publications', 'personCategories'));
     }
 
     public function legacy(string $page): RedirectResponse
