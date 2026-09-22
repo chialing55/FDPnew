@@ -3,6 +3,7 @@
 namespace App\Filament\Resources\PageResource\Pages;
 
 use App\Filament\Resources\PageResource;
+use App\Filament\Actions\ViewPublicPageAction;
 use App\Filament\Resources\SiteResource;
 use App\Filament\Resources\SubjectResource;
 use Filament\Actions;
@@ -56,12 +57,9 @@ class EditPage extends EditRecord
     protected function getHeaderActions(): array
     {
         return [
-            Actions\Action::make('preview')
-                ->label('預覽前台')
-                ->icon('heroicon-o-eye')
-                ->url(fn () => url('/' . ltrim($this->record->slug, '/')))
-                ->openUrlInNewTab(),
-            Actions\DeleteAction::make(),
+            ViewPublicPageAction::make(fn () => url('/' . ltrim($this->record->slug, '/'))),
+            Actions\DeleteAction::make()
+                ->visible(fn (): bool => PageResource::canDelete($this->record)),
         ];
     }
 

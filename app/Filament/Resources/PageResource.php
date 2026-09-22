@@ -26,6 +26,8 @@ class PageResource extends Resource
 {
     private const FIXED_LIST_PAGE_SLUGS = ['results', 'projects', 'about/news', 'about/team'];
 
+    private const PROTECTED_PAGE_SLUGS = ['index', 'results', 'projects', 'about/news', 'about/team'];
+
     private const IMAGE_EXTENSIONS = ['jpg', 'jpeg', 'png', 'webp', 'gif'];
 
     private const SLUG_SETTINGS = [
@@ -295,11 +297,10 @@ class PageResource extends Resource
                                     return;
                                 }
 
-                                ImmediatePublicImage::delete($record->homepage_image);
-                                $record->update(['homepage_image' => null]);
-                                $set('homepage_image', []);
+                                // 和上傳一樣，等使用者按儲存才寫入資料庫。
+                                $set('homepage_image', null);
                             }),
-                    ])->visible(fn (?Site $record): bool => filled($record?->homepage_image)),
+                    ])->visible(fn (Forms\Get $get, ?Site $record): bool => filled($get('homepage_image') ?? $record?->homepage_image)),
                 ]),
             ]);
     }
@@ -505,9 +506,13 @@ class PageResource extends Resource
                     ->openUrlInNewTab(),
                 Tables\Actions\EditAction::make(),
             ])
-            ->bulkActions([
-                Tables\Actions\DeleteBulkAction::make(),
-            ]);
+            ->bulkActions([]);
+    }
+
+    public static function canDelete(\Illuminate\Database\Eloquent\Model $record): bool
+    {
+        return parent::canDelete($record)
+            && ! in_array($record->slug, self::PROTECTED_PAGE_SLUGS, true);
     }
 
     public static function getPages(): array

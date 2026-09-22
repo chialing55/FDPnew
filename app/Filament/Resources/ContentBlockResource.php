@@ -3,6 +3,7 @@
 namespace App\Filament\Resources;
 
 use App\Filament\Resources\ContentBlockResource\Pages;
+use App\Filament\Forms\ContentBlockForm;
 use App\Models\Web\ContentBlock;
 use App\Models\Web\Site;
 use App\Models\Web\Subject;
@@ -13,10 +14,6 @@ use Filament\Forms\Form;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
-use Filament\Forms\Components\RichEditor;
-use Wiebenieuwenhuis\FilamentCodeEditor\Components\CodeEditor;
-use Filament\Forms\Components\Textarea;
-use Filament\Forms\Components\Tabs;
 use Illuminate\Database\Eloquent\Builder;
 use Filament\Forms\Set;
 use Filament\Navigation\NavigationItem;
@@ -192,31 +189,7 @@ Forms\Components\Select::make('owner_selector')
                                 ->maxLength(255),
                         ]),
 
-                        Forms\Components\Repeater::make('items')
-                            ->label('章節內容')
-                            ->relationship('items')
-                            ->orderColumn('sort_order')
-                            ->reorderable()
-                            ->addActionLabel('新增內容項目')
-                            ->schema([
-                                Forms\Components\Select::make('type')
-                                    ->label('內容類型')
-                                    ->options(['text' => '文字', 'component' => '動態元件'])
-                                    ->default('text')->live()->required(),
-                                Forms\Components\Toggle::make('is_public')
-                                    ->label('顯示於前台')
-                                    ->default(true)
-                                    ->columnSpanFull(),
-                                Textarea::make('body_zh_tw')
-                                    ->label('內容（中）')->rows(10)->columnSpanFull()
-                                    ->visible(fn (Forms\Get $get): bool => $get('type') === 'text'),
-                                Textarea::make('body_en')
-                                    ->label('內容（英）')->rows(10)->columnSpanFull()
-                                    ->visible(fn (Forms\Get $get): bool => $get('type') === 'text'),
-                                Forms\Components\TextInput::make('component')
-                                    ->label('Livewire 元件名稱')->columnSpanFull()
-                                    ->visible(fn (Forms\Get $get): bool => $get('type') === 'component'),
-                            ])->columns(2),
+                        ContentBlockForm::items(),
                 ]),
             ]);
     }

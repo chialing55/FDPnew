@@ -4,13 +4,11 @@ namespace App\Filament\Resources;
 
 use App\Filament\Resources\TeamResource\Pages;
 use App\Models\Web\Team;
-use App\Filament\Forms\ImmediatePublicImage;
 use Filament\Forms;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
-use Illuminate\Support\HtmlString;
 
 class TeamResource extends Resource
 {
@@ -108,40 +106,16 @@ class TeamResource extends Resource
                 // ====== Logo ======
                 Forms\Components\Section::make('Logo')
                     ->schema([
-                        ImmediatePublicImage::field('logo_path', 'Logo 圖檔', directory: 'teams/logo', maxSize: 2048)
-                            ->live()
-                            ->afterStateHydrated(fn (Forms\Components\FileUpload $component): Forms\Components\FileUpload => $component->state([]))
-                            ->afterStateUpdated(function (Forms\Components\FileUpload $component, mixed $state, ?Team $record): void {
-                                $upload = ImmediatePublicImage::upload($state);
-
-                                if (! $upload || ! $record) {
-                                    return;
-                                }
-
-                                $path = ImmediatePublicImage::replace($upload, 'teams/logo', $record->logo_path);
-                                $record->update(['logo_path' => $path]);
-                                $component->state([]);
-                            })
-                            ->helperText('選擇檔案後會立即上傳；重新選擇會直接取代舊 Logo。'),
-                        Forms\Components\Placeholder::make('logo_preview')
-                            ->label('目前 Logo')
-                            ->content(fn (?Team $record): HtmlString => ImmediatePublicImage::preview($record?->logo_path, '尚未上傳 Logo', circular: true)),
-                        Forms\Components\Actions::make([
-                            Forms\Components\Actions\Action::make('deleteLogo')
-                                ->label('刪除 Logo')
-                                ->icon('heroicon-o-trash')
-                                ->color('danger')
-                                ->requiresConfirmation()
-                                ->action(function (Forms\Set $set, ?Team $record): void {
-                                    if (! $record) {
-                                        return;
-                                    }
-
-                                    ImmediatePublicImage::delete($record->logo_path);
-                                    $record->update(['logo_path' => null]);
-                                    $set('logo_path', []);
-                                }),
-                        ])->visible(fn (?Team $record): bool => filled($record?->logo_path)),
+                        Forms\Components\FileUpload::make('logo_path')
+                            ->label('Logo 圖檔')
+                            ->disk('public')
+                            ->directory('teams/logo')
+                            ->visibility('public')
+                            ->image()
+                            ->acceptedFileTypes(['image/jpeg', 'image/png', 'image/webp', 'image/gif'])
+                            ->maxSize(2048)
+                            ->imagePreviewHeight('120')
+                            ->helperText('選擇、替換或移除後，按「儲存變更」才會更新公開頁面。'),
                     ]),
 
             ]);

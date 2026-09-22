@@ -1,5 +1,9 @@
 @php($statePath = $getStatePath())
 @php($initialState = $getState() ?? '')
+@once
+    <link rel="stylesheet" href="{{ asset('vendor/jodit/jodit.min.css') }}">
+    <script src="{{ asset('vendor/jodit/jodit.min.js') }}"></script>
+@endonce
 <x-dynamic-component :component="$getFieldWrapperView()" :field="$field">
     <div
         x-data="{
@@ -66,13 +70,23 @@
                         if (this.editor && value !== this.editor.value) this.editor.value = value || '';
                     });
                 };
-                if (window.Jodit) start(); else window.addEventListener('load', start, { once: true });
+                const waitForJodit = () => {
+                    if (window.Jodit) {
+                        start();
+                        return;
+                    }
+
+                    window.setTimeout(waitForJodit, 100);
+                };
+
+                waitForJodit();
             }
         }"
         x-init="initEditor()"
         @submit.capture.window="syncEditor()"
         class="cms-jodit-editor"
     >
+        @if ($showsExamples())
         <details class="cms-content-class-help">
             <summary>可用排版 class 與 HTML 範例</summary>
             <div class="cms-content-class-help-body">
@@ -94,6 +108,8 @@
                 <p>請在編輯器的「原始碼」模式貼入 HTML；一般標題、段落、清單、表格與引用不需額外 class。</p>
             </div>
         </details>
+        @endif
+        @if ($showsPreview())
         <div class="mb-3 flex justify-end">
             <button type="button" class="cms-preview-button" @click.stop="openPreview()">預覽</button>
         </div>
@@ -110,5 +126,6 @@
                 </div>
             </div>
         </template>
+        @endif
     </div>
 </x-dynamic-component>

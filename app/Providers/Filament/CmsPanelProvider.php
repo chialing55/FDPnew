@@ -2,7 +2,7 @@
 
 namespace App\Providers\Filament;
 
-use App\Filament\Support\CmsFormActions;
+use App\Filament\Support\AdminPanelDefaults;
 use App\Http\Middleware\EnsureUserIsApproved;
 use Filament\Http\Middleware\Authenticate;
 use Filament\Http\Middleware\AuthenticateSession;
@@ -29,9 +29,7 @@ class CmsPanelProvider extends PanelProvider
 {
     public function panel(Panel $panel): Panel
     {
-        CmsFormActions::configure();
-
-        return $panel
+        return AdminPanelDefaults::configure($panel)
             ->default()
             ->id('cms')
             ->path('cms')
@@ -44,7 +42,6 @@ class CmsPanelProvider extends PanelProvider
                 . '</span>'
             ))
             ->favicon(asset('images/紅楠_葉_72_300.png'))
-            ->sidebarCollapsibleOnDesktop()
             ->navigationGroups([
                 NavigationGroup::make()->label('首頁')->icon('heroicon-o-home'),
                 NavigationGroup::make()->label('動態樣區')->icon('heroicon-o-map'),
