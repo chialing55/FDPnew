@@ -30,6 +30,12 @@ class PublicationResource extends Resource
 
     protected static ?int $navigationSort = 3;
 
+    /**
+     * A specialised publication resource may reuse this form without exposing
+     * cross-site relation management.
+     */
+    protected static bool $showsRelationSettings = true;
+
     public static function form(Form $form): Form
     {
         return $form->schema([
@@ -109,12 +115,21 @@ class PublicationResource extends Resource
                         ]),
                         Forms\Components\Toggle::make('is_open_access')->label('Open Access'),
                         Forms\Components\Toggle::make('is_active')->label('顯示於前台')->default(true),
+                        Forms\Components\Toggle::make('is_changyang')->label('張楊家豪（顯示於老師個人網站）'),
                     ]),
                 Tabs\Tab::make('關聯設定')
                     ->icon('heroicon-o-link')
                     ->schema([
+                        Forms\Components\Select::make('site_review_status')
+                            ->label('樣區歸屬確認')
+                            ->options(static::siteReviewStatusOptions())
+                            ->default('reviewed')
+                            ->required()
+                            ->helperText('Zotero 新增的文獻會設為「待確認」；既有資料維持已確認。'),
                         ...ContentRelationForm::fields(),
-                    ])->columns(2),
+                    ])
+                    ->columns(2)
+                    ->visible(fn (): bool => static::$showsRelationSettings),
             ])->persistTabInQueryString()->columnSpanFull(),
         ]);
     }
@@ -147,6 +162,13 @@ class PublicationResource extends Resource
             Tables\Columns\TextColumn::make('journal')->label('期刊')->limit(35)->wrap()->toggleable(isToggledHiddenByDefault: true),
             Tables\Columns\TextColumn::make('sites.name_zh_tw')
                 ->label('樣區')->badge()->separator(', '),
+            Tables\Columns\TextColumn::make('site_review_status')
+                ->label('樣區確認')
+                ->formatStateUsing(fn (?string $state): string => static::siteReviewStatusOptions()[$state] ?? $state ?? '')
+                ->badge()
+                ->color(fn (?string $state): string => match ($state) {
+                    'pending' => 'warning', 'reviewed', 'not_related' => 'success', default => 'gray',
+                }),
             Tables\Columns\TextColumn::make('subjects.name_zh_tw')
                 ->label('研究主題')->badge()->separator(', '),
             Tables\Columns\TextColumn::make('doi')->label('DOI')->searchable()->limit(30)->toggleable(isToggledHiddenByDefault: true),
@@ -167,6 +189,9 @@ class PublicationResource extends Resource
                     ->multiple()
                     ->searchable()
                     ->preload(),
+                Tables\Filters\SelectFilter::make('site_review_status')
+                    ->label('樣區歸屬確認')
+                    ->options(static::siteReviewStatusOptions()),
                 Tables\Filters\SelectFilter::make('subject')
                     ->label('研究主題')
                     ->relationship('subjects', 'name_zh_tw')
@@ -184,16 +209,39 @@ class PublicationResource extends Resource
                     ->button()
             )
             ->actions(
-            [
-                Tables\Actions\EditAction::make()->label('編輯'),
-            ],
-            ActionsPosition::BeforeColumns,
-        );
+                [
+                    Tables\Actions\EditAction::make()
+                        ->label('編輯')
+                        ->icon('heroicon-o-pencil-square')
+                        ->color('gray')
+                        ->extraAttributes(['class' => 'fi-publication-edit-action']),
+                ],
+                ActionsPosition::AfterColumns,
+            );
     }
 
     public static function getPages(): array
     {
         return ['index' => Pages\ListPublications::route('/'), 'create' => Pages\CreatePublication::route('/create'), 'edit' => Pages\EditPublication::route('/{record}/edit')];
+    }
+
+    public static function getNavigationBadge(): ?string
+    {
+        $count = Publication::query()
+            ->where('is_changyang', true)
+            ->where('site_review_status', 'pending')
+            ->count();
+
+        return $count > 0 ? (string) $count : null;
+    }
+
+    protected static function siteReviewStatusOptions(): array
+    {
+        return [
+            'pending' => '待確認',
+            'reviewed' => '已確認',
+            'not_related' => '與所有樣區無關',
+        ];
     }
 
     protected static function typeField(): Forms\Components\Select
@@ -226,6 +274,7 @@ class PublicationResource extends Resource
             'book' => $labels['book'],
             'dataset' => $labels['dataset'],
             'paper' => $labels['paper'],
+            'preprint' => $labels['preprint'],
             'poster' => $labels['poster'],
             'oral' => $labels['oral'],
         ];

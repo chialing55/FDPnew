@@ -3,6 +3,7 @@
 namespace App\Filament\Resources\PublicationResource\Pages;
 
 use App\Filament\Actions\ListPageSettingsAction;
+use App\Filament\Actions\SyncZoteroPublicationsAction;
 use App\Filament\Resources\PublicationResource;
 use App\Models\Web\Site;
 use App\Models\Web\SiteSetting;
@@ -24,6 +25,7 @@ class ListPublications extends ListRecords
     {
         return [
             ListPageSettingsAction::make('publications', '學術產出頁'),
+            SyncZoteroPublicationsAction::make(),
             Actions\Action::make('importCsv')
                 ->label('匯入 CSV')
                 ->icon('heroicon-o-arrow-up-tray')
@@ -46,9 +48,9 @@ class ListPublications extends ListRecords
                         ->maxSize(20480)
                         ->storeFiles(false)
                         ->required()
-                        ->helperText('依表頭名稱挑選需要的欄位匯入，多餘欄位會自動忽略；依 external_id、DOI、標題與年份，或期刊／學位論文複合欄位判斷新增或更新。'),
+                        ->helperText('依表頭名稱挑選需要的欄位匯入，多餘欄位會自動忽略；依 zotero_id、DOI、標題與年份，或期刊／學位論文複合欄位判斷新增或更新。'),
                 ])
-                ->modalDescription('新資料必須包含 authors 與 title。支援欄位：external_id、authors、authors_zh_tw、title、title_zh_tw、journal、journal_zh_tw、year、type、language、institution、institution_zh_tw、thesis_type、volume、issue、pages、doi、url、pdf_path、is_open_access、is_active；其他欄位會忽略。')
+                ->modalDescription('新資料必須包含 authors 與 title。支援欄位：zotero_id、authors、authors_zh_tw、title、title_zh_tw、journal、journal_zh_tw、year、type、language、institution、institution_zh_tw、thesis_type、volume、issue、pages、doi、url、pdf_path、is_open_access、is_active；其他欄位會忽略。')
                 ->action(function (array $data, PublicationCsvImporter $importer): void {
                     $file = $data['csv'] ?? null;
 

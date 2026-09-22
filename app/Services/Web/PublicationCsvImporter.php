@@ -12,7 +12,7 @@ use RuntimeException;
 class PublicationCsvImporter
 {
     private const IMPORTABLE_COLUMNS = [
-        'external_id',
+        'zotero_id',
         'authors',
         'authors_zh_tw',
         'title',
@@ -127,7 +127,7 @@ class PublicationCsvImporter
                 continue;
             }
 
-            $value = is_string($value) ? trim($value) : $value;
+            $value = is_string($value) ? PublicationTextNormalizer::text($value) : $value;
             $normalized[$column] = $value === '' ? null : $value;
         }
 
@@ -173,8 +173,8 @@ class PublicationCsvImporter
 
     private function resolvePublication(array $row): Publication
     {
-        if (filled($row['external_id'] ?? null)) {
-            return Publication::firstOrNew(['external_id' => $row['external_id']]);
+        if (filled($row['zotero_id'] ?? null)) {
+            return Publication::firstOrNew(['zotero_id' => $row['zotero_id']]);
         }
 
         if (filled($row['doi'] ?? null)) {
@@ -245,7 +245,7 @@ class PublicationCsvImporter
 
         if ($matches->count() > 1) {
             throw new RuntimeException(
-                '複合欄位比對到多筆既有文獻（'.implode('、', array_keys($fields)).'），請補上 external_id 或 DOI。'
+                '複合欄位比對到多筆既有文獻（'.implode('、', array_keys($fields)).'），請補上 zotero_id 或 DOI。'
             );
         }
 
@@ -255,7 +255,7 @@ class PublicationCsvImporter
     private function validateRow(array $row, int $line, bool $isNew): void
     {
         $rules = [
-            'external_id' => ['nullable', 'string', 'max:255'],
+            'zotero_id' => ['nullable', 'string', 'max:255'],
             'authors' => [$isNew ? 'required' : 'nullable', 'string'],
             'authors_zh_tw' => ['nullable', 'string'],
             'title' => [$isNew ? 'required' : 'nullable', 'string', 'max:500'],

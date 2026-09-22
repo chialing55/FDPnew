@@ -22,7 +22,7 @@ beforeEach(function () {
 
     Schema::connection('mysql_web')->create('publications', function (Blueprint $table): void {
         $table->id();
-        $table->string('external_id')->nullable();
+        $table->string('zotero_id')->nullable();
         $table->text('authors')->nullable();
         $table->text('authors_zh_tw')->nullable();
         $table->string('title', 500)->nullable();
@@ -65,14 +65,14 @@ it('links every successfully imported publication to the selected site without r
     $existingSite = Site::create(['name_zh_tw' => '原有樣區']);
     $selectedSite = Site::create(['name_zh_tw' => '本次匯入樣區']);
     $publication = Publication::create([
-        'external_id' => 'PUB-1',
+        'zotero_id' => 'PUB-1',
         'authors' => 'Original author',
         'title' => 'Original title',
     ]);
     $publication->sites()->attach($existingSite);
 
     $file = tmpfile();
-    fputcsv($file, ['external_id', 'authors', 'title']);
+    fputcsv($file, ['zotero_id', 'authors', 'title']);
     fputcsv($file, ['PUB-1', 'Updated author', 'Updated title']);
     fputcsv($file, ['PUB-2', 'New author', 'New title']);
     $path = stream_get_meta_data($file)['uri'];
@@ -80,23 +80,23 @@ it('links every successfully imported publication to the selected site without r
     $result = app(PublicationCsvImporter::class)->import($path, $selectedSite->id);
 
     expect($result)->toBe(['created' => 1, 'updated' => 1, 'skipped' => 0, 'skipped_rows' => []])
-        ->and(Publication::where('external_id', 'PUB-1')->first()->sites()->pluck('sites.id')->all())
+        ->and(Publication::where('zotero_id', 'PUB-1')->first()->sites()->pluck('sites.id')->all())
         ->toEqualCanonicalizing([$existingSite->id, $selectedSite->id])
-        ->and(Publication::where('external_id', 'PUB-2')->first()->sites()->pluck('sites.id')->all())
+        ->and(Publication::where('zotero_id', 'PUB-2')->first()->sites()->pluck('sites.id')->all())
         ->toBe([$selectedSite->id]);
 
     fclose($file);
 });
 
-it('imports CSV columns and updates records by external id', function () {
+it('imports CSV columns and updates records by Zotero id', function () {
     Publication::create([
-        'external_id' => 'PUB-1',
+        'zotero_id' => 'PUB-1',
         'authors' => 'Original author',
         'title' => 'Original title',
     ]);
 
     $file = tmpfile();
-    fwrite($file, "\xEF\xBB\xBFexternal_id,authors,title,title_zh_tw,year,is_open_access\n");
+    fwrite($file, "\xEF\xBB\xBFzotero_id,authors,title,title_zh_tw,year,is_open_access\n");
     fwrite($file, "PUB-1,Updated author,Updated title,更新後中文標題,2025,yes\n");
     fwrite($file, "PUB-2,New author,New title,,2026,0\n");
     $path = stream_get_meta_data($file)['uri'];
@@ -105,9 +105,9 @@ it('imports CSV columns and updates records by external id', function () {
 
     expect($result)->toBe(['created' => 1, 'updated' => 1, 'skipped' => 0, 'skipped_rows' => []])
         ->and(Publication::count())->toBe(2)
-        ->and(Publication::where('external_id', 'PUB-1')->first()->title_zh_tw)->toBe('更新後中文標題')
-        ->and(Publication::where('external_id', 'PUB-1')->first()->is_open_access)->toBeTruthy()
-        ->and(Publication::where('external_id', 'PUB-2')->first()->title_zh_tw)->toBeNull();
+        ->and(Publication::where('zotero_id', 'PUB-1')->first()->title_zh_tw)->toBe('更新後中文標題')
+        ->and(Publication::where('zotero_id', 'PUB-1')->first()->is_open_access)->toBeTruthy()
+        ->and(Publication::where('zotero_id', 'PUB-2')->first()->title_zh_tw)->toBeNull();
 
     fclose($file);
 });
@@ -146,6 +146,25 @@ it('imports author lists longer than 1000 characters', function () {
     expect($result)->toBe(['created' => 1, 'updated' => 0, 'skipped' => 0, 'skipped_rows' => []])
         ->and(strlen(Publication::first()->authors))->toBeGreaterThan(1000)
         ->and(Publication::first()->authors)->toBe(rtrim($authors));
+
+    fclose($file);
+});
+
+it('removes spaces around hyphens in imported publication text', function () {
+    $file = tmpfile();
+    fputcsv($file, ['authors', 'title', 'journal', 'pages']);
+    fputcsv($file, ['Chang - Yang, Chia - Hao', 'Plant - soil feedback', 'Forest - Ecology', '10 - 20']);
+    $path = stream_get_meta_data($file)['uri'];
+
+    app(PublicationCsvImporter::class)->import($path);
+
+    expect(Publication::first()->only(['authors', 'title', 'journal', 'pages']))
+        ->toBe([
+            'authors' => 'Chang-Yang, Chia-Hao',
+            'title' => 'Plant-soil feedback',
+            'journal' => 'Forest-Ecology',
+            'pages' => '10-20',
+        ]);
 
     fclose($file);
 });

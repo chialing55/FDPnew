@@ -27,7 +27,7 @@ class Publication extends Model
         'pdf_path',
         'doi',
         'url',
-        'external_id',
+        'zotero_id',
         'type',
         'language',
         'institution',
@@ -35,8 +35,19 @@ class Publication extends Model
         'thesis_type',
         'is_open_access',
         'is_active',
+        'is_changyang',
+        'site_review_status',
 
     ];
+
+    protected function casts(): array
+    {
+        return [
+            'is_open_access' => 'boolean',
+            'is_active' => 'boolean',
+            'is_changyang' => 'boolean',
+        ];
+    }
 
     public static function typeLabels(?string $locale = null): array
     {
@@ -52,6 +63,7 @@ class Publication extends Model
                 'journalartical' => 'Journal article',
                 'journalarticle' => 'Journal article',
                 'paper' => 'Paper',
+                'preprint' => 'Preprint',
                 'poster' => 'Poster',
                 'oral' => 'Oral presentation',
             ]
@@ -64,6 +76,7 @@ class Publication extends Model
                 'journalartical' => '期刊論文',
                 'journalarticle' => '期刊論文',
                 'paper' => '論文',
+                'preprint' => '預印本',
                 'poster' => '海報發表',
                 'oral' => '口頭發表',
             ];
@@ -147,11 +160,11 @@ class Publication extends Model
                 'doctoral' => 'Doctoral dissertation',
                 default => 'Thesis',
             }
-            : match ($thesisType) {
-                'master' => '碩士論文',
-                'doctoral' => '博士論文',
-                default => '學位論文',
-            };
+        : match ($thesisType) {
+            'master' => '碩士論文',
+            'doctoral' => '博士論文',
+            default => '學位論文',
+        };
 
         return filled($this->display_institution)
             ? $label.', '.e(rtrim($this->display_institution, '.'))
