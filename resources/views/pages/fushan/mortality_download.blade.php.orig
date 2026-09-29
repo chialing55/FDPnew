@@ -45,8 +45,7 @@
         .mortality-field-guide table { width: 92%; max-width: 1050px; margin: 0 auto; }
         .mortality-field-guide th, .mortality-field-guide td { padding: 5px 8px; vertical-align: top; line-height: 1.45; }
         .mortality-field-guide td:first-child { width: 1%; font-family: monospace; font-weight: 700; white-space: nowrap; }
-        .mortality-field-guide th:nth-child(2), .mortality-field-guide td:nth-child(2) { width: 40%; }
-        .mortality-field-guide th:nth-child(3), .mortality-field-guide td:nth-child(3) { width: 60%; }
+        .mortality-field-guide th:nth-child(2), .mortality-field-guide th:nth-child(3), .mortality-field-guide td:nth-child(2), .mortality-field-guide td:nth-child(3) { width: 50%; }
         .mortality-field-guide td:last-child { color: #4b5563; }
         .mortality-field-table-wrap { overflow-x: auto; }
     </style>

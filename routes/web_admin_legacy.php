@@ -345,6 +345,14 @@ Route::middleware(['auth', 'approved'])->prefix('admin')->name('admin.')->group(
                 ->defaults('site', 'fushan')
                 ->name('download');
 
+            Route::get('/download/census-records', [MortalityController::class, 'downloadCensusRecords'])
+                ->defaults('site', 'fushan')
+                ->name('download.census-records');
+
+            Route::get('/download/tree-individuals', [MortalityController::class, 'downloadTreeIndividuals'])
+                ->defaults('site', 'fushan')
+                ->name('download.tree-individuals');
+
             Route::get('/record-paper', [MortalityController::class, 'downloadRecordPaper'])
                 ->defaults('site', 'fushan')
                 ->name('record-paper');

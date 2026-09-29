@@ -1005,18 +1005,113 @@ class MortalityController extends Controller
     {
         $user = $request->user();
         $site = $request->route('site');
-        $latestCensus = $this->latestCensusRecordInfo();
-        $latestCensusText = $latestCensus
-            ? '第 ' . $latestCensus->census . ' 次（' . ($latestCensus->survey_year ?? '年份未設定') . ' 年）'
-            : '尚無資料';
+        $hasCensusRecords = DB::connection('fs_mortality')->table('census_records')->exists();
+        $hasTreeIndividuals = DB::connection('fs_mortality')->table('tree_individuals')->exists();
 
         return view('pages/fushan/mortality_download', [
             'site' => $site,
             'project' => '死亡率調查',
             'user' => $user->account ?? $user->name,
-            'latestCensus' => $latestCensus,
-            'latestCensusText' => $latestCensusText,
+            'hasCensusRecords' => $hasCensusRecords,
+            'hasTreeIndividuals' => $hasTreeIndividuals,
         ]);
+    }
+
+    public function downloadCensusRecords(): StreamedResponse
+    {
+        $headers = [
+            'id', 'census', 'survey_year', 'date', 'stemid', 'dbh', 'status', 'mode',
+            'living_length', 'branches', 'illumination', 'leaning', 'liana', 'fungi',
+            'wounded_stem', 'deformity', 'rotten', 'leaves', 'leaf_damage', 'comments',
+        ];
+
+        return $this->streamTxt('mortality_census_records.txt', $headers, function ($handle) {
+            DB::connection('fs_mortality')
+                ->table('census_records as cr')
+                ->leftJoin('censuses as c', 'c.census', '=', 'cr.census')
+                ->select([
+                    'cr.id', 'cr.census', 'c.survey_year', 'cr.date', 'cr.stemid', 'cr.dbh',
+                    'cr.status', 'cr.mode', 'cr.living_length', 'cr.branches', 'cr.illumination',
+                    'cr.leaning', 'cr.liana', 'cr.fungi', 'cr.wounded_stem', 'cr.deformity',
+                    'cr.rotten', 'cr.leaves', 'cr.leaf_damage',
+                ])
+                ->chunkById(1000, function ($rows) use ($handle) {
+                    $comments = $this->downloadCommentsByRecordId($rows->pluck('id')->all());
+
+                    foreach ($rows as $row) {
+                        fputcsv($handle, [
+                            $row->id,
+                            $row->census,
+                            $row->survey_year,
+                            $this->formatDownloadDate($row->date),
+                            $row->stemid,
+                            $this->formatDownloadValue($row->dbh),
+                            $row->status,
+                            $row->mode,
+                            $this->formatDownloadValue($row->living_length),
+                            $row->branches,
+                            $row->illumination,
+                            $row->leaning,
+                            $row->liana,
+                            $this->formatDownloadValue($row->fungi),
+                            $row->wounded_stem,
+                            $row->deformity,
+                            $row->rotten,
+                            $row->leaves,
+                            $this->formatDownloadValue($row->leaf_damage),
+                            $comments[(int) $row->id] ?? '',
+                        ], "\t");
+                    }
+                }, 'cr.id', 'id');
+        });
+    }
+
+    public function downloadTreeIndividuals(): StreamedResponse
+    {
+        $headers = [
+            'id', 'stemid', 'spcode', 'chname', 'family', 'scientific_name',
+            'qx', 'qy', 'subqx', 'subqy', 'x', 'y',
+        ];
+
+        return $this->streamTxt('mortality_tree_individuals.txt', $headers, function ($handle) {
+            $baseTable = $this->qualifiedBaseTable();
+            $siteSpeciesTable = $this->qualifiedTable('plant_catalog', 'site_species');
+            $checklistTable = $this->qualifiedTable('plant_catalog', 'taiwan_checklist');
+
+            DB::connection('fs_mortality')
+                ->table('tree_individuals as ti')
+                ->join(DB::raw($baseTable . ' as b'), function ($join) {
+                    $join->on('b.tag', '=', DB::raw("LEFT(SUBSTRING_INDEX(ti.stemid, '.', 1), 6)"));
+                })
+                ->leftJoin(DB::raw($siteSpeciesTable . ' as ss'), function ($join) {
+                    $join->on('ss.spcode', '=', 'b.spcode')
+                        ->where('ss.site', '=', 'fushan');
+                })
+                ->leftJoin(DB::raw($checklistTable . ' as tc'), 'tc.spcode', '=', 'ss.code')
+                ->select([
+                    'ti.id', 'ti.stemid', 'b.spcode', 'tc.chname', 'tc.family',
+                    'tc.canonical_name as scientific_name', 'b.qx', 'b.qy',
+                    'b.subqx', 'b.subqy', 'b.qudx as x', 'b.qudy as y',
+                ])
+                ->chunkById(1000, function ($rows) use ($handle) {
+                    foreach ($rows as $row) {
+                        fputcsv($handle, [
+                            $row->id,
+                            $row->stemid,
+                            $row->spcode,
+                            $row->chname,
+                            $row->family,
+                            $row->scientific_name,
+                            $row->qx,
+                            $row->qy,
+                            $row->subqx,
+                            $row->subqy,
+                            $this->formatDownloadValue($row->x),
+                            $this->formatDownloadValue($row->y),
+                        ], "\t");
+                    }
+                }, 'ti.id', 'id');
+        });
     }
 
     public function downloadLatestCensusRecords(Request $request): StreamedResponse
@@ -1191,13 +1286,19 @@ class MortalityController extends Controller
 
     private function qualifiedBaseTable(): string
     {
-        $database = config('database.connections.mysql1.database');
+        return $this->qualifiedTable('mysql1', 'base');
+    }
+
+    private function qualifiedTable(string $connection, string $table): string
+    {
+        $database = config("database.connections.{$connection}.database");
+        $quotedTable = '`' . str_replace('`', '``', $table) . '`';
 
         if (!$database) {
-            return '`base`';
+            return $quotedTable;
         }
 
-        return '`' . str_replace('`', '``', $database) . '`.`base`';
+        return '`' . str_replace('`', '``', $database) . '`.' . $quotedTable;
     }
     private function downloadCommentsByRecordId(array $recordIds): array
     {
@@ -1217,6 +1318,7 @@ class MortalityController extends Controller
             ->get([
                 'crc.census_record_id',
                 'crc.comment_other',
+                'co.code',
                 'co.comment_en',
                 'co.comment_zh',
             ])
@@ -1224,14 +1326,15 @@ class MortalityController extends Controller
             ->map(function ($rows) {
                 return $rows
                     ->map(function ($row) {
-                        $optionText = $this->nullIfBlank($row->comment_en)
-                            ?? $this->nullIfBlank($row->comment_zh);
+                        $optionText = $this->nullIfBlank($row->comment_zh)
+                            ?? $this->nullIfBlank($row->comment_en)
+                            ?? $this->nullIfBlank($row->code);
                         $otherText = $this->nullIfBlank($row->comment_other);
 
-                        return $optionText ?? $otherText;
+                        return trim(implode(' ', array_filter([$optionText, $otherText])));
                     })
                     ->filter(fn ($text) => $text !== null && $text !== '')
-                    ->implode(' | ');
+                    ->implode('；');
             })
             ->all();
     }
