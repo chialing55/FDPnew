@@ -48,7 +48,7 @@ it('formats ChangYang journal citations without duplicate punctuation and highli
     ]);
 
     expect($publication->chang_yang_citation_html)
-        ->toBe('Su S.-H.; <strong>Chang-Yang C.-H.</strong>; <strong>Chia-Hao Chang-Yang</strong>. <strong>Micro-topographic differentiation</strong>. <em>Taiwan Journal of Forest Science</em>. 25 (1) : 63–80.')
+        ->toBe('Su, S.-H., <strong>Chang-Yang, C.-H.</strong>, <strong>Chang-Yang, C.-H</strong>. <strong>Micro-topographic differentiation</strong>. <em>Taiwan Journal of Forest Science</em>. 25 (1) : 63–80.')
         ->not->toContain('..');
 });
 
@@ -70,7 +70,7 @@ it('uses distinct book and thesis citation formats on the ChangYang site', funct
     ]);
 
     expect($book->chang_yang_citation_html)
-        ->toBe('<strong>Chang-Yang, Chia-Hao</strong>. <strong><em>Forest Dynamics</em></strong>. Forest Press.')
+        ->toBe('<strong>Chang-Yang, C.-H</strong>. <strong><em>Forest Dynamics</em></strong>. Forest Press.')
         ->and($thesis->chang_yang_citation_html)
         ->toBe('<strong>Chang-Yang, C.-H</strong>. <strong>Seed Rain Dynamics</strong>. Doctoral dissertation, National Taiwan University.');
 });

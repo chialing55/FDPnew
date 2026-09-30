@@ -115,7 +115,7 @@ class Publication extends Model
 
     public function getCitationHtmlAttribute(): ?string
     {
-        $authors = filled($this->display_authors) ? e(rtrim($this->abbreviated_authors, '.')) : null;
+        $authors = $this->formatAuthors($this->abbreviated_authors);
         $title = filled($this->display_title) ? e(rtrim($this->display_title, '.')) : null;
         if ($title !== null && app()->getLocale() === 'en' && $this->isChineseLanguage()) {
             $title .= ' (in Chinese)';
@@ -145,7 +145,7 @@ class Publication extends Model
     /** 老師個人網站使用完整作者名單，並依出版品類型排版。 */
     public function getChangYangCitationHtmlAttribute(): ?string
     {
-        $authors = $this->highlightChangYang($this->citationText($this->authors));
+        $authors = $this->formatAuthors($this->authors, true);
         $title = $this->citationText($this->title);
         $title = $title !== null ? e($title) : null;
 
@@ -205,17 +205,71 @@ class Publication extends Model
         return preg_replace('/[\s\p{Z}\.]+$/u', '', trim((string) $value));
     }
 
-    private function highlightChangYang(?string $authors): ?string
+    private function formatAuthors(?string $authors, bool $highlightChangYang = false): ?string
     {
-        if ($authors === null) {
+        if (! filled($authors)) {
             return null;
         }
 
-        return preg_replace_callback(
-            '/(Chang-Yang, Chia-Hao|Chia-Hao Chang-Yang|Chang-Yang,? C\.-H\.?)/u',
-            fn (array $match): string => '<strong>'.$match[0].'</strong>',
-            e($authors)
-        );
+        $hasSemicolonSeparators = str_contains($authors, ';');
+        $authorList = $hasSemicolonSeparators
+            ? preg_split('/\s*;\s*/u', $authors, -1, PREG_SPLIT_NO_EMPTY)
+            : [trim($authors)];
+
+        $formatted = array_filter(array_map(function (string $author) use ($hasSemicolonSeparators, $highlightChangYang): ?string {
+            $author = trim($author);
+            if (preg_match('/^\.+$/', $author)) {
+                return '…';
+            }
+
+            if (preg_match('/^(?:Chia-Hao\s+Chang-Yang|Chang-Yang,?\s+(?:Chia-Hao|C\.-H\.))\.?$/iu', $author)) {
+                $author = 'Chang-Yang, C.-H.';
+            } elseif (($hasSemicolonSeparators && str_contains($author, ',')) || substr_count($author, ',') === 1) {
+                [$family, $given] = array_pad(array_map('trim', explode(',', $author, 2)), 2, null);
+                if (filled($family) && filled($given)) {
+                    $author = $this->citationText($family).', '.$this->authorInitials($given);
+                }
+            } elseif (preg_match('/^(.+?)\s+((?:\p{Lu}\.(?:-\p{Lu}\.)?)(?:\s+\p{Lu}\.)*)$/u', $author, $matches)) {
+                $author = $matches[1].', '.$matches[2];
+            }
+
+            $author = preg_replace('/\.+$/u', '.', trim($author));
+            if ($author === '') {
+                return null;
+            }
+
+            $escaped = e($author);
+
+            return $highlightChangYang && preg_match('/^Chang-Yang, C\.-H\.$/u', $author)
+                ? '<strong>'.$escaped.'</strong>'
+                : $escaped;
+        }, $authorList));
+
+        if ($formatted === []) {
+            return null;
+        }
+
+        $formatted = array_values($formatted);
+        $lastIndex = array_key_last($formatted);
+        $formatted[$lastIndex] = preg_replace('/\.(<\/strong>)?$/u', '$1', $formatted[$lastIndex]);
+
+        return implode(', ', $formatted);
+    }
+
+    private function authorInitials(string $givenNames): string
+    {
+        $words = preg_split('/\s+/u', trim($givenNames), -1, PREG_SPLIT_NO_EMPTY);
+
+        return implode(' ', array_map(function (string $word): string {
+            $parts = preg_split('/-/u', trim($word, " \t\n\r\0\x0B."), -1, PREG_SPLIT_NO_EMPTY);
+
+            return implode('-', array_map(function (string $part): string {
+                $part = trim($part, " \t\n\r\0\x0B.");
+                $initial = mb_strtoupper(mb_substr($part, 0, 1));
+
+                return $initial.'.';
+            }, $parts));
+        }, $words));
     }
 
     private function thesisSource(): ?string
