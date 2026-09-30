@@ -28,7 +28,6 @@
     @include('changyang.components.page-blocks', [
         'blocks' => collect([$previewBlock]),
         'interactivePreview' => true,
-        'previewHeadingInsideBody' => (bool) data_get($preview, 'heading_inside_body'),
     ])
 </div>
 <style>

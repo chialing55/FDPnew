@@ -10,7 +10,7 @@
         @php
             $contentContainsImages = str_contains(strtolower($block->content_html ?? ''), '<img');
             $hasStructuredMedia = in_array($block->layout, ['image_left', 'image_right'], true) && ! $contentContainsImages && $block->images->isNotEmpty();
-            $headingInsideBody = $hasStructuredMedia && (($currentPage->slug ?? null) === 'courses' || ($previewHeadingInsideBody ?? false));
+            $headingInsideBody = $hasStructuredMedia;
         @endphp
         <section @class(['content-section', 'content-section--media-card' => $headingInsideBody])>
             @if ($block->heading && ! $headingInsideBody)

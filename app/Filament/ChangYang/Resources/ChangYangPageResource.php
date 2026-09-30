@@ -186,11 +186,10 @@ class ChangYangPageResource extends Resource
                             ->label('圖片取樣與顯示')
                             ->imagePath(fn (Forms\Get $get): mixed => $get('image_path'))
                             ->visible(fn (Forms\Get $get): bool => filled($get('image_path')))
-                            ->previewData(fn (Forms\Get $get, $livewire): array => [
+                            ->previewData(fn (Forms\Get $get): array => [
                                 'heading' => $get('../../heading'),
                                 'content' => $get('../../content_html'),
                                 'layout' => $get('../../layout'),
-                                'heading_inside_body' => $livewire->record?->slug === 'courses',
                                 'photographer' => $get('photographer'),
                                 'mode' => 'block',
                                 'caption' => $get('caption'),
