@@ -214,7 +214,7 @@ class Publication extends Model
         $hasSemicolonSeparators = str_contains($authors, ';');
         $authorList = $hasSemicolonSeparators
             ? preg_split('/\s*;\s*/u', $authors, -1, PREG_SPLIT_NO_EMPTY)
-            : [trim($authors)];
+            : $this->splitCommaSeparatedInitialAuthors($authors);
 
         $formatted = array_filter(array_map(function (string $author) use ($hasSemicolonSeparators, $highlightChangYang): ?string {
             $author = trim($author);
@@ -256,6 +256,35 @@ class Publication extends Model
         $formatted[$lastIndex] = preg_replace('/\.(<\/strong>)?$/u', '$1', $formatted[$lastIndex]);
 
         return implode(', ', $formatted);
+    }
+
+    private function splitCommaSeparatedInitialAuthors(string $authors): array
+    {
+        $chunks = preg_split('/\s*,\s*/u', trim($authors), -1, PREG_SPLIT_NO_EMPTY);
+        if (count($chunks) < 2) {
+            return [trim($authors)];
+        }
+
+        $initialsPattern = '(?:\p{Lu}\.(?:-\p{Lu}\.)?)(?:\s+\p{Lu}\.)*';
+        $parsed = [];
+        for ($index = 0; $index < count($chunks); $index++) {
+            $chunk = trim($chunks[$index]);
+            if (preg_match('/^.+?\s+'.$initialsPattern.'$/u', $chunk)) {
+                $parsed[] = $chunk;
+                continue;
+            }
+
+            $next = $chunks[$index + 1] ?? null;
+            if ($next !== null && preg_match('/^'.$initialsPattern.'$/u', trim($next))) {
+                $parsed[] = $chunk.', '.trim($next);
+                $index++;
+                continue;
+            }
+
+            return [trim($authors)];
+        }
+
+        return count($parsed) > 1 ? $parsed : [trim($authors)];
     }
 
     private function authorInitials(string $givenNames): string

@@ -85,3 +85,14 @@ it('normalizes given-name-first Zotero authors and compound family names', funct
     expect($publication->chang_yang_citation_html)
         ->toStartWith('Kaewsong, K., Kraichak, E., <strong>Chang-Yang, C.-H.</strong>, de Oliveira, A. A. <strong>Coastal plant communities</strong>.');
 });
+
+it('normalizes comma-separated initials even when surname commas are mixed in', function () {
+    $publication = new Publication([
+        'authors' => 'Lin Y., Chao K.-J., Song G.-Z. M., Chao W.-C., Chang-Yang C.-H., Hsieh, C.-F.',
+        'title' => 'Seedling mortality',
+        'type' => 'journalArticle',
+    ]);
+
+    expect($publication->chang_yang_citation_html)
+        ->toStartWith('Lin, Y., Chao, K.-J., Song, G.-Z. M., Chao, W.-C., <strong>Chang-Yang, C.-H.</strong>, Hsieh, C.-F. <strong>Seedling mortality</strong>.');
+});
