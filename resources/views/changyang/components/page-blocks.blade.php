@@ -7,14 +7,17 @@
 @endphp
 <div class="page-content">
     @forelse ($blocks as $block)
-        <section class="content-section">
-            @if ($block->heading)
+        @php
+            $contentContainsImages = str_contains(strtolower($block->content_html ?? ''), '<img');
+            $hasStructuredMedia = in_array($block->layout, ['image_left', 'image_right'], true) && ! $contentContainsImages && $block->images->isNotEmpty();
+            $headingInsideBody = $hasStructuredMedia && (($currentPage->slug ?? null) === 'courses' || ($previewHeadingInsideBody ?? false));
+        @endphp
+        <section @class(['content-section', 'content-section--media-card' => $headingInsideBody])>
+            @if ($block->heading && ! $headingInsideBody)
                 <h2 class="content-section__title">{!! $formatSectionHeading($block->heading) !!}</h2>
             @endif
             <div class="content-section__blocks">
                     @php
-                        $contentContainsImages = str_contains(strtolower($block->content_html ?? ''), '<img');
-                        $hasStructuredMedia = in_array($block->layout, ['image_left', 'image_right'], true) && ! $contentContainsImages && $block->images->isNotEmpty();
                         $mediaWidth = data_get($block->images->first()?->display_settings, 'frame_width');
                         $mediaWidth = is_string($mediaWidth) && preg_match('/^\d+(?:\.\d+)?(?:px|rem|%)$/', $mediaWidth) ? $mediaWidth : null;
                     @endphp
@@ -48,6 +51,9 @@
                                 @endif
                             </div>
                             <div class="content-block__body">
+                                @if ($block->heading && $headingInsideBody)
+                                    <h2 class="content-section__title">{!! $formatSectionHeading($block->heading) !!}</h2>
+                                @endif
                                 @if ($block->content_html)<div class="rich-text">{!! $block->content_html !!}</div>@endif
                             </div>
                         @else

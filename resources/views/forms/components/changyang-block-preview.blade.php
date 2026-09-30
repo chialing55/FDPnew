@@ -25,7 +25,11 @@
     </div>
 @endif
 <div class="changyang-block-preview">
-    @include('changyang.components.page-blocks', ['blocks' => collect([$previewBlock]), 'interactivePreview' => true])
+    @include('changyang.components.page-blocks', [
+        'blocks' => collect([$previewBlock]),
+        'interactivePreview' => true,
+        'previewHeadingInsideBody' => (bool) data_get($preview, 'heading_inside_body'),
+    ])
 </div>
 <style>
     .changyang-block-preview .page-content { width: min(100%, 1106px) !important; margin: 0 auto !important; }
