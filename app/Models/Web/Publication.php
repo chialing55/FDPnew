@@ -231,6 +231,8 @@ class Publication extends Model
                 }
             } elseif (preg_match('/^(.+?)\s+((?:\p{Lu}\.(?:-\p{Lu}\.)?)(?:\s+\p{Lu}\.)*)$/u', $author, $matches)) {
                 $author = $matches[1].', '.$matches[2];
+            } elseif (! str_contains($author, ',') && str_contains($author, ' ')) {
+                $author = $this->normalizeGivenFirstAuthor($author);
             }
 
             $author = preg_replace('/\.+$/u', '.', trim($author));
@@ -270,6 +272,28 @@ class Publication extends Model
                 return $initial.'.';
             }, $parts));
         }, $words));
+    }
+
+    private function normalizeGivenFirstAuthor(string $author): string
+    {
+        $parts = preg_split('/\s+/u', trim($author), -1, PREG_SPLIT_NO_EMPTY);
+        if (count($parts) < 2) {
+            return $author;
+        }
+
+        $familyStart = count($parts) - 1;
+        $familyParticles = ['da', 'de', 'del', 'den', 'der', 'di', 'do', 'dos', 'du', 'la', 'le', 'van', 'von'];
+        foreach (array_slice($parts, 1, -1, true) as $index => $part) {
+            if (in_array(mb_strtolower(trim($part, '.')), $familyParticles, true)) {
+                $familyStart = $index;
+                break;
+            }
+        }
+
+        $given = implode(' ', array_slice($parts, 0, $familyStart));
+        $family = implode(' ', array_slice($parts, $familyStart));
+
+        return $family.', '.$this->authorInitials($given);
     }
 
     private function thesisSource(): ?string

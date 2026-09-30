@@ -74,3 +74,14 @@ it('uses distinct book and thesis citation formats on the ChangYang site', funct
         ->and($thesis->chang_yang_citation_html)
         ->toBe('<strong>Chang-Yang, C.-H</strong>. <strong>Seed Rain Dynamics</strong>. Doctoral dissertation, National Taiwan University.');
 });
+
+it('normalizes given-name-first Zotero authors and compound family names', function () {
+    $publication = new Publication([
+        'authors' => 'Kanokporn Kaewsong; Ekaphan Kraichak; Chia-Hao Chang-Yang; Alexandre Adalardo de Oliveira',
+        'title' => 'Coastal plant communities',
+        'type' => 'journalArticle',
+    ]);
+
+    expect($publication->chang_yang_citation_html)
+        ->toStartWith('Kaewsong, K., Kraichak, E., <strong>Chang-Yang, C.-H.</strong>, de Oliveira, A. A. <strong>Coastal plant communities</strong>.');
+});
