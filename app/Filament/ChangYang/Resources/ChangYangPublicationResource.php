@@ -34,7 +34,6 @@ class ChangYangPublicationResource extends BasePublicationResource
             Tables\Columns\TextColumn::make('abbreviated_authors')->label('作者')->searchable()->wrap(),
             Tables\Columns\TextColumn::make('title')->label('標題')->searchable()->limit(70)->wrap(),
             Tables\Columns\TextColumn::make('journal')->label('期刊')->limit(35)->toggleable(isToggledHiddenByDefault: true),
-            Tables\Columns\IconColumn::make('is_active')->label('公開')->boolean(),
         ])->defaultSort('year', 'desc')
             ->actions([Tables\Actions\EditAction::make()->label('編輯')]);
     }

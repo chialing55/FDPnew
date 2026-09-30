@@ -142,6 +142,82 @@ class Publication extends Model
         return $parts === [] ? null : implode('. ', $parts).'.';
     }
 
+    /** 老師個人網站使用完整作者名單，並依出版品類型排版。 */
+    public function getChangYangCitationHtmlAttribute(): ?string
+    {
+        $authors = $this->highlightChangYang($this->citationText($this->authors));
+        $title = $this->citationText($this->title);
+        $title = $title !== null ? e($title) : null;
+
+        if ($this->type === 'book') {
+            $parts = array_filter([
+                $authors,
+                $title !== null ? '<strong><em>'.$title.'</em></strong>' : null,
+                filled($this->institution) ? e($this->citationText($this->institution)) : null,
+            ]);
+
+            return $parts === [] ? null : implode('. ', $parts).'.';
+        }
+
+        if ($this->type === 'thesis') {
+            $parts = array_filter([
+                $authors,
+                $title !== null ? '<strong>'.$title.'</strong>' : null,
+                $this->thesisSource(),
+            ]);
+
+            return $parts === [] ? null : implode('. ', $parts).'.';
+        }
+
+        $parts = array_filter([
+            $authors,
+            $title !== null ? '<strong>'.$title.'</strong>' : null,
+            filled($this->journal) ? '<em>'.e($this->citationText($this->journal)).'</em>' : null,
+        ]);
+        $citation = $parts === [] ? '' : implode('. ', $parts).'.';
+
+        $volumeAndIssue = trim((string) $this->citationText($this->volume));
+        if (filled($this->issue)) {
+            $volumeAndIssue .= ($volumeAndIssue !== '' ? ' ' : '').'('.$this->citationText($this->issue).')';
+        }
+        if ($volumeAndIssue !== '') {
+            $citation .= ' '.e($volumeAndIssue);
+        }
+        if (filled($this->pages)) {
+            $citation .= ($volumeAndIssue !== '' ? ' : ' : ' ').e($this->citationText($this->pages));
+        }
+        if ($volumeAndIssue !== '' || filled($this->pages)) {
+            $citation .= '.';
+        }
+        if ($this->type === 'preprint') {
+            $citation .= ' (Preprint)';
+        }
+
+        return $citation !== '' ? $citation : null;
+    }
+
+    private function citationText(mixed $value): ?string
+    {
+        if (! filled($value)) {
+            return null;
+        }
+
+        return preg_replace('/[\s\p{Z}\.]+$/u', '', trim((string) $value));
+    }
+
+    private function highlightChangYang(?string $authors): ?string
+    {
+        if ($authors === null) {
+            return null;
+        }
+
+        return preg_replace_callback(
+            '/(Chang-Yang, Chia-Hao|Chia-Hao Chang-Yang|Chang-Yang,? C\.-H\.?)/u',
+            fn (array $match): string => '<strong>'.$match[0].'</strong>',
+            e($authors)
+        );
+    }
+
     private function thesisSource(): ?string
     {
         if ($this->type !== 'thesis') {

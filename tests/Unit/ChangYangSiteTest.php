@@ -1,5 +1,6 @@
 <?php
 
+use App\Models\Web\Publication;
 use Illuminate\Support\Facades\DB;
 
 uses(Tests\TestCase::class);
@@ -10,20 +11,47 @@ it('imports exactly the eight public pages', function () {
 });
 
 it('serves every database-driven Changyang page', function (string $page) {
-    $uri = $page === 'home' ? '/changyang' : '/changyang/'.$page;
+    $uri = $page === 'home' ? '/' : '/'.$page;
 
-    $this->get($uri)
+    $this->get('https://changyang.tw'.$uri)
         ->assertOk()
         ->assertSee('Plant Ecology Lab at NSYSU')
         ->assertSee('Resources');
 })->with(['home', 'news', 'people', 'research', 'publications', 'courses', 'gallery', 'resources']);
 
+it('publishes teacher publications independently of the plot website status', function () {
+    $teacherPublication = Publication::create([
+        'authors' => 'Visibility Test Author',
+        'title' => 'Teacher website visibility regression test',
+        'year' => 2099,
+        'is_active' => false,
+        'is_changyang' => true,
+    ]);
+    $plotOnlyPublication = Publication::create([
+        'authors' => 'Visibility Test Author',
+        'title' => 'Plot-only visibility regression test',
+        'year' => 2099,
+        'is_active' => true,
+        'is_changyang' => false,
+    ]);
+
+    try {
+        $this->get('https://changyang.tw/publications')
+            ->assertOk()
+            ->assertSee($teacherPublication->title)
+            ->assertDontSee($plotOnlyPublication->title);
+    } finally {
+        $teacherPublication->delete();
+        $plotOnlyPublication->delete();
+    }
+});
+
 it('does not expose gallery source pages as regular pages', function (string $page) {
-    $this->get('/changyang/'.$page)->assertNotFound();
+    $this->get('https://changyang.tw/'.$page)->assertNotFound();
 })->with(['fushan', 'bci', 'blog']);
 
 it('renders page content, news groups and gallery albums from the database', function () {
-    $this->get('/changyang/people')
+    $this->get('https://changyang.tw/people')
         ->assertOk()
         ->assertSee('Principle Investigator (PI)')
         ->assertSee('Research Assistants')
@@ -31,23 +59,23 @@ it('renders page content, news groups and gallery albums from the database', fun
         ->assertDontSee('<table', false)
         ->assertDontSee('wsite-multicol', false);
 
-    $this->get('/changyang/news')
+    $this->get('https://changyang.tw/news')
         ->assertOk()
         ->assertSee('Nov. 2024');
 
-    $this->get('/changyang/research')
+    $this->get('https://changyang.tw/research')
         ->assertOk()
         ->assertSee('Effects of climatic variation on plant reproduction')
         ->assertDontSee('<table', false)
         ->assertDontSee('wsite-multicol', false);
 
-    $this->get('/changyang/resources')
+    $this->get('https://changyang.tw/resources')
         ->assertOk()
         ->assertSee('Taiwan Forest Bureau')
         ->assertDontSee('class="paragraph"', false)
         ->assertDontSee('<ul style=', false);
 
-    $this->get('/changyang/gallery')
+    $this->get('https://changyang.tw/gallery')
         ->assertOk()
         ->assertSee('Fushan')
         ->assertSee('BCI')
@@ -57,17 +85,17 @@ it('renders page content, news groups and gallery albums from the database', fun
 });
 
 it('redirects old html paths only for valid pages', function () {
-    $this->get('/changyang/research.html')
-        ->assertRedirect('/changyang/research')
+    $this->get('https://changyang.tw/research.html')
+        ->assertRedirect('https://changyang.tw/research')
         ->assertStatus(301);
 
-    $this->get('/changyang/fushan.html')->assertNotFound();
+    $this->get('https://changyang.tw/fushan.html')->assertNotFound();
 });
 
 it('only references Changyang public-storage assets that exist', function () {
     foreach (['home', 'news', 'people', 'research', 'publications', 'courses', 'gallery', 'resources'] as $page) {
-        $uri = $page === 'home' ? '/changyang' : '/changyang/'.$page;
-        $html = $this->get($uri)->getContent();
+        $uri = $page === 'home' ? '/' : '/'.$page;
+        $html = $this->get('https://changyang.tw'.$uri)->getContent();
         expect($html)->not->toContain('/changyang-assets/');
         preg_match_all('#/storage/changyang/([^"\')?]+)#', $html, $matches);
 

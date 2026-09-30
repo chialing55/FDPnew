@@ -5,7 +5,7 @@
     </div>
     <div class="fi-changyang-list-table-wrap">
         <table class="fi-changyang-list-table">
-            <thead><tr><th>年份</th><th>類型</th><th>作者</th><th>標題</th><th>公開</th><th class="fi-changyang-list-table__actions"><span class="sr-only">操作</span></th></tr></thead>
+            <thead><tr><th>年份</th><th>類型</th><th>作者</th><th>標題</th><th class="fi-changyang-list-table__actions"><span class="sr-only">操作</span></th></tr></thead>
             <tbody>
                 @forelse ($publications as $publication)
                     <tr wire:key="changyang-publication-{{ $publication->id }}" class="fi-changyang-list-table__row" x-on:click="if (! $event.target.closest('a, button, input')) window.location = @js(\App\Filament\ChangYang\Resources\ChangYangPublicationResource::getUrl('edit', ['record' => $publication]))">
@@ -13,11 +13,10 @@
                         <td>{{ \App\Models\Web\Publication::typeLabels('zh-TW')[$publication->type] ?? $publication->type }}</td>
                         <td>{{ \Illuminate\Support\Str::limit($publication->abbreviated_authors, 60) }}</td>
                         <td>{{ \Illuminate\Support\Str::limit($publication->title, 100) }}</td>
-                        <td><x-filament::icon :icon="$publication->is_active ? 'heroicon-o-check-circle' : 'heroicon-o-x-circle'" :class="$publication->is_active ? 'fi-changyang-list-table__published' : 'fi-changyang-list-table__hidden'" /></td>
                         <td class="fi-changyang-list-table__actions"><a class="fi-changyang-list-table__edit" href="{{ \App\Filament\ChangYang\Resources\ChangYangPublicationResource::getUrl('edit', ['record' => $publication]) }}"><x-filament::icon icon="heroicon-o-pencil-square" class="h-5 w-5" /> 編輯</a></td>
                     </tr>
                 @empty
-                    <tr><td colspan="6">尚無學術產出</td></tr>
+                    <tr><td colspan="5">尚無學術產出</td></tr>
                 @endforelse
             </tbody>
         </table>

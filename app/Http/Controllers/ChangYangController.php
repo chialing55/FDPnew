@@ -43,7 +43,7 @@ class ChangYangController extends Controller
         }
 
         $publications = $currentPage->template === 'publications'
-            ? Publication::active()->where('is_changyang', true)->latestFirst()->orderBy('title')->get()->groupBy('year')
+            ? Publication::query()->where('is_changyang', true)->latestFirst()->orderBy('title')->get()->groupBy('year')
             : collect();
 
         $personCategories = $currentPage->template === 'people'

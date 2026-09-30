@@ -58,6 +58,9 @@ return [
 
     'asset_url' => env('ASSET_URL'),
 
+    /* Standalone public URL for the ChangYang laboratory site. */
+    'changyang_url' => env('CHANGYANG_URL', 'https://changyang.tw'),
+
     /*
     |--------------------------------------------------------------------------
     | Application Timezone

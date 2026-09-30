@@ -14,7 +14,7 @@ use App\Http\Controllers\ChangYangController;
 // showing Filament's panel-specific sign-in page.
 Route::redirect('/changyang-admin/login', '/login');
 
-Route::prefix('changyang')->name('changyang.')->group(function () {
+Route::domain(parse_url(config('app.changyang_url'), PHP_URL_HOST))->name('changyang.')->group(function () {
     Route::get('/', [ChangYangController::class, 'show'])->name('home');
     Route::get('/{page}.html', [ChangYangController::class, 'legacy'])
         ->where('page', '[a-z0-9-]+')
@@ -23,6 +23,17 @@ Route::prefix('changyang')->name('changyang.')->group(function () {
         ->where('page', '[a-z0-9-]+')
         ->name('page');
 });
+
+Route::domain('www.'.parse_url(config('app.changyang_url'), PHP_URL_HOST))->group(function () {
+    Route::get('/{path?}', function (?string $path = null) {
+        return redirect()->to(rtrim(config('app.changyang_url'), '/').($path ? '/'.$path : ''), 301);
+    })->where('path', '.*');
+});
+
+// Preserve existing bookmarks while making the standalone domain canonical.
+Route::get('/changyang/{path?}', function (?string $path = null) {
+    return redirect()->to(rtrim(config('app.changyang_url'), '/').($path ? '/'.$path : ''), 301);
+})->where('path', '.*');
 
 /*
 |--------------------------------------------------------------------------

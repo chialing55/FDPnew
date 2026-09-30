@@ -35,3 +35,42 @@ it('always uses original publication fields on the English site', function () {
         ->and($publication->display_title)->toBe('English title')
         ->and($publication->display_journal)->toBe('English Journal');
 });
+
+it('formats ChangYang journal citations without duplicate punctuation and highlights his name variants', function () {
+    $publication = new Publication([
+        'authors' => 'Su S.-H.; Chang-Yang C.-H.; Chia-Hao Chang-Yang.',
+        'title' => 'Micro-topographic differentiation.',
+        'journal' => 'Taiwan Journal of Forest Science.',
+        'volume' => '25',
+        'issue' => '1',
+        'pages' => '63–80.',
+        'type' => 'journalArticle',
+    ]);
+
+    expect($publication->chang_yang_citation_html)
+        ->toBe('Su S.-H.; <strong>Chang-Yang C.-H.</strong>; <strong>Chia-Hao Chang-Yang</strong>. <strong>Micro-topographic differentiation</strong>. <em>Taiwan Journal of Forest Science</em>. 25 (1) : 63–80.')
+        ->not->toContain('..');
+});
+
+it('uses distinct book and thesis citation formats on the ChangYang site', function () {
+    app()->setLocale('en');
+
+    $book = new Publication([
+        'authors' => 'Chang-Yang, Chia-Hao',
+        'title' => 'Forest Dynamics',
+        'type' => 'book',
+        'institution' => 'Forest Press',
+    ]);
+    $thesis = new Publication([
+        'authors' => 'Chang-Yang, C.-H.',
+        'title' => 'Seed Rain Dynamics',
+        'type' => 'thesis',
+        'thesis_type' => 'doctoral',
+        'institution' => 'National Taiwan University',
+    ]);
+
+    expect($book->chang_yang_citation_html)
+        ->toBe('<strong>Chang-Yang, Chia-Hao</strong>. <strong><em>Forest Dynamics</em></strong>. Forest Press.')
+        ->and($thesis->chang_yang_citation_html)
+        ->toBe('<strong>Chang-Yang, C.-H</strong>. <strong>Seed Rain Dynamics</strong>. Doctoral dissertation, National Taiwan University.');
+});

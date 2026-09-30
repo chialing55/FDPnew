@@ -6,13 +6,7 @@
                 @foreach ($items as $publication)
                     <li>
                         <p>
-                            {!! str_replace('Chang-Yang, Chia-Hao', '<strong>Chang-Yang, Chia-Hao</strong>', e($publication->authors)) !!}.
-                            <strong>{{ $publication->title }}</strong>.
-                            @if ($publication->journal)<em>{{ $publication->journal }}</em>.@endif
-                            @if ($publication->volume){{ $publication->volume }}@endif
-                            @if ($publication->issue)({{ $publication->issue }})@endif
-                            @if ($publication->pages): {{ $publication->pages }}.@endif
-                            @if ($publication->type === 'preprint')<span>(Preprint)</span>@endif
+                            {!! $publication->chang_yang_citation_html !!}
                             @if ($publication->doi)
                                 <a href="https://doi.org/{{ \App\Services\Web\PublicationIdentity::doi($publication->doi) }}" target="_blank" rel="noopener noreferrer">DOI</a>
                             @elseif ($publication->url && preg_match('~^https?://~i', $publication->url))
