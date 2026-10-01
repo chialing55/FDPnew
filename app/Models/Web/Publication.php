@@ -147,13 +147,16 @@ class Publication extends Model
     {
         $authors = $this->formatAuthors($this->authors, true);
         $title = $this->citationText($this->title);
+        if ($title !== null && $this->isChineseLanguage() && ! preg_match('/\(in Chinese\)$/iu', $title)) {
+            $title .= ' (in Chinese)';
+        }
         $title = $title !== null ? e($title) : null;
 
         if ($this->type === 'book') {
             $parts = array_filter([
                 $authors,
                 $title !== null ? '<strong><em>'.$title.'</em></strong>' : null,
-                filled($this->institution) ? e($this->citationText($this->institution)) : null,
+                filled($this->journal) ? e($this->citationText($this->journal)) : null,
             ]);
 
             return $parts === [] ? null : implode('. ', $parts).'.';
@@ -163,7 +166,7 @@ class Publication extends Model
             $parts = array_filter([
                 $authors,
                 $title !== null ? '<strong>'.$title.'</strong>' : null,
-                $this->thesisSource(),
+                $this->changYangThesisSource(),
             ]);
 
             return $parts === [] ? null : implode('. ', $parts).'.';
@@ -194,6 +197,25 @@ class Publication extends Model
         }
 
         return $citation !== '' ? $citation : null;
+    }
+
+    private function changYangThesisSource(): string
+    {
+        $thesisType = match (strtolower(trim((string) $this->thesis_type))) {
+            'master', "master's thesis", 'masters thesis', '碩士', '碩士論文' => 'master',
+            'doctoral', 'doctoral dissertation', 'phd', 'ph.d.', '博士', '博士論文' => 'doctoral',
+            default => null,
+        };
+
+        $label = match ($thesisType) {
+            'master' => "Master's thesis",
+            'doctoral' => 'Doctoral dissertation',
+            default => 'Thesis',
+        };
+
+        return filled($this->institution)
+            ? $label.', '.e($this->citationText($this->institution))
+            : $label;
     }
 
     private function citationText(mixed $value): ?string

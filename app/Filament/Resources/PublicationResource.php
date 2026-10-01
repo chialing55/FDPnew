@@ -83,9 +83,11 @@ class PublicationResource extends Resource
                                 ->columnSpan(4)
                                 ->visible(fn (Forms\Get $get): bool => $get('type') === 'thesis'),
                             static::pairedAutocompleteField('journal', 'Journal', 'journal_zh_tw')
+                                ->label(fn (Forms\Get $get): string => $get('type') === 'book' ? 'Publisher' : 'Journal')
                                 ->columnSpan(fn (Forms\Get $get): int => $get('language') === 'zh' ? 3 : 6)
                                 ->hidden(fn (Forms\Get $get): bool => $get('type') === 'thesis'),
                             static::pairedAutocompleteField('journal_zh_tw', '中文期刊名稱', 'journal')
+                                ->label(fn (Forms\Get $get): string => $get('type') === 'book' ? '出版社' : '中文期刊名稱')
                                 ->columnSpan(3)
                                 ->visible(fn (Forms\Get $get): bool => $get('type') !== 'thesis' && $get('language') === 'zh'),
                             Forms\Components\TextInput::make('volume')

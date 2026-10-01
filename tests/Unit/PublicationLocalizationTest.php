@@ -57,9 +57,10 @@ it('uses distinct book and thesis citation formats on the ChangYang site', funct
 
     $book = new Publication([
         'authors' => 'Chang-Yang, Chia-Hao',
-        'title' => 'Forest Dynamics',
+        'title' => '森林動態',
         'type' => 'book',
-        'institution' => 'Forest Press',
+        'language' => 'zh-TW',
+        'journal' => 'Forest Press',
     ]);
     $thesis = new Publication([
         'authors' => 'Chang-Yang, C.-H.',
@@ -70,9 +71,25 @@ it('uses distinct book and thesis citation formats on the ChangYang site', funct
     ]);
 
     expect($book->chang_yang_citation_html)
-        ->toBe('<strong>Chang-Yang, C.-H</strong>. <strong><em>Forest Dynamics</em></strong>. Forest Press.')
+        ->toBe('<strong>Chang-Yang, C.-H</strong>. <strong><em>森林動態 (in Chinese)</em></strong>. Forest Press.')
         ->and($thesis->chang_yang_citation_html)
         ->toBe('<strong>Chang-Yang, C.-H</strong>. <strong>Seed Rain Dynamics</strong>. Doctoral dissertation, National Taiwan University.');
+});
+
+it('keeps ChangYang thesis labels in English and marks Chinese theses', function () {
+    app()->setLocale('zh-TW');
+
+    $thesis = new Publication([
+        'authors' => 'Chang-Yang, Chia-Hao',
+        'title' => '森林種子雨研究',
+        'type' => 'thesis',
+        'language' => 'zh',
+        'thesis_type' => 'master',
+        'institution' => 'National Taiwan University',
+    ]);
+
+    expect($thesis->chang_yang_citation_html)
+        ->toBe('<strong>Chang-Yang, C.-H</strong>. <strong>森林種子雨研究 (in Chinese)</strong>. Master\'s thesis, National Taiwan University.');
 });
 
 it('normalizes given-name-first Zotero authors and compound family names', function () {
