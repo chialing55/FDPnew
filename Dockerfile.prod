@@ -14,7 +14,7 @@ RUN npm run build:css \
     && npm run build:admin-css \
     && ./node_modules/.bin/vite build
 
-FROM php:8.3-fpm-bookworm AS php-base
+FROM php:8.3.36-fpm-bookworm AS php-base
 
 RUN apt-get update \
     && apt-get install -y --no-install-recommends \

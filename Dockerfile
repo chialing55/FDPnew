@@ -1,8 +1,8 @@
 # 第一步：取得 Composer
 FROM composer:2 AS composer
 
-# 第二步：主容器使用 PHP 8.2 FPM
-FROM php:8.3-fpm
+# 第二步：主容器使用固定版本的 PHP 8.3 FPM
+FROM php:8.3.36-fpm
 
 # 安裝系統套件 + PHP extensions
 RUN apt-get update && apt-get install -y \
