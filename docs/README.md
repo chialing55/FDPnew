@@ -11,6 +11,7 @@
 ## 正式環境維運
 
 - [正式站備份與還原](production/backup.md)
+- [前端開發依賴升級待辦](production/frontend-dependency-upgrade.md)
 
 ## 後台介面
 

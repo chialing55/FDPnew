@@ -22,6 +22,8 @@ yarn-error.log
 /public/recordpdf
 composer.json
 composer.lock
+!/composer.json
+!/composer.lock
 /public/fs_census4_scanfile
 /public/fs_census5_scanfile
 /public/ss_10m_census1_scanfile

@@ -2,6 +2,12 @@
 
 > 本文件記錄目前暫緩、日後需要接續的工作。現正進行中的 ForestGEO／GEO-TREES 工作不列於此處。
 
+## 正式環境維運
+
+- [ ] 下次調整前端時，升級 Tailwind CSS、Vite 等建置工具並完成畫面回歸測試。
+
+詳細說明：[前端開發依賴升級待辦](production/frontend-dependency-upgrade.md)
+
 ## 每木
 
 - [ ] 重整每木輸入介面，且在重整完成前維持既有輸入流程正常運作。
