@@ -25,6 +25,7 @@ create_database "${DB_DATABASE_FIFTH:-}"
 create_database "${DB_DATABASE_SIXTH:-}"
 create_database "${DB_DATABASE_WEB:-}"
 create_database "${DB_DATABASE_FS_MORTALITY:-}"
+create_database "${DB_DATABASE_FS_SEEDLING_EXP:-}"
 create_database "${DB_DATABASE_NJS_SEEDLING:-}"
 
 "${mysql[@]}" <<SQL
@@ -65,6 +66,9 @@ database_for_import() {
             ;;
         fs_mortality.sql|fs_mortality.sql.gz)
             printf '%s' "${DB_DATABASE_FS_MORTALITY:-fs_mortality}"
+            ;;
+        fs_seedling_exp.sql|fs_seedling_exp.sql.gz)
+            printf '%s' "${DB_DATABASE_FS_SEEDLING_EXP:-fs_seedling_exp}"
             ;;
         njs_seedling.sql|njs_seedling.sql.gz)
             printf '%s' "${DB_DATABASE_NJS_SEEDLING:-njs_seedling}"
