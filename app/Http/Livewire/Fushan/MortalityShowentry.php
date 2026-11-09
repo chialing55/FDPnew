@@ -9,6 +9,7 @@ use App\Models\FsMortality\Record1;
 use App\Models\FsMortality\Record2;
 use App\Models\FsMortality\Team;
 use App\Models\FsMortality\TeamMember;
+use App\Support\DataEntry\SaveFeedback;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\Rule;
 use Livewire\Component;
@@ -16,53 +17,96 @@ use Livewire\Component;
 class MortalityShowentry extends Component
 {
     private const DEFAULT_PERSONNEL_SLOTS = 4;
+
     private const SPECIAL_CASE_COMMENT_KEYWORDS = [
         '特例',
         'exception',
     ];
 
     public $entry;
+
     public $user;
+
     public $site;
+
     public $selectedMapKey;
+
     public $selectedMapSort;
+
     public $selectedMap;
+
     public $mapOptions = [];
+
     public $records = [];
+
     public $suggestedMapKey;
+
     public $firstPendingMapKey;
+
     public $firstPendingMap;
+
     public $suggestedMapSort;
+
     public $firstPendingMapSort;
+
     public $entryCompleted = false;
+
     public $currentPageCompleted = false;
+
     public $recordCount = 0;
+
     public $pendingCount = 0;
+
     public $currentCensus;
+
     public $surveyYear;
+
     public $inputDate;
+
     public $completionHint;
+
     public $previousMapKey;
+
     public $nextMapKey;
+
     public $previousMapSort;
+
     public $nextMapSort;
+
     public $surveyDate;
+
     public $selectedTeamId = '';
+
     public $surveyPersonnel = [];
+
     public $teamOptions = [];
+
     public $showTeamBuilder = false;
+
     public $teamSearch = '';
+
     public $teamSortField = 'id';
+
     public $teamSortDirection = 'asc';
+
     public $editingTeamId = '';
+
     public $personOptions = [];
+
     public $surveyMetaMessage;
+
     public $commentsModalOpen = false;
+
     public $editingCommentRecordId;
+
     public $editingCommentMeta = [];
+
     public $commentItems = [];
+
     public $stemCorrectionItems = [];
+
     public $commentOptions = [];
+
     public $stemCorrectionOptions = [
         'qx' => '20x',
         'qy' => '20y',
@@ -72,19 +116,30 @@ class MortalityShowentry extends Component
         'csp' => 'csp',
         'other' => 'other',
     ];
+
     public $commentsSaveMessage;
+
     public $entrySaveMessage;
+
+    public string $entrySaveStatus = 'noop';
+
     public $entrySaveErrors = [];
+
     public $entrySaveErrorRecordIds = [];
+
     public $showCommentOptionForm = false;
+
     public $newCommentOption = [
         'code' => '',
         'comment_zh' => '',
         'comment_en' => '',
         'category' => '',
     ];
+
     public $commentOptionMessage;
+
     public $draftEntryRecords = [];
+
     public $mainStatusMessage;
 
     public function mount($entry, $user, $site): void
@@ -140,7 +195,7 @@ class MortalityShowentry extends Component
             }])
             ->find((int) $value);
 
-        if (!$team) {
+        if (! $team) {
             $this->selectedTeamId = '';
             $this->ensureMinimumPersonnelSlots();
 
@@ -166,7 +221,7 @@ class MortalityShowentry extends Component
     {
         $this->resetTeamBuilder();
 
-        $this->showTeamBuilder = !$this->showTeamBuilder;
+        $this->showTeamBuilder = ! $this->showTeamBuilder;
     }
 
     public function loadTeamForEditing($teamId): void
@@ -177,7 +232,7 @@ class MortalityShowentry extends Component
             }, 'teamMembers.person'])
             ->find((int) $teamId);
 
-        if (!$team) {
+        if (! $team) {
             return;
         }
 
@@ -189,7 +244,7 @@ class MortalityShowentry extends Component
             ->values()
             ->all();
         $this->ensureMinimumPersonnelSlots();
-        $this->surveyMetaMessage = '已載入 team_id ' . $team->id . '，可修改後儲存。';
+        $this->surveyMetaMessage = '已載入 team_id '.$team->id.'，可修改後儲存。';
         $this->showTeamBuilder = true;
     }
 
@@ -210,7 +265,7 @@ class MortalityShowentry extends Component
 
     public function sortTeamOptions(string $field): void
     {
-        if (!in_array($field, ['id', 'label'], true)) {
+        if (! in_array($field, ['id', 'label'], true)) {
             return;
         }
 
@@ -236,7 +291,7 @@ class MortalityShowentry extends Component
             || DB::connection('fs_mortality')->table('census_records')->where('team_id', $teamId)->exists();
 
         if ($isUsed) {
-            $this->surveyMetaMessage = 'team_id ' . $teamId . ' 已被調查資料使用，不能刪除。';
+            $this->surveyMetaMessage = 'team_id '.$teamId.' 已被調查資料使用，不能刪除。';
 
             return;
         }
@@ -249,7 +304,7 @@ class MortalityShowentry extends Component
         $this->refreshEntryState();
         $this->resetTeamBuilder();
         $this->showTeamBuilder = true;
-        $this->surveyMetaMessage = '已刪除 team_id ' . $teamId . '。';
+        $this->surveyMetaMessage = '已刪除 team_id '.$teamId.'。';
         $this->dispatchEntryGridEvent();
     }
 
@@ -258,7 +313,7 @@ class MortalityShowentry extends Component
         $modelClass = $this->getRecordModelClass();
         $record = $modelClass::query()->find($recordId);
 
-        if (!$record) {
+        if (! $record) {
             return;
         }
 
@@ -333,7 +388,7 @@ class MortalityShowentry extends Component
 
     public function toggleCommentOptionForm(): void
     {
-        $this->showCommentOptionForm = !$this->showCommentOptionForm;
+        $this->showCommentOptionForm = ! $this->showCommentOptionForm;
         $this->commentOptionMessage = null;
         $this->resetErrorBag(['newCommentOption.code', 'newCommentOption.comment_zh', 'newCommentOption.comment_en', 'newCommentOption.category']);
     }
@@ -380,14 +435,14 @@ class MortalityShowentry extends Component
 
     public function saveCommentsEditor(): void
     {
-        if (!$this->editingCommentRecordId) {
+        if (! $this->editingCommentRecordId) {
             return;
         }
 
         $modelClass = $this->getRecordModelClass();
         $record = $modelClass::query()->find($this->editingCommentRecordId);
 
-        if (!$record) {
+        if (! $record) {
             return;
         }
 
@@ -395,8 +450,8 @@ class MortalityShowentry extends Component
         $stemCorrectionsJson = $this->buildStemCorrectionPayload($this->stemCorrectionItems);
 
         $record->update([
-            'comments_json' => !empty($commentsJson) ? $commentsJson : null,
-            'stem_corrections_json' => !empty($stemCorrectionsJson) ? $stemCorrectionsJson : null,
+            'comments_json' => ! empty($commentsJson) ? $commentsJson : null,
+            'stem_corrections_json' => ! empty($stemCorrectionsJson) ? $stemCorrectionsJson : null,
             'updated_by' => (string) $this->user,
         ]);
 
@@ -408,9 +463,9 @@ class MortalityShowentry extends Component
         $this->entrySaveErrors = $draftResult['errors'];
         $this->entrySaveErrorRecordIds = $draftResult['errorRecordIds'];
 
-        if (!empty($draftResult['errors'])) {
+        if (! empty($draftResult['errors'])) {
             $savedDraftText = $draftResult['savedCount'] > 0 ? "，並同步儲存 {$draftResult['savedCount']} 筆表格資料" : '';
-            $this->mainStatusMessage = '備註已儲存' . $savedDraftText . '；其餘未通過驗證的表格內容已保留在前端。';
+            $this->mainStatusMessage = '備註已儲存'.$savedDraftText.'；其餘未通過驗證的表格內容已保留在前端。';
         } elseif ($draftResult['savedCount'] > 0) {
             $this->mainStatusMessage = "備註與 {$draftResult['savedCount']} 筆表格資料已儲存。";
         } else {
@@ -446,7 +501,7 @@ class MortalityShowentry extends Component
 
         $this->selectedTeamId = (string) $teamId;
         $this->editingTeamId = (string) $teamId;
-        $this->surveyMetaMessage = '已建立 team_id ' . $teamId . '，可在下方資料表逐筆填寫。';
+        $this->surveyMetaMessage = '已建立 team_id '.$teamId.'，可在下方資料表逐筆填寫。';
         $this->refreshEntryState();
         $this->showTeamBuilder = true;
         $this->dispatchEntryGridEvent();
@@ -470,7 +525,7 @@ class MortalityShowentry extends Component
 
         $this->selectedTeamId = (string) $teamId;
         $this->editingTeamId = (string) $teamId;
-        $this->surveyMetaMessage = 'team_id ' . $teamId . ' 已修改，可在下方資料表逐筆填寫。';
+        $this->surveyMetaMessage = 'team_id '.$teamId.' 已修改，可在下方資料表逐筆填寫。';
         $this->refreshEntryState();
         $this->showTeamBuilder = true;
         $this->dispatchEntryGridEvent();
@@ -485,9 +540,16 @@ class MortalityShowentry extends Component
         $result = $this->persistDraftRecords($records);
         $this->entrySaveErrors = $result['errors'];
         $this->entrySaveErrorRecordIds = $result['errorRecordIds'];
+        $failed = count($result['errorRecordIds']);
+        $this->entrySaveStatus = SaveFeedback::status($result['savedCount'], $failed);
+        $this->entrySaveMessage = SaveFeedback::message(
+            $this->entrySaveStatus,
+            $result['savedCount'],
+            $result['skippedCount'],
+            $failed,
+        );
 
         if ($result['savedCount'] > 0 && empty($result['errors'])) {
-            $this->entrySaveMessage = "已儲存 {$result['savedCount']} 筆資料。";
             $this->refreshEntryState();
             $this->dispatchEntryGridEvent();
             $this->dispatch('mortality-entry-save-result', errorRecordIds: []);
@@ -496,13 +558,11 @@ class MortalityShowentry extends Component
         }
 
         if ($result['savedCount'] > 0) {
-            $this->entrySaveMessage = "已儲存 {$result['savedCount']} 筆資料，其餘資料請修正後再儲存。";
             $this->dispatch('mortality-entry-save-result', errorRecordIds: $this->entrySaveErrorRecordIds);
 
             return;
         }
 
-        $this->entrySaveMessage = '目前沒有可儲存的資料。';
         $this->dispatch('mortality-entry-save-result', errorRecordIds: $this->entrySaveErrorRecordIds);
     }
 
@@ -565,13 +625,13 @@ class MortalityShowentry extends Component
                     ['sort_label', 'asc'],
                     ['id', 'asc'],
                 ])
-            ->values()
-            ->map(fn ($team) => [
-                'id' => $team['id'],
-                'label' => $team['label'],
-                'display' => $team['id'] . '：' . $team['label'],
-            ])
-            ->all()
+                ->values()
+                ->map(fn ($team) => [
+                    'id' => $team['id'],
+                    'label' => $team['label'],
+                    'display' => $team['id'].'：'.$team['label'],
+                ])
+                ->all()
             : [];
 
         $firstPendingRow = (clone $baseQuery)
@@ -591,13 +651,13 @@ class MortalityShowentry extends Component
         $this->firstPendingMapSort = $firstPendingRow ? (int) $firstPendingRow->map_sort : null;
         $mapOptionKeys = array_map(fn ($row) => (string) $row['key'], $this->mapOptions);
         $this->suggestedMapKey = $this->firstPendingMapKey ?? ($mapOptionKeys[0] ?? null);
-        $this->suggestedMapSort = $this->firstPendingMapSort ?? (!empty($this->mapOptions) ? (int) $this->mapOptions[0]['map_sort'] : null);
+        $this->suggestedMapSort = $this->firstPendingMapSort ?? (! empty($this->mapOptions) ? (int) $this->mapOptions[0]['map_sort'] : null);
 
-        $this->entryCompleted = !$this->hasPendingStatus(clone $baseQuery);
+        $this->entryCompleted = ! $this->hasPendingStatus(clone $baseQuery);
 
         $selectedMapKey = $this->buildCurrentSelectedMapKey();
 
-        if ($selectedMapKey !== null && !in_array($selectedMapKey, $mapOptionKeys, true)) {
+        if ($selectedMapKey !== null && ! in_array($selectedMapKey, $mapOptionKeys, true)) {
             $this->selectedMapKey = null;
             $this->selectedMapSort = null;
             $this->selectedMap = null;
@@ -698,8 +758,8 @@ class MortalityShowentry extends Component
 
     private function buildCompletionHint(): ?string
     {
-        $firstEntryCompleted = !$this->hasPendingStatus(Record1::query());
-        $secondEntryCompleted = !$this->hasPendingStatus(Record2::query());
+        $firstEntryCompleted = ! $this->hasPendingStatus(Record1::query());
+        $secondEntryCompleted = ! $this->hasPendingStatus(Record2::query());
 
         if ($this->entry === '1') {
             if ($firstEntryCompleted && $secondEntryCompleted) {
@@ -729,7 +789,7 @@ class MortalityShowentry extends Component
         $this->dispatch(
             'mortality-entry-data',
             records: $this->records,
-            enabled: $this->selectedMapSort !== null && $this->selectedMap !== null && !empty($this->records),
+            enabled: $this->selectedMapSort !== null && $this->selectedMap !== null && ! empty($this->records),
             mapSort: $this->selectedMapSort,
             map: $this->selectedMap,
             entry: $this->entry,
@@ -752,7 +812,7 @@ class MortalityShowentry extends Component
 
     private function buildMapOptionKey(int $mapSort, string $map): string
     {
-        return $mapSort . '|' . trim($map);
+        return $mapSort.'|'.trim($map);
     }
 
     private function buildCurrentSelectedMapKey(): ?string
@@ -801,10 +861,10 @@ class MortalityShowentry extends Component
             ->values()
             ->all();
 
-        if (!empty($duplicateNames)) {
+        if (! empty($duplicateNames)) {
             $this->addError(
                 'surveyPersonnel',
-                '調查人員有重複：' . implode('、', $duplicateNames) . '，請確認後再儲存。'
+                '調查人員有重複：'.implode('、', $duplicateNames).'，請確認後再儲存。'
             );
 
             return null;
@@ -830,7 +890,7 @@ class MortalityShowentry extends Component
             ->all();
 
         foreach ($uniqueNames as $name) {
-            if (!isset($existingPeople[$name])) {
+            if (! isset($existingPeople[$name])) {
                 $person = Person::query()->create([
                     'name' => $name,
                 ]);
@@ -892,7 +952,7 @@ class MortalityShowentry extends Component
     {
         $team = Team::query()->where('census', $this->currentCensus)->find($teamId);
 
-        if (!$team) {
+        if (! $team) {
             return $this->resolveTeamId($personNames);
         }
 
@@ -926,7 +986,7 @@ class MortalityShowentry extends Component
             ->all();
 
         foreach ($uniqueNames as $name) {
-            if (!isset($existingPeople[$name])) {
+            if (! isset($existingPeople[$name])) {
                 $person = Person::query()->create([
                     'name' => $name,
                 ]);
@@ -991,6 +1051,7 @@ class MortalityShowentry extends Component
             ->keyBy('id');
 
         $savedCount = 0;
+        $skippedCount = 0;
         $errors = [];
         $errorRecordIds = [];
 
@@ -998,12 +1059,16 @@ class MortalityShowentry extends Component
             $recordId = (int) ($payload['id'] ?? 0);
             $record = $existingRecords->get($recordId);
 
-            if (!$record) {
+            if (! $record) {
+                $skippedCount++;
+
                 continue;
             }
 
             $statusRaw = $this->blankToNull($payload['status'] ?? null);
             if ($statusRaw === null) {
+                $skippedCount++;
+
                 continue;
             }
 
@@ -1013,10 +1078,11 @@ class MortalityShowentry extends Component
                 $commentsJsonOverrides[$recordId] ?? null
             );
 
-            if (!empty($validated['errors'])) {
+            if (! empty($validated['errors'])) {
                 $label = trim((string) ($record->stemid ?: $record->id));
-                $errors[] = '第 ' . ($index + 1) . ' 筆（' . $label . '）：' . implode(' | ', $validated['errors']);
+                $errors[] = '第 '.($index + 1).' 筆（'.$label.'）：'.implode(' | ', $validated['errors']);
                 $errorRecordIds[] = $recordId;
+
                 continue;
             }
 
@@ -1033,6 +1099,7 @@ class MortalityShowentry extends Component
 
         return [
             'savedCount' => $savedCount,
+            'skippedCount' => $skippedCount,
             'errors' => $errors,
             'errorRecordIds' => array_values(array_unique($errorRecordIds)),
         ];
@@ -1084,8 +1151,8 @@ class MortalityShowentry extends Component
             ->values()
             ->map(function ($option) {
                 $fullLabel = $option->comment_zh
-                    . ($option->comment_en ? ' / ' . $option->comment_en : '')
-                    . ($option->code ? ' (' . $option->code . ')' : '');
+                    .($option->comment_en ? ' / '.$option->comment_en : '')
+                    .($option->code ? ' ('.$option->code.')' : '');
 
                 return [
                     'id' => (int) $option->id,
@@ -1155,6 +1222,7 @@ class MortalityShowentry extends Component
                 }
 
                 $payload[] = $entry;
+
                 continue;
             }
 
@@ -1180,7 +1248,7 @@ class MortalityShowentry extends Component
             ->values()
             ->all();
 
-        $commentLabels = !empty($commentIds)
+        $commentLabels = ! empty($commentIds)
             ? CommentOption::query()
                 ->whereIn('id', $commentIds)
                 ->pluck('comment_zh', 'id')
@@ -1196,7 +1264,7 @@ class MortalityShowentry extends Component
                     : '';
 
                 if ($label !== '' && $text !== '') {
-                    return $label . '：' . $text;
+                    return $label.'：'.$text;
                 }
 
                 return $label !== '' ? $label : $text;
@@ -1260,14 +1328,14 @@ class MortalityShowentry extends Component
         $teamIdRaw = $this->blankToNull($payload['team_id'] ?? null);
 
         $allowedStatuses = ['OK', 'A', 'D', 'X', 'NF'];
-        if ($status === '' || !in_array($status, $allowedStatuses, true)) {
+        if ($status === '' || ! in_array($status, $allowedStatuses, true)) {
             $errors[] = 'status 必須填入 OK、A、D、X 或 NF。';
         }
 
         if ($dateRaw === null) {
             $errors[] = '調查日期必須填寫。';
             $date = null;
-        } elseif (!$this->isValidDate($dateRaw)) {
+        } elseif (! $this->isValidDate($dateRaw)) {
             $errors[] = '調查日期格式需為 YYYY-MM-DD。';
             $date = null;
         } else {
@@ -1277,7 +1345,7 @@ class MortalityShowentry extends Component
         if ($teamIdRaw === null) {
             $errors[] = '調查團隊必須選擇。';
             $teamId = null;
-        } elseif (!ctype_digit((string) $teamIdRaw) || !Team::query()->where('census', $this->currentCensus)->where('id', (int) $teamIdRaw)->exists()) {
+        } elseif (! ctype_digit((string) $teamIdRaw) || ! Team::query()->where('census', $this->currentCensus)->where('id', (int) $teamIdRaw)->exists()) {
             $errors[] = '調查團隊不存在或不屬於本次 census，請重新選擇。';
             $teamId = null;
         } else {
@@ -1287,13 +1355,13 @@ class MortalityShowentry extends Component
         $statusAllowsDetails = in_array($status, ['A', 'OK'], true);
 
         if ($dbh2Raw !== null) {
-            if (!is_numeric($dbh2Raw)) {
+            if (! is_numeric($dbh2Raw)) {
                 $errors[] = 'DBH(new) 必須為數字。';
                 $dbh2 = null;
             } else {
                 $dbh2 = round((float) $dbh2Raw, 2);
 
-                if ($dbh1 !== null && $dbh2 < $dbh1 && !$hasDbhShrinkComment) {
+                if ($dbh1 !== null && $dbh2 < $dbh1 && ! $hasDbhShrinkComment) {
                     $errors[] = 'DBH(new) 需大於等於 DBH(old)，若小於請填寫備註: 確認縮水 或 DBH shrink。';
                 }
             }
@@ -1301,7 +1369,7 @@ class MortalityShowentry extends Component
             $dbh2 = null;
         }
 
-        if (!$statusAllowsDetails && $dbh2 !== null) {
+        if (! $statusAllowsDetails && $dbh2 !== null) {
             $errors[] = '只有 status 為 A 或 OK 時才可填寫 DBH(new)。';
         }
 
@@ -1314,7 +1382,7 @@ class MortalityShowentry extends Component
         }
 
         if ($modeRaw !== '') {
-            if ($modeRaw !== '?' && !preg_match('/^[SBU]{1,3}$/', $modeRaw)) {
+            if ($modeRaw !== '?' && ! preg_match('/^[SBU]{1,3}$/', $modeRaw)) {
                 $errors[] = 'mode 只能填 S、B、U 的組合或 ?。';
             }
 
@@ -1324,7 +1392,7 @@ class MortalityShowentry extends Component
         }
 
         if ($livingLengthRaw !== null) {
-            if (!is_numeric($livingLengthRaw)) {
+            if (! is_numeric($livingLengthRaw)) {
                 $errors[] = 'Living length 必須為數字。';
                 $livingLength = null;
             } else {
@@ -1344,7 +1412,7 @@ class MortalityShowentry extends Component
 
         $branchesInvalid = false;
         if ($branchesRaw !== null) {
-            if (!ctype_digit((string) $branchesRaw) || (int) $branchesRaw < 0 || (int) $branchesRaw > 100) {
+            if (! ctype_digit((string) $branchesRaw) || (int) $branchesRaw < 0 || (int) $branchesRaw > 100) {
                 $errors[] = 'branches 必須為 0 到 100 的整數。';
                 $branchesInvalid = true;
                 $branches = null;
@@ -1355,21 +1423,21 @@ class MortalityShowentry extends Component
             $branches = null;
         }
 
-        if (!$branchesInvalid && $status === 'A' && $dbh2 !== null) {
+        if (! $branchesInvalid && $status === 'A' && $dbh2 !== null) {
             if ($branches === null || $branches < 0 || $branches > 100) {
                 $errors[] = 'status 為 A 且有 DBH(new) 時，branches 必須為 0 到 100。';
             }
         }
 
-        if (!$branchesInvalid && $status === 'A' && $dbh2 !== null && $branches === null) {
+        if (! $branchesInvalid && $status === 'A' && $dbh2 !== null && $branches === null) {
             $errors[] = 'status 為 A 且有 DBH(new) 時必須填寫 branches。';
         }
 
         if (
-            !$branchesInvalid
+            ! $branchesInvalid
             && $status === 'A'
             && $dbh2 === null
-            && !$dbhDependencyExemptForShortLivingLength
+            && ! $dbhDependencyExemptForShortLivingLength
             && $branches !== null
             && $branches !== 0
         ) {
@@ -1381,7 +1449,7 @@ class MortalityShowentry extends Component
         }
 
         if ($illuminationRaw !== null) {
-            if (!ctype_digit((string) $illuminationRaw) || (int) $illuminationRaw < 0 || (int) $illuminationRaw > 5) {
+            if (! ctype_digit((string) $illuminationRaw) || (int) $illuminationRaw < 0 || (int) $illuminationRaw > 5) {
                 $errors[] = 'illumination 必須為 0 到 5。';
                 $illumination = null;
             } else {
@@ -1404,19 +1472,19 @@ class MortalityShowentry extends Component
         if (
             $status === 'A'
             && $dbh2 === null
-            && !$dbhDependencyExemptForShortLivingLength
+            && ! $dbhDependencyExemptForShortLivingLength
             && $illumination !== null
             && $illumination !== 0
         ) {
             $errors[] = 'status 為 A 且有填寫 illumination 時必須填寫 DBH(new)。';
         }
 
-        if (!in_array($status, ['A', 'OK'], true) && $illumination !== null) {
+        if (! in_array($status, ['A', 'OK'], true) && $illumination !== null) {
             $errors[] = '只有 status 為 A 或 OK 時才可填寫 illumination。';
         }
 
         if ($leaningRaw !== null) {
-            if (!is_numeric($leaningRaw) || (float) $leaningRaw < 10 || (float) $leaningRaw > 150) {
+            if (! is_numeric($leaningRaw) || (float) $leaningRaw < 10 || (float) $leaningRaw > 150) {
                 $errors[] = 'leaning 必須為 10 到 150。';
                 $leaning = null;
             } else {
@@ -1431,7 +1499,7 @@ class MortalityShowentry extends Component
         }
 
         $allowedLiana = ['', 'L', 'S', 'LS'];
-        if (!in_array($liana, $allowedLiana, true)) {
+        if (! in_array($liana, $allowedLiana, true)) {
             $errors[] = 'liana 只能填 L、S 或 LS。';
         }
 
@@ -1442,7 +1510,7 @@ class MortalityShowentry extends Component
         $leafDamage = $this->validateOptionalDiscrete($leafDamageRaw, ['1'], 'leaf_damage', $errors);
 
         if ($leavesRaw !== null) {
-            if (!ctype_digit((string) $leavesRaw) || (int) $leavesRaw < 0 || (int) $leavesRaw > 100) {
+            if (! ctype_digit((string) $leavesRaw) || (int) $leavesRaw < 0 || (int) $leavesRaw > 100) {
                 $errors[] = 'leaves 必須為 0 到 100 的整數。';
                 $leaves = null;
             } else {
@@ -1452,11 +1520,11 @@ class MortalityShowentry extends Component
             $leaves = null;
         }
 
-        if (!$statusAllowsDetails && ($woundedStem !== null || $rotten !== null)) {
+        if (! $statusAllowsDetails && ($woundedStem !== null || $rotten !== null)) {
             $errors[] = '只有 status 為 A 或 OK 時才可填寫 wounded_stem、rotten。';
         }
 
-        if (!$statusAllowsDetails && ($deformity !== null || $leaves !== null || $leafDamage !== null)) {
+        if (! $statusAllowsDetails && ($deformity !== null || $leaves !== null || $leafDamage !== null)) {
             $errors[] = '只有 status 為 A 或 OK 時才可填寫 deformity、leaves、leaf_damage。';
         }
 
@@ -1559,8 +1627,8 @@ class MortalityShowentry extends Component
         }
 
         $stringValue = (string) $value;
-        if (!in_array($stringValue, $allowed, true)) {
-            $errors[] = $field . ' 只能填 ' . implode('、', $allowed) . '。';
+        if (! in_array($stringValue, $allowed, true)) {
+            $errors[] = $field.' 只能填 '.implode('、', $allowed).'。';
 
             return null;
         }

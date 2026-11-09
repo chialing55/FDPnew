@@ -326,10 +326,22 @@ select {
   color: #14532d;
 }
 
-.app-feedback-note--error {
+.app-feedback-note--warning {
   border-color: #e7c79a;
   background-color: #fff3df;
   color: #8a2f00;
+}
+
+.app-feedback-note--info {
+  border-color: rgba(59, 130, 246, .35);
+  background-color: rgba(59, 130, 246, .10);
+  color: #1e3a8a;
+}
+
+.app-feedback-note--error {
+  border-color: rgba(220, 38, 38, .35);
+  background-color: rgba(220, 38, 38, .10);
+  color: #991b1b;
 }
 
 
@@ -617,8 +629,12 @@ button:-webkit-details-marker {
   color: #14532d;
 }
 
-.savenote.app-feedback-note--error {
+.savenote.app-feedback-note--warning {
   color: #8a2f00;
+}
+
+.savenote.app-feedback-note--error {
+  color: #991b1b;
 }
 
 

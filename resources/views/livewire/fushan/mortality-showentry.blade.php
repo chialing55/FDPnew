@@ -205,7 +205,7 @@
                         </span>
                     </div>
                     @if (!empty($entrySaveMessage))
-                        <div style="margin-top:8px; color:#166534;">{{ $entrySaveMessage }}</div>
+                        <div class="app-feedback-note {{ $entrySaveStatus === 'success' ? 'app-feedback-note--success' : ($entrySaveStatus === 'partial' ? 'app-feedback-note--warning' : ($entrySaveStatus === 'error' ? 'app-feedback-note--error' : '')) }}" style="margin-top:8px;">{{ $entrySaveMessage }}</div>
                     @endif
                     @if (!empty($mainStatusMessage))
                         <div style="margin-top:8px; color:#166534;">{{ $mainStatusMessage }}</div>

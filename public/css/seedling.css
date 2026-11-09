@@ -122,8 +122,12 @@
 	color: #14532d;
 }
 
-.app-feedback-note.savenote.app-feedback-note--error {
+.app-feedback-note.savenote.app-feedback-note--warning {
 	color: #8a2f00;
+}
+
+.app-feedback-note.savenote.app-feedback-note--error {
+	color: #991b1b;
 }
 
 .prev,

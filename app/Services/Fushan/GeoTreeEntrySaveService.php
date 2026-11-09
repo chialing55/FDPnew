@@ -19,8 +19,7 @@ final class GeoTreeEntrySaveService
         private readonly TreeEntryProfileResolver $profiles,
         private readonly TreeEntryValidator $validator,
         private readonly GeoTreeEntryRowLockResolver $rowLocks,
-    ) {
-    }
+    ) {}
 
     public function save(
         string $entry,
@@ -31,7 +30,7 @@ final class GeoTreeEntrySaveService
         array $submittedRows,
         string $actor,
     ): array {
-        if (!in_array($entry, ['1', '2'], true)) {
+        if (! in_array($entry, ['1', '2'], true)) {
             return $this->failure('輸入次數不正確，請重新進入輸入頁。');
         }
         $storedRows = $this->query($entry)
@@ -42,92 +41,113 @@ final class GeoTreeEntrySaveService
             ->map(fn ($row) => $row->toArray())
             ->all();
 
-        $structureErrors = $this->validateStructure($submittedRows, $storedRows);
-        if ($structureErrors !== []) {
-            return ['ok' => false, 'errors' => $structureErrors, 'rows' => $submittedRows];
-        }
-
         $lockData = $this->rowLocks->resolve($storedRows);
         $previousByStemid = $lockData['previousByStemid'];
         $lockedStemids = $lockData['lockedStemids'];
         $rules = $this->profiles->validationRules('fushan_geo_trees');
-        $result = $this->validator->validate(
-            $submittedRows,
-            $previousByStemid,
-            $rules,
-            'existing',
-            $lockedStemids,
-            true,
-        );
-
-        if ($result->fails()) {
-            return ['ok' => false, 'errors' => $result->errors, 'rows' => $result->rows];
-        }
-
         $locked = array_fill_keys($lockedStemids, true);
         $storedByStemid = collect($storedRows)->keyBy(fn (array $row) => (string) $row['stemid']);
-        $changed = 0;
-
-        DB::connection('fs_geo_tree_survey')->transaction(function () use (
-            $entry,
-            $result,
-            $locked,
-            $storedByStemid,
-            $actor,
-            &$changed,
-        ): void {
-            foreach ($result->rows as $row) {
-                $stemid = (string) $row['stemid'];
-                if (isset($locked[$stemid])) {
-                    continue;
-                }
-                if (in_array((string) ($row['date'] ?? ''), ['', '0000-00-00'], true)) {
-                    continue;
-                }
-
-                $updates = $this->updatesFor($row, $storedByStemid->get($stemid));
-                if ($updates === []) {
-                    continue;
-                }
-
-                $updates['updated_id'] = $actor;
-                $updates['updated_at'] = now()->format('Y-m-d H:i:s');
-                $this->query($entry)->where('stemid', $stemid)->update($updates);
-                $changed++;
-            }
-        });
-
-        return ['ok' => true, 'errors' => [], 'rows' => $result->rows, 'changed' => $changed];
-    }
-
-    private function validateStructure(array $submittedRows, array $storedRows): array
-    {
+        $rows = array_values($submittedRows);
         $errors = [];
-        $expected = collect($storedRows)->keyBy(fn (array $row) => (string) $row['stemid']);
+        $changed = 0;
+        $skipped = 0;
         $seen = [];
 
-        foreach (array_values($submittedRows) as $index => $row) {
-            $stemid = (string) ($row['stemid'] ?? '');
-            if ($stemid === '' || !$expected->has($stemid)) {
-                $errors[] = $this->error($index, 'stemid', 'scope', '資料不屬於目前的小樣區，請重新載入。');
+        foreach ($rows as $index => $submittedRow) {
+            if (in_array((string) ($submittedRow['date'] ?? ''), ['', '0000-00-00'], true)) {
+                $skipped++;
+
                 continue;
             }
-            if (isset($seen[$stemid])) {
-                $errors[] = $this->error($index, 'stemid', 'duplicate_row', "{$stemid} 重複出現在送出的資料中。");
+
+            $stemid = (string) ($submittedRow['stemid'] ?? '');
+            $identityErrors = $this->validateIdentity($submittedRow, $storedByStemid, $seen, $index);
+            if ($identityErrors !== []) {
+                array_push($errors, ...$identityErrors);
+
                 continue;
             }
             $seen[$stemid] = true;
 
-            $stored = $expected->get($stemid);
-            foreach (self::IDENTITY_FIELDS as $field) {
-                if ((string) ($row[$field] ?? '') !== (string) ($stored[$field] ?? '')) {
-                    $errors[] = $this->error($index, $field, 'identity_changed', "{$stemid} 的 {$field} 不可修改。");
+            if (isset($locked[$stemid])) {
+                $skipped++;
+
+                continue;
+            }
+
+            $result = $this->validator->validate(
+                [$submittedRow],
+                $previousByStemid,
+                $rules,
+                'existing',
+                $lockedStemids,
+                true,
+            );
+            if ($result->fails()) {
+                foreach ($result->errors as $error) {
+                    $error['row'] = $index;
+                    $errors[] = $error;
                 }
+                $rows[$index] = $result->rows[0] ?? $submittedRow;
+
+                continue;
+            }
+
+            $row = $result->rows[0];
+            $rows[$index] = $row;
+
+            try {
+                $rowChanged = DB::connection('fs_geo_tree_survey')->transaction(function () use ($entry, $row, $storedByStemid, $actor, $stemid): int {
+                    $updates = $this->updatesFor($row, $storedByStemid->get($stemid));
+                    if ($updates === []) {
+                        return 0;
+                    }
+
+                    $updates['updated_id'] = $actor;
+                    $updates['updated_at'] = now()->format('Y-m-d H:i:s');
+                    $this->query($entry)->where('stemid', $stemid)->update($updates);
+
+                    return 1;
+                });
+                $changed += $rowChanged;
+            } catch (\Throwable $exception) {
+                report($exception);
+                $errors[] = $this->error($index, 'date', 'save_failed', "{$stemid} 儲存失敗，資料已保留，請稍後再試。");
             }
         }
 
-        if (count($seen) !== $expected->count()) {
-            $errors[] = $this->error(0, 'stemid', 'missing_rows', '送出的資料筆數不完整，請重新載入後再輸入。');
+        return [
+            'ok' => $errors === [],
+            'status' => $errors === [] ? ($changed > 0 ? 'success' : 'noop') : ($changed > 0 ? 'partial' : 'error'),
+            'errors' => $errors,
+            'rows' => $rows,
+            'changed' => $changed,
+            'skipped' => $skipped,
+            'failed' => collect($errors)->pluck('row')->unique()->count(),
+            'counts' => [
+                'saved' => $changed,
+                'skipped' => $skipped,
+                'failed' => collect($errors)->pluck('row')->unique()->count(),
+            ],
+        ];
+    }
+
+    private function validateIdentity(array $row, $storedByStemid, array $seen, int $index): array
+    {
+        $errors = [];
+        $stemid = (string) ($row['stemid'] ?? '');
+        if ($stemid === '' || ! $storedByStemid->has($stemid)) {
+            return [$this->error($index, 'stemid', 'scope', '資料不屬於目前的小樣區，請重新載入。')];
+        }
+        if (isset($seen[$stemid])) {
+            return [$this->error($index, 'stemid', 'duplicate_row', "{$stemid} 重複出現在送出的資料中。")];
+        }
+
+        $stored = $storedByStemid->get($stemid);
+        foreach (self::IDENTITY_FIELDS as $field) {
+            if ((string) ($row[$field] ?? '') !== (string) ($stored[$field] ?? '')) {
+                $errors[] = $this->error($index, $field, 'identity_changed', "{$stemid} 的 {$field} 不可修改。");
+            }
         }
 
         return $errors;
@@ -161,7 +181,16 @@ final class GeoTreeEntrySaveService
 
     private function failure(string $message): array
     {
-        return ['ok' => false, 'errors' => [$this->error(0, 'stemid', 'request', $message)], 'rows' => []];
+        return [
+            'ok' => false,
+            'status' => 'error',
+            'errors' => [$this->error(0, 'stemid', 'request', $message)],
+            'rows' => [],
+            'changed' => 0,
+            'skipped' => 0,
+            'failed' => 1,
+            'counts' => ['saved' => 0, 'skipped' => 0, 'failed' => 1],
+        ];
     }
 
     private function error(int $row, string $field, string $code, string $message): array

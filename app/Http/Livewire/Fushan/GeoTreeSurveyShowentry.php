@@ -5,11 +5,12 @@ namespace App\Http\Livewire\Fushan;
 use App\Models\FsGeoTreeSurvey\Record1;
 use App\Models\FsGeoTreeSurvey\Record2;
 use App\Models\PlantCatalog\SiteSpecies;
+use App\Services\Fushan\GeoTreeEntryRowLockResolver;
 use App\Services\Fushan\GeoTreeEntrySaveService;
 use App\Services\Fushan\GeoTreeEntryStartingPointService;
-use App\Services\Fushan\GeoTreeEntryRowLockResolver;
-use App\Services\Fushan\GeoTreeSurveyRecordPaperService;
 use App\Services\Fushan\GeoTreeSpecialModificationService;
+use App\Services\Fushan\GeoTreeSurveyRecordPaperService;
+use App\Support\DataEntry\SaveFeedback;
 use App\Support\ResolvesActorAccount;
 use Illuminate\Support\Facades\Schema;
 use Livewire\Component;
@@ -20,23 +21,41 @@ class GeoTreeSurveyShowentry extends Component
     use ResolvesActorAccount;
 
     public string $entry;
+
     public string $user;
+
     public string $site;
+
     public ?int $qx = null;
+
     public ?int $qy = null;
+
     public int $sqx = 1;
+
     public int $sqy = 1;
+
     public array $qxOptions = [];
+
     public array $qyOptions = [];
+
     public array $records = [];
+
     public array $excludedQuadrats = [];
+
     public array $speciesOptions = [];
+
     public ?array $suggestedStartingPoint = null;
+
     public string $entrynote = '';
+
     public bool $recordTablesReady = false;
+
     public ?string $previousAction = null;
+
     public ?string $nextAction = null;
+
     public ?string $previousSubquadratAction = null;
+
     public ?string $nextSubquadratAction = null;
 
     public function mount(string $entry, string $user, string $site): void
@@ -47,7 +66,7 @@ class GeoTreeSurveyShowentry extends Component
         $this->recordTablesReady = Schema::connection('fs_geo_tree_survey')->hasTable('record1')
             && Schema::connection('fs_geo_tree_survey')->hasTable('record2');
 
-        if (!$this->recordTablesReady) {
+        if (! $this->recordTablesReady) {
             $this->entrynote = '尚未建立 record1、record2，請先執行資料表 migration。';
 
             return;
@@ -96,7 +115,7 @@ class GeoTreeSurveyShowentry extends Component
         }
 
         $this->refreshQyOptions();
-        if (!in_array($this->qy, $this->qyOptions, true)) {
+        if (! in_array($this->qy, $this->qyOptions, true)) {
             $this->entrynote = '查無此樣方，請重新選擇。';
 
             return;
@@ -110,7 +129,7 @@ class GeoTreeSurveyShowentry extends Component
         $this->qx = $qx;
         $this->refreshQyOptions();
 
-        if (!in_array($qy, $this->qyOptions, true)) {
+        if (! in_array($qy, $this->qyOptions, true)) {
             $this->entrynote = $this->isExcludedQuadrat($qx, $qy)
                 ? '此樣區不需輸出紀錄紙，也不需輸入。'
                 : '查無此樣方，請重新選擇。';
@@ -172,16 +191,20 @@ class GeoTreeSurveyShowentry extends Component
             return;
         }
 
-        if (!$result['ok']) {
-            $message = $result['errors'][0]['message'] ?? '資料檢查未通過。';
-            $this->dispatchSaveResult(false, $result['errors'], $message);
+        $changed = (int) ($result['changed'] ?? 0);
+        $skipped = (int) ($result['skipped'] ?? 0);
+        $failed = (int) ($result['failed'] ?? 0);
+        $status = (string) ($result['status'] ?? SaveFeedback::status($changed, $failed));
+        $message = SaveFeedback::message($status, $changed, $skipped, $failed);
+
+        if (! $result['ok']) {
+            $this->dispatchSaveResult(false, $result['errors'], $message, $status, $result['counts'] ?? []);
 
             return;
         }
 
-        $changed = (int) ($result['changed'] ?? 0);
         $this->loadQuadrat($this->qx, $this->qy, $this->sqx, $this->sqy);
-        $this->dispatchSaveResult(true, [], $changed > 0 ? "儲存完成，共更新 {$changed} 筆資料。" : '資料檢查完成，沒有需要更新的內容。');
+        $this->dispatchSaveResult(true, [], $message, $status, $result['counts'] ?? []);
     }
 
     public function saveSpecialModification(array $data): void
@@ -209,7 +232,7 @@ class GeoTreeSurveyShowentry extends Component
             return;
         }
 
-        if (!$result['ok']) {
+        if (! $result['ok']) {
             $message = $result['errors'][0]['message'] ?? '特殊修改檢查未通過。';
             $this->dispatchSpecialSaveResult(false, $result['errors'], $message);
 
@@ -231,12 +254,14 @@ class GeoTreeSurveyShowentry extends Component
         );
     }
 
-    private function dispatchSaveResult(bool $ok, array $errors, string $message): void
+    private function dispatchSaveResult(bool $ok, array $errors, string $message, ?string $status = null, array $counts = []): void
     {
         $this->dispatch(
             'geo-tree-entry-save-result',
             containerId: 'geo-tree-entry-hot',
             ok: $ok,
+            status: $status ?? ($ok ? 'success' : 'error'),
+            counts: $counts,
             errors: $errors,
             message: $message,
         );
@@ -263,7 +288,7 @@ class GeoTreeSurveyShowentry extends Component
     private function refreshSubquadratNavigation(): void
     {
         $order = ['11', '12', '22', '21', '13', '14', '24', '23', '33', '34', '44', '43', '31', '32', '42', '41'];
-        $index = array_search($this->sqx . $this->sqy, $order, true);
+        $index = array_search($this->sqx.$this->sqy, $order, true);
         $previous = $index !== false && $index > 0 ? $order[$index - 1] : null;
         $next = $index !== false && $index < count($order) - 1 ? $order[$index + 1] : null;
         $this->previousSubquadratAction = $previous

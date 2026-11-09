@@ -297,17 +297,26 @@
             }
         }
 
-        function showFeedback(message, ok) {
+        function showFeedback(message, status = 'error') {
             [feedbackTop, feedback].forEach((element) => {
                 if (!element) return;
                 element.textContent = message || '';
-                element.style.color = ok ? 'forestgreen' : '#b71c1c';
+                element.classList.remove(
+                    'app-feedback-note--success',
+                    'app-feedback-note--warning',
+                    'app-feedback-note--error',
+                    'app-feedback-note--info'
+                );
+                const modifier = status === 'partial' ? 'warning' : status;
+                if (['success', 'warning', 'error', 'info'].includes(modifier)) {
+                    element.classList.add(`app-feedback-note--${modifier}`);
+                }
             });
         }
 
         function handleSaveResult(result) {
             validationErrors = result.errors || [];
-            showFeedback(result.message || '', Boolean(result.ok));
+            showFeedback(result.message || '', result.status || (result.ok ? 'success' : 'error'));
             if (saveButton) saveButton.disabled = false;
 
             if (!result.ok && validationErrors.length) {
@@ -336,7 +345,7 @@
             syncCurrentPage();
             validationErrors = [];
             hot.render();
-            showFeedback('資料檢查與儲存中……', true);
+            showFeedback('資料檢查與儲存中……', 'info');
             saveButton.disabled = true;
             if (specialRecord) {
                 pendingSpecialOpens.set(payload.containerId, { record: { ...specialRecord }, payload });
@@ -347,7 +356,7 @@
             const componentElement = container.closest('[wire\\:id]');
             const component = componentElement ? Livewire.find(componentElement.getAttribute('wire:id')) : null;
             if (!component) {
-                showFeedback('找不到輸入元件，資料仍保留在畫面上，請重新整理後再試。', false);
+                showFeedback('找不到輸入元件：資料仍保留在畫面上，請重新整理後再試。', 'error');
                 saveButton.disabled = false;
                 pendingSpecialOpens.delete(payload.containerId);
                 return;
@@ -359,7 +368,7 @@
             try {
                 await component.call('saveRows', rows);
             } catch (error) {
-                showFeedback('儲存失敗，資料仍保留在畫面上，請稍後再試。', false);
+                showFeedback('儲存失敗：資料仍保留在畫面上，請稍後再試。', 'error');
                 saveButton.disabled = false;
                 pendingSpecialOpens.delete(payload.containerId);
             }
