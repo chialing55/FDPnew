@@ -1,12 +1,14 @@
 # ForestGEO `census5_part` 產生方式
 
+> 分類：資料管理系統／研究工作項目／GEO-TREES
+
 ## 用途
 
 `fs_geo_tree_survey.census5_part` 是福山 ForestGEO／GEO-TREES 調查的背景資料表。目前用於產生調查紀錄紙，後續也會作為 `record1`、`record2` 輸入工作表的來源及資料檢查時的前次調查資料。
 
 此表不是由網站頁面自動產生。目前的產生方式是由管理人員手動執行：
 
-[`database/scripts/import_geo_tree_survey_census5_part.sql`](../../database/scripts/import_geo_tree_survey_census5_part.sql)
+[`database/scripts/import_geo_tree_survey_census5_part.sql`](../../../../database/scripts/import_geo_tree_survey_census5_part.sql)
 
 ## 執行前提
 

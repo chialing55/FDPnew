@@ -1,5 +1,7 @@
 # Research Output Asset Flow
 
+> 分類：資料管理系統／研究成果輸出
+
 Use this flow for report pages that generate temporary charts or PDFs.
 
 1. Controller uses `ManagesResearchOutputAssets`.

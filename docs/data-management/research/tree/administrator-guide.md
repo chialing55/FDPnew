@@ -1,5 +1,7 @@
 # 福山每木調查資料輸入與驗證指南
 
+> 分類：資料管理系統／研究工作項目／每木
+
 供樣區管理員與資料輸入人員參考｜整理日期：2026-09-10
 
 本指南以本專案的**福山每木調查**為例，將輸入注意事項與驗證規則整理成工作流程，供其他樣區管理員參考。內容以既有第五次調查輸入流程為主，前次比較資料為第四次調查。
@@ -187,8 +189,8 @@ DBH 的門檻以 cm 表示。POM、樹蕨 h高／h低的填寫單位須依該次
 
 本指南依據福山每木的注意事項及既有程式整理，未更動輸入系統：
 
-- [福山每木輸入注意事項](../../resources/views/pages/fushan/tree_note.blade.php)。
-- [既有樹驗證](../../app/Jobs/FsTreeDataCheck.php)、[新增樹驗證](../../app/Jobs/FsTreeRecruitCheck.php)。
-- [儲存、新增、特殊修改與完成檢查](../../app/Http/Controllers/Fushan/TreeSaveController.php)。
+- [福山每木輸入注意事項](../../../../resources/views/pages/fushan/tree_note.blade.php)。
+- [既有樹驗證](../../../../app/Jobs/FsTreeDataCheck.php)、[新增樹驗證](../../../../app/Jobs/FsTreeRecruitCheck.php)。
+- [儲存、新增、特殊修改與完成檢查](../../../../app/Http/Controllers/Fushan/TreeSaveController.php)。
 
 文件與程式有差異的地方，已在相關段落說明；其中 -3 的適用情境、DBH < 1 的特殊補記方式，應由管理員確認後再作為其他樣區的操作規則。

@@ -1,5 +1,7 @@
 # Research Chart Style
 
+> 分類：資料管理系統／研究成果輸出
+
 This note records the current R chart sizes and text scaling used by seed and seedling research outputs. Base R text sizes are relative `cex` values. When a script does not set a value explicitly, base R uses `cex = 1.0`; if `par(cex = ...)` is set, later text is scaled by that base value.
 
 ## Shared Target

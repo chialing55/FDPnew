@@ -1,35 +1,35 @@
 # 工作文件索引
 
-本目錄依工作項目整理技術 note。新增文件時，請放入對應的工作項目資料夾；若尚無合適分類，再建立新的工作項目資料夾。
+文件依使用系統分成三個頂層類型。新增文件時，先判斷屬於哪一套系統，再放入該系統的「介面規範」「功能／維護」或「研究工作項目」分類；不要再以籠統的 `admin`、`production` 資料夾混放。
 
 目前暫緩、日後需要接續的工作統一記錄於[暫緩工作待辦事項](TODO.md)。
 
-## ForestGEO／GEO-TREES
+## 1. 前台
 
-- [`census5_part` 產生方式](geo-trees/census5-part.md)
+公開網站、訪客可見畫面及前台建置相關文件。
 
-## 正式環境維運
+- [前台文件索引](frontend/README.md)
 
-- [正式站備份與還原](production/backup.md)
-- [前端開發依賴升級待辦](production/frontend-dependency-upgrade.md)
+## 2. 後台網頁編輯
 
-## 後台介面
+用於維護前台內容的後台，包括 Filament 編輯介面、個人網站內容及文獻同步。
 
-- [編輯列表樣式](admin/list-style.md)
+- [後台網頁編輯文件索引](backend-editor/README.md)
 
-## 研究成果輸出
+## 3. 資料管理系統
 
-- [圖表樣式](research-output/chart-style.md)
-- [輸出檔案流程](research-output/assets.md)
+調查資料的輸入、檢查、檢視、下載、研究成果輸出與資料庫維運。
 
-## 種子
+- [資料管理系統文件索引](data-management/README.md)
+  - [介面規範](data-management/interface-specs/README.md)
+  - [各研究工作項目](data-management/research/README.md)
 
-- [`fs_base.seeds_spinfo` 淘汰待辦](seeds/spinfo-retirement.md)
+## 文件分類判斷
 
-## 每木
+| 類型 | 判斷方式 | 例子 |
+| --- | --- | --- |
+| 前台 | 未登入訪客使用或前台資源建置 | 公開頁面、前端依賴 |
+| 後台網頁編輯 | 管理者編輯前台網站內容 | 新聞、人物、圖片、文獻 |
+| 資料管理系統 | 調查與研究資料的管理流程 | 每木、小苗、種子、GEO-TREES |
 
-- [福山每木調查資料輸入與驗證指南（管理員閱讀版）](tree-entry/administrator-guide.md)
-- [輸入介面重整待辦](tree/entry-refactor.md)
-- [公版每木輸入介面](tree-entry/shared-interface.md)
-- [每木輸入驗證規格](tree-entry/validation-profiles.md)
-- [壽山每木輸入驗證現況](tree-entry/shoushan-validation.md)
+同一功能若同時包含前台與後台，應依文件主要用途分類，並從另一類型的索引加上交叉連結，不複製兩份內容。

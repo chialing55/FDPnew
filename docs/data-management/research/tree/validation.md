@@ -1,5 +1,7 @@
 # 每木資料輸入與驗證規格
 
+> 分類：資料管理系統／研究工作項目／每木
+
 ## 1. 文件定位
 
 本文件是公版每木資料輸入、驗證與儲存的正式規格。欄位規則只在此處定義；介面文件及各調查 note 僅引用本文件，不另行複製相同規則。
@@ -234,7 +236,7 @@
 - 公版 validator 測試：`tests/Unit/TreeEntryValidatorTest.php`
 - 公版介面：`resources/views/components/tree-entry/`
 - 公版 Handsontable：`public/js/tree-entry-grid.js`
-- 公版介面架構：[公版每木輸入介面](shared-interface.md)
+- 公版介面架構：[公版每木輸入介面](shared-entry-interface.md)
 - 壽山舊程式盤點：[壽山每木輸入驗證現況](shoushan-validation.md)
 
 調查規則異動時，應先修改本文件與 profile，再修改 validator 及測試。

@@ -2,11 +2,11 @@
 
 > 本文件記錄目前暫緩、日後需要接續的工作。現正進行中的 ForestGEO／GEO-TREES 工作不列於此處。
 
-## 正式環境維運
+## 前台維護
 
 - [ ] 下次調整前端時，升級 Tailwind CSS、Vite 等建置工具並完成畫面回歸測試。
 
-詳細說明：[前端開發依賴升級待辦](production/frontend-dependency-upgrade.md)
+詳細說明：[前台開發依賴升級待辦](frontend/maintenance/dependency-upgrade.md)
 
 ## 每木
 
@@ -24,7 +24,7 @@
 - [ ] 確認第一次輸入、第二次輸入、新增樹、修改、資料比對、地圖及 PDF 功能均正常。
 - [ ] 完成資料比對與備份後，再決定是否停用或刪除舊資料表。
 
-詳細說明：[每木輸入介面重整待辦](tree/entry-refactor.md)
+詳細說明：[每木輸入介面重整待辦](data-management/research/tree/entry-refactor.md)
 
 ## 種子
 
@@ -35,7 +35,7 @@
 - [ ] 搜尋並確認正式程式已無 `FsBaseSeedsSpinfo` 或 `fs_base.seeds_spinfo` 的執行路徑。
 - [ ] 完成正式環境備份與驗證後，再評估刪除 `fs_base.seeds_spinfo`。
 
-詳細說明：[`fs_base.seeds_spinfo` 淘汰待辦](seeds/spinfo-retirement.md)
+詳細說明：[`fs_base.seeds_spinfo` 淘汰待辦](data-management/research/seeds/spinfo-retirement.md)
 
 ## 維護方式
 
