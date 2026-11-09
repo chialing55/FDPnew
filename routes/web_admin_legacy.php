@@ -7,6 +7,7 @@ use App\Http\Controllers\LoginController;
 use App\Http\Controllers\ChoiceController;
 
 use App\Http\Controllers\Fushan\SeedlingController;
+use App\Http\Controllers\Fushan\SeedlingExperimentController;
 use App\Http\Controllers\Fushan\TreeController;
 use App\Http\Controllers\Fushan\SeedsController;
 use App\Http\Controllers\Fushan\MortalityController;
@@ -282,6 +283,34 @@ Route::middleware(['auth', 'approved'])->prefix('admin')->name('admin.')->group(
                 ->defaults('site', 'fushan')
                 ->name('research-output.clear-session');
         });
+
+        // ===== Seedling experiment workspace =====
+        Route::prefix('seedling-experiment')
+            ->middleware('scope:fushan,seedling-experiment')
+            ->name('seedling-experiment.')
+            ->controller(SeedlingExperimentController::class)
+            ->group(function () {
+                Route::get('/', 'index')->name('index');
+                Route::get('/documents', 'documents')->name('documents');
+                Route::post('/record-paper/prepare', 'prepareRecordPaper')->name('record-paper.prepare');
+                Route::get('/record-paper/{survey}', 'downloadRecordPaper')
+                    ->whereNumber('survey')
+                    ->name('record-paper.download');
+                Route::get('/upload', 'upload')->middleware('admin')->name('upload');
+                Route::post('/upload/{dataset}', 'storeUpload')
+                    ->middleware('admin')
+                    ->whereIn('dataset', ['phase1_raw', 'phase2_raw', 'greenhouse_order', 'greenhouse_raw'])
+                    ->name('upload.store');
+                Route::get('/upload/greenhouse/merged', 'downloadGreenhouseMerged')
+                    ->middleware('admin')
+                    ->name('greenhouse-merged.download');
+                Route::get('/entry-guide', 'entryGuide')->name('entry-guide');
+                Route::get('/entry', 'groundcoverPhase2')->name('entry');
+                Route::get('/groundcover-phase2', 'groundcoverPhase2')->name('groundcover-phase2');
+                Route::get('/greenhouse', 'greenhouse')->name('greenhouse');
+                Route::get('/data', 'data')->name('data');
+                Route::get('/download', 'download')->name('download');
+            });
 
         Route::prefix('mortality')->middleware('scope:fushan,mortality')->name('mortality.')->group(function () {
             Route::get('/', [MortalityController::class, 'mortality'])

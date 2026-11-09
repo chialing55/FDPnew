@@ -176,6 +176,11 @@
                         'style' => 'box1',
                         'label' => '福山 小苗',
                     ],
+                    'fushan.seedling-experiment' => [
+                        'img' => asset('/images/research/seedling.png'),
+                        'style' => 'box1',
+                        'label' => '福山 小苗實驗',
+                    ],
                     'fushan.mortality' => [
                         'img' => asset('/images/research/fs_mortality.jpg'),
                         'style' => 'box1',
@@ -203,6 +208,7 @@
                     'fushan.tree',
                     'fushan.seeds',
                     'fushan.seedling',
+                    'fushan.seedling-experiment',
                     'fushan.mortality',
                     'fushan.geo-tree-survey',
                     'shoushan.tree',

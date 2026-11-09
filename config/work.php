@@ -16,6 +16,13 @@ return [
         'module' => 'seedling',
     ],
     [
+        'key' => 'fushan.seedling-experiment',
+        'title' => '福山｜小苗實驗',
+        'route' => 'admin.fushan.seedling-experiment.documents',
+        'site' => 'fushan',
+        'module' => 'seedling-experiment',
+    ],
+    [
         'key' => 'fushan.mortality',
         'title' => '福山｜死亡率調查',
         'route' => 'admin.fushan.mortality.index',
