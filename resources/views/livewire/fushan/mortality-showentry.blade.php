@@ -28,6 +28,10 @@
                     </select>
                 </span>
 
+                @if (($selectedMapKey === null || $selectedMapKey === '') && $firstPendingMapKey !== null)
+                    <span style="color:#475569;">請從 map {{ $firstPendingMap }} 開始。</span>
+                @endif
+
 
 
                 @if ($selectedMapSort !== null && $selectedMap !== null)
@@ -49,10 +53,8 @@
 
             </div>
             <div style='margin:10px 0'>
-                @if (!empty($completionHint))
+                @if (($selectedMapKey === null || $selectedMapKey === '') && !empty($completionHint))
                     <span style="font-weight:700; color:#374151;">{{ $completionHint }}</span>
-                @elseif ($selectedMapKey === null && $firstPendingMapKey !== null)
-                    <span style="color:#475569;">建議從 map {{ $firstPendingMap }} 開始。</span>
                 @endif
             </div>
         @else

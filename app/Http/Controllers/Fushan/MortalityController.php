@@ -1007,6 +1007,12 @@ class MortalityController extends Controller
         $site = $request->route('site');
         $hasCensusRecords = DB::connection('fs_mortality')->table('census_records')->exists();
         $hasTreeIndividuals = DB::connection('fs_mortality')->table('tree_individuals')->exists();
+        $latestDownloadYear = $hasCensusRecords
+            ? DB::connection('fs_mortality')
+                ->table('census_records as cr')
+                ->join('censuses as c', 'c.census', '=', 'cr.census')
+                ->max('c.survey_year')
+            : null;
 
         return view('pages/fushan/mortality_download', [
             'site' => $site,
@@ -1014,6 +1020,7 @@ class MortalityController extends Controller
             'user' => $user->account ?? $user->name,
             'hasCensusRecords' => $hasCensusRecords,
             'hasTreeIndividuals' => $hasTreeIndividuals,
+            'latestDownloadYear' => $latestDownloadYear !== null ? (int) $latestDownloadYear : null,
         ]);
     }
 

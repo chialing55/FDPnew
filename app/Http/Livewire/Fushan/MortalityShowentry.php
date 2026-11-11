@@ -636,10 +636,7 @@ class MortalityShowentry extends Component
 
         $firstPendingRow = (clone $baseQuery)
             ->select('map_sort', 'map')
-            ->where(function ($query) {
-                $query->whereNull('status')
-                    ->orWhere('status', '');
-            })
+            ->whereNull('date')
             ->orderBy('map_sort')
             ->orderBy('map')
             ->orderBy('id')

@@ -95,7 +95,12 @@
         <div class='text_box'>
             <h2>死亡率調查資料下載</h2>
             <hr>
-            <p style="margin: 10px 0 18px;">下載完整死亡率調查資料與個體基本資料（UTF-8、Tab 分隔）。</p>
+            <p style="margin: 10px 0 18px;">
+                下載完整死亡率調查資料與個體基本資料（UTF-8、Tab 分隔）。
+                @if ($latestDownloadYear !== null)
+                    目前可下載的最新資料年份為 {{ $latestDownloadYear }} 年。
+                @endif
+            </p>
             <table class="tablesorter" style="min-width: 720px;">
                 <thead>
                     <tr>
