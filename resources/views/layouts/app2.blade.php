@@ -28,9 +28,6 @@
 
 @section('footer')
     <footer>
-        @php
-            $hasPendingUsers = App\Models\User::where('status', 'pending')->exists();
-        @endphp
         <div id="header_text" class='fc-w flex'
             style='font-size: 14px; align-items: center; justify-content: space-between;  box-sizing: border-box;'>
             <div>
@@ -41,12 +38,6 @@
 
             </div>
             <div class='flex' style='gap:12px; align-items: center;'>
-
-                @if (auth()->user()?->is_admin && $hasPendingUsers)
-                    <span style="color: #f87171; font-weight: 600;">
-                        有待審使用者!!
-                    </span>
-                @endif
 
                 @if (auth()->check())
                     <a href="{{ route('admin.profile.edit') }}" class="nav-link" style='text-decoration: none;'>

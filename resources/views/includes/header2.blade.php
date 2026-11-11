@@ -27,7 +27,13 @@
             @yield('headerList')
         </div>
 
-        <div class='user iflex' style='padding:10px 30px; font-size: 14px; vertical-align: bottom;'>
+        <div class='user iflex' style='padding:10px 30px; font-size: 14px; vertical-align: bottom; align-items: center;'>
+            @if (auth()->user()?->is_admin && App\Models\User::where('status', 'pending')->exists())
+                <a href="{{ route('admin.users.index') }}"
+                    style='margin-right:20px; color:#f87171; font-weight:600; text-decoration:none;'>
+                    有待審使用者!!
+                </a>
+            @endif
             <span>Hi! {{ $user }}</span>
             <span style='margin-left:20px' class='back'>管理介面首頁</span>
         </div>
