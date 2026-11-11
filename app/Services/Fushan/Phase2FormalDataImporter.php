@@ -79,16 +79,19 @@ class Phase2FormalDataImporter
 
             if ($plot === '' || $number === '' || $species === '') {
                 $errors[] = "{$location}：Plot、編號或物種不可空白。";
+
                 continue;
             }
             if (isset($seen[$key])) {
                 $errors[] = "{$location}：同一次調查有重複個體。";
+
                 continue;
             }
             $seen[$key] = true;
 
             if (! in_array($status, ['A', 'D', 'G'], true)) {
                 $errors[] = "{$location}：Status 必須是 A、D 或 G，目前為「{$row->status}」。";
+
                 continue;
             }
 
@@ -159,6 +162,7 @@ class Phase2FormalDataImporter
             $plotCode = trim((string) $row->plot);
             $number = trim((string) $row->individual_no);
             $key = $plotCode.'|'.$number;
+            $density = (int) $row->density;
 
             if (! isset($plots[$plotCode])) {
                 $plotId = $db->table('plots')->insertGetId([
@@ -201,6 +205,7 @@ class Phase2FormalDataImporter
             $status = strtoupper(trim((string) $row->status));
             if ($individual->end_date !== null && $status === 'G') {
                 $skippedAfterGone++;
+
                 continue;
             }
 
