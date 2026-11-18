@@ -20,7 +20,7 @@ class SeedlingExperimentRecordPaperExporter
     public function make(int $surveyId): array
     {
         $survey = $this->surveyService->findForDownload($surveyId);
-        $rows = $this->rows($surveyId);
+        $rows = $this->rows($surveyId, $survey->status);
 
         if ($rows->isEmpty()) {
             throw new RuntimeException('此調查批次沒有可輸出的個體。');
@@ -52,25 +52,34 @@ class SeedlingExperimentRecordPaperExporter
         ];
     }
 
-    private function rows(int $surveyId)
+    private function rows(int $surveyId, string $surveyStatus)
     {
+        $recordForeignKey = $this->recordForeignKey($surveyStatus);
+
         return DB::connection(self::CONNECTION)
             ->table('survey_individuals as batch_items')
             ->join('individuals as individuals', 'individuals.id', '=', 'batch_items.individual_id')
             ->join('plots as plots', 'plots.id', '=', 'individuals.plot_id')
-            ->leftJoin('records as previous', 'previous.id', '=', 'batch_items.previous_record_id')
+            ->leftJoin('records as displayed', 'displayed.id', '=', $recordForeignKey)
             ->where('batch_items.survey_id', $surveyId)
             ->orderBy('batch_items.survey_order')
             ->select([
                 'plots.plot_code',
                 'individuals.individual_no',
                 'individuals.species_name',
-                'previous.length',
-                'previous.leaf_count',
-                'previous.status',
-                'previous.note',
+                'displayed.length',
+                'displayed.leaf_count',
+                'displayed.status',
+                'displayed.note',
             ])
             ->get();
+    }
+
+    private function recordForeignKey(string $surveyStatus): string
+    {
+        return $surveyStatus === 'completed'
+            ? 'batch_items.record_id'
+            : 'batch_items.previous_record_id';
     }
 
     /**

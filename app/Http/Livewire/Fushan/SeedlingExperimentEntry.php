@@ -309,12 +309,14 @@ class SeedlingExperimentEntry extends Component
             ->join('individuals as individuals', 'individuals.id', '=', 'batch_items.individual_id')
             ->join('plots as plots', 'plots.id', '=', 'individuals.plot_id')
             ->leftJoin('records as records', 'records.id', '=', 'batch_items.record_id')
+            ->leftJoin('records as previous', 'previous.id', '=', 'batch_items.previous_record_id')
             ->where('batch_items.survey_id', $this->surveyId)
             ->whereIn('plots.plot_code', $plot['plots'])
             ->orderBy('batch_items.survey_order')
             ->get([
                 'batch_items.id as batch_item_id',
                 'batch_items.individual_id',
+                'batch_items.record_id',
                 'plots.plot_code as plot',
                 'plots.density',
                 'individuals.individual_no',
@@ -324,7 +326,8 @@ class SeedlingExperimentEntry extends Component
                 'records.cotyledon_count',
                 'records.leaf_count',
                 'records.status',
-                'records.note',
+                'records.note as current_note',
+                'previous.note as previous_note',
             ]);
 
         $previousByIndividual = DB::connection(self::CONNECTION)
@@ -354,7 +357,11 @@ class SeedlingExperimentEntry extends Component
                     'cotyledon_count' => $row->cotyledon_count ?? ($previousWasDead ? -4 : 0),
                     'leaf_count' => $row->leaf_count ?? ($previousWasDead ? -4 : ''),
                     'status' => $row->status ?? ($previousWasDead ? 'D' : 'A'),
-                    'note' => $row->note ?? '',
+                    'note' => $this->displayedNote(
+                        $row->record_id,
+                        $row->current_note,
+                        $row->previous_note,
+                    ),
                 ];
             })
             ->all();
@@ -480,5 +487,10 @@ class SeedlingExperimentEntry extends Component
         $number = (float) $value;
 
         return floor($number) === $number ? (int) $number : $number;
+    }
+
+    private function displayedNote(mixed $recordId, mixed $currentNote, mixed $previousNote): string
+    {
+        return (string) ($recordId === null ? ($previousNote ?? '') : ($currentNote ?? ''));
     }
 }
