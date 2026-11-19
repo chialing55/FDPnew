@@ -51,6 +51,12 @@ class SeedlingExperimentSpreadsheetImporter
             'cleaned' => false,
             'required' => ['survey_order', 'date', 'species', 'plot', 'no', 'length', 'leaf_count', 'status', 'note'],
         ],
+        'greenhouse_deployment' => [
+            'table' => 'greenhouse_raw',
+            'kind' => 'greenhouse',
+            'cleaned' => false,
+            'required' => ['survey_order', 'shade', 'date', 'species', 'plot', 'no', 'length', 'leaf_count', 'status', 'note'],
+        ],
     ];
 
     private const HEADERS = [
@@ -64,6 +70,7 @@ class SeedlingExperimentSpreadsheetImporter
         '樣區' => 'plot',
         '處理' => 'plot',
         'treatment' => 'plot',
+        'treatments' => 'plot',
         '遮蔭處理排序' => 'shade',
         'density' => 'density',
         '密度' => 'density',
@@ -86,6 +93,20 @@ class SeedlingExperimentSpreadsheetImporter
         '備註' => 'note',
         '附註' => 'note',
         'note' => 'note',
+    ];
+
+    private const HEADER_LABELS = [
+        'survey_order' => '調查順序',
+        'date' => 'Date（日期）',
+        'species' => 'Sp.（物種）',
+        'plot' => 'Treatment（處理）',
+        'density' => 'Density（密度）',
+        'no' => 'No.（編號）',
+        'length' => '長度',
+        'cotyledon_count' => '子葉數',
+        'leaf_count' => '葉片數',
+        'status' => 'Status（狀態）',
+        'note' => '備註',
     ];
 
     public static function counts(): array
@@ -124,6 +145,7 @@ class SeedlingExperimentSpreadsheetImporter
             'phase2_cleaned' => '地被實驗第二期修改後資料',
             'greenhouse_raw' => '溫室實驗原始資料',
             'greenhouse_order' => '溫室實驗調查順序參考資料',
+            'greenhouse_deployment' => '溫室實驗主機匯入原始資料',
         ];
 
         if ($dataset === 'greenhouse_order') {
@@ -171,7 +193,7 @@ class SeedlingExperimentSpreadsheetImporter
             return "原始資料上傳完成：{$result['count']} 筆。修改後資料產生及整理完成：{$cleanedCount} 筆，共執行 {$correctedCount} 項修正（移除 {$stats['known_rows_deleted']} 筆、補登 {$stats['known_rows_inserted']} 筆）。正式資料匯入完成：{$batchCount} 批，新增樣區 {$plotCount} 個、個體 {$individualCount} 株、調查紀錄 {$recordCount} 筆（補登 {$backfilledCount} 筆）。";
         }
 
-        if ($dataset === 'greenhouse_raw') {
+        if (($config['kind'] ?? null) === 'greenhouse') {
             $cleanedCount = DB::connection(self::CONNECTION)->table('greenhouse_cleaned')->count();
             $formal = app(GreenhouseFormalDataImporter::class)->importRemaining();
             if ($formal['stopped'] !== null) {
@@ -278,8 +300,13 @@ class SeedlingExperimentSpreadsheetImporter
 
         $missing = array_values(array_diff($required, array_filter($mapped)));
         if ($missing !== []) {
+            $missingLabels = array_map(
+                fn (string $column): string => self::HEADER_LABELS[$column] ?? $column,
+                $missing
+            );
+
             throw ValidationException::withMessages([
-                'spreadsheet' => "工作表「{$sheet}」缺少必要欄位：".implode('、', $missing),
+                'spreadsheet' => "工作表「{$sheet}」缺少必要欄位：".implode('、', $missingLabels),
             ]);
         }
 

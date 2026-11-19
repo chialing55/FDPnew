@@ -107,6 +107,9 @@ final class GreenhouseFormalDataImporter
             if ($individual !== null && (int) $individual->survey_order !== $order) {
                 $errors[] = "{$location}：調查順序由 {$individual->survey_order} 變成 {$row->survey_order}。";
             }
+            if ($individual !== null && $individual->end_date !== null && $status !== 'G') {
+                $errors[] = "{$location}：個體已於 {$individual->end_date} 記為 G，之後卻出現 {$status}。";
+            }
         }
 
         return array_slice($errors, 0, 50);
@@ -157,11 +160,18 @@ final class GreenhouseFormalDataImporter
                     'id' => $individualId,
                     'survey_order' => (int) $row->survey_order,
                     'species_name' => trim((string) $row->species),
+                    'end_date' => null,
+                    'death_date' => null,
                 ];
                 $createdIndividuals++;
             }
 
             $status = strtoupper(trim((string) $row->status));
+            $individual = $individuals[$key];
+            if ($individual->end_date !== null && $status === 'G') {
+                continue;
+            }
+
             $db->table('records')->insert([
                 'individual_id' => $individuals[$key]->id,
                 'survey_date' => $date,
@@ -177,17 +187,21 @@ final class GreenhouseFormalDataImporter
             ]);
             $createdRecords++;
 
-            if ($status === 'D') {
+            if ($status === 'D' && $individual->death_date === null) {
                 $db->table('individuals')->where('id', $individuals[$key]->id)->update([
                     'death_date' => $date,
                     'updated_at' => $now,
                 ]);
+                $individual->death_date = $date;
             } elseif ($status === 'G') {
+                $deathDate = $individual->death_date ?: $date;
                 $db->table('individuals')->where('id', $individuals[$key]->id)->update([
-                    'death_date' => $date,
+                    'death_date' => $deathDate,
                     'end_date' => $date,
                     'updated_at' => $now,
                 ]);
+                $individual->death_date = $deathDate;
+                $individual->end_date = $date;
             }
         }
 
@@ -212,7 +226,15 @@ final class GreenhouseFormalDataImporter
         return $db->table('individuals as individuals')
             ->join('plots as plots', 'plots.id', '=', 'individuals.plot_id')
             ->where('plots.experiment_id', $experimentId)
-            ->get(['individuals.id', 'individuals.individual_no', 'individuals.survey_order', 'individuals.species_name', 'plots.plot_code'])
+            ->get([
+                'individuals.id',
+                'individuals.individual_no',
+                'individuals.survey_order',
+                'individuals.species_name',
+                'individuals.end_date',
+                'individuals.death_date',
+                'plots.plot_code',
+            ])
             ->keyBy(fn (object $row): string => $row->plot_code.'|'.$row->individual_no)->all();
     }
 
