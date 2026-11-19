@@ -168,7 +168,7 @@ XML,
                     '',
                     $record->leaf_count,
                     '',
-                    $record->status,
+                    $this->displayedStatus($record->status),
                     $record->note,
                 ], $rowNumber, 2)
                 .'</row>';
@@ -199,6 +199,11 @@ XML,
             .'<oddFooter>'.$this->xml('&R&P/&N').'</oddFooter>'
             .'</headerFooter>'
             .'</worksheet>';
+    }
+
+    private function displayedStatus(mixed $status): string
+    {
+        return strtoupper(trim((string) $status)) === 'D' ? 'D' : '';
     }
 
     /**

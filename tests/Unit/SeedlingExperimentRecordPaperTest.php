@@ -21,6 +21,18 @@ it('uses the current record after the survey is completed', function (): void {
         ->toBe('batch_items.record_id');
 });
 
+it('only carries a previous D into the record paper Status column', function (string $status, string $expected): void {
+    $exporter = (new ReflectionClass(SeedlingExperimentRecordPaperExporter::class))
+        ->newInstanceWithoutConstructor();
+    $method = new ReflectionMethod($exporter, 'displayedStatus');
+
+    expect($method->invoke($exporter, $status))->toBe($expected);
+})->with([
+    'alive is blank' => ['A', ''],
+    'dead is retained' => ['D', 'D'],
+    'gone is blank' => ['G', ''],
+]);
+
 it('uses Treatment and the greenhouse title in greenhouse record paper', function (): void {
     $exporter = (new ReflectionClass(SeedlingExperimentRecordPaperExporter::class))
         ->newInstanceWithoutConstructor();

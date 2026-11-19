@@ -177,7 +177,7 @@
                         'label' => '福山 小苗',
                     ],
                     'fushan.seedling-experiment' => [
-                        'img' => asset('/images/research/seedling.png'),
+                        'img' => asset('/images/research/PXL_20231024_230243989.jpg'),
                         'style' => 'box1',
                         'label' => '福山 小苗實驗',
                     ],

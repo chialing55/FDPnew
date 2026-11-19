@@ -15,7 +15,7 @@
 <div class="text_box" style="width:min(900px, 100%); box-sizing:border-box;">
     <h2>{{ $title }}</h2>
     <hr>
-    <p>記錄紙依調查順序列出本期仍需追蹤的小苗，並帶入前一次調查的高度、葉片數、Status 與備註。</p>
+    <p>記錄紙依調查順序列出本期仍需追蹤的小苗，並帶入前一次調查的高度、葉片數、備註及 Status D；Status A 留白。</p>
     <p>批次建立後名單即固定；同一份記錄紙可以重複下載。</p>
 
     @if (session($statusKey))
