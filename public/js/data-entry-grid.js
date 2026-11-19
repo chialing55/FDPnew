@@ -19,6 +19,7 @@
         if (previous) previous.hot.destroy();
 
         const definitions = payload.columns || [];
+        const definedFields = new Set(definitions.map((definition) => definition.data));
         const records = (payload.records || []).map((record) => ({ ...record }));
         const rowHeight = 35;
         const tableHeight = Math.max(90, 44 + (records.length * rowHeight));
@@ -99,7 +100,7 @@
                 statusChanges.forEach(([row, , , status]) => {
                     const normalized = String(status || '').toUpperCase();
                     if (normalized === 'D' || normalized === 'G') {
-                        ['length', 'cotyledon_count', 'leaf_count'].forEach((field) => {
+                        ['length', 'cotyledon_count', 'leaf_count'].filter((field) => definedFields.has(field)).forEach((field) => {
                             hot.setDataAtRowProp(row, field, -4, 'status-rule');
                         });
                     } else if (normalized === 'A') {
@@ -108,7 +109,7 @@
                                 hot.setDataAtRowProp(row, field, '', 'status-rule');
                             }
                         });
-                        if (Number(hot.getSourceDataAtRow(row).cotyledon_count) === -4) {
+                        if (definedFields.has('cotyledon_count') && Number(hot.getSourceDataAtRow(row).cotyledon_count) === -4) {
                             hot.setDataAtRowProp(row, 'cotyledon_count', 0, 'status-rule');
                         }
                     }

@@ -296,20 +296,26 @@ Route::middleware(['auth', 'approved'])->prefix('admin')->name('admin.')->group(
                 Route::get('/record-paper/{survey}', 'downloadRecordPaper')
                     ->whereNumber('survey')
                     ->name('record-paper.download');
+                Route::post('/greenhouse/record-paper/prepare', 'prepareGreenhouseRecordPaper')
+                    ->name('greenhouse-record-paper.prepare');
+                Route::get('/greenhouse/record-paper/{survey}', 'downloadGreenhouseRecordPaper')
+                    ->whereNumber('survey')
+                    ->name('greenhouse-record-paper.download');
                 Route::get('/upload', 'upload')->middleware('admin')->name('upload');
                 Route::post('/upload/{dataset}', 'storeUpload')
                     ->middleware('admin')
-                    ->whereIn('dataset', ['phase1_raw', 'phase2_raw', 'greenhouse_order', 'greenhouse_raw'])
+                    ->whereIn('dataset', ['phase1_raw', 'phase2_raw', 'greenhouse_deployment'])
                     ->name('upload.store');
-                Route::get('/upload/greenhouse/merged', 'downloadGreenhouseMerged')
-                    ->middleware('admin')
-                    ->name('greenhouse-merged.download');
                 Route::get('/entry-guide', 'entryGuide')->name('entry-guide');
                 Route::get('/entry', 'groundcoverPhase2')->name('entry');
                 Route::get('/groundcover-phase2', 'groundcoverPhase2')->name('groundcover-phase2');
                 Route::get('/greenhouse', 'greenhouse')->name('greenhouse');
                 Route::get('/data', 'data')->name('data');
-                Route::get('/download', 'download')->name('download');
+                Route::get('/download', 'download')->middleware('admin')->name('download');
+                Route::get('/download/{experiment}', 'downloadExperimentTxt')
+                    ->middleware('admin')
+                    ->whereIn('experiment', ['groundcover_phase1', 'groundcover_phase2', 'greenhouse'])
+                    ->name('download.txt');
             });
 
         Route::prefix('mortality')->middleware('scope:fushan,mortality')->name('mortality.')->group(function () {

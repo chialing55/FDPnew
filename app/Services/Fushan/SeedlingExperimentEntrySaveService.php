@@ -9,20 +9,23 @@ final class SeedlingExperimentEntrySaveService
 {
     private const CONNECTION = 'fs_seedling_exp';
 
-    private const IDENTITY_FIELDS = ['plot', 'density', 'individual_no', 'species'];
-
     /**
      * Revalidate every batch item from persisted records before completing a survey.
      *
      * @return array<int, string>
      */
-    public function completionErrors(int $surveyId): array
+    public function completionErrors(int $surveyId, string $experimentCode = 'groundcover_phase2'): array
     {
         $connection = DB::connection(self::CONNECTION);
-        $survey = $connection->table('surveys')->find($surveyId);
+        $survey = $connection->table('surveys as surveys')
+            ->join('experiments as experiments', 'experiments.id', '=', 'surveys.experiment_id')
+            ->where('surveys.id', $surveyId)
+            ->select('surveys.*', 'experiments.code as experiment_code')
+            ->first();
         if ($survey === null) {
             return ['找不到目前調查批次。'];
         }
+        $experimentCode = (string) $survey->experiment_code;
 
         $items = $connection->table('survey_individuals as batch_items')
             ->join('individuals as individuals', 'individuals.id', '=', 'batch_items.individual_id')
@@ -77,7 +80,7 @@ final class SeedlingExperimentEntrySaveService
                 'leaf_count' => $item->leaf_count,
                 'status' => $item->status,
                 'note' => $item->note,
-            ], $item, $index, $survey->survey_period);
+            ], $item, $index, $survey->survey_period, $experimentCode);
 
             foreach ($rowErrors as $rowError) {
                 $errors[] = "{$label}：{$rowError['message']}";
@@ -90,16 +93,21 @@ final class SeedlingExperimentEntrySaveService
     /**
      * @return array{ok:bool, errors:array<int, array<string, mixed>>, changed?:int, skipped?:int}
      */
-    public function saveGroup(int $surveyId, string $plotGroup, array $submittedRows): array
+    public function saveGroup(int $surveyId, string $plotGroup, array $submittedRows, string $experimentCode = 'groundcover_phase2'): array
     {
         $connection = DB::connection(self::CONNECTION);
-        $survey = $connection->table('surveys')->find($surveyId);
+        $survey = $connection->table('surveys as surveys')
+            ->join('experiments as experiments', 'experiments.id', '=', 'surveys.experiment_id')
+            ->where('surveys.id', $surveyId)
+            ->select('surveys.*', 'experiments.code as experiment_code')
+            ->first();
 
         if ($survey === null || ! in_array($survey->status, ['prepared', 'in_progress'], true)) {
             return $this->failure('目前調查批次不存在或已完成。');
         }
+        $experimentCode = (string) $survey->experiment_code;
 
-        $storedByItem = $this->storedRows($surveyId, $plotGroup)->keyBy('batch_item_id');
+        $storedByItem = $this->storedRows($surveyId, $plotGroup, $experimentCode)->keyBy('batch_item_id');
         $errors = [];
         $changed = 0;
         $skipped = 0;
@@ -125,8 +133,8 @@ final class SeedlingExperimentEntrySaveService
             }
             $seen[$itemId] = true;
             $stored = $storedByItem->get($itemId);
-            $identityErrors = $this->validateIdentity($row, $stored, $index);
-            [$normalized, $rowErrors] = $this->validateRow($row, $stored, $index, $survey->survey_period);
+            $identityErrors = $this->validateIdentity($row, $stored, $index, $experimentCode);
+            [$normalized, $rowErrors] = $this->validateRow($row, $stored, $index, $survey->survey_period, $experimentCode);
             $currentErrors = [...$identityErrors, ...$rowErrors];
 
             if ($currentErrors !== []) {
@@ -136,10 +144,12 @@ final class SeedlingExperimentEntrySaveService
             }
 
             try {
-                $rowChanged = $connection->transaction(function () use ($connection, $survey, $normalized, $stored): int {
+                $rowChanged = $connection->transaction(function () use ($connection, $survey, $normalized, $stored, $experimentCode): int {
                     $row = $normalized;
                     $rowChanged = 0;
-                    $this->backfillRecoveredRecords((int) $stored->individual_id, $row['status']);
+                    if ($experimentCode !== 'greenhouse') {
+                        $this->backfillRecoveredRecords((int) $stored->individual_id, $row['status']);
+                    }
 
                     $values = [
                         'individual_id' => $stored->individual_id,
@@ -221,16 +231,15 @@ final class SeedlingExperimentEntrySaveService
         ];
     }
 
-    private function storedRows(int $surveyId, string $plotGroup)
+    private function storedRows(int $surveyId, string $plotGroup, string $experimentCode)
     {
-        return DB::connection(self::CONNECTION)
+        $query = DB::connection(self::CONNECTION)
             ->table('survey_individuals as batch_items')
             ->join('individuals as individuals', 'individuals.id', '=', 'batch_items.individual_id')
             ->join('plots as plots', 'plots.id', '=', 'individuals.plot_id')
             ->leftJoin('records as records', 'records.id', '=', 'batch_items.record_id')
             ->leftJoin('records as previous', 'previous.id', '=', 'batch_items.previous_record_id')
             ->where('batch_items.survey_id', $surveyId)
-            ->where('plots.plot_code', 'like', $plotGroup.'-%')
             ->orderBy('batch_items.survey_order')
             ->select([
                 'batch_items.id as batch_item_id',
@@ -241,15 +250,25 @@ final class SeedlingExperimentEntrySaveService
                 'individuals.individual_no',
                 'individuals.species_name as species',
                 'previous.cotyledon_count as previous_cotyledon_count',
-            ])
-            ->get();
+            ]);
+
+        if ($experimentCode === 'greenhouse') {
+            $query->where('plots.plot_code', $plotGroup);
+        } else {
+            $query->where('plots.plot_code', 'like', $plotGroup.'-%');
+        }
+
+        return $query->get();
     }
 
-    private function validateIdentity(array $row, object $stored, int $index): array
+    private function validateIdentity(array $row, object $stored, int $index, string $experimentCode): array
     {
         $errors = [];
 
-        foreach (self::IDENTITY_FIELDS as $field) {
+        $fields = $experimentCode === 'greenhouse'
+            ? ['plot', 'individual_no', 'species']
+            : ['plot', 'density', 'individual_no', 'species'];
+        foreach ($fields as $field) {
             $submitted = $row[$field] ?? '';
             $expectedValue = $stored->{$field};
             $same = $field === 'density'
@@ -271,7 +290,7 @@ final class SeedlingExperimentEntrySaveService
     /**
      * @return array{0:array<string, mixed>, 1:array<int, array<string, mixed>>}
      */
-    private function validateRow(array $row, object $stored, int $index, string $surveyPeriod): array
+    private function validateRow(array $row, object $stored, int $index, string $surveyPeriod, string $experimentCode = 'groundcover_phase2'): array
     {
         $errors = [];
         $date = trim((string) ($row['date'] ?? ''));
@@ -297,7 +316,10 @@ final class SeedlingExperimentEntrySaveService
         }
 
         $measurements = [];
-        foreach (['length', 'cotyledon_count', 'leaf_count'] as $field) {
+        $measurementFields = $experimentCode === 'greenhouse'
+            ? ['length', 'leaf_count']
+            : ['length', 'cotyledon_count', 'leaf_count'];
+        foreach ($measurementFields as $field) {
             $value = $row[$field] ?? null;
             if ($value === '' || $value === null || ! is_numeric($value)) {
                 $errors[] = $this->error($index, $field, 'required_numeric', "{$field} 必須輸入數值。");
@@ -324,11 +346,11 @@ final class SeedlingExperimentEntrySaveService
                 }
             }
 
-            $cotyledon = $measurements['cotyledon_count'];
-            if ($stored->species === '香楠' && $cotyledon !== null && $cotyledon !== 0) {
+            $cotyledon = $measurements['cotyledon_count'] ?? null;
+            if ($experimentCode !== 'greenhouse' && $stored->species === '香楠' && $cotyledon !== null && $cotyledon !== 0) {
                 $errors[] = $this->error($index, 'cotyledon_count', 'xiangnan_cotyledon', '香楠不可有子葉數，請輸入 0。');
             }
-            if ($stored->species === '黃杞' && $cotyledon !== null) {
+            if ($experimentCode !== 'greenhouse' && $stored->species === '黃杞' && $cotyledon !== null) {
                 if ($cotyledon > 2) {
                     $errors[] = $this->error($index, 'cotyledon_count', 'huangqi_cotyledon_max', '黃杞子葉數最多為 2。');
                 }
@@ -344,7 +366,7 @@ final class SeedlingExperimentEntrySaveService
             'date' => $date,
             'status' => $status,
             'length' => $measurements['length'],
-            'cotyledon_count' => $measurements['cotyledon_count'],
+            'cotyledon_count' => $measurements['cotyledon_count'] ?? null,
             'leaf_count' => $measurements['leaf_count'],
             'note' => $note === '' ? null : $note,
         ], $errors];

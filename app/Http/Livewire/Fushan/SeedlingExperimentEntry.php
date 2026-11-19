@@ -6,6 +6,7 @@ use App\Services\Fushan\SeedlingExperimentEntrySaveService;
 use App\Services\Fushan\SeedlingExperimentSurveyService;
 use App\Support\DataEntry\SaveFeedback;
 use Illuminate\Support\Facades\DB;
+use Livewire\Attributes\Locked;
 use Livewire\Component;
 use Throwable;
 
@@ -13,6 +14,10 @@ class SeedlingExperimentEntry extends Component
 {
     private const CONNECTION = 'fs_seedling_exp';
 
+    #[Locked]
+    public string $experimentCode = 'groundcover_phase2';
+
+    #[Locked]
     public ?int $surveyId = null;
 
     public string $surveyPeriod = '';
@@ -51,11 +56,28 @@ class SeedlingExperimentEntry extends Component
 
     public string $gridStatus = 'noop';
 
-    public function mount(): void
+    public function mount(string $experimentCode = 'groundcover_phase2'): void
     {
+        $this->experimentCode = in_array($experimentCode, ['groundcover_phase2', 'greenhouse'], true)
+            ? $experimentCode
+            : 'groundcover_phase2';
         $this->userName = (string) (auth()->user()?->account ?? auth()->user()?->name ?? '');
         $this->inputDate = now()->format('Y-m-d');
         $this->loadActiveSurvey();
+    }
+
+    public function prepareSurvey(): void
+    {
+        $this->resetMessage();
+
+        try {
+            app(SeedlingExperimentSurveyService::class)->prepare(auth()->id(), $this->experimentCode);
+            $this->loadActiveSurvey();
+            $this->message = '已建立下一期輸入名單。';
+        } catch (Throwable $exception) {
+            report($exception);
+            $this->setError($exception->getMessage());
+        }
     }
 
     public function startInput(): void
@@ -112,7 +134,7 @@ class SeedlingExperimentEntry extends Component
 
         try {
             $result = app(SeedlingExperimentEntrySaveService::class)
-                ->saveGroup($this->surveyId, $plotGroup, $rows);
+                ->saveGroup($this->surveyId, $plotGroup, $rows, $this->experimentCode);
         } catch (Throwable $exception) {
             report($exception);
             $this->dispatchSaveResult(false, [], '儲存失敗，輸入內容仍保留在畫面上。');
@@ -162,7 +184,7 @@ class SeedlingExperimentEntry extends Component
 
         try {
             app(SeedlingExperimentSurveyService::class)
-                ->addRecoveredIndividual($this->surveyId, $group, $individualId);
+                ->addRecoveredIndividual($this->surveyId, $group, $individualId, $this->experimentCode);
         } catch (Throwable $exception) {
             report($exception);
             $this->setError($exception->getMessage());
@@ -182,7 +204,7 @@ class SeedlingExperimentEntry extends Component
 
         try {
             $result = app(SeedlingExperimentSurveyService::class)
-                ->complete($this->surveyId, auth()->id());
+                ->complete($this->surveyId, auth()->id(), $this->experimentCode);
         } catch (Throwable $exception) {
             report($exception);
             $this->setError($exception->getMessage());
@@ -198,13 +220,14 @@ class SeedlingExperimentEntry extends Component
 
     public function getTitleProperty(): string
     {
+        $experimentName = $this->experimentCode === 'greenhouse' ? '溫室實驗' : '地被實驗第二期';
         if ($this->surveyPeriod === '') {
-            return '地被實驗第二期資料輸入';
+            return $experimentName.'資料輸入';
         }
 
         [$year, $month] = explode('-', $this->surveyPeriod);
 
-        return sprintf('%d 年 %d 月 地被實驗第二期資料輸入', (int) $year, (int) $month);
+        return sprintf('%d 年 %d 月 %s資料輸入', (int) $year, (int) $month, $experimentName);
     }
 
     public function getCurrentPlotProperty(): ?array
@@ -231,7 +254,7 @@ class SeedlingExperimentEntry extends Component
 
     private function loadActiveSurvey(): void
     {
-        $summary = app(SeedlingExperimentSurveyService::class)->summary();
+        $summary = app(SeedlingExperimentSurveyService::class)->summary($this->experimentCode);
         $survey = $summary['active_survey'] ?? null;
 
         if ($survey === null) {
@@ -271,7 +294,9 @@ class SeedlingExperimentEntry extends Component
             ->get(['plots.plot_code', 'batch_items.record_id']);
 
         $this->plots = $rows
-            ->groupBy(fn (object $row): string => explode('-', $row->plot_code, 2)[0])
+            ->groupBy(fn (object $row): string => $this->experimentCode === 'greenhouse'
+                ? $row->plot_code
+                : explode('-', $row->plot_code, 2)[0])
             ->map(function ($groupRows, string $group): array {
                 $completed = $groupRows->whereNotNull('record_id')->count();
 
@@ -350,11 +375,13 @@ class SeedlingExperimentEntry extends Component
                     'batch_item_id' => (int) $row->batch_item_id,
                     'date' => $row->date ?? $this->defaultSurveyDate,
                     'plot' => $row->plot,
-                    'density' => $this->formatNumber($row->density),
+                    'density' => $this->experimentCode === 'greenhouse' ? null : $this->formatNumber($row->density),
                     'individual_no' => $row->individual_no,
                     'species' => $row->species,
                     'length' => $row->length === null ? ($previousWasDead ? -4 : '') : $this->formatNumber($row->length),
-                    'cotyledon_count' => $row->cotyledon_count ?? ($previousWasDead ? -4 : 0),
+                    'cotyledon_count' => $this->experimentCode === 'greenhouse'
+                        ? null
+                        : ($row->cotyledon_count ?? ($previousWasDead ? -4 : 0)),
                     'leaf_count' => $row->leaf_count ?? ($previousWasDead ? -4 : ''),
                     'status' => $row->status ?? ($previousWasDead ? 'D' : 'A'),
                     'note' => $this->displayedNote(
@@ -430,7 +457,9 @@ class SeedlingExperimentEntry extends Component
             'seedling-experiment-entry-grid-data',
             containerId: 'seedling-experiment-entry-hot',
             records: $this->records,
-            columns: config('seedling-experiment-entry.columns'),
+            columns: config($this->experimentCode === 'greenhouse'
+                ? 'greenhouse-experiment-entry.columns'
+                : 'seedling-experiment-entry.columns'),
             initialErrors: $this->gridErrors,
             initialMessage: $this->gridMessage,
             initialResultOk: $this->gridResultOk,
@@ -493,4 +522,5 @@ class SeedlingExperimentEntry extends Component
     {
         return (string) ($recordId === null ? ($previousNote ?? '') : ($currentNote ?? ''));
     }
+
 }

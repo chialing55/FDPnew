@@ -67,9 +67,11 @@
         <div class="list {{ $page === 'data' ? 'now' : '' }}">
             <a class="experiment-nav-link" href="{{ route('admin.fushan.seedling-experiment.data') }}">資料檢視<hr></a>
         </div>
-        <div class="list {{ $page === 'download' ? 'now' : '' }}">
-            <a class="experiment-nav-link" href="{{ route('admin.fushan.seedling-experiment.download') }}">資料下載<hr></a>
-        </div>
+        @if((int) (auth()->user()?->is_admin ?? 0) === 1)
+            <div class="list {{ $page === 'download' ? 'now' : '' }} admin-only-link">
+                <a class="experiment-nav-link" href="{{ route('admin.fushan.seedling-experiment.download') }}">資料下載<hr></a>
+            </div>
+        @endif
     </div>
 @endsection
 
@@ -103,7 +105,7 @@
             parent.addEventListener('click', show);
         });
     </script>
-    @if ($page === 'groundcover-phase2')
+    @if (in_array($page, ['groundcover-phase2', 'greenhouse'], true))
         <script src="{{ asset('/js/data-entry-grid.js') }}?v={{ filemtime(public_path('js/data-entry-grid.js')) }}"></script>
     @endif
 @endsection

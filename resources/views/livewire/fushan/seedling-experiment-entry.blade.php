@@ -1,4 +1,9 @@
 <div class="seedling-entry-page">
+    @php
+        $isGreenhouse = $experimentCode === 'greenhouse';
+        $gridId = 'seedling-experiment-entry-hot';
+        $groupLabel = $isGreenhouse ? '處理' : '樣區組';
+    @endphp
     <section class="seedling-entry-header">
         <h2>{{ $this->title }}</h2>
         <p>
@@ -20,7 +25,14 @@
 
     @if ($surveyId === null)
         <div class="text_box">
-            <p>目前沒有可輸入的調查批次，請先至相關文件確認記錄紙批次。</p>
+            <p>目前沒有可輸入的調查批次。</p>
+            @if ($isGreenhouse)
+                <button type="button" class="button1" wire:click="prepareSurvey" wire:loading.attr="disabled">
+                    建立下一期輸入名單
+                </button>
+            @else
+                <p>請先至相關文件確認記錄紙批次。</p>
+            @endif
         </div>
     @elseif ($surveyStatus === 'prepared')
         <section class="text_box seedling-entry-start">
@@ -35,14 +47,14 @@
                 @enderror
                 <button type="submit" class="button1">開始輸入</button>
             </form>
-            <p class="seedling-entry-hint">日期會先帶入所有資料列；若部分 Plot 在其他日期調查，可在表格內個別修改。</p>
+            <p class="seedling-entry-hint">日期會先帶入所有資料列；若部分 {{ $isGreenhouse ? 'Treatment' : 'Plot' }} 在其他日期調查，可在表格內個別修改。</p>
         </section>
     @elseif ($surveyStatus === 'in_progress')
         @if ($this->currentPlot)
             <div class="seedling-entry-site-selector">
                 <p>
-                    <strong>選擇要輸入的樣區組</strong>
-                    <select onchange="DataEntryGrid.navigate('seedling-experiment-entry-hot', this.value); this.value='{{ $currentPlotIndex }}';">
+                    <strong>選擇要輸入的{{ $groupLabel }}</strong>
+                    <select onchange="DataEntryGrid.navigate('{{ $gridId }}', this.value); this.value='{{ $currentPlotIndex }}';">
                         @foreach ($plots as $index => $plot)
                             <option value="{{ $index }}" @selected($index === $currentPlotIndex)>
                                 {{ $plot['group'] }}{{ $plot['is_complete'] ? '（已完成）' : '' }}
@@ -52,13 +64,13 @@
 
                     <span class="seedling-entry-site-navigation">
                         @if ($currentPlotIndex > 0)
-                            <a class="a_" onclick="DataEntryGrid.navigate('seedling-experiment-entry-hot', {{ $currentPlotIndex - 1 }})">上一個</a>
+                            <a class="a_" onclick="DataEntryGrid.navigate('{{ $gridId }}', {{ $currentPlotIndex - 1 }})">上一個</a>
                         @else
                             <span class="seedling-entry-hidden-nav">上一個</span>
                         @endif
 
                         @if ($currentPlotIndex < count($plots) - 1)
-                            <a class="a_" onclick="DataEntryGrid.navigate('seedling-experiment-entry-hot', {{ $currentPlotIndex + 1 }})">下一個</a>
+                            <a class="a_" onclick="DataEntryGrid.navigate('{{ $gridId }}', {{ $currentPlotIndex + 1 }})">下一個</a>
                         @else
                             <span class="seedling-entry-hidden-nav">下一個</span>
                         @endif
@@ -67,23 +79,25 @@
             </div>
 
             <section class="text_box seedling-entry-table-panel">
-                <h6>小苗調查資料｜{{ $this->currentPlot['group'] }}（{{ implode('、', $this->currentPlot['plots']) }}）</h6>
+                <h6>小苗調查資料｜{{ $this->currentPlot['group'] }}@unless($isGreenhouse)（{{ implode('、', $this->currentPlot['plots']) }}）@endunless</h6>
                 <hr>
 
                 <div id="simplenote" class="text_box2">
                     <ul>
                         <li><b>輸入資料後需按 <button class="datasavebutton" style="width:auto;" disabled>儲存</button>，才能確實將資料儲存。</b></li>
                         <li>每筆資料分別儲存；長度留白的資料視為尚未輸入並跳過，其他資料不會因此退回。</li>
-                        <li>新一期預設 Status 為 <b>A</b>、子葉數為 <b>0</b>；前一期為 <b>D</b> 者保留 -4、-4、-4、D。</li>
-                        <li>Status 為 <b>D</b> 或 <b>G</b> 時，長度、子葉數與葉片數會自動填入 -4。</li>
+                        <li>新一期預設 Status 為 <b>A</b>@unless($isGreenhouse)、子葉數為 <b>0</b>@endunless；前一期為 <b>D</b> 者保留量測值 -4 與 D。</li>
+                        <li>Status 為 <b>D</b> 或 <b>G</b> 時，{{ $isGreenhouse ? '長度與葉片數' : '長度、子葉數與葉片數' }}會自動填入 -4。</li>
                         <li>Status 為 <b>A</b> 時，請輸入本次實際量測值。</li>
-                        <li>香楠子葉數必須為 <b>0</b>；黃杞最多為 <b>2</b>，且不可比上次增加。</li>
+                        @unless($isGreenhouse)
+                            <li>香楠子葉數必須為 <b>0</b>；黃杞最多為 <b>2</b>，且不可比上次增加。</li>
+                        @endunless
                     </ul>
                 </div>
 
-                <div class="seedling-entry-revival">
-                    <strong>G 復活</strong>
-                    @if ($gRevivalCandidates !== [])
+                @if ($gRevivalCandidates !== [])
+                    <div class="seedling-entry-revival">
+                        <strong>G 復活</strong>
                         <select wire:model="gRevivalIndividualId">
                             <option value="">請選擇本組已 G 的小苗</option>
                             @foreach ($gRevivalCandidates as $candidate)
@@ -91,13 +105,11 @@
                             @endforeach
                         </select>
                         <button type="button" class="button1" wire:click="reviveG">加入本期輸入</button>
-                    @else
-                        <span>本組目前沒有可恢復追蹤的 G 個體。</span>
-                    @endif
-                </div>
+                    </div>
+                @endif
 
                 <div class="entrytablediv">
-                    <x-data-entry.handsontable id="seedling-experiment-entry-hot" save-label="儲存" />
+                    <x-data-entry.handsontable :id="$gridId" save-label="儲存" />
                 </div>
             </section>
         @endif

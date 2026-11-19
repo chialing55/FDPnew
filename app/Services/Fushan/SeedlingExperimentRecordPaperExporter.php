@@ -17,9 +17,9 @@ class SeedlingExperimentRecordPaperExporter
     /**
      * @return array{path:string, filename:string, record_count:int}
      */
-    public function make(int $surveyId): array
+    public function make(int $surveyId, string $experimentCode = 'groundcover_phase2'): array
     {
-        $survey = $this->surveyService->findForDownload($surveyId);
+        $survey = $this->surveyService->findForDownload($surveyId, $experimentCode);
         $rows = $this->rows($surveyId, $survey->status);
 
         if ($rows->isEmpty()) {
@@ -37,7 +37,7 @@ class SeedlingExperimentRecordPaperExporter
             throw new RuntimeException('無法建立記錄紙 Excel 檔。');
         }
 
-        $parts = $this->xlsxParts($rows->all(), $survey->survey_period);
+        $parts = $this->xlsxParts($rows->all(), $survey->survey_period, $experimentCode);
         foreach ($parts as $name => $contents) {
             $zip->addFromString($name, $contents);
         }
@@ -45,9 +45,11 @@ class SeedlingExperimentRecordPaperExporter
 
         $period = str_replace('-', '', $survey->survey_period);
 
+        $filePrefix = $experimentCode === 'greenhouse' ? '溫室實驗' : '小苗試驗';
+
         return [
             'path' => $path,
-            'filename' => "小苗試驗紀錄{$period}紀錄紙.xlsx",
+            'filename' => "{$filePrefix}紀錄{$period}紀錄紙.xlsx",
             'record_count' => $rows->count(),
         ];
     }
@@ -86,10 +88,12 @@ class SeedlingExperimentRecordPaperExporter
      * @param  array<int, object>  $records
      * @return array<string, string>
      */
-    private function xlsxParts(array $records, string $surveyPeriod): array
+    private function xlsxParts(array $records, string $surveyPeriod, string $experimentCode): array
     {
-        $worksheet = $this->worksheetXml($records, $surveyPeriod);
+        $worksheet = $this->worksheetXml($records, $surveyPeriod, $experimentCode);
         $lastRow = count($records) + 1;
+        $sheetName = $experimentCode === 'greenhouse' ? '溫室實驗紀錄紙' : '小苗試驗紀錄紙';
+        $documentTitle = $experimentCode === 'greenhouse' ? '溫室實驗' : '小苗試驗';
 
         return [
             '[Content_Types].xml' => <<<'XML'
@@ -116,7 +120,7 @@ XML,
                 .'<cp:coreProperties xmlns:cp="http://schemas.openxmlformats.org/package/2006/metadata/core-properties" '
                 .'xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:dcterms="http://purl.org/dc/terms/" '
                 .'xmlns:dcmitype="http://purl.org/dc/dcmitype/" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">'
-                .'<dc:title>'.$this->xml("小苗試驗 {$surveyPeriod} 紀錄紙").'</dc:title>'
+                .'<dc:title>'.$this->xml("{$documentTitle} {$surveyPeriod} 紀錄紙").'</dc:title>'
                 .'<dc:creator>FDP</dc:creator><cp:lastModifiedBy>FDP</cp:lastModifiedBy>'
                 .'<dcterms:created xsi:type="dcterms:W3CDTF">'.now()->utc()->format('Y-m-d\TH:i:s\Z').'</dcterms:created>'
                 .'</cp:coreProperties>',
@@ -129,9 +133,9 @@ XML,
             'xl/workbook.xml' => '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>'
                 .'<workbook xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main" '
                 .'xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships">'
-                .'<sheets><sheet name="小苗試驗紀錄紙" sheetId="1" r:id="rId1"/></sheets>'
-                .'<definedNames><definedName name="_xlnm.Print_Area" localSheetId="0">\'小苗試驗紀錄紙\'!$A$1:$I$'.$lastRow.'</definedName>'
-                .'<definedName name="_xlnm.Print_Titles" localSheetId="0">\'小苗試驗紀錄紙\'!$1:$1</definedName></definedNames>'
+                .'<sheets><sheet name="'.$this->xml($sheetName).'" sheetId="1" r:id="rId1"/></sheets>'
+                .'<definedNames><definedName name="_xlnm.Print_Area" localSheetId="0">\''.$this->xml($sheetName).'\'!$A$1:$I$'.$lastRow.'</definedName>'
+                .'<definedName name="_xlnm.Print_Titles" localSheetId="0">\''.$this->xml($sheetName).'\'!$1:$1</definedName></definedNames>'
                 .'</workbook>',
             'xl/_rels/workbook.xml.rels' => <<<'XML'
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
@@ -148,9 +152,9 @@ XML,
     /**
      * @param  array<int, object>  $records
      */
-    private function worksheetXml(array $records, string $surveyPeriod): string
+    private function worksheetXml(array $records, string $surveyPeriod, string $experimentCode): string
     {
-        $headers = ['Plot', 'No', 'sp.', '高度', '', '葉片', '', '狀態', '備註'];
+        $headers = [$experimentCode === 'greenhouse' ? 'Treatment' : 'Plot', 'No', 'sp.', '高度', '', '葉片', '', '狀態', '備註'];
         $rows = ['<row r="1" ht="20" customHeight="1">'.$this->cells($headers, 1, 1).'</row>'];
 
         foreach ($records as $index => $record) {
@@ -191,7 +195,7 @@ XML,
             .'<pageMargins left="0.25" right="0.25" top="0.5" bottom="0.5" header="0.2" footer="0.2"/>'
             .'<pageSetup orientation="portrait" paperSize="9" fitToWidth="1" fitToHeight="0"/>'
             .'<headerFooter>'
-            .'<oddHeader>'.$this->xml("&L&14&B地被小苗試驗 {$surveyPeriod}&B&R&11調查日期____________________________").'</oddHeader>'
+            .'<oddHeader>'.$this->xml('&L&14&B'.($experimentCode === 'greenhouse' ? '溫室實驗' : '地被小苗試驗')." {$surveyPeriod}&B&R&11調查日期____________________________").'</oddHeader>'
             .'<oddFooter>'.$this->xml('&R&P/&N').'</oddFooter>'
             .'</headerFooter>'
             .'</worksheet>';

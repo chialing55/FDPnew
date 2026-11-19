@@ -5,9 +5,18 @@
         $pages = [
             'overview' => ['title' => '福山 小苗實驗', 'description' => '請由上方工作列選擇要進行的作業。'],
             'documents' => ['title' => '相關文件', 'description' => '下載小苗實驗調查使用的記錄紙與相關文件。'],
-            'upload' => ['title' => '上傳資料', 'description' => '請上傳地被實驗第一期、第二期或溫室實驗原始資料；修改後資料由系統內部產生。'],
-            'entry-guide' => ['title' => '資料輸入注意事項', 'description' => '此頁將放置小苗實驗的欄位定義、輸入規則與操作流程。'],
-            'groundcover-phase2' => ['title' => '地被實驗第二期', 'description' => '此頁將提供地被實驗第二期資料的新增與編輯介面。'],
+            'upload' => [
+                'title' => '上傳資料',
+                'description' => '請上傳地被實驗第一期、第二期或溫室實驗原始資料；修改後資料由系統內部產生。',
+            ],
+            'entry-guide' => [
+                'title' => '資料輸入注意事項',
+                'description' => '此頁將放置小苗實驗的欄位定義、輸入規則與操作流程。',
+            ],
+            'groundcover-phase2' => [
+                'title' => '地被實驗第二期',
+                'description' => '此頁將提供地被實驗第二期資料的新增與編輯介面。',
+            ],
             'greenhouse' => ['title' => '溫室實驗', 'description' => '此頁將提供溫室實驗資料的新增與編輯介面。'],
             'data' => ['title' => '資料檢視', 'description' => '此頁將提供小苗實驗資料的查詢、篩選與檢視。'],
             'download' => ['title' => '資料下載', 'description' => '此頁將提供小苗實驗資料的下載條件與檔案輸出。'],
@@ -15,70 +24,18 @@
         $content = $pages[$page] ?? $pages['overview'];
     @endphp
 
-    <div class="flex text_outbox" style="flex-direction: column; align-items: center;">
+    <div class="text_outbox flex" style="flex-direction: column; align-items: center;">
         @if ($page === 'documents')
-            <div class="flex text_outbox" style="align-items: flex-start; justify-content: center;">
-                <div class="text_box">
-                    <h2>地被實驗第二期記錄紙</h2>
-                    <hr>
-                    <p>記錄紙依調查順序列出本期仍需追蹤的小苗，並帶入前一次調查的高度、葉片數、Status 與備註。</p>
-                    <p>批次建立後名單即固定；同一份記錄紙可以重複下載，不會因下載而重新計算名單。</p>
-
-                    @if (session('status'))
-                        <div class="app-feedback-note app-feedback-note--success" style="margin:18px 0;">{{ session('status') }}</div>
-                    @endif
-                    @if ($errors->has('record_paper'))
-                        <div class="app-feedback-note app-feedback-note--error" style="margin:18px 0;">
-                            {{ $errors->first('record_paper') }}
-                        </div>
-                    @endif
-
-                    @if (!($recordPaper['available'] ?? false))
-                        <div class="app-feedback-note app-feedback-note--error" style="margin-top:18px;">
-                            {{ $recordPaper['message'] ?? '目前無法產生記錄紙。' }}
-                        </div>
-                    @elseif ($recordPaper['active_survey'] ?? null)
-                        @php
-                            [$surveyYear, $surveyMonth] = explode('-', $recordPaper['active_survey']->survey_period);
-                        @endphp
-                        <p>
-                            已建立調查月份：
-                            <strong>{{ $surveyYear }} 年 {{ (int) $surveyMonth }} 月</strong><br>
-                            固定名單：{{ number_format($recordPaper['active_survey_count']) }} 株
-                        </p>
-                        <a class="button1"
-                            href="{{ route('admin.fushan.seedling-experiment.record-paper.download', ['survey' => $recordPaper['active_survey']->id]) }}">
-                            下載小苗試驗紀錄{{ str_replace('-', '', $recordPaper['active_survey']->survey_period) }}紀錄紙.xlsx
-                        </a>
-                    @elseif ($recordPaper['next_period'] ?? null)
-                        @php
-                            [$nextYear, $nextMonth] = explode('-', $recordPaper['next_period']);
-                        @endphp
-                        <p>
-                            最新正式資料：{{ $recordPaper['latest_period'] }}<br>
-                            下一次調查：<strong>{{ $nextYear }} 年 {{ (int) $nextMonth }} 月</strong><br>
-                            預計固定名單：{{ number_format($recordPaper['eligible_count']) }} 株
-                        </p>
-
-                        @if (($recordPaper['missing_order_count'] ?? 0) > 0)
-                            <div class="app-feedback-note app-feedback-note--error" style="margin-top:18px;">
-                                仍有 {{ number_format($recordPaper['missing_order_count']) }} 株缺少調查順序，請先補齊後再產生。
-                            </div>
-                        @else
-                            <form method="POST" action="{{ route('admin.fushan.seedling-experiment.record-paper.prepare') }}">
-                                @csrf
-                                <button type="submit" class="button1"
-                                    onclick="this.disabled=true; this.form.submit();">
-                                    產生 {{ $nextYear }} 年 {{ (int) $nextMonth }} 月記錄紙
-                                </button>
-                            </form>
-                        @endif
-                    @else
-                        <div class="app-feedback-note app-feedback-note--error" style="margin-top:18px;">
-                            尚無正式調查資料，無法判斷下一個調查月份。
-                        </div>
-                    @endif
-                </div>
+            <div class="text_outbox flex"
+                style="flex-direction:column; align-items:center; justify-content:flex-start; gap:18px;">
+                @include('pages.fushan.seedling-experiment.partials.record-paper-card', [
+                    'summary' => $recordPaper,
+                    'experiment' => 'groundcover_phase2',
+                ])
+                @include('pages.fushan.seedling-experiment.partials.record-paper-card', [
+                    'summary' => $greenhouseRecordPaper,
+                    'experiment' => 'greenhouse',
+                ])
             </div>
         @elseif ($page === 'upload')
             <div class="experiment-upload-intro">
@@ -98,7 +55,8 @@
                 </section>
 
                 @if (session('status'))
-                    <div class="app-feedback-note app-feedback-note--success" style="margin-top:18px;">{{ session('status') }}</div>
+                    <div class="app-feedback-note app-feedback-note--success" style="margin-top:18px;">{{ session('status') }}
+                    </div>
                 @endif
                 @if ($errors->any())
                     <div class="app-feedback-note app-feedback-note--error" style="margin-top:18px;">
@@ -108,10 +66,23 @@
 
                 @php
                     $uploadCards = [
-                        'phase1_raw' => ['title' => '地被實驗第一期｜原始資料', 'columns' => 'Date、Plot、No.、Species、長度、葉片數、Status、備註', 'button' => '上傳、整理並匯入正式資料'],
-                        'phase2_raw' => ['title' => '地被實驗第二期｜原始資料', 'columns' => '調查順序排序、Date、Plot、Density、No.、Species、長度、子葉數、葉片數、Status、備註', 'button' => '上傳、整理並匯入正式資料'],
-                        'greenhouse_order' => ['title' => '溫室實驗｜調查順序參考檔', 'columns' => '其中一次調查資料；需含調查(輸入)順序、日期、物種、處理、編號、高度、葉片、狀態、附註', 'button' => '上傳調查順序'],
-                        'greenhouse_raw' => ['title' => '溫室實驗｜完整歷史資料', 'columns' => 'Date、Sp.、Treatment、No.、長度、葉片數、Status、附註；本機整理完成後，也可上傳含調查順序的完整檔', 'button' => '上傳、合併排序並匯入正式資料'],
+                        'phase1_raw' => [
+                            'title' => '地被實驗第一期｜原始資料',
+                            'columns' => 'Date、Plot、No.、Species、長度、葉片數、Status、備註',
+                            'button' => '上傳、整理並匯入正式資料',
+                        ],
+                        'phase2_raw' => [
+                            'title' => '地被實驗第二期｜原始資料',
+                            'columns' =>
+                                '調查順序排序、Date、Plot、Density、No.、Species、長度、子葉數、葉片數、Status、備註',
+                            'button' => '上傳、整理並匯入正式資料',
+                        ],
+                        'greenhouse_deployment' => [
+                            'title' => '溫室實驗｜原始資料',
+                            'columns' =>
+                                '調查(輸入)順序、遮蔭處理排序、Date、Sp.、Treatment、No.、長度、葉片數、Status、備註',
+                            'button' => '上傳、整理並匯入正式資料',
+                        ],
                     ];
                 @endphp
 
@@ -128,35 +99,129 @@
                         <div class="experiment-upload-meta">目前已有 {{ number_format($uploadCounts[$dataset] ?? 0) }} 筆</div>
                         <p>{{ $card['columns'] }}</p>
                         <input type="file" name="spreadsheet" accept=".xlsx,.csv,.ods" required>
-                        <button type="submit" onclick="this.disabled=true; this.form.submit();">{{ $card['button'] ?? '上傳並匯入' }}</button>
+                        <button type="submit"
+                            onclick="this.disabled=true; this.form.submit();">{{ $card['button'] ?? '上傳並匯入' }}</button>
                     </form>
                 @endforeach
 
             </div>
-
-            @if (($uploadCounts['greenhouse_raw'] ?? 0) > 0)
-                <div style="width:min(1250px, calc(100% - 80px)); margin:18px auto 0; text-align:right;">
-                    <a class="button" href="{{ route('admin.fushan.seedling-experiment.greenhouse-merged.download') }}">下載含調查順序的溫室完整 CSV</a>
-                </div>
-            @endif
         @elseif ($page === 'data')
             @livewire('fushan.seedling-experiment-dataviewer')
+        @elseif ($page === 'download')
+            @php
+                $downloads = [
+                    'groundcover_phase1' => [
+                        'title' => '地被實驗第一期',
+                        'columns' => 'Date、Plot、No.、Species、長度、葉片數、Status、備註',
+                    ],
+                    'groundcover_phase2' => [
+                        'title' => '地被實驗第二期',
+                        'columns' =>
+                            '調查順序排序、Date、Plot、Density、No.、Species、長度、子葉數、葉片數、Status、備註',
+                    ],
+                    'greenhouse' => [
+                        'title' => '溫室實驗',
+                        'columns' =>
+                            '調查(輸入)順序、遮蔭處理排序、Date、Sp.、Treatment、No.、長度、葉片數、Status、備註',
+                    ],
+                ];
+            @endphp
+
+            <div class="text_outbox flex" style="flex-direction:column; align-items:center;">
+                <section class="text_box" style="width:min(1100px, 100%); box-sizing:border-box; overflow-x:auto;">
+                    <h2>小苗實驗資料下載</h2>
+                    <hr>
+                    <table class="tablesorter" style="min-width:760px;">
+                        <thead>
+                            <tr>
+                                <th>資料表</th>
+                                <th>資料範圍</th>
+                                <th>說明</th>
+                                <th>下載</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach ($downloads as $experiment => $download)
+                                <tr>
+                                    <td>{{ $download['title'] }}</td>
+                                    <td>全部資料</td>
+                                    <td>{{ $download['columns'] }}</td>
+                                    <td>
+                                        <form method="GET"
+                                            action="{{ route('admin.fushan.seedling-experiment.download.txt', ['experiment' => $experiment]) }}"
+                                            style="margin:0;">
+                                            <button type="submit">下載 txt</button>
+                                        </form>
+                                    </td>
+                                </tr>
+                            @endforeach
+                        </tbody>
+                    </table>
+
+                    <x-seedling-experiment.download-note />
+                </section>
+            </div>
         @elseif ($page === 'groundcover-phase2')
             @livewire('fushan.seedling-experiment-entry')
+        @elseif ($page === 'greenhouse')
+            @livewire('fushan.seedling-experiment-entry', ['experimentCode' => 'greenhouse'])
         @elseif ($page === 'entry-guide')
-            <div class="text_box" style="width:min(900px, 100%); box-sizing:border-box; text-align:left;">
+            <div>
                 <h2>小苗實驗資料輸入注意事項</h2>
-                <hr>
-                <ol>
-                    <li>調查原則為每月一次；開始輸入前先選擇本次實際調查日期。</li>
-                    <li>系統依調查順序逐 Plot 顯示固定名單，不需另外選擇樣站。</li>
-                    <li>Status 為 A 時，請輸入本次實際量測的長度、子葉數及葉片數。</li>
-                    <li>Status 為 D 或 G 時，量測欄位皆為 -4；選擇狀態後系統會自動帶入。</li>
-                    <li>新一期預設 Status 為 A、子葉數為 0；前一期為 D 者延續顯示 -4、-4、-4、D。</li>
-                    <li>D 表示仍看到個體或屍體，下個月繼續調查；G 表示完全消失，本次後結束追蹤。</li>
-                    <li>每個 Plot 輸入後都要按「儲存」；長度留白的資料會跳過，其餘資料逐筆儲存，單筆錯誤不影響其他正確資料。</li>
-                    <li>所有個體完成儲存後才能確認本月完成；系統隨後自動建立下一個月份批次。</li>
-                </ol>
+                <div class="note">
+                    <ul style="font-weight:800;">
+                        <li>開始輸入前，請先選擇本次實際調查日期。</li>
+                        <li>每個分組輸入後都要按「儲存」，才能確實將資料儲存。</li>
+                        <li>新一期預設 Status 為 A；前一期為 D 者，長度、葉片數及 Status 預設為 -4、-4、D。</li>
+                        <li>經人工確認已為 G 的個體需要恢復追蹤時，可使用「G 復活」加入本期名單。</li>
+
+                        <li>所有個體儲存完成後，請按「確認本月輸入完成」；系統檢查完成後才會建立下一個調查月份。</li>
+                    </ul>
+
+                    <div class="text_outbox flex" style="flex-direction:column;">
+                        <div class="text_box_note_out" style="width:100%;">
+                            <div class="text_box text_box_note">
+                                <h2>共同操作</h2>
+                                <ol>
+                                    <li><b>調查月份</b>－原則為每月調查一次；系統依目前調查月份顯示固定名單。</li>
+                                    <li><b>調查順序</b>－系統依調查順序顯示處理或樣區及個體，不需另外選擇樣站。</li>
+                                    <li><b>Date</b>本次實際調查日期。</li>
+                                    <li><b>Status</b></li>
+                                    <ul>
+                                        <li> A: 個體存活。填寫本次實際量測值。</li>
+                                        <li> D: 個體死亡，仍有看到殘餘的枝幹。系統將自動帶入 -4。於下次調查時保留資料，以避免判斷錯誤。</li>
+                                        <li> G: 個體死亡，枝幹已消失。系統將自動帶入 -4。結束追蹤。如再出現，可於輸入介面選取復原。</li>
+                                    </ul>
+
+                                    <li><b>儲存</b>－系統逐筆檢查並儲存。正確資料會先儲存；錯誤資料不會儲存，請依提示修正後再次按「儲存」。長度留白視為尚未輸入，該次儲存直接跳過。</li>
+                                    <li><b>完成調查</b>－所有個體都完成儲存後，才可確認本月輸入完成。</li>
+                                </ol>
+                            </div>
+                        </div>
+
+                        <div class="text_box_note_out" style="width:100%;">
+                            <div class="text_box text_box_note">
+                                <h2>地被實驗第二期資料輸入</h2>
+                                <ol>
+                                    <li>資料依樣區組分頁，欄位為 Date、Plot、Density、No.、Species、長度、子葉數、葉片數、Status 與備註。</li>
+                                    <li><b>香楠</b>－子葉數必須為 0。</li>
+                                    <li><b>黃杞</b>－子葉數最多為 2，且不可比前一次增加。</li>
+                                </ol>
+                            </div>
+                        </div>
+
+                        <div class="text_box_note_out" style="width:100%;">
+                            <div class="text_box text_box_note">
+                                <h2>溫室實驗資料輸入</h2>
+                                <ol>
+                                    <li>資料依 Treatment 分頁，Treatment 與個體皆依調查順序排列。</li>
+                                    <li>欄位為 Date、Treatment、No.、Species、長度、葉片數、Status 與備註。</li>
+
+                                </ol>
+                            </div>
+                        </div>
+                    </div>
+                </div>
             </div>
         @else
             <div class="text_box" style="width:min(900px, calc(100vw - 140px)); box-sizing:border-box; text-align:left;">

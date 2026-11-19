@@ -11,22 +11,22 @@ class SeedlingExperimentSurveyService
 {
     private const CONNECTION = 'fs_seedling_exp';
 
-    private const EXPERIMENT_CODE = 'groundcover_phase2';
+    private const DEFAULT_EXPERIMENT_CODE = 'groundcover_phase2';
 
     /**
      * @return array<string, mixed>
      */
-    public function summary(): array
+    public function summary(string $experimentCode = self::DEFAULT_EXPERIMENT_CODE): array
     {
         $connection = DB::connection(self::CONNECTION);
         $experiment = $connection->table('experiments')
-            ->where('code', self::EXPERIMENT_CODE)
+            ->where('code', $experimentCode)
             ->first();
 
         if ($experiment === null) {
             return [
                 'available' => false,
-                'message' => '找不到地被實驗第二期設定。',
+                'message' => '找不到'.$this->experimentName($experimentCode).'設定。',
             ];
         }
 
@@ -76,21 +76,21 @@ class SeedlingExperimentSurveyService
         ];
     }
 
-    public function prepare(int|string|null $userId): object
+    public function prepare(int|string|null $userId, string $experimentCode = self::DEFAULT_EXPERIMENT_CODE): object
     {
         if (! Schema::connection(self::CONNECTION)->hasTable('surveys')) {
             throw new RuntimeException('記錄紙資料表尚未建立，請先執行 migration。');
         }
 
-        return DB::connection(self::CONNECTION)->transaction(function () use ($userId): object {
+        return DB::connection(self::CONNECTION)->transaction(function () use ($userId, $experimentCode): object {
             $connection = DB::connection(self::CONNECTION);
             $experiment = $connection->table('experiments')
-                ->where('code', self::EXPERIMENT_CODE)
+                ->where('code', $experimentCode)
                 ->lockForUpdate()
                 ->first();
 
             if ($experiment === null) {
-                throw new RuntimeException('找不到地被實驗第二期設定。');
+                throw new RuntimeException('找不到'.$this->experimentName($experimentCode).'設定。');
             }
 
             $existing = $connection->table('surveys')
@@ -176,18 +176,18 @@ class SeedlingExperimentSurveyService
         });
     }
 
-    public function findForDownload(int $surveyId): object
+    public function findForDownload(int $surveyId, string $experimentCode = self::DEFAULT_EXPERIMENT_CODE): object
     {
         $survey = DB::connection(self::CONNECTION)
             ->table('surveys as surveys')
             ->join('experiments as experiments', 'experiments.id', '=', 'surveys.experiment_id')
             ->where('surveys.id', $surveyId)
-            ->where('experiments.code', self::EXPERIMENT_CODE)
+            ->where('experiments.code', $experimentCode)
             ->select('surveys.*')
             ->first();
 
         if ($survey === null) {
-            throw new RuntimeException('找不到指定的地被實驗第二期調查批次。');
+            throw new RuntimeException('找不到指定的'.$this->experimentName($experimentCode).'調查批次。');
         }
 
         return $survey;
@@ -225,23 +225,23 @@ class SeedlingExperimentSurveyService
         });
     }
 
-    public function addRecoveredIndividual(int $surveyId, string $plotGroup, int $individualId): void
+    public function addRecoveredIndividual(int $surveyId, string $plotGroup, int $individualId, string $experimentCode = self::DEFAULT_EXPERIMENT_CODE): void
     {
-        DB::connection(self::CONNECTION)->transaction(function () use ($surveyId, $plotGroup, $individualId): void {
+        DB::connection(self::CONNECTION)->transaction(function () use ($surveyId, $plotGroup, $individualId, $experimentCode): void {
             $connection = DB::connection(self::CONNECTION);
             $survey = $connection->table('surveys')->where('id', $surveyId)->lockForUpdate()->first();
             if ($survey === null || $survey->status !== 'in_progress') {
                 throw new RuntimeException('目前調查批次不存在或尚未開始。');
             }
 
-            $individual = $connection->table('individuals as individuals')
+            $individualQuery = $connection->table('individuals as individuals')
                 ->join('plots as plots', 'plots.id', '=', 'individuals.plot_id')
                 ->where('individuals.id', $individualId)
                 ->where('plots.experiment_id', $survey->experiment_id)
-                ->where('plots.plot_code', 'like', $plotGroup.'-%')
                 ->whereNotNull('individuals.end_date')
-                ->select('individuals.*', 'plots.plot_code')
-                ->first();
+                ->select('individuals.*', 'plots.plot_code');
+            $this->applyPlotGroupScope($individualQuery, $plotGroup, $experimentCode);
+            $individual = $individualQuery->first();
             if ($individual === null) {
                 throw new RuntimeException('所選個體不屬於目前樣區組，或不是已由 G 結束的個體。');
             }
@@ -274,9 +274,9 @@ class SeedlingExperimentSurveyService
     /**
      * @return array{survey:object, next_survey:object}
      */
-    public function complete(int $surveyId, int|string|null $userId): array
+    public function complete(int $surveyId, int|string|null $userId, string $experimentCode = self::DEFAULT_EXPERIMENT_CODE): array
     {
-        $completedSurvey = DB::connection(self::CONNECTION)->transaction(function () use ($surveyId, $userId): object {
+        $completedSurvey = DB::connection(self::CONNECTION)->transaction(function () use ($surveyId, $userId, $experimentCode): object {
             $connection = DB::connection(self::CONNECTION);
             $survey = $connection->table('surveys')
                 ->where('id', $surveyId)
@@ -287,7 +287,7 @@ class SeedlingExperimentSurveyService
                 throw new RuntimeException('目前調查批次不存在、尚未開始或已完成。');
             }
 
-            $completionErrors = app(SeedlingExperimentEntrySaveService::class)->completionErrors($surveyId);
+            $completionErrors = app(SeedlingExperimentEntrySaveService::class)->completionErrors($surveyId, $experimentCode);
             if ($completionErrors !== []) {
                 $shown = array_slice($completionErrors, 0, 10);
                 $message = '完成前檢查失敗：'.implode('；', $shown);
@@ -330,8 +330,24 @@ class SeedlingExperimentSurveyService
             return $connection->table('surveys')->find($surveyId);
         });
 
-        $nextSurvey = $this->prepare($userId);
+        $nextSurvey = $this->prepare($userId, $experimentCode);
 
         return ['survey' => $completedSurvey, 'next_survey' => $nextSurvey];
+    }
+
+    private function experimentName(string $experimentCode): string
+    {
+        return $experimentCode === 'greenhouse' ? '溫室實驗' : '地被實驗第二期';
+    }
+
+    private function applyPlotGroupScope($query, string $plotGroup, string $experimentCode): void
+    {
+        if ($experimentCode === 'greenhouse') {
+            $query->where('plots.plot_code', $plotGroup);
+
+            return;
+        }
+
+        $query->where('plots.plot_code', 'like', $plotGroup.'-%');
     }
 }

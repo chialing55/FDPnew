@@ -6,10 +6,10 @@ use App\Http\Controllers\Controller;
 use App\Services\Fushan\SeedlingExperimentRecordPaperExporter;
 use App\Services\Fushan\SeedlingExperimentSpreadsheetImporter;
 use App\Services\Fushan\SeedlingExperimentSurveyService;
+use App\Services\Fushan\SeedlingExperimentTxtExporter;
 use Illuminate\Contracts\View\View;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\ValidationException;
 use Symfony\Component\HttpFoundation\BinaryFileResponse;
 use Symfony\Component\HttpFoundation\StreamedResponse;
@@ -25,7 +25,26 @@ class SeedlingExperimentController extends Controller
     {
         return $this->page('documents', [
             'recordPaper' => $surveyService->summary(),
+            'greenhouseRecordPaper' => $surveyService->summary('greenhouse'),
         ]);
+    }
+
+    public function prepareGreenhouseRecordPaper(SeedlingExperimentSurveyService $surveyService): RedirectResponse
+    {
+        try {
+            $survey = $surveyService->prepare(auth()->id(), 'greenhouse');
+        } catch (\Throwable $exception) {
+            report($exception);
+
+            return back()->withErrors(['greenhouse_record_paper' => '記錄紙產生失敗：'.$exception->getMessage()]);
+        }
+
+        return redirect()
+            ->route('admin.fushan.seedling-experiment.documents')
+            ->with('greenhouse_status', sprintf(
+                '已建立 %s 溫室實驗調查批次與固定名單，可下載記錄紙。',
+                $survey->survey_period
+            ));
     }
 
     public function prepareRecordPaper(SeedlingExperimentSurveyService $surveyService): RedirectResponse
@@ -58,6 +77,29 @@ class SeedlingExperimentController extends Controller
             return redirect()
                 ->route('admin.fushan.seedling-experiment.documents')
                 ->withErrors(['record_paper' => '記錄紙下載失敗：'.$exception->getMessage()]);
+        }
+
+        return response()
+            ->download(
+                $result['path'],
+                $result['filename'],
+                ['Content-Type' => 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet']
+            )
+            ->deleteFileAfterSend(true);
+    }
+
+    public function downloadGreenhouseRecordPaper(
+        int $survey,
+        SeedlingExperimentRecordPaperExporter $exporter
+    ): BinaryFileResponse|RedirectResponse {
+        try {
+            $result = $exporter->make($survey, 'greenhouse');
+        } catch (\Throwable $exception) {
+            report($exception);
+
+            return redirect()
+                ->route('admin.fushan.seedling-experiment.documents')
+                ->withErrors(['greenhouse_record_paper' => '記錄紙下載失敗：'.$exception->getMessage()]);
         }
 
         return response()
@@ -103,27 +145,6 @@ class SeedlingExperimentController extends Controller
         return $this->page('entry-guide');
     }
 
-    public function downloadGreenhouseMerged(): StreamedResponse
-    {
-        $rows = DB::connection('fs_seedling_exp')->table('greenhouse_raw')
-            ->orderByRaw("STR_TO_DATE(REPLACE(date, '-', ''), '%Y%m%d')")
-            ->orderByRaw('CAST(survey_order AS UNSIGNED)')
-            ->get();
-
-        return response()->streamDownload(function () use ($rows): void {
-            $handle = fopen('php://output', 'wb');
-            fwrite($handle, "\xEF\xBB\xBF");
-            fputcsv($handle, ['調查(輸入)順序', '遮蔭處理排序', 'Date', 'Sp.', 'Treatment', 'No.', '長度', '葉片數', 'Status', '附註']);
-            foreach ($rows as $row) {
-                fputcsv($handle, [
-                    $row->survey_order, $row->shade, $row->date, $row->species, $row->plot,
-                    $row->no, $row->length, $row->leaf_count, $row->status, $row->note,
-                ]);
-            }
-            fclose($handle);
-        }, '溫室實驗完整資料_含調查順序.csv', ['Content-Type' => 'text/csv; charset=UTF-8']);
-    }
-
     public function groundcoverPhase2(): View
     {
         return $this->page('groundcover-phase2');
@@ -142,6 +163,13 @@ class SeedlingExperimentController extends Controller
     public function download(): View
     {
         return $this->page('download');
+    }
+
+    public function downloadExperimentTxt(
+        string $experiment,
+        SeedlingExperimentTxtExporter $exporter
+    ): StreamedResponse {
+        return $exporter->download($experiment);
     }
 
     private function page(string $page, array $data = []): View
